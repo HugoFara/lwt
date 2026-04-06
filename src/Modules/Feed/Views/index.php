@@ -46,8 +46,13 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  */
 
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/feeds', 'label' => 'Feeds', 'icon' => 'list'],
-    ['url' => '/feeds/new', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
+    ['url' => '/feeds', 'label' => __('feed.index_action_feeds'), 'icon' => 'list'],
+    [
+        'url' => '/feeds/new',
+        'label' => __('feed.index_action_new_feed'),
+        'icon' => 'rss',
+        'class' => 'is-primary',
+    ],
 ]);
 ?>
 <div x-data="feedIndex({currentQuery: '<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>'})">
@@ -65,7 +70,7 @@ echo PageLayoutHelper::buildActionCard([
                        name="query"
                        class="input"
                        value="<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="Search feeds... (e.g., lang:Spanish news)"
+                       placeholder="<?= htmlspecialchars(__('feed.index_search_placeholder'), ENT_QUOTES, 'UTF-8') ?>"
                        disabled />
                 <span class="icon is-left">
                     <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
@@ -73,13 +78,13 @@ echo PageLayoutHelper::buildActionCard([
             </div>
             <div class="control">
                 <button type="button" class="button is-info" disabled>
-                    Search
+                    <?= __('feed.index_search_button') ?>
                 </button>
             </div>
         </div>
         <p class="help has-text-grey">
             <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
-            Search functionality is being redesigned. Full filtering will be available soon.
+            <?= __('feed.index_search_redesign_notice') ?>
         </p>
 
         <?php if ($totalFeeds > 0) : ?>
@@ -88,7 +93,9 @@ echo PageLayoutHelper::buildActionCard([
             <div class="level-left">
                 <div class="level-item">
                     <span class="tag is-info is-medium">
-                        <?php echo $totalFeeds; ?> Newsfeed<?php echo $totalFeeds == 1 ? '' : 's'; ?>
+                        <?= $totalFeeds === 1
+                            ? __('feed.index_count_one', ['count' => $totalFeeds])
+                            : __('feed.index_count_many', ['count' => $totalFeeds]) ?>
                     </span>
                 </div>
             </div>
@@ -108,7 +115,7 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small">Sort</span>
+                            <span class="button is-static is-small"><?= __('feed.index_sort') ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">
@@ -133,32 +140,41 @@ echo PageLayoutHelper::buildActionCard([
 <table class="table is-bordered is-fullwidth">
 <tr>
     <th class="" colspan="3">
-        Multi Actions <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
+        <?= __('feed.index_multi_actions') ?>
+        <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
     </th>
 </tr>
 <tr><td class="has-text-centered feeds-filter-cell">
-<input type="button" value="Mark All" @click="markAll()" />
-<input type="button" value="Mark None" @click="markNone()" />
-</td><td class="has-text-centered" colspan="2">Marked Newsfeeds:&nbsp;
+<input
+    type="button"
+    value="<?= htmlspecialchars(__('feed.index_mark_all'), ENT_QUOTES, 'UTF-8') ?>"
+    @click="markAll()"
+/>
+<input
+    type="button"
+    value="<?= htmlspecialchars(__('feed.index_mark_none'), ENT_QUOTES, 'UTF-8') ?>"
+    @click="markNone()"
+/>
+</td><td class="has-text-centered" colspan="2"><?= __('feed.index_marked_feeds') ?>&nbsp;
 <select name="markaction" id="markaction" disabled="disabled" @change="handleMarkAction($event)">
-    <option value="">[Choose...]</option>
+    <option value=""><?= __('feed.index_choose') ?></option>
     <option disabled="disabled">------------</option>
-    <option value="update">Update</option>
+    <option value="update"><?= __('feed.index_action_update') ?></option>
     <option disabled="disabled">------------</option>
-    <option value="res_art">Reset Unloadable Articles</option>
+    <option value="res_art"><?= __('feed.index_action_reset_unloadable') ?></option>
     <option disabled="disabled">------------</option>
-    <option value="del_art">Delete All Articles</option>
+    <option value="del_art"><?= __('feed.index_action_delete_articles') ?></option>
     <option disabled="disabled">------------</option>
-    <option value="del">Delete</option>
+    <option value="del"><?= __('feed.index_action_delete') ?></option>
 </select></td></tr>
 </table>
 <table class="table is-bordered is-fullwidth sortable">
 <tr>
-    <th class="sorttable_nosort">Mark</th>
-    <th class="sorttable_nosort">Actions</th>
-    <th class="clickable">Newsfeeds</th>
-    <th class="sorttable_nosort">Options</th>
-    <th class="sorttable_numeric clickable">Last Update</th>
+    <th class="sorttable_nosort"><?= __('feed.index_col_mark') ?></th>
+    <th class="sorttable_nosort"><?= __('feed.index_col_actions') ?></th>
+    <th class="clickable"><?= __('feed.index_col_newsfeeds') ?></th>
+    <th class="sorttable_nosort"><?= __('feed.index_col_options') ?></th>
+    <th class="sorttable_numeric clickable"><?= __('feed.index_col_last_update') ?></th>
 </tr>
     <?php
     $time = time();
@@ -184,7 +200,9 @@ echo PageLayoutHelper::buildActionCard([
         </span>
     </td>
     <td class="has-text-centered"><?php echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="has-text-centered"><?php echo htmlspecialchars(str_replace(',', ', ', $row['NfOptions']), ENT_QUOTES, 'UTF-8'); ?></td>
+    <td class="has-text-centered"><?php
+        echo htmlspecialchars(str_replace(',', ', ', $row['NfOptions']), ENT_QUOTES, 'UTF-8');
+    ?></td>
     <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
         <?php if ($row['NfUpdate']) {
             echo $feedService->formatLastUpdate($diff);

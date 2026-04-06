@@ -35,16 +35,22 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 <?php /** @psalm-suppress MixedArrayAccess */ if (($config['progress']['total'] ?? 0) === 0) : ?>
   <div class="container py-6">
     <div class="notification is-info is-light has-text-centered">
-      <p class="is-size-5 has-text-weight-bold mb-2">No vocabulary to review for the day.</p>
-      <p class="has-text-grey-dark">Start reading a text and mark words to build your review queue.</p>
+      <p class="is-size-5 has-text-weight-bold mb-2">
+        <?php echo \htmlspecialchars(__('review.no_vocabulary_title'), ENT_QUOTES, 'UTF-8'); ?>
+      </p>
+      <p class="has-text-grey-dark">
+        <?php echo \htmlspecialchars(__('review.no_vocabulary_hint'), ENT_QUOTES, 'UTF-8'); ?>
+      </p>
       <div class="buttons is-centered mt-5">
-        <a href="/texts" class="button is-primary">Back to Texts</a>
+        <a href="/texts" class="button is-primary">
+          <?php echo \htmlspecialchars(__('review.back_to_texts'), ENT_QUOTES, 'UTF-8'); ?>
+        </a>
       </div>
     </div>
   </div>
 <?php else : ?>
   <div class="has-text-centered py-6">
-    <p class="has-text-grey">Loading review...</p>
+    <p class="has-text-grey"><?php echo \htmlspecialchars(__('review.loading'), ENT_QUOTES, 'UTF-8'); ?></p>
   </div>
 <?php endif; ?>
 </div>

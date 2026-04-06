@@ -29,17 +29,25 @@ use Lwt\Shared\UI\Helpers\FormHelper;
  */
 
 $actions = [
-    ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'],
-    ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus'],
-    ['url' => '/texts', 'label' => 'All Texts', 'icon' => 'book-open'],
+    ['url' => '/books', 'label' => __('book.my_books'), 'icon' => 'library'],
+    ['url' => '/texts/new', 'label' => __('book.new_text'), 'icon' => 'circle-plus'],
+    ['url' => '/texts', 'label' => __('book.all_texts'), 'icon' => 'book-open'],
 ];
 
+$zipMissing = !extension_loaded('zip');
+$formStyle = $zipMissing ? ' style="pointer-events: none; opacity: 0.6;"' : '';
+$submitDisabled = $zipMissing ? ' disabled title="ZIP extension required"' : '';
 ?>
 
 <h2 class="title is-4">
-    Import EPUB
+    <?php echo __('book.import_epub'); ?>
     <a target="_blank" href="docs/info.html#howtotext" class="ml-2">
-        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
+        <?php
+        echo IconHelper::render('help-circle', [
+            'title' => __('common.help'),
+            'alt' => __('common.help'),
+        ]);
+        ?>
     </a>
 </h2>
 
@@ -49,49 +57,51 @@ $actions = [
 <div class="notification is-info is-light">
     <p>
         <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'mr-2']); ?>
-        EPUB files are imported as books with chapters. Please select your EPUB file below.
+        <?php echo __('book.epub_intro_notice'); ?>
     </p>
 </div>
 <?php endif; ?>
 
-<?php if (!extension_loaded('zip')) : ?>
+<?php if ($zipMissing) : ?>
 <div class="notification is-danger">
     <p>
-        <strong><?php echo IconHelper::render('alert-circle', ['alt' => 'Error', 'class' => 'mr-2']); ?>
-        ZIP Extension Required</strong>
+        <strong><?php
+            echo IconHelper::render('alert-circle', ['alt' => __('common.error'), 'class' => 'mr-2']);
+        ?>
+        <?php echo __('book.zip_required_title'); ?></strong>
     </p>
     <p>
-        The PHP ZIP extension is required for EPUB import but is not currently installed.
-        Please contact your system administrator to install the <code>php-zip</code> extension.
+        <?php echo __('book.zip_required_body'); ?>
     </p>
     <details class="mt-2">
-        <summary>Installation Instructions</summary>
+        <summary><?php echo __('book.install_instructions'); ?></summary>
         <div class="content mt-2">
-            <p><strong>For Ubuntu/Debian systems:</strong></p>
+            <p><strong><?php echo __('book.install_ubuntu'); ?></strong></p>
             <pre><code>sudo apt-get install php-zip
 sudo systemctl restart apache2  # or nginx</code></pre>
 
-            <p><strong>For CentOS/RHEL/Fedora systems:</strong></p>
+            <p><strong><?php echo __('book.install_centos'); ?></strong></p>
             <pre><code>sudo dnf install php-zip  # or yum install php-zip
 sudo systemctl restart httpd  # or nginx</code></pre>
 
-            <p><strong>For Docker setups:</strong></p>
-            <p>Add <code>RUN docker-php-ext-install zip</code> to your Dockerfile and rebuild the container.</p>
+            <p><strong><?php echo __('book.install_docker'); ?></strong></p>
+            <p><?php echo __('book.install_docker_help'); ?></p>
         </div>
     </details>
 </div>
 <?php endif; ?>
 
-<form enctype="multipart/form-data" class="validate" action="/book/import" method="post"<?php echo !extension_loaded('zip') ? ' style="pointer-events: none; opacity: 0.6;"' : ''; ?>>
+<form enctype="multipart/form-data" class="validate" action="/book/import" method="post"<?php echo $formStyle; ?>>
     <?php echo FormHelper::csrfField(); ?>
 
     <div class="box">
         <!-- Language -->
         <div class="field">
             <label class="label" for="LgID">
-                Language
-                <span class="icon has-text-danger is-small" title="Required field">
-                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                <?php echo __('common.language'); ?>
+                <span class="icon has-text-danger is-small"
+                      title="<?php echo htmlspecialchars(__('common.required_field'), ENT_QUOTES); ?>">
+                    <?php echo IconHelper::render('asterisk', ['alt' => __('common.required_field')]); ?>
                 </span>
             </label>
             <div class="control">
@@ -101,17 +111,19 @@ sudo systemctl restart httpd  # or nginx</code></pre>
                     </select>
                 </div>
             </div>
-            <p class="help">Select the language of the book.</p>
+            <p class="help"><?php echo __('book.select_book_language'); ?></p>
         </div>
 
         <!-- EPUB File -->
         <div class="field">
             <label class="label">
-                EPUB File
-                <span class="icon has-text-danger is-small" title="Required field">
-                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                <?php echo __('book.epub_file'); ?>
+                <span class="icon has-text-danger is-small"
+                      title="<?php echo htmlspecialchars(__('common.required_field'), ENT_QUOTES); ?>">
+                    <?php echo IconHelper::render('asterisk', ['alt' => __('common.required_field')]); ?>
                 </span>
             </label>
+            <?php $noFile = htmlspecialchars(__('book.no_file_selected'), ENT_QUOTES); ?>
             <div class="file has-name is-fullwidth">
                 <label class="file-label">
                     <input class="file-input"
@@ -120,18 +132,18 @@ sudo systemctl restart httpd  # or nginx</code></pre>
                            accept=".epub"
                            required
                            @change="document.getElementById('filename').textContent =
-                               $el.files[0]?.name || 'No file selected'" />
+                               $el.files[0]?.name || '<?php echo $noFile; ?>'" />
                     <span class="file-cta">
                         <span class="file-icon">
-                            <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
+                            <?php echo IconHelper::render('upload', ['alt' => __('common.upload')]); ?>
                         </span>
-                        <span class="file-label">Choose EPUB file...</span>
+                        <span class="file-label"><?php echo __('book.choose_epub_file'); ?></span>
                     </span>
-                    <span class="file-name" id="filename">No file selected</span>
+                    <span class="file-name" id="filename"><?php echo __('book.no_file_selected'); ?></span>
                 </label>
             </div>
             <p class="help">
-                Upload limits:
+                <?php echo __('book.upload_limits'); ?>
                 <strong>post_max_size</strong>: <?php echo ini_get('post_max_size'); ?>,
                 <strong>upload_max_filesize</strong>: <?php echo ini_get('upload_max_filesize'); ?>
             </p>
@@ -139,38 +151,43 @@ sudo systemctl restart httpd  # or nginx</code></pre>
 
         <!-- Override Title (optional) -->
         <div class="field">
-            <label class="label" for="TxTitle">Title Override</label>
+            <label class="label" for="TxTitle"><?php echo __('book.title_override'); ?></label>
             <div class="control">
                 <input type="text"
                        class="input"
                        name="TxTitle"
                        id="TxTitle"
                        maxlength="200"
-                       placeholder="Leave empty to use title from EPUB"
-                       title="Optional: Override the book title from the EPUB" />
+                       placeholder="<?php
+                           echo htmlspecialchars(__('book.title_override_placeholder'), ENT_QUOTES);
+                        ?>"
+                       title="<?php
+                           echo htmlspecialchars(__('book.title_override_help'), ENT_QUOTES);
+                        ?>" />
             </div>
-            <p class="help">Optional. Leave empty to use the title from the EPUB file.</p>
+            <p class="help"><?php echo __('book.title_override_help'); ?></p>
         </div>
 
         <!-- Tags (optional) -->
         <div class="field">
-            <label class="label">Tags</label>
+            <label class="label"><?php echo __('common.tags'); ?></label>
             <div class="control">
                 <?php echo \Lwt\Modules\Tags\Application\TagsFacade::getTextTagsHtml(0); ?>
             </div>
-            <p class="help">Optional. Tags will be applied to all chapters.</p>
+            <p class="help"><?php echo __('book.tags_help'); ?></p>
         </div>
     </div>
 
     <!-- Form Actions -->
     <div class="field is-grouped is-grouped-right">
         <div class="control">
-            <a href="/books" class="button is-light">Cancel</a>
+            <a href="/books" class="button is-light"><?php echo __('common.cancel'); ?></a>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="Import" class="button is-primary"<?php echo !extension_loaded('zip') ? ' disabled title="ZIP extension required"' : ''; ?>>
-                <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
-                <span class="ml-2">Import EPUB</span>
+            <button type="submit" name="op" value="Import"
+                    class="button is-primary"<?php echo $submitDisabled; ?>>
+                <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
+                <span class="ml-2"><?php echo __('book.import_epub'); ?></span>
             </button>
         </div>
     </div>

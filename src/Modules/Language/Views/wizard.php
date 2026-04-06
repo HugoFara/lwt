@@ -49,7 +49,7 @@ assert(is_array($languagePresetsArray));
         <!-- Language to study (L2) -->
         <div class="field mb-5">
             <label class="label is-medium" for="l2">
-                The language you want to study
+                <?php echo __('language.wizard.l2_label'); ?>
             </label>
             <div class="control">
                 <?php echo SearchableSelectHelper::forLanguages(
@@ -58,7 +58,7 @@ assert(is_array($languagePresetsArray));
                     [
                         'name' => 'l2',
                         'id' => 'l2',
-                        'placeholder' => '[Choose...]',
+                        'placeholder' => __('language.wizard.choose_placeholder'),
                         'required' => false,
                         'size' => 'medium'
                     ]
@@ -69,7 +69,7 @@ assert(is_array($languagePresetsArray));
         <!-- Native language (L1) -->
         <div class="field">
             <label class="label is-medium" for="l1">
-                Your native language
+                <?php echo __('language.wizard.l1_label'); ?>
             </label>
             <div class="control">
                 <?php echo SearchableSelectHelper::forLanguages(
@@ -78,7 +78,7 @@ assert(is_array($languagePresetsArray));
                     [
                         'name' => 'l1',
                         'id' => 'l1',
-                        'placeholder' => '[Choose...]',
+                        'placeholder' => __('language.wizard.choose_placeholder'),
                         'required' => false,
                         'size' => 'medium'
                     ]

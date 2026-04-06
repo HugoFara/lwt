@@ -38,7 +38,7 @@ $languagesOptionTyped = $languagesOption;
     echo json_encode($languageData, JSON_HEX_TAG | JSON_HEX_AMP);
 ?></script>
 
-<h2 class="title is-4">Check Text Parsing</h2>
+<h2 class="title is-4"><?= __e('text.check.heading') ?></h2>
 
 <form class="validate" action="/text/check" method="post">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
@@ -46,7 +46,7 @@ $languagesOptionTyped = $languagesOption;
         <!-- Language -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="TxLgID">Language</label>
+                <label class="label" for="TxLgID"><?= __e('text.common.language') ?></label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -58,8 +58,8 @@ $languagesOptionTyped = $languagesOption;
                         </div>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        <span class="icon has-text-danger" title="<?= __e('text.common.field_required') ?>">
+                            <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                         </span>
                     </div>
                 </div>
@@ -70,8 +70,8 @@ $languagesOptionTyped = $languagesOption;
         <div class="field is-horizontal">
             <div class="field-label is-normal">
                 <label class="label" for="TxText">
-                    Text
-                    <span class="has-text-grey is-size-7">(max. 65,000 bytes)</span>
+                    <?= __e('text.common.text') ?>
+                    <span class="has-text-grey is-size-7"><?= __e('text.check.text_max') ?></span>
                 </label>
             </div>
             <div class="field-body">
@@ -83,12 +83,12 @@ $languagesOptionTyped = $languagesOption;
                                   data_maxlength="65000"
                                   data_info="Text"
                                   rows="15"
-                                  placeholder="Paste your text here to check how it will be parsed..."
+                                  placeholder="<?= __e('text.check.text_placeholder') ?>"
                                   required></textarea>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        <span class="icon has-text-danger" title="<?= __e('text.common.field_required') ?>">
+                            <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                         </span>
                     </div>
                 </div>
@@ -106,7 +106,7 @@ $languagesOptionTyped = $languagesOption;
                 <span class="icon is-small">
                     <?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?>
                 </span>
-                <span>Back</span>
+                <span><?= __e('text.common.back') ?></span>
             </button>
         </div>
         <div class="control">
@@ -114,7 +114,7 @@ $languagesOptionTyped = $languagesOption;
                 <span class="icon is-small">
                     <?php echo IconHelper::render('check', ['alt' => 'Check']); ?>
                 </span>
-                <span>Check</span>
+                <span><?= __e('text.common.check') ?></span>
             </button>
         </div>
     </div>

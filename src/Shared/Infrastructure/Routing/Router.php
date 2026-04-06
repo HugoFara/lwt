@@ -1128,19 +1128,29 @@ class Router
         http_response_code(404);
         $cssUrl = UrlUtilities::url('/dist/css/standalone.css');
         $homeUrl = UrlUtilities::url('/');
+        $title = __('legacy.error_404_title');
+        $bodyText = __('legacy.error_404_body', ['path' => '__LWT_PATH__']);
+        [$bodyBefore, $bodyAfter] = array_pad(explode('__LWT_PATH__', $bodyText, 2), 2, '');
+        $returnHome = __('legacy.return_home');
         ?>
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>404 - Page Not Found</title>
+            <title><?php echo htmlspecialchars($title); ?></title>
             <link rel="stylesheet" href="<?php echo htmlspecialchars($cssUrl); ?>" type="text/css"/>
         </head>
         <body class="error-page">
             <div class="error">
-                <h1>404 - Page Not Found</h1>
-                <p>The requested page <code><?php echo htmlspecialchars($path); ?></code> was not found.</p>
-                <p><a href="<?php echo htmlspecialchars($homeUrl); ?>">Return to Home</a></p>
+                <h1><?php echo htmlspecialchars($title); ?></h1>
+                <p><?php
+                    echo htmlspecialchars($bodyBefore);
+                ?><code><?php echo htmlspecialchars($path); ?></code><?php
+                    echo htmlspecialchars($bodyAfter);
+?></p>
+                <p><a href="<?php echo htmlspecialchars($homeUrl); ?>">
+                    <?php echo htmlspecialchars($returnHome); ?>
+                </a></p>
             </div>
         </body>
         </html>
@@ -1159,17 +1169,18 @@ class Router
     {
         http_response_code(500);
         $cssUrl = UrlUtilities::url('/dist/css/standalone.css');
+        $title = __('legacy.error_500_title');
         ?>
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>500 - Internal Server Error</title>
+            <title><?php echo htmlspecialchars($title); ?></title>
             <link rel="stylesheet" href="<?php echo htmlspecialchars($cssUrl); ?>" type="text/css"/>
         </head>
         <body class="error-page">
             <div class="error">
-                <h1>500 - Internal Server Error</h1>
+                <h1><?php echo htmlspecialchars($title); ?></h1>
                 <div class="message"><?php echo htmlspecialchars($message); ?></div>
             </div>
         </body>

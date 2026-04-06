@@ -109,7 +109,7 @@ class UserController extends BaseController
         // Get persisted form data
         $username = $this->formData->getAndClearUsername();
 
-        $this->render('Login', false);
+        $this->render(__('user.login.page_title'), false);
         require __DIR__ . '/../Views/login.php';
         $this->endRender();
 
@@ -185,7 +185,7 @@ class UserController extends BaseController
         $username = $this->formData->getAndClearUsername();
         $email = $this->formData->getAndClearEmail();
 
-        $this->render('Register', false);
+        $this->render(__('user.register.page_title'), false);
         require __DIR__ . '/../Views/register.php';
         $this->endRender();
 
@@ -306,7 +306,7 @@ class UserController extends BaseController
             }
 
             // Single-user mode: show simplified profile page
-            $this->render('Profile', true);
+            $this->render(__('user.profile.page_title'), true);
             require __DIR__ . '/../Views/profile_single_user.php';
             $this->endRender();
             return null;
@@ -318,7 +318,7 @@ class UserController extends BaseController
         $successMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_SUCCESS);
         $success = !empty($successMessages) ? $successMessages[0]['message'] : null;
 
-        $this->render('Profile', true);
+        $this->render(__('user.profile.page_title'), true);
         require __DIR__ . '/../Views/profile.php';
         $this->endRender();
 
@@ -571,7 +571,7 @@ class UserController extends BaseController
         // Get persisted form data
         $email = $this->formData->getAndClearPasswordEmail();
 
-        $this->render('Forgot Password', false);
+        $this->render(__('user.forgot.page_title'), false);
         require __DIR__ . '/../Views/forgot_password.php';
         $this->endRender();
     }
@@ -634,7 +634,7 @@ class UserController extends BaseController
         $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
         $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
 
-        $this->render('Reset Password', false);
+        $this->render(__('user.reset.page_title'), false);
         require __DIR__ . '/../Views/reset_password.php';
         $this->endRender();
     }

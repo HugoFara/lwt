@@ -62,6 +62,21 @@ if (!function_exists('__')) {
     }
 }
 
+if (!function_exists('__e')) {
+    /**
+     * Translate a key and HTML-escape the result for safe output in templates.
+     *
+     * @param string                    $key    Dot-notated translation key
+     * @param array<string, string|int> $params Interpolation parameters
+     *
+     * @return string HTML-escaped translated string
+     */
+    function __e(string $key, array $params = []): string
+    {
+        return htmlspecialchars(__($key, $params), ENT_QUOTES, 'UTF-8');
+    }
+}
+
 if (!function_exists('base_path')) {
     /**
      * Get the configured application base path.

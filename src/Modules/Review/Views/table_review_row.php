@@ -67,7 +67,11 @@ $sent1 = str_replace(
     <td class="has-text-centered" nowrap="nowrap">
         <a href="edit_tword.php?wid=<?php echo $woId; ?>" target="ro"
             data-action="show-right-frames">
-            <?php echo IconHelper::render('file-pen-line', ['title' => 'Edit Term', 'alt' => 'Edit Term']); ?>
+<?php $editTermLabel = __('review.table.edit_term'); ?>
+            <?php echo IconHelper::render(
+                'file-pen-line',
+                ['title' => $editTermLabel, 'alt' => $editTermLabel]
+            ); ?>
         </a>
     </td>
     <td class="has-text-centered" nowrap="nowrap">

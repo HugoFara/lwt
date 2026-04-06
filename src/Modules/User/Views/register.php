@@ -27,6 +27,8 @@ assert(isset($username) && is_string($username));
 assert(isset($email) && is_string($email));
 assert(isset($error) && (is_string($error) || $error === null));
 /** @var string|null $error */
+
+$t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
 ?>
 
 <section class="section">
@@ -44,9 +46,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                                 <span>LWT</span>
                             </span>
                         </h1>
-                        <p class="subtitle is-6 has-text-grey">
-                            Create Your Account
-                        </p>
+                        <p class="subtitle is-6 has-text-grey"><?php echo $t('register.subtitle'); ?></p>
                     </div>
 
                     <!-- Error message -->
@@ -61,7 +61,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                     <form method="POST" action="/register" x-data="registerForm()" @submit="submitForm($event)">
                         <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                         <div class="field">
-                            <label class="label" for="username">Username</label>
+                            <label class="label" for="username"><?php echo $t('register.username_label'); ?></label>
                             <div class="control has-icons-left has-icons-right">
                                 <input
                                     type="text"
@@ -69,7 +69,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                                     name="username"
                                     class="input"
                                     :class="{ 'is-danger': errors.username }"
-                                    placeholder="Choose a username"
+                                    placeholder="<?php echo $t('register.username_placeholder'); ?>"
                                     value="<?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?>"
                                     required
                                     minlength="3"
@@ -87,12 +87,12 @@ assert(isset($error) && (is_string($error) || $error === null));
                             </div>
                             <p class="help is-danger" x-show="errors.username" x-text="errors.username"></p>
                             <p class="help" x-show="!errors.username">
-                                3-100 characters, letters, numbers, underscores, and hyphens only
+                                <?php echo $t('register.username_help'); ?>
                             </p>
                         </div>
 
                         <div class="field">
-                            <label class="label" for="email">Email</label>
+                            <label class="label" for="email"><?php echo $t('register.email_label'); ?></label>
                             <div class="control has-icons-left has-icons-right">
                                 <input
                                     type="email"
@@ -100,7 +100,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                                     name="email"
                                     class="input"
                                     :class="{ 'is-danger': errors.email }"
-                                    placeholder="Enter your email address"
+                                    placeholder="<?php echo $t('register.email_placeholder'); ?>"
                                     value="<?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>"
                                     required
                                     @blur="validateEmail($event.target.value)"
@@ -116,7 +116,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                         </div>
 
                         <div class="field">
-                            <label class="label" for="password">Password</label>
+                            <label class="label" for="password"><?php echo $t('register.password_label'); ?></label>
                             <div class="control has-icons-left has-icons-right">
                                 <input
                                     type="password"
@@ -124,7 +124,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                                     name="password"
                                     class="input"
                                     :class="{ 'is-danger': errors.password }"
-                                    placeholder="Create a password"
+                                    placeholder="<?php echo $t('register.password_placeholder'); ?>"
                                     required
                                     minlength="8"
                                     maxlength="128"
@@ -140,12 +140,14 @@ assert(isset($error) && (is_string($error) || $error === null));
                             </div>
                             <p class="help is-danger" x-show="errors.password" x-text="errors.password"></p>
                             <p class="help" x-show="!errors.password">
-                                At least 8 characters with at least one letter and one number
+                                <?php echo $t('register.password_help'); ?>
                             </p>
                         </div>
 
                         <div class="field">
-                            <label class="label" for="password_confirm">Confirm Password</label>
+                            <label class="label" for="password_confirm">
+                                <?php echo $t('register.password_confirm_label'); ?>
+                            </label>
                             <div class="control has-icons-left has-icons-right">
                                 <input
                                     type="password"
@@ -153,7 +155,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                                     name="password_confirm"
                                     class="input"
                                     :class="{ 'is-danger': errors.passwordConfirm }"
-                                    placeholder="Confirm your password"
+                                    placeholder="<?php echo $t('register.password_confirm_placeholder'); ?>"
                                     required
                                     x-model="passwordConfirm"
                                     @input="validatePasswordConfirm()"
@@ -185,7 +187,7 @@ assert(isset($error) && (is_string($error) || $error === null));
                                     <span class="icon">
                                         <i data-lucide="user-plus"></i>
                                     </span>
-                                    <span>Create Account</span>
+                                    <span><?php echo $t('register.submit'); ?></span>
                                 </button>
                             </div>
                         </div>
@@ -194,8 +196,8 @@ assert(isset($error) && (is_string($error) || $error === null));
                     <!-- Login link -->
                     <hr>
                     <p class="has-text-centered">
-                        Already have an account?
-                        <a href="/login">Log in</a>
+                        <?php echo $t('register.have_account'); ?>
+                        <a href="/login"><?php echo $t('register.login_link'); ?></a>
                     </p>
                 </div>
             </div>

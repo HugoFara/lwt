@@ -47,6 +47,10 @@ assert(is_int($currentpage));
 assert(is_int($pages));
 assert(is_int($currentsort));
 
+$phSearch = htmlspecialchars(__('vocabulary.list.search_disabled_placeholder'), ENT_QUOTES, 'UTF-8');
+$termOne = __('vocabulary.list.term_one');
+$termOther = __('vocabulary.list.term_other');
+
 ?>
 
 <!-- NOTE: Search bar planned for future UI refactoring.
@@ -64,21 +68,21 @@ assert(is_int($currentsort));
                        name="query"
                        class="input"
                        value="<?php echo htmlspecialchars($currentquery, ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="Search terms... (e.g., lang:Spanish status:learning verb)"
+                       placeholder="<?= $phSearch ?>"
                        disabled />
                 <span class="icon is-left">
-                    <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
+                    <?php echo IconHelper::render('search', ['alt' => __('vocabulary.common.search')]); ?>
                 </span>
             </div>
             <div class="control">
                 <button type="button" class="button is-info" disabled>
-                    Search
+                    <?= __('vocabulary.common.search') ?>
                 </button>
             </div>
         </div>
         <p class="help has-text-grey">
             <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
-            Search functionality is being redesigned. Full filtering will be available soon.
+            <?= __('vocabulary.list.search_redesign_notice') ?>
         </p>
 
         <?php if ($recno > 0) { ?>
@@ -87,7 +91,7 @@ assert(is_int($currentsort));
             <div class="level-left">
                 <div class="level-item">
                     <span class="tag is-info is-medium">
-                        <?php echo $recno; ?> Term<?php echo ($recno == 1 ? '' : 's'); ?>
+                        <?php echo $recno; ?> <?= $recno == 1 ? $termOne : $termOther ?>
                     </span>
                 </div>
             </div>
@@ -98,7 +102,7 @@ assert(is_int($currentsort));
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small">Sort</span>
+                            <span class="button is-static is-small"><?= __('vocabulary.list.sort_filter') ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">

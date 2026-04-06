@@ -25,6 +25,8 @@ namespace Lwt\Modules\User\Views;
 /** @psalm-suppress TypeDoesNotContainNull */
 $token = isset($token) && is_string($token) ? $token : '';
 $error = isset($error) && is_string($error) ? $error : null;
+
+$t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
 ?>
 
 <section class="section">
@@ -39,12 +41,10 @@ $error = isset($error) && is_string($error) ? $error : null;
                                 <span class="icon has-text-primary">
                                     <i data-lucide="lock"></i>
                                 </span>
-                                <span>Reset Password</span>
+                                <span><?php echo $t('reset.page_title'); ?></span>
                             </span>
                         </h1>
-                        <p class="subtitle is-6 has-text-grey">
-                            Enter your new password
-                        </p>
+                        <p class="subtitle is-6 has-text-grey"><?php echo $t('reset.subtitle'); ?></p>
                     </div>
 
                     <!-- Error message -->
@@ -70,7 +70,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                         >
 
                         <div class="field">
-                            <label class="label" for="password">New Password</label>
+                            <label class="label" for="password"><?php echo $t('reset.password_label'); ?></label>
                             <div class="control has-icons-left has-icons-right">
                                 <input
                                     type="password"
@@ -78,7 +78,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                                     name="password"
                                     class="input"
                                     :class="{ 'is-danger': errors.password }"
-                                    placeholder="Enter new password"
+                                    placeholder="<?php echo $t('reset.password_placeholder'); ?>"
                                     required
                                     minlength="8"
                                     maxlength="128"
@@ -95,12 +95,14 @@ $error = isset($error) && is_string($error) ? $error : null;
                             </div>
                             <p class="help is-danger" x-show="errors.password" x-text="errors.password"></p>
                             <p class="help" x-show="!errors.password">
-                                At least 8 characters with at least one letter and one number
+                                <?php echo $t('reset.password_help'); ?>
                             </p>
                         </div>
 
                         <div class="field">
-                            <label class="label" for="password_confirm">Confirm New Password</label>
+                            <label class="label" for="password_confirm">
+                                <?php echo $t('reset.password_confirm_label'); ?>
+                            </label>
                             <div class="control has-icons-left has-icons-right">
                                 <input
                                     type="password"
@@ -108,7 +110,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                                     name="password_confirm"
                                     class="input"
                                     :class="{ 'is-danger': errors.passwordConfirm }"
-                                    placeholder="Confirm new password"
+                                    placeholder="<?php echo $t('reset.password_confirm_placeholder'); ?>"
                                     required
                                     x-model="passwordConfirm"
                                     @input="validatePasswordConfirm()"
@@ -144,7 +146,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                                     <span class="icon">
                                         <i data-lucide="check"></i>
                                     </span>
-                                    <span>Reset Password</span>
+                                    <span><?php echo $t('reset.submit'); ?></span>
                                 </button>
                             </div>
                         </div>
@@ -159,7 +161,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                                 <span class="icon">
                                     <i data-lucide="arrow-left"></i>
                                 </span>
-                                <span>Back to Login</span>
+                                <span><?php echo $t('reset.back_to_login'); ?></span>
                             </span>
                         </a>
                     </p>

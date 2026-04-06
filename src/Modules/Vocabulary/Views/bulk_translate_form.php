@@ -37,6 +37,10 @@ assert(is_array($dictionaries));
 assert(is_array($terms));
 assert($nextOffset === null || is_int($nextOffset));
 
+$altMarkAll = __('vocabulary.multi.mark_all');
+$altMarkNone = __('vocabulary.multi.mark_none');
+$lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUOTES, 'UTF-8');
+
 ?>
 <script type="application/json" id="bulk-translate-config">
 <?php echo json_encode([
@@ -63,17 +67,17 @@ assert($nextOffset === null || is_int($nextOffset));
                                 class="button is-info is-outlined"
                                 @click="markAll()">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('check-square', ['alt' => 'Mark All']); ?>
+                                <?php echo IconHelper::render('check-square', ['alt' => $altMarkAll]); ?>
                             </span>
-                            <span>Mark All</span>
+                            <span><?= __('vocabulary.multi.mark_all') ?></span>
                         </button>
                         <button type="button"
                                 class="button is-outlined"
                                 @click="markNone()">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('square', ['alt' => 'Mark None']); ?>
+                                <?php echo IconHelper::render('square', ['alt' => __('vocabulary.multi.mark_none')]); ?>
                             </span>
-                            <span>Mark None</span>
+                            <span><?= __('vocabulary.multi.mark_none') ?></span>
                         </button>
                     </div>
                 </div>
@@ -83,33 +87,33 @@ assert($nextOffset === null || is_int($nextOffset));
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small">Marked Terms</span>
+                            <span class="button is-static is-small"><?= __('vocabulary.multi.marked_terms') ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">
                                 <select @change="handleTermToggles($event.target.value);
                                                $event.target.selectedIndex = 0;">
-                                    <option value="0" selected>[Choose...]</option>
-                                    <optgroup label="Change Status">
-                                        <option value="1">Set Status To [1]</option>
-                                        <option value="2">Set Status To [2]</option>
-                                        <option value="3">Set Status To [3]</option>
-                                        <option value="4">Set Status To [4]</option>
-                                        <option value="5">Set Status To [5]</option>
-                                        <option value="99">Set Status To [WKn]</option>
-                                        <option value="98">Set Status To [Ign]</option>
+                                    <option value="0" selected><?= __('vocabulary.bulk.choose_placeholder') ?></option>
+                                    <optgroup label="<?= $lblChangeStatus ?>">
+                                        <?php for ($i = 1; $i <= 5; $i++) : ?>
+                                        <option value="<?= $i ?>">
+                                            <?= __('vocabulary.bulk.set_status_to', ['n' => $i]) ?>
+                                        </option>
+                                        <?php endfor; ?>
+                                        <option value="99"><?= __('vocabulary.bulk.set_status_wkn') ?></option>
+                                        <option value="98"><?= __('vocabulary.bulk.set_status_ign') ?></option>
                                     </optgroup>
-                                    <option value="6">Set To Lowercase</option>
-                                    <option value="7">Delete Translation</option>
+                                    <option value="6"><?= __('vocabulary.bulk.set_to_lowercase') ?></option>
+                                    <option value="7"><?= __('vocabulary.bulk.delete_translation') ?></option>
                                 </select>
                             </div>
                         </div>
                         <div class="control">
                             <button type="submit" class="button is-primary is-small">
                                 <span class="icon is-small">
-                                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                                    <?php echo IconHelper::render('save', ['alt' => __('vocabulary.common.save')]); ?>
                                 </span>
-                                <span x-text="submitButtonText">Save</span>
+                                <span x-text="submitButtonText"><?= __('vocabulary.common.save') ?></span>
                             </button>
                         </div>
                     </div>
@@ -123,10 +127,10 @@ assert($nextOffset === null || is_int($nextOffset));
         <table class="table is-fullwidth is-striped is-hoverable">
             <thead>
                 <tr class="notranslate">
-                    <th class="has-text-centered" style="width: 60px;">Mark</th>
-                    <th style="min-width: 8em;">Term</th>
-                    <th>Translation</th>
-                    <th class="has-text-centered" style="width: 100px;">Status</th>
+                    <th class="has-text-centered" style="width: 60px;"><?= __('vocabulary.common.mark') ?></th>
+                    <th style="min-width: 8em;"><?= __('vocabulary.list.col_term') ?></th>
+                    <th><?= __('vocabulary.list.col_translation') ?></th>
+                    <th class="has-text-centered" style="width: 100px;"><?= __('vocabulary.list.col_status') ?></th>
                 </tr>
             </thead>
             <tbody>

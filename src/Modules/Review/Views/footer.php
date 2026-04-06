@@ -39,29 +39,42 @@ $lRemaining = (int) round($remainingInt / $divisor, 0);
 $lWrong = (int) round($wrongInt / $divisor, 0);
 $lCorrect = (int) round($correctInt / $divisor, 0);
 ?>
+<?php
+$elapsedLabel = htmlspecialchars(__('review.progress.elapsed_time'), ENT_QUOTES, 'UTF-8');
+$notYetLabel = htmlspecialchars(__('review.progress.not_yet_reviewed'), ENT_QUOTES, 'UTF-8');
+$wrongLabel = htmlspecialchars(__('review.progress.wrong'), ENT_QUOTES, 'UTF-8');
+$correctLabel = htmlspecialchars(__('review.progress.correct'), ENT_QUOTES, 'UTF-8');
+$totalLabel = htmlspecialchars(__('review.progress.total_reviews'), ENT_QUOTES, 'UTF-8');
+?>
 <footer id="footer">
     <span class="test-footer-stat">
-        <?php echo IconHelper::render('clock', ['title' => 'Elapsed Time', 'alt' => 'Elapsed Time']); ?>
-        <span id="timer" title="Elapsed Time"></span>
+        <?php echo IconHelper::render(
+            'clock',
+            ['title' => __('review.progress.elapsed_time'), 'alt' => __('review.progress.elapsed_time')]
+        ); ?>
+        <span id="timer" title="<?php echo $elapsedLabel; ?>"></span>
     </span>
     <span class="test-footer-stat test-progress-bar">
         <span id="not-tested-box" class="test-progress-notyet"
-            title="Not yet reviewed"
+            title="<?php echo $notYetLabel; ?>"
             style="width:<?php echo $lRemaining; ?>px"></span><span
             id="wrong-tests-box" class="test-progress-wrong"
-            title="Wrong"
+            title="<?php echo $wrongLabel; ?>"
             style="width:<?php echo $lWrong; ?>px"></span><span
             id="correct-tests-box" class="test-progress-correct"
-            title="Correct"
+            title="<?php echo $correctLabel; ?>"
             style="width:<?php echo $lCorrect; ?>px"></span>
     </span>
     <span class="test-footer-stat">
-        <span title="Total reviews" id="total_tests"><?php echo $total; ?></span>
+        <span title="<?php echo $totalLabel; ?>" id="total_tests"><?php echo $total; ?></span>
         =
-        <span class="todosty" title="Not yet reviewed" id="not-tested"><?php echo $remainingInt; ?></span>
+        <span class="todosty" title="<?php echo $notYetLabel; ?>"
+            id="not-tested"><?php echo $remainingInt; ?></span>
         +
-        <span class="donewrongsty" title="Wrong" id="wrong-tests"><?php echo $wrongInt; ?></span>
+        <span class="donewrongsty" title="<?php echo $wrongLabel; ?>"
+            id="wrong-tests"><?php echo $wrongInt; ?></span>
         +
-        <span class="doneoksty" title="Correct" id="correct-tests"><?php echo $correctInt; ?></span>
+        <span class="doneoksty" title="<?php echo $correctLabel; ?>"
+            id="correct-tests"><?php echo $correctInt; ?></span>
     </span>
 </footer>

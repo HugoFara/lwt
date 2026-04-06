@@ -50,6 +50,8 @@ assert(is_string($dictLinksHtml));
 assert(is_string($sentenceAreaHtml));
 assert(is_string($wordTagsHtml));
 
+$valSave = htmlspecialchars(__('vocabulary.common.save'), ENT_QUOTES, 'UTF-8');
+
 ?>
 
 <script type="application/json" id="word-form-config">
@@ -67,22 +69,22 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="tid" value="<?php echo $textId; ?>" />
 <input type="hidden" name="ord" value="<?php echo $ord; ?>" />
 <table class="table is-bordered is-fullwidth">
-   <tr title="Only change uppercase/lowercase!">
-       <td class="has-text-right"><b>New Term:</b></td>
+   <tr title="<?= htmlspecialchars(__('vocabulary.form.uppercase_only_hint'), ENT_QUOTES, 'UTF-8') ?>">
+       <td class="has-text-right"><b><?= __('vocabulary.form.new_term') ?>:</b></td>
        <td class="">
            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
            data_info="New Term" type="text"
            name="WoText" id="wordfield" value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>"
            maxlength="250" size="35" />
            <?php echo IconHelper::render('circle-x', [
-               'title' => 'Field must not be empty',
-               'alt' => 'Field must not be empty'
+               'title' => __('vocabulary.common.field_required'),
+               'alt' => __('vocabulary.common.field_required')
            ]); ?>
        </td>
    </tr>
    <?php echo $similarTermsRow; ?>
    <tr>
-       <td class="has-text-right">Translation:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.translation_label') ?></td>
        <td class="">
            <textarea name="WoTranslation"
            class="setfocus textarea-noreturn checklength checkoutsidebmp"
@@ -91,13 +93,13 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Tags:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.tags_label') ?></td>
        <td class="">
            <?php echo $wordTagsHtml; ?>
        </td>
    </tr>
    <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
-       <td class="has-text-right">Romaniz.:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.romaniz_label') ?></td>
        <td class="">
            <input type="text" class="checkoutsidebmp" data_info="Romanization"
            name="WoRomanization"
@@ -105,7 +107,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Sentence<br />Term in {...}:</td>
+       <td class="has-text-right"><?= __('vocabulary.show.sentence_term_in_braces') ?></td>
        <td class="">
            <textarea <?php echo $scrdir; ?> name="WoSentence"
            class="textarea-noreturn checklength checkoutsidebmp"
@@ -114,7 +116,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Notes:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.notes_label') ?></td>
        <td class="">
            <textarea name="WoNotes"
            class="textarea-noreturn checklength checkoutsidebmp"
@@ -124,7 +126,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
    </tr>
    <?php echo $similarTermsRow; ?>
    <tr>
-       <td class="has-text-right">Status:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.status_label') ?></td>
        <td class="">
            <?php echo SelectOptionsBuilder::forWordStatusRadio(1); ?>
        </td>
@@ -133,7 +135,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        <td class="has-text-right" colspan="2">
            <?php echo $dictLinksHtml; ?>
        &nbsp; &nbsp; &nbsp;
-       <input type="submit" name="op" value="Save" /></td>
+       <input type="submit" name="op" value="<?= $valSave ?>" /></td>
    </tr>
 </table>
 </form>

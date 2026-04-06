@@ -46,8 +46,17 @@ use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 <?php
 echo PageLayoutHelper::buildActionCard(
     [
-    ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-    ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
+    [
+        'url' => '/texts/new',
+        'label' => __('text.list.new_text'),
+        'icon' => 'circle-plus',
+        'class' => 'is-primary'
+    ],
+    [
+        'url' => '/text/archived?query=&page=1',
+        'label' => __('text.list.archived_texts'),
+        'icon' => 'archive'
+    ],
     ]
 );
 ?>
@@ -60,7 +69,7 @@ echo PageLayoutHelper::buildActionCard(
         <span class="icon is-large">
             <i data-lucide="loader-2" class="icon-spin"></i>
         </span>
-        <p class="mt-2">Loading texts...</p>
+        <p class="mt-2"><?= __e('text.list.loading_texts') ?></p>
     </div>
 
     <!-- Sort control and summary -->
@@ -77,11 +86,13 @@ echo PageLayoutHelper::buildActionCard(
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small">Sort</span>
+                            <span class="button is-static is-small"><?= __e('text.common.sort') ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select @change="handleSortChange($event)" aria-label="Sort texts by">
+                                <select
+                                    @change="handleSortChange($event)"
+                                    aria-label="<?= __e('text.list.sort_aria') ?>">
                                     <?php echo SelectOptionsBuilder::forTextSort(); ?>
                                 </select>
                             </div>
@@ -99,11 +110,11 @@ echo PageLayoutHelper::buildActionCard(
                 <div class="buttons are-small">
                     <button type="button" class="button" @click="markAllTexts(true)">
                         <?php echo IconHelper::render('check-square', ['size' => 14]); ?>
-                        <span class="ml-1">Mark All</span>
+                        <span class="ml-1"><?= __e('text.common.mark_all') ?></span>
                     </button>
                     <button type="button" class="button" @click="markAllTexts(false)">
                         <?php echo IconHelper::render('square', ['size' => 14]); ?>
-                        <span class="ml-1">Mark None</span>
+                        <span class="ml-1"><?= __e('text.common.mark_none') ?></span>
                     </button>
                     <span
                         x-show="markedTexts.size > 0"
@@ -118,7 +129,7 @@ echo PageLayoutHelper::buildActionCard(
                     <div class="control">
                         <span class="button is-static is-small">
                             <?php echo IconHelper::render('zap', ['size' => 14]); ?>
-                            <span class="ml-1">Actions</span>
+                            <span class="ml-1"><?= __e('text.common.actions') ?></span>
                         </span>
                     </div>
                     <div class="control">
@@ -126,7 +137,7 @@ echo PageLayoutHelper::buildActionCard(
                             <select
                                 :disabled="markedTexts.size === 0"
                                 @change="handleMultiAction($event)"
-                                aria-label="Bulk actions for selected texts">
+                                aria-label="<?= __e('text.list.bulk_aria') ?>">
                                 <?php echo SelectOptionsBuilder::forMultipleTextsActions(); ?>
                             </select>
                         </div>
@@ -152,21 +163,21 @@ echo PageLayoutHelper::buildActionCard(
                         </label>
                         <p class="card-header-title" x-text="text.title"></p>
                         <div class="card-header-icon card-icons">
-                            <span x-show="text.has_audio" title="With Audio">
+                            <span x-show="text.has_audio" title="<?= __e('text.common.with_audio') ?>">
                                 <?php echo IconHelper::render('volume-2', ['size' => 16]); ?>
                             </span>
                             <a
                                 x-show="text.has_source"
                                 :href="text.source_uri"
                                 target="_blank"
-                                title="Source Link"
+                                title="<?= __e('text.common.source_link') ?>"
                                 @click.stop>
                                 <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
                             </a>
                             <a
                                 x-show="text.annotated"
                                 :href="'/text/' + text.id + '/print'"
-                                title="Annotated Text"
+                                title="<?= __e('text.common.annotated_text') ?>"
                                 @click.stop>
                                 <?php echo IconHelper::render('file-text', ['size' => 16]); ?>
                             </a>
@@ -190,16 +201,16 @@ echo PageLayoutHelper::buildActionCard(
                                     <div class="stat-row">
                                         <div
                                             class="stat-item"
-                                            title="Total number of unique words in this text">
-                                            <span class="stat-label">Total</span>
+                                            title="<?= __e('text.list.stat_total_title') ?>">
+                                            <span class="stat-label"><?= __e('text.list.stat_total') ?></span>
                                             <span
                                                 class="stat-value"
                                                 x-text="getStatTotal(text.id)"></span>
                                         </div>
                                         <div
                                             class="stat-item"
-                                            title="Words you have saved to your vocabulary">
-                                            <span class="stat-label">Saved</span>
+                                            title="<?= __e('text.list.stat_saved_title') ?>">
+                                            <span class="stat-label"><?= __e('text.list.stat_saved') ?></span>
                                             <span class="stat-value">
                                                 <a
                                                     class="status4"
@@ -212,16 +223,16 @@ echo PageLayoutHelper::buildActionCard(
                                         </div>
                                         <div
                                             class="stat-item"
-                                            title="Words you haven't saved yet">
-                                            <span class="stat-label">Unknown</span>
+                                            title="<?= __e('text.list.stat_unknown_title') ?>">
+                                            <span class="stat-label"><?= __e('text.list.stat_unknown') ?></span>
                                             <span
                                                 class="stat-value status0"
                                                 x-text="getStatUnknown(text.id)"></span>
                                         </div>
                                         <div
                                             class="stat-item"
-                                            title="Percentage of unknown words">
-                                            <span class="stat-label">Unkn.%</span>
+                                            title="<?= __e('text.list.stat_unknown_percent_title') ?>">
+                                            <span class="stat-label"><?= __e('text.list.stat_unknown_percent') ?></span>
                                             <span
                                                 class="stat-value"
                                                 x-text="getStatUnknownPercent(text.id)">
@@ -242,7 +253,9 @@ echo PageLayoutHelper::buildActionCard(
                             </template>
                             <template x-if="!getStatsForText(text.id)">
                                 <div class="stat-row">
-                                    <span class="has-text-grey is-size-7">Loading statistics...</span>
+                                    <span class="has-text-grey is-size-7">
+                                        <?= __e('text.list.loading_statistics') ?>
+                                    </span>
                                 </div>
                             </template>
                         </div>
@@ -251,16 +264,16 @@ echo PageLayoutHelper::buildActionCard(
                     <footer class="card-footer">
                         <a :href="'/text/' + text.id + '/read'" class="card-footer-item is-primary-action">
                             <?php echo IconHelper::render('book-open', ['size' => 16]); ?>
-                            <span>Read</span>
+                            <span><?= __e('text.common.read') ?></span>
                         </a>
                         <a :href="'/review?text=' + text.id" class="card-footer-item">
                             <?php echo IconHelper::render('circle-help', ['size' => 16]); ?>
-                            <span>Review</span>
+                            <span><?= __e('text.common.review') ?></span>
                         </a>
                         <div class="card-footer-item has-dropdown" x-data="dropdownToggle">
                             <a @click.prevent.stop="toggle()" class="dropdown-trigger-link">
                                 <?php echo IconHelper::render('more-horizontal', ['size' => 16]); ?>
-                                <span>More</span>
+                                <span><?= __e('text.common.more') ?></span>
                             </a>
                             <div
                                 class="dropdown-menu card-dropdown"
@@ -270,18 +283,18 @@ echo PageLayoutHelper::buildActionCard(
                                 <div class="dropdown-content">
                                     <a :href="'/text/' + text.id + '/print-plain'" class="dropdown-item">
                                         <?php echo IconHelper::render('printer', ['size' => 14]); ?>
-                                        <span>Print</span>
+                                        <span><?= __e('text.common.print') ?></span>
                                     </a>
                                     <a href="#"
                                        class="dropdown-item"
                                        :data-url="'/texts/' + text.id + '/archive'"
                                        @click.prevent="handlePostActionFromEvent($event)">
                                         <?php echo IconHelper::render('archive', ['size' => 14]); ?>
-                                        <span>Archive</span>
+                                        <span><?= __e('text.common.archive') ?></span>
                                     </a>
                                     <a :href="'/texts/' + text.id + '/edit'" class="dropdown-item">
                                         <?php echo IconHelper::render('file-pen', ['size' => 14]); ?>
-                                        <span>Edit</span>
+                                        <span><?= __e('text.common.edit') ?></span>
                                     </a>
                                     <hr class="dropdown-divider">
                                     <a
@@ -289,7 +302,7 @@ echo PageLayoutHelper::buildActionCard(
                                         :data-url="'/texts/' + text.id"
                                         @click.prevent="handleRestDeleteFromEvent($event)">
                                         <?php echo IconHelper::render('trash-2', ['size' => 14]); ?>
-                                        <span>Delete</span>
+                                        <span><?= __e('text.common.delete') ?></span>
                                     </a>
                                 </div>
                             </div>
@@ -309,16 +322,16 @@ echo PageLayoutHelper::buildActionCard(
             <span class="icon">
                 <i data-lucide="chevron-down"></i>
             </span>
-            <span>Show More</span>
+            <span><?= __e('text.common.show_more') ?></span>
         </button>
     </div>
 
     <!-- Empty state -->
     <div x-show="!loading && texts.length === 0" class="notification is-info is-light">
-        <p>No texts found for this language.
+        <p><?= __e('text.list.empty') ?>
             <a href="<?php
                 echo \Lwt\Shared\Infrastructure\Http\UrlUtilities::url('/texts/new');
-            ?>">Create your first text</a> to get started!</p>
+            ?>"><?= __e('text.list.empty_create') ?></a> <?= __e('text.list.empty_to_get_started') ?></p>
     </div>
 </div>
 

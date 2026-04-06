@@ -40,9 +40,9 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 if (!empty($message)) :
     $messageText = match ($message) {
-        'deleted' => 'Dictionary deleted successfully.',
+        'deleted' => __('dictionary.deleted_success'),
         default => str_starts_with($message, 'imported_')
-            ? 'Imported ' . substr($message, 9) . ' entries.'
+            ? __('dictionary.imported_count', ['count' => substr($message, 9)])
             : $message,
     };
     ?>
@@ -61,9 +61,9 @@ if (!empty($message)) :
 
 <?php
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/languages', 'label' => 'Languages', 'icon' => 'globe'],
+    ['url' => '/languages', 'label' => __('dictionary.languages_link'), 'icon' => 'globe'],
     [
-        'url' => '/word/upload?tab=dictionary', 'label' => 'Import Dictionary',
+        'url' => '/word/upload?tab=dictionary', 'label' => __('dictionary.import_dictionary'),
         'icon' => 'upload', 'class' => 'is-primary'
     ],
 ]);
@@ -86,7 +86,7 @@ echo PageLayoutHelper::buildActionCard([
             </div>
             <div class="control">
                 <button type="submit" class="button is-info">
-                    <?php echo IconHelper::render('search', ['alt' => 'Go']); ?>
+                    <?php echo IconHelper::render('search', ['alt' => __('common.go')]); ?>
                 </button>
             </div>
         </div>
@@ -95,40 +95,50 @@ echo PageLayoutHelper::buildActionCard([
 
 <!-- Mode Info -->
 <div class="box mb-4">
-    <h4 class="title is-5 mb-2">Local Dictionary Mode</h4>
+    <h4 class="title is-5 mb-2"><?php echo __('dictionary.local_mode_title'); ?></h4>
     <p class="mb-2">
-        Current mode:
+        <?php echo __('dictionary.current_mode'); ?>
         <span class="tag is-info is-medium">
             <?php
             echo match ($localDictMode) {
-                0 => 'Online dictionaries only',
-                1 => 'Local first, online fallback',
-                2 => 'Local dictionaries only',
-                3 => 'Combined (show both)',
-                default => 'Unknown',
+                0 => __('dictionary.mode_online'),
+                1 => __('dictionary.mode_local_first'),
+                2 => __('dictionary.mode_local_only'),
+                3 => __('dictionary.mode_combined'),
+                default => __('dictionary.mode_unknown'),
             };
             ?>
         </span>
     </p>
     <p class="help">
-        You can change the mode in the
-        <a href="/languages/<?php echo $langId; ?>/edit#local-dict-mode">language settings</a>.
+        <?php echo __('dictionary.mode_change_help'); ?>
+        <a href="/languages/<?php echo $langId; ?>/edit#local-dict-mode">
+            <?php echo __('dictionary.language_settings'); ?>
+        </a>.
     </p>
 </div>
 
 <!-- Quick Create -->
 <div class="box mb-4">
-    <h4 class="title is-5 mb-2">Quick Create Dictionary</h4>
+    <h4 class="title is-5 mb-2"><?php echo __('dictionary.quick_create'); ?></h4>
     <form method="POST" action="/languages/<?php echo $langId; ?>/dictionaries">
         <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
         <div class="field has-addons">
             <div class="control is-expanded">
-                <input type="text" name="dict_name" class="input" placeholder="Dictionary name..." required>
+                <?php
+                $createPlaceholder = htmlspecialchars(
+                    __('dictionary.dictionary_name_placeholder'),
+                    ENT_QUOTES
+                );
+                ?>
+                <input type="text" name="dict_name" class="input"
+                       placeholder="<?php echo $createPlaceholder; ?>"
+                       required>
             </div>
             <div class="control">
                 <button type="submit" name="create_dictionary" value="1" class="button is-primary">
-                    <?php echo IconHelper::render('plus', ['alt' => 'Create']); ?>
-                    Create
+                    <?php echo IconHelper::render('plus', ['alt' => __('common.create')]); ?>
+                    <?php echo __('common.create'); ?>
                 </button>
             </div>
         </div>
@@ -137,15 +147,22 @@ echo PageLayoutHelper::buildActionCard([
 
 <!-- Dictionaries List -->
 <div class="box">
-    <h4 class="title is-5 mb-4">Dictionaries for <?php echo htmlspecialchars($langName, ENT_QUOTES); ?></h4>
+    <h4 class="title is-5 mb-4">
+        <?php
+        echo htmlspecialchars(
+            __('dictionary.dictionaries_for', ['language' => $langName]),
+            ENT_QUOTES
+        );
+        ?>
+    </h4>
 
     <?php if (empty($dictionaries)) : ?>
     <div class="notification is-light">
-        <p>No local dictionaries found for this language.</p>
+        <p><?php echo __('dictionary.no_local_dicts'); ?></p>
         <p class="mt-2">
             <a href="/word/upload?tab=dictionary" class="button is-primary is-small">
-                <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
-                Import a dictionary
+                <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
+                <?php echo __('dictionary.import_a_dictionary'); ?>
             </a>
         </p>
     </div>
@@ -154,12 +171,12 @@ echo PageLayoutHelper::buildActionCard([
         <table class="table is-fullwidth is-striped is-hoverable">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Format</th>
-                    <th>Entries</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th><?php echo __('common.name'); ?></th>
+                    <th><?php echo __('dictionary.col_format'); ?></th>
+                    <th><?php echo __('dictionary.col_entries'); ?></th>
+                    <th><?php echo __('dictionary.col_priority'); ?></th>
+                    <th><?php echo __('common.status'); ?></th>
+                    <th><?php echo __('common.actions'); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -186,9 +203,9 @@ echo PageLayoutHelper::buildActionCard([
                     </td>
                     <td>
                         <?php if ($dict->isEnabled()) : ?>
-                        <span class="tag is-success">Enabled</span>
+                        <span class="tag is-success"><?php echo __('common.enabled'); ?></span>
                         <?php else : ?>
-                        <span class="tag is-warning">Disabled</span>
+                        <span class="tag is-warning"><?php echo __('common.disabled'); ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -198,30 +215,43 @@ echo PageLayoutHelper::buildActionCard([
                                   style="display:inline;">
                                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
+                                <?php
+                                $toggleTitle = $dict->isEnabled()
+                                    ? __('dictionary.toggle_disable')
+                                    : __('dictionary.toggle_enable');
+                                ?>
                                 <button type="submit" name="toggle_enabled" value="1"
                                         class="button <?php echo $dict->isEnabled() ? 'is-warning' : 'is-success'; ?>"
-                                        title="<?php echo $dict->isEnabled() ? 'Disable' : 'Enable'; ?>">
+                                        title="<?php echo htmlspecialchars($toggleTitle, ENT_QUOTES); ?>">
                                     <?php
                                     $eyeIcon = $dict->isEnabled() ? 'eye-off' : 'eye';
-                                    echo IconHelper::render($eyeIcon, ['alt' => 'Toggle']);
+                                    echo IconHelper::render($eyeIcon, ['alt' => $toggleTitle]);
                                     ?>
                                 </button>
                             </form>
 
                             <!-- Import more entries -->
                             <a href="/word/upload?tab=dictionary"
-                               class="button is-info" title="Import entries">
-                                <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
+                               class="button is-info"
+                               title="<?php echo htmlspecialchars(__('dictionary.import_entries'), ENT_QUOTES); ?>">
+                                <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
                             </a>
 
                             <!-- Delete -->
+                            <?php
+                            $confirmDelete = htmlspecialchars(
+                                __('dictionary.confirm_delete_dict'),
+                                ENT_QUOTES
+                            );
+                            ?>
                             <form method="POST" action="/dictionaries/delete" style="display:inline;"
-                                  @submit="if(!confirm('Delete this dictionary and all its entries?')) $event.preventDefault()">
+                                  @submit="if(!confirm('<?php echo $confirmDelete; ?>')) $event.preventDefault()">
                                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
                                 <input type="hidden" name="lang_id" value="<?php echo $langId; ?>">
-                                <button type="submit" class="button is-danger" title="Delete">
-                                    <?php echo IconHelper::render('trash', ['alt' => 'Delete']); ?>
+                                <button type="submit" class="button is-danger"
+                                        title="<?php echo htmlspecialchars(__('common.delete'), ENT_QUOTES); ?>">
+                                    <?php echo IconHelper::render('trash', ['alt' => __('common.delete')]); ?>
                                 </button>
                             </form>
                         </div>

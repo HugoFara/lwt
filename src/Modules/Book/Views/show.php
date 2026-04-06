@@ -26,8 +26,8 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 
 $actions = [
-    ['url' => '/books', 'label' => 'All Books', 'icon' => 'library'],
-    ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'file-up'],
+    ['url' => '/books', 'label' => __('book.all_books'), 'icon' => 'library'],
+    ['url' => '/book/import', 'label' => __('book.import_epub'), 'icon' => 'file-up'],
 ];
 
 ?>
@@ -44,21 +44,31 @@ $actions = [
             <!-- Book Info -->
             <div class="content">
                 <?php if ($book['author']) : ?>
-                <p><strong>Author:</strong> <?php echo htmlspecialchars($book['author']); ?></p>
+                <p><strong><?php echo __('common.author'); ?>:</strong>
+                    <?php echo htmlspecialchars($book['author']); ?></p>
                 <?php endif; ?>
 
                 <?php if ($book['description']) : ?>
-                <p><strong>Description:</strong> <?php echo htmlspecialchars($book['description']); ?></p>
+                <p><strong><?php echo __('common.description'); ?>:</strong>
+                    <?php echo htmlspecialchars($book['description']); ?></p>
                 <?php endif; ?>
 
                 <p>
-                    <strong>Source:</strong>
+                    <strong><?php echo __('book.source'); ?>:</strong>
                     <span class="tag is-info"><?php echo strtoupper($book['sourceType']); ?></span>
                 </p>
 
                 <p>
-                    <strong>Progress:</strong>
-                    Chapter <?php echo $book['currentChapter']; ?> of <?php echo $book['totalChapters']; ?>
+                    <strong><?php echo __('book.col_progress'); ?>:</strong>
+                    <?php
+                    echo htmlspecialchars(
+                        __('book.chapter_x_of_y', [
+                            'current' => $book['currentChapter'],
+                            'total' => $book['totalChapters'],
+                        ]),
+                        ENT_QUOTES
+                    );
+                    ?>
                     (<?php echo round($book['progress'], 1); ?>%)
                 </p>
 
@@ -70,8 +80,8 @@ $actions = [
             <!-- Continue Reading Button -->
             <?php if (!empty($chapters)) : ?>
             <a href="/text/<?php echo $chapters[0]['id']; ?>/read" class="button is-primary is-medium">
-                <?php echo IconHelper::render('book-open', ['alt' => 'Continue']); ?>
-                <span class="ml-2">Continue Reading</span>
+                <?php echo IconHelper::render('book-open', ['alt' => __('book.continue_reading')]); ?>
+                <span class="ml-2"><?php echo __('book.continue_reading'); ?></span>
             </a>
             <?php endif; ?>
         </div>
@@ -79,12 +89,13 @@ $actions = [
         <div class="column is-4">
             <!-- Actions -->
             <div class="buttons">
+                <?php $confirmDelete = htmlspecialchars(__('book.confirm_delete_book'), ENT_QUOTES); ?>
                 <form method="post" action="/book/<?php echo $book['id']; ?>/delete"
-                      @submit="if(!confirm('Delete this book and all its chapters?')) $event.preventDefault()">
+                      @submit="if(!confirm('<?php echo $confirmDelete; ?>')) $event.preventDefault()">
                     <?php echo FormHelper::csrfField(); ?>
                     <button type="submit" class="button is-danger is-outlined">
-                        <?php echo IconHelper::render('trash-2', ['alt' => 'Delete']); ?>
-                        <span class="ml-2">Delete Book</span>
+                        <?php echo IconHelper::render('trash-2', ['alt' => __('common.delete')]); ?>
+                        <span class="ml-2"><?php echo __('book.delete_book'); ?></span>
                     </button>
                 </form>
             </div>
@@ -94,17 +105,17 @@ $actions = [
 
 <!-- Chapters List -->
 <div class="box">
-    <h3 class="title is-5">Chapters</h3>
+    <h3 class="title is-5"><?php echo __('book.chapters'); ?></h3>
 
     <?php if (empty($chapters)) : ?>
-    <p class="has-text-grey">No chapters found.</p>
+    <p class="has-text-grey"><?php echo __('book.no_chapters_found'); ?></p>
     <?php else : ?>
     <table class="table is-fullwidth is-hoverable">
         <thead>
             <tr>
                 <th style="width: 60px;">#</th>
-                <th>Title</th>
-                <th style="width: 100px;">Actions</th>
+                <th><?php echo __('common.title'); ?></th>
+                <th style="width: 100px;"><?php echo __('common.actions'); ?></th>
             </tr>
         </thead>
         <tbody>
@@ -116,15 +127,15 @@ $actions = [
                         <?php echo htmlspecialchars($chapter['title']); ?>
                     </a>
                     <?php if ($chapter['num'] === $book['currentChapter']) : ?>
-                    <span class="tag is-small is-info ml-2">Current</span>
+                    <span class="tag is-small is-info ml-2"><?php echo __('common.current'); ?></span>
                     <?php endif; ?>
                 </td>
                 <td>
                     <a href="/text/<?php echo $chapter['id']; ?>/read" class="button is-small is-primary">
-                        <?php echo IconHelper::render('book-open', ['alt' => 'Read']); ?>
+                        <?php echo IconHelper::render('book-open', ['alt' => __('common.read')]); ?>
                     </a>
                     <a href="/texts/<?php echo $chapter['id']; ?>/edit" class="button is-small is-light">
-                        <?php echo IconHelper::render('edit', ['alt' => 'Edit']); ?>
+                        <?php echo IconHelper::render('edit', ['alt' => __('common.edit')]); ?>
                     </a>
                 </td>
             </tr>

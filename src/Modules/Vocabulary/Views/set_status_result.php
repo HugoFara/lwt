@@ -37,7 +37,7 @@ assert(is_string($todoContent));
 
 $hex = StringUtils::toClassName($term->textLowercase());
 ?>
-<p>Status: <?php echo StatusHelper::getColoredMessage($status); ?></p>
+<p><?= __('vocabulary.result.status_label') ?> <?php echo StatusHelper::getColoredMessage($status); ?></p>
 
 <script type="application/json" data-lwt-set-status-result-config>
 <?php echo json_encode([

@@ -142,7 +142,7 @@ class GoogleController extends BaseController
         $error = is_string($sessionError) ? $sessionError : null;
         unset($_SESSION['auth_error']);
 
-        $this->render('Link Google Account', false);
+        $this->render(__('user.google_link.page_title'), false);
         require __DIR__ . '/../Views/google_link_confirm.php';
         $this->endRender();
     }

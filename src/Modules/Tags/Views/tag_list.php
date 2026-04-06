@@ -57,17 +57,17 @@ assert($service instanceof TagsFacade);
 assert(is_bool($isTextTag));
 
 $baseUrl = $service->getBaseUrl();
-$tagTypeLabel = $service->getTagTypeLabel();
 /** @var array<int, array{value: int, text: string}> $sortOptions */
 $sortOptions = $service->getSortOptions();
-$itemLabel = $isTextTag ? 'Texts' : 'Terms';
+$itemLabel = $isTextTag ? __('tags.items_label_texts') : __('tags.items_label_terms');
+$newTagLabel = $isTextTag ? __('tags.list_new_text_tag') : __('tags.list_new_term_tag');
 
 PageLayoutHelper::renderMessage($message, false);
 
 echo PageLayoutHelper::buildActionCard([
     [
         'url' => $baseUrl . '/new',
-        'label' => 'New ' . $tagTypeLabel . ' Tag',
+        'label' => $newTagLabel,
         'icon' => 'circle-plus',
         'class' => 'is-primary'
     ],
@@ -87,7 +87,7 @@ echo PageLayoutHelper::buildActionCard([
                        name="query"
                        class="input"
                        value="<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="Search tags..."
+                       placeholder="<?= htmlspecialchars(__('tags.list_search_placeholder'), ENT_QUOTES, 'UTF-8') ?>"
                        disabled />
                 <span class="icon is-left">
                     <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
@@ -95,13 +95,13 @@ echo PageLayoutHelper::buildActionCard([
             </div>
             <div class="control">
                 <button type="button" class="button is-info" disabled>
-                    Search
+                    <?= __('tags.list_search_button') ?>
                 </button>
             </div>
         </div>
         <p class="help has-text-grey">
             <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
-            Search functionality is being redesigned. Full filtering will be available soon.
+            <?= __('tags.list_search_redesign_notice') ?>
         </p>
 
         <?php if ($totalCount > 0) : ?>
@@ -110,7 +110,9 @@ echo PageLayoutHelper::buildActionCard([
             <div class="level-left">
                 <div class="level-item">
                     <span class="tag is-info is-medium">
-                        <?php echo $totalCount; ?> Tag<?php echo ($totalCount == 1 ? '' : 's'); ?>
+                        <?= $totalCount === 1
+                            ? __('tags.list_count_one', ['count' => $totalCount])
+                            : __('tags.list_count_many', ['count' => $totalCount]) ?>
                     </span>
                 </div>
             </div>
@@ -129,7 +131,7 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small">Sort</span>
+                            <span class="button is-static is-small"><?= __('tags.list_sort') ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">
@@ -152,7 +154,7 @@ echo PageLayoutHelper::buildActionCard([
 </form>
 
 <?php if ($totalCount == 0) : ?>
-<p class="has-text-grey">No tags found.</p>
+<p class="has-text-grey"><?= __('tags.list_no_tags') ?></p>
 <?php else : ?>
 <form name="form2" action="<?php echo $baseUrl; ?>" method="post">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
@@ -165,7 +167,7 @@ echo PageLayoutHelper::buildActionCard([
             <div class="level-item">
                 <span class="icon-text">
                     <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
-                    <span class="has-text-weight-semibold ml-1">Multi Actions</span>
+                    <span class="has-text-weight-semibold ml-1"><?= __('tags.list_multi_actions') ?></span>
                 </span>
             </div>
         </div>
@@ -176,7 +178,9 @@ echo PageLayoutHelper::buildActionCard([
             <div class="field has-addons">
                 <div class="control">
                     <span class="button is-static is-small">
-                        <strong>ALL</strong>&nbsp;<?php echo ($totalCount == 1 ? '1 Tag' : $totalCount . ' Tags'); ?>
+                        <strong><?= __('tags.list_all_label') ?></strong>&nbsp;<?= $totalCount === 1
+                            ? __('tags.list_all_count_one')
+                            : __('tags.list_all_count_many', ['count' => $totalCount]) ?>
                     </span>
                 </div>
                 <div class="control">
@@ -195,18 +199,18 @@ echo PageLayoutHelper::buildActionCard([
             <div class="buttons are-small">
                 <button type="button" class="button is-light" data-action="mark-all">
                     <?php echo IconHelper::render('check-check', ['alt' => 'Mark All']); ?>
-                    <span class="ml-1">Mark All</span>
+                    <span class="ml-1"><?= __('tags.list_mark_all') ?></span>
                 </button>
                 <button type="button" class="button is-light" data-action="mark-none">
                     <?php echo IconHelper::render('x', ['alt' => 'Mark None']); ?>
-                    <span class="ml-1">Mark None</span>
+                    <span class="ml-1"><?= __('tags.list_mark_none') ?></span>
                 </button>
             </div>
         </div>
         <div class="control">
             <div class="field has-addons">
                 <div class="control">
-                    <span class="button is-static is-small">Marked Tags</span>
+                    <span class="button is-static is-small"><?= __('tags.list_marked_tags') ?></span>
                 </div>
                 <div class="control">
                     <div class="select is-small">
@@ -225,13 +229,15 @@ echo PageLayoutHelper::buildActionCard([
 <table class="table is-striped is-hoverable is-fullwidth sortable">
 <thead>
 <tr>
-    <th class="has-text-centered sorttable_nosort" style="width: 3em;">Mark</th>
-    <th class="has-text-centered sorttable_nosort" style="width: 6em;">Actions</th>
-    <th class="clickable">Tag Text</th>
-    <th class="clickable">Tag Comment</th>
-    <th class="has-text-centered clickable"><?php echo $itemLabel; ?> With Tag</th>
+    <th class="has-text-centered sorttable_nosort" style="width: 3em;"><?= __('tags.list_col_mark') ?></th>
+    <th class="has-text-centered sorttable_nosort" style="width: 6em;"><?= __('tags.list_col_actions') ?></th>
+    <th class="clickable"><?= __('tags.list_col_text') ?></th>
+    <th class="clickable"><?= __('tags.list_col_comment') ?></th>
+    <th class="has-text-centered clickable"><?= $isTextTag
+        ? __('tags.list_col_items_with_tag_texts')
+        : __('tags.list_col_items_with_tag_terms') ?></th>
     <?php if ($isTextTag) : ?>
-    <th class="has-text-centered clickable">Arch. Texts With Tag</th>
+    <th class="has-text-centered clickable"><?= __('tags.list_col_archived_with_tag') ?></th>
     <?php endif; ?>
 </tr>
 </thead>
@@ -363,7 +369,7 @@ echo PageLayoutHelper::buildActionCard([
             </div>
             <?php if ($isTextTag) : ?>
             <div class="tags has-addons mb-0">
-                <span class="tag is-dark">Archived</span>
+                <span class="tag is-dark"><?= __('tags.label_archived') ?></span>
                 <?php $archivedCountMobile = $tag['archivedUsageCount'] ?? 0; ?>
                 <?php if ($archivedCountMobile > 0) : ?>
                 <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link">
@@ -386,7 +392,9 @@ echo PageLayoutHelper::buildActionCard([
     <div class="level-left">
         <div class="level-item">
             <span class="tag is-info is-medium">
-                <?php echo $totalCount; ?> Tag<?php echo ($totalCount == 1 ? '' : 's'); ?>
+                <?= $totalCount === 1
+                    ? __('tags.list_count_one', ['count' => $totalCount])
+                    : __('tags.list_count_many', ['count' => $totalCount]) ?>
             </span>
         </div>
     </div>

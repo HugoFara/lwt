@@ -46,8 +46,8 @@ $settings = array_map(
     <span class="icon-text">
         <?php echo IconHelper::render('settings', ['alt' => 'Preferences']); ?>
         <span class="ml-2">
-            Looking for reading, review, appearance, or pagination settings?
-            <a href="/profile/preferences"><strong>Go to Preferences</strong></a>
+            <?= __('admin.settings_preferences_link') ?>
+            <a href="/profile/preferences"><strong><?= __('admin.settings_preferences_link_target') ?></strong></a>
         </span>
     </span>
 </div>
@@ -60,9 +60,13 @@ $settings = array_map(
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('rss', ['alt' => 'Newsfeeds']); ?>
-                <span class="ml-2">Newsfeeds</span>
+                <span class="ml-2"><?= __('admin.settings_section_newsfeeds') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('admin.settings_toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -71,7 +75,10 @@ $settings = array_map(
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
                 <label class="label" for="set-max-articles-with-text">
-                    Maximum Articles <span class="has-text-weight-normal">(with cache)</span>
+                    <?= __('admin.settings_max_articles_with_text') ?>
+                    <span class="has-text-weight-normal">
+                        <?= __('admin.settings_max_articles_with_text_qualifier') ?>
+                    </span>
                 </label>
                 <div class="field has-addons">
                     <div class="control">
@@ -93,17 +100,23 @@ $settings = array_map(
                                required />
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('admin.settings_field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Maximum articles per feed with cached text</p>
+                <p class="help"><?= __('admin.settings_max_articles_with_text_help') ?></p>
             </div>
 
             <div class="field">
                 <label class="label" for="set-max-articles-without-text">
-                    Maximum Articles <span class="has-text-weight-normal">(no cache)</span>
+                    <?= __('admin.settings_max_articles_with_text') ?>
+                    <span class="has-text-weight-normal">
+                        <?= __('admin.settings_max_articles_without_text_qualifier') ?>
+                    </span>
                 </label>
                 <div class="field has-addons">
                     <div class="control">
@@ -125,16 +138,21 @@ $settings = array_map(
                                required />
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('admin.settings_field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Maximum articles per feed without cached text</p>
+                <p class="help"><?= __('admin.settings_max_articles_without_text_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-max-texts-per-feed">Maximum Texts per Feed</label>
+                <label class="label" for="set-max-texts-per-feed">
+                    <?= __('admin.settings_max_texts_per_feed') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control">
                         <input class="input notempty posintnumber"
@@ -155,12 +173,15 @@ $settings = array_map(
                                required />
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('admin.settings_field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Older texts are moved to the Text Archive</p>
+                <p class="help"><?= __('admin.settings_max_texts_per_feed_help') ?></p>
             </div>
         </div>
     </div>
@@ -170,9 +191,13 @@ $settings = array_map(
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('users', ['alt' => 'Multi-User']); ?>
-                <span class="ml-2">Multi-User</span>
+                <span class="ml-2"><?= __('admin.settings_section_multi_user') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('admin.settings_toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -180,26 +205,26 @@ $settings = array_map(
         </header>
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
-                <label class="label">Allow Registration</label>
+                <label class="label"><?= __('admin.settings_allow_registration') ?></label>
                 <div class="control">
                     <label class="checkbox">
                         <input type="checkbox"
                                name="set-allow-registration"
                                value="1"
                                <?php echo ((int)($settings['set-allow-registration'] ?? '1') ? "checked" : ""); ?> />
-                        Allow new users to register accounts
+                        <?= __('admin.settings_allow_registration_help') ?>
                     </label>
                 </div>
             </div>
             <div class="field">
-                <label class="label">Check for Updates</label>
+                <label class="label"><?= __('admin.settings_check_for_updates') ?></label>
                 <div class="control">
                     <label class="checkbox">
                         <input type="checkbox"
                                name="set-check-for-updates"
                                value="1"
                                <?php echo ((int)($settings['set-check-for-updates'] ?? '1') ? "checked" : ""); ?> />
-                        Notify admins on the home page when a new LWT release is available
+                        <?= __('admin.settings_check_for_updates_help') ?>
                     </label>
                 </div>
             </div>
@@ -216,7 +241,7 @@ $settings = array_map(
                 <span class="icon is-small">
                     <?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?>
                 </span>
-                <span>Back</span>
+                <span><?= __('admin.settings_back') ?></span>
             </button>
         </div>
         <div class="control">
@@ -227,7 +252,7 @@ $settings = array_map(
                 <span class="icon is-small">
                     <?php echo IconHelper::render('rotate-ccw', ['alt' => 'Reset']); ?>
                 </span>
-                <span>Reset to Defaults</span>
+                <span><?= __('admin.settings_reset_defaults') ?></span>
             </button>
         </div>
         <div class="control">
@@ -235,7 +260,7 @@ $settings = array_map(
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
-                <span>Save</span>
+                <span><?= __('admin.settings_save') ?></span>
             </button>
         </div>
     </div>

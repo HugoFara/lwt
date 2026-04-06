@@ -34,9 +34,11 @@ assert(is_string($hex));
 assert(is_string($word));
 assert(is_string($todoContent));
 
-$statusName = $status === 99 ? 'Well-Known' : 'Ignored';
+$message = $status === 99
+    ? __('vocabulary.result.word_marked_well_known')
+    : __('vocabulary.result.word_marked_ignored');
 ?>
-<p>Word marked as <?php echo $statusName; ?>.</p>
+<p><?php echo $message; ?></p>
 
 <script type="application/json" data-lwt-insert-status-result-config>
 <?php echo json_encode([

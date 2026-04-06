@@ -142,7 +142,7 @@ class MicrosoftController extends BaseController
         $error = is_string($sessionError) ? $sessionError : null;
         unset($_SESSION['auth_error']);
 
-        $this->render('Link Microsoft Account', false);
+        $this->render(__('user.microsoft_link.page_title'), false);
         require __DIR__ . '/../Views/microsoft_link_confirm.php';
         $this->endRender();
     }

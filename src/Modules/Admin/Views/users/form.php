@@ -29,7 +29,7 @@ $formAction = $isEdit && $user !== null
 <div class="container">
     <div class="box">
         <h2 class="title is-4">
-            <?php echo $isEdit ? 'Edit User' : 'Create New User'; ?>
+            <?= $isEdit ? __('admin.user_form_edit_title') : __('admin.user_form_create_title') ?>
         </h2>
 
         <form method="post" action="<?php echo htmlspecialchars($formAction, ENT_QUOTES, 'UTF-8'); ?>">
@@ -37,13 +37,17 @@ $formAction = $isEdit && $user !== null
 
             <!-- Username -->
             <div class="field">
-                <label class="label" for="username">Username</label>
+                <label class="label" for="username"><?= __('admin.user_form_username') ?></label>
                 <div class="control has-icons-left">
                     <input class="input" type="text" id="username" name="username"
                            value="<?php echo htmlspecialchars($formData['username'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                            required minlength="3" maxlength="100"
                            pattern="[a-zA-Z0-9_-]+"
-                           placeholder="Letters, numbers, underscores, hyphens">
+                           placeholder="<?= htmlspecialchars(
+                               __('admin.user_form_username_placeholder'),
+                               ENT_QUOTES,
+                               'UTF-8'
+                           ) ?>">
                     <span class="icon is-small is-left">
                         <?php echo IconHelper::render('user', ['class' => 'icon']); ?>
                     </span>
@@ -52,7 +56,7 @@ $formAction = $isEdit && $user !== null
 
             <!-- Email -->
             <div class="field">
-                <label class="label" for="email">Email</label>
+                <label class="label" for="email"><?= __('admin.user_form_email') ?></label>
                 <div class="control has-icons-left">
                     <input class="input" type="email" id="email" name="email"
                            value="<?php echo htmlspecialchars($formData['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
@@ -67,16 +71,23 @@ $formAction = $isEdit && $user !== null
             <!-- Password -->
             <div class="field">
                 <label class="label" for="password">
-                    Password
+                    <?= __('admin.user_form_password') ?>
                     <?php if ($isEdit) : ?>
-                        <span class="has-text-grey has-text-weight-normal">(leave blank to keep current)</span>
+                        <span class="has-text-grey has-text-weight-normal">
+                            <?= __('admin.user_form_password_keep') ?>
+                        </span>
                     <?php endif; ?>
                 </label>
+                <?php
+                    $pwPlaceholder = $isEdit
+                        ? __('admin.user_form_password_placeholder_edit')
+                        : __('admin.user_form_password_placeholder_new');
+                ?>
                 <div class="control has-icons-left">
                     <input class="input" type="password" id="password" name="password"
                            <?php echo $isEdit ? '' : 'required'; ?>
                            minlength="8"
-                           placeholder="<?php echo $isEdit ? 'Leave blank to keep current password' : 'Minimum 8 characters'; ?>">
+                           placeholder="<?= htmlspecialchars($pwPlaceholder, ENT_QUOTES, 'UTF-8') ?>">
                     <span class="icon is-small is-left">
                         <?php echo IconHelper::render('lock', ['class' => 'icon']); ?>
                     </span>
@@ -85,21 +96,22 @@ $formAction = $isEdit && $user !== null
 
             <!-- Role -->
             <div class="field">
-                <label class="label" for="role">Role</label>
+                <label class="label" for="role"><?= __('admin.user_form_role') ?></label>
                 <div class="control">
                     <div class="select">
                         <select id="role" name="role" <?php echo $isSelf ? 'disabled' : ''; ?>>
-                            <option value="user" <?php echo ($formData['role'] ?? 'user') === 'user' ? 'selected' : ''; ?>>
-                                User
+                            <?php $roleValue = $formData['role'] ?? 'user'; ?>
+                            <option value="user" <?= $roleValue === 'user' ? 'selected' : '' ?>>
+                                <?= __('admin.user_form_role_user') ?>
                             </option>
-                            <option value="admin" <?php echo ($formData['role'] ?? '') === 'admin' ? 'selected' : ''; ?>>
-                                Admin
+                            <option value="admin" <?= $roleValue === 'admin' ? 'selected' : '' ?>>
+                                <?= __('admin.user_form_role_admin') ?>
                             </option>
                         </select>
                     </div>
                     <?php if ($isSelf) : ?>
                         <input type="hidden" name="role" value="admin">
-                        <p class="help">You cannot change your own role.</p>
+                        <p class="help"><?= __('admin.user_form_role_self_help') ?></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -111,11 +123,11 @@ $formAction = $isEdit && $user !== null
                         <input type="checkbox" name="is_active" value="1"
                                <?php echo ($formData['is_active'] ?? '1') === '1' ? 'checked' : ''; ?>
                                <?php echo $isSelf ? 'disabled' : ''; ?>>
-                        Active
+                        <?= __('admin.user_form_active') ?>
                     </label>
                     <?php if ($isSelf) : ?>
                         <input type="hidden" name="is_active" value="1">
-                        <p class="help">You cannot deactivate your own account.</p>
+                        <p class="help"><?= __('admin.user_form_active_self_help') ?></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -136,7 +148,7 @@ $formAction = $isEdit && $user !== null
                 ?>
                 <?php if (!empty($providers)) : ?>
             <div class="field">
-                <label class="label">Linked OAuth Providers</label>
+                <label class="label"><?= __('admin.user_form_oauth_label') ?></label>
                 <div class="control">
                     <div class="tags">
                         <?php foreach ($providers as $provider) : ?>
@@ -151,22 +163,22 @@ $formAction = $isEdit && $user !== null
 
             <!-- Metadata (read-only) -->
             <div class="field">
-                <label class="label">Account Info</label>
+                <label class="label"><?= __('admin.user_form_account_info') ?></label>
                 <div class="content is-small">
                     <p>
-                        <strong>Created:</strong>
+                        <strong><?= __('admin.user_form_created') ?></strong>
                         <?php echo htmlspecialchars($user->created()->format('Y-m-d H:i:s'), ENT_QUOTES, 'UTF-8'); ?>
                         <br>
-                        <strong>Last Login:</strong>
+                        <strong><?= __('admin.user_form_last_login') ?></strong>
                         <?php
                         $lastLogin = $user->lastLogin();
                         echo $lastLogin !== null
                             ? htmlspecialchars($lastLogin->format('Y-m-d H:i:s'), ENT_QUOTES, 'UTF-8')
-                            : '<em>Never</em>';
+                            : '<em>' . __('admin.user_form_never') . '</em>';
                         ?>
                         <br>
-                        <strong>Has Password:</strong>
-                        <?php echo $user->hasPassword() ? 'Yes' : 'No (OAuth only)'; ?>
+                        <strong><?= __('admin.user_form_has_password') ?></strong>
+                        <?= $user->hasPassword() ? __('admin.user_form_yes') : __('admin.user_form_no_oauth') ?>
                     </p>
                 </div>
             </div>
@@ -176,13 +188,13 @@ $formAction = $isEdit && $user !== null
             <div class="field is-grouped">
                 <div class="control">
                     <button class="button is-primary" type="submit">
-                        <?php echo $isEdit ? 'Save Changes' : 'Create User'; ?>
+                        <?= $isEdit ? __('admin.user_form_save_changes') : __('admin.user_form_create') ?>
                     </button>
                 </div>
                 <div class="control">
                     <a class="button is-light"
                        href="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users">
-                        Cancel
+                        <?= __('admin.user_form_cancel') ?>
                     </a>
                 </div>
             </div>

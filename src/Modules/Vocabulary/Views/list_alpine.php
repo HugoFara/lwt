@@ -35,13 +35,33 @@ use Lwt\Shared\UI\Helpers\IconHelper;
 /** @var int $currentlang */
 /** @var int $perPage */
 
+$grpStatus = htmlspecialchars(__('vocabulary.multi.group_status_changes'), ENT_QUOTES, 'UTF-8');
+$grpEdits = htmlspecialchars(__('vocabulary.multi.group_edits'), ENT_QUOTES, 'UTF-8');
+$grpExport = htmlspecialchars(__('vocabulary.multi.group_export'), ENT_QUOTES, 'UTF-8');
+$grpOther = htmlspecialchars(__('vocabulary.multi.group_other'), ENT_QUOTES, 'UTF-8');
+$grpDanger = htmlspecialchars(__('vocabulary.multi.group_danger_zone'), ENT_QUOTES, 'UTF-8');
+$titleWcnt = htmlspecialchars(__('vocabulary.list.col_word_count_title'), ENT_QUOTES, 'UTF-8');
+$titleEdit = htmlspecialchars(__('vocabulary.common.edit'), ENT_QUOTES, 'UTF-8');
+$titleResetFilters = htmlspecialchars(__('vocabulary.list.reset_filters'), ENT_QUOTES, 'UTF-8');
+$titleNoSent = htmlspecialchars(__('vocabulary.list.no_valid_sentence'), ENT_QUOTES, 'UTF-8');
+$phSearchTerms = htmlspecialchars(__('vocabulary.list.search_placeholder'), ENT_QUOTES, 'UTF-8');
+$titleFirstPage = htmlspecialchars(__('vocabulary.list.first_page'), ENT_QUOTES, 'UTF-8');
+$titlePrevPage = htmlspecialchars(__('vocabulary.list.previous_page'), ENT_QUOTES, 'UTF-8');
+$titleNextPage = htmlspecialchars(__('vocabulary.list.next_page'), ENT_QUOTES, 'UTF-8');
+$titleLastPage = htmlspecialchars(__('vocabulary.list.last_page'), ENT_QUOTES, 'UTF-8');
+
 ?>
 
 <?php
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/words/new', 'label' => 'Import Single Term', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-    ['url' => '/word/upload', 'label' => 'Import Terms', 'icon' => 'file-up'],
-    ['url' => '/word/tags', 'label' => 'Term Tags', 'icon' => 'tags'],
+    [
+        'url' => '/words/new',
+        'label' => __('vocabulary.actions.import_single_term'),
+        'icon' => 'circle-plus',
+        'class' => 'is-primary'
+    ],
+    ['url' => '/word/upload', 'label' => __('vocabulary.actions.import_terms'), 'icon' => 'file-up'],
+    ['url' => '/word/tags', 'label' => __('vocabulary.actions.term_tags'), 'icon' => 'tags'],
 ]);
 ?>
 
@@ -51,9 +71,12 @@ echo PageLayoutHelper::buildActionCard([
     <!-- Loading state -->
     <div x-show="loading" class="has-text-centered py-6">
         <span class="icon is-large">
-            <?php echo IconHelper::render('loader-2', ['class' => 'animate-spin', 'alt' => 'Loading']); ?>
+            <?php echo IconHelper::render('loader-2', [
+                'class' => 'animate-spin',
+                'alt' => __('vocabulary.common.loading')
+            ]); ?>
         </span>
-        <p class="mt-2">Loading terms...</p>
+        <p class="mt-2"><?= __('vocabulary.common.loading_terms') ?></p>
     </div>
 
     <!-- Filter bar -->
@@ -63,12 +86,12 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow" x-show="filters.lang && filterOptions.texts.length > 0">
                 <div class="field has-addons">
                     <div class="control">
-                        <span class="button is-static is-small">Text</span>
+                        <span class="button is-static is-small"><?= __('vocabulary.list.text_filter') ?></span>
                     </div>
                     <div class="control">
                         <div class="select is-small">
                             <select :value="filters.text_id" @change="setFilterFromEvent('text_id', $event)">
-                                <option value="">All Texts</option>
+                                <option value=""><?= __('vocabulary.list.all_texts') ?></option>
                                 <template x-for="text in filterOptions.texts" :key="text.id">
                                     <option :value="text.id" x-text="text.title"></option>
                                 </template>
@@ -82,7 +105,7 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow">
                 <div class="field has-addons">
                     <div class="control">
-                        <span class="button is-static is-small">Status</span>
+                        <span class="button is-static is-small"><?= __('vocabulary.list.status_filter') ?></span>
                     </div>
                     <div class="control">
                         <div class="select is-small">
@@ -100,12 +123,12 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow" x-show="filterOptions.tags.length > 0">
                 <div class="field has-addons">
                     <div class="control">
-                        <span class="button is-static is-small">Tag</span>
+                        <span class="button is-static is-small"><?= __('vocabulary.list.tag_filter') ?></span>
                     </div>
                     <div class="control">
                         <div class="select is-small">
                             <select :value="filters.tag1" @change="setFilterFromEvent('tag1', $event)">
-                                <option value="">Any Tag</option>
+                                <option value=""><?= __('vocabulary.list.any_tag') ?></option>
                                 <template x-for="tag in filterOptions.tags" :key="tag.id">
                                     <option :value="tag.id" x-text="tag.name"></option>
                                 </template>
@@ -119,7 +142,7 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow">
                 <div class="field has-addons">
                     <div class="control">
-                        <span class="button is-static is-small">Sort</span>
+                        <span class="button is-static is-small"><?= __('vocabulary.list.sort_filter') ?></span>
                     </div>
                     <div class="control">
                         <div class="select is-small">
@@ -137,7 +160,7 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow">
                 <div class="field has-addons">
                     <div class="control">
-                        <span class="button is-static is-small">Show</span>
+                        <span class="button is-static is-small"><?= __('vocabulary.list.show_filter') ?></span>
                     </div>
                     <div class="control">
                         <div class="select is-small">
@@ -156,31 +179,41 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="dropdown" :class="columnsOpen ? 'is-active' : ''">
                     <div class="dropdown-trigger">
                         <button type="button" class="button is-small" @click="toggleColumnsDropdown()" @click.outside="closeColumnsDropdown()">
-                            <span>Columns</span>
+                            <span><?= __('vocabulary.list.columns') ?></span>
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('chevron-down', ['alt' => 'Toggle']); ?>
+                                <?php
+                                echo IconHelper::render('chevron-down', ['alt' => __('vocabulary.list.toggle')]);
+                                ?>
                             </span>
                         </button>
                     </div>
                     <div class="dropdown-menu" style="min-width: 10rem;">
                         <div class="dropdown-content">
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" :checked="columns.romanization" @change="toggleColumn('romanization')" /> Romanization
+                                <input type="checkbox" :checked="columns.romanization"
+                                    @change="toggleColumn('romanization')" />
+                                <?= __('vocabulary.list.col_romanization') ?>
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" :checked="columns.translation" @change="toggleColumn('translation')" /> Translation
+                                <input type="checkbox" :checked="columns.translation"
+                                    @change="toggleColumn('translation')" />
+                                <?= __('vocabulary.list.col_translation') ?>
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" :checked="columns.tags" @change="toggleColumn('tags')" /> Tags
+                                <input type="checkbox" :checked="columns.tags"
+                                    @change="toggleColumn('tags')" /> <?= __('vocabulary.list.col_tags') ?>
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" :checked="columns.sentence" @change="toggleColumn('sentence')" /> Sentence
+                                <input type="checkbox" :checked="columns.sentence"
+                                    @change="toggleColumn('sentence')" /> <?= __('vocabulary.list.col_sentence') ?>
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" :checked="columns.status" @change="toggleColumn('status')" /> Status
+                                <input type="checkbox" :checked="columns.status"
+                                    @change="toggleColumn('status')" /> <?= __('vocabulary.list.col_status') ?>
                             </label>
                             <label class="dropdown-item checkbox is-size-7">
-                                <input type="checkbox" :checked="columns.score" @change="toggleColumn('score')" /> Score
+                                <input type="checkbox" :checked="columns.score"
+                                    @change="toggleColumn('score')" /> <?= __('vocabulary.list.col_score') ?>
                             </label>
                         </div>
                     </div>
@@ -193,18 +226,19 @@ echo PageLayoutHelper::buildActionCard([
                     <div class="control is-expanded has-icons-left">
                         <input type="text"
                                class="input is-small"
-                               placeholder="Search terms..."
+                               placeholder="<?= $phSearchTerms ?>"
                                :value="filters.query"
                                @input="syncQueryValue($event)"
                                @keyup.enter="applyQueryFilter()"
                                @keyup.debounce.500ms="applyQueryFilter()" />
                         <span class="icon is-left">
-                            <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
+                            <?php echo IconHelper::render('search', ['alt' => __('vocabulary.common.search')]); ?>
                         </span>
                     </div>
                     <div class="control">
-                        <button type="button" class="button is-small" @click="resetFilters()" title="Reset all filters">
-                            <?php echo IconHelper::render('x', ['alt' => 'Reset']); ?>
+                        <button type="button" class="button is-small" @click="resetFilters()"
+                            title="<?= $titleResetFilters ?>">
+                            <?php echo IconHelper::render('x', ['alt' => __('vocabulary.common.reset')]); ?>
                         </button>
                     </div>
                 </div>
@@ -234,8 +268,8 @@ echo PageLayoutHelper::buildActionCard([
 
     <!-- No results message -->
     <div x-show="!loading && words.length === 0" class="notification is-info is-light">
-        <p>No terms found matching your filters.
-            <a href="/words/new">Create a new term</a> or adjust your filters.</p>
+        <p><?= __('vocabulary.list.no_results') ?>
+            <a href="/words/new"><?= __('vocabulary.list.create_new_term') ?></a>.</p>
     </div>
 
     <!-- Multi Actions Section -->
@@ -244,8 +278,11 @@ echo PageLayoutHelper::buildActionCard([
             <div class="level-left">
                 <div class="level-item">
                     <span class="icon-text">
-                        <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
-                        <span class="has-text-weight-semibold ml-1">Multi Actions</span>
+                        <?php echo IconHelper::render('zap', [
+                            'title' => __('vocabulary.multi.title'),
+                            'alt' => __('vocabulary.multi.title')
+                        ]); ?>
+                        <span class="has-text-weight-semibold ml-1"><?= __('vocabulary.multi.title') ?></span>
                     </span>
                 </div>
             </div>
@@ -256,7 +293,7 @@ echo PageLayoutHelper::buildActionCard([
                 <div class="field has-addons">
                     <div class="control">
                         <span class="button is-static is-small">
-                            <strong>ALL</strong>&nbsp;<span
+                            <strong><?= __('vocabulary.multi.all') ?></strong>&nbsp;<span
                                 x-text="termCountLabel()"
                             ></span>
                         </span>
@@ -264,26 +301,26 @@ echo PageLayoutHelper::buildActionCard([
                     <div class="control">
                         <div class="select is-small">
                             <select @change="handleAllAction($event)">
-                                <option value="">[ Choose Action ]</option>
-                                <optgroup label="Status Changes">
-                                    <option value="alls1">Set Status to 1</option>
-                                    <option value="alls2">Set Status to 2</option>
-                                    <option value="alls3">Set Status to 3</option>
-                                    <option value="alls4">Set Status to 4</option>
-                                    <option value="alls5">Set Status to 5</option>
-                                    <option value="alls98">Set Status to Ignored</option>
-                                    <option value="alls99">Set Status to Well Known</option>
-                                    <option value="allspl1">Increment Status (+1)</option>
-                                    <option value="allsmi1">Decrement Status (-1)</option>
+                                <option value=""><?= __('vocabulary.multi.choose_action') ?></option>
+                                <optgroup label="<?= $grpStatus ?>">
+                                    <option value="alls1"><?= __('vocabulary.multi.set_status_1') ?></option>
+                                    <option value="alls2"><?= __('vocabulary.multi.set_status_2') ?></option>
+                                    <option value="alls3"><?= __('vocabulary.multi.set_status_3') ?></option>
+                                    <option value="alls4"><?= __('vocabulary.multi.set_status_4') ?></option>
+                                    <option value="alls5"><?= __('vocabulary.multi.set_status_5') ?></option>
+                                    <option value="alls98"><?= __('vocabulary.multi.set_status_ignored') ?></option>
+                                    <option value="alls99"><?= __('vocabulary.multi.set_status_well_known') ?></option>
+                                    <option value="allspl1"><?= __('vocabulary.multi.increment_status') ?></option>
+                                    <option value="allsmi1"><?= __('vocabulary.multi.decrement_status') ?></option>
                                 </optgroup>
-                                <optgroup label="Edits">
-                                    <option value="alllower">Set to Lowercase</option>
-                                    <option value="allcap">Capitalize</option>
-                                    <option value="alladdtag">Add Tag</option>
-                                    <option value="alldeltag">Remove Tag</option>
+                                <optgroup label="<?= $grpEdits ?>">
+                                    <option value="alllower"><?= __('vocabulary.multi.set_lowercase') ?></option>
+                                    <option value="allcap"><?= __('vocabulary.multi.capitalize') ?></option>
+                                    <option value="alladdtag"><?= __('vocabulary.multi.add_tag') ?></option>
+                                    <option value="alldeltag"><?= __('vocabulary.multi.remove_tag') ?></option>
                                 </optgroup>
-                                <optgroup label="Danger Zone">
-                                    <option value="alldel">Delete ALL</option>
+                                <optgroup label="<?= $grpDanger ?>">
+                                    <option value="alldel"><?= __('vocabulary.multi.delete_all') ?></option>
                                 </optgroup>
                             </select>
                         </div>
@@ -296,12 +333,12 @@ echo PageLayoutHelper::buildActionCard([
             <div class="control">
                 <div class="buttons are-small">
                     <button type="button" class="button is-light" @click="markAll(true)">
-                        <?php echo IconHelper::render('check-check', ['alt' => 'Mark All']); ?>
-                        <span class="ml-1">Mark All</span>
+                        <?php echo IconHelper::render('check-check', ['alt' => __('vocabulary.multi.mark_all')]); ?>
+                        <span class="ml-1"><?= __('vocabulary.multi.mark_all') ?></span>
                     </button>
                     <button type="button" class="button is-light" @click="markAll(false)">
-                        <?php echo IconHelper::render('x', ['alt' => 'Mark None']); ?>
-                        <span class="ml-1">Mark None</span>
+                        <?php echo IconHelper::render('x', ['alt' => __('vocabulary.multi.mark_none')]); ?>
+                        <span class="ml-1"><?= __('vocabulary.multi.mark_none') ?></span>
                     </button>
                     <span
                         x-show="getMarkedCount() > 0"
@@ -313,40 +350,40 @@ echo PageLayoutHelper::buildActionCard([
             <div class="control">
                 <div class="field has-addons">
                     <div class="control">
-                        <span class="button is-static is-small">Marked Terms</span>
+                        <span class="button is-static is-small"><?= __('vocabulary.multi.marked_terms') ?></span>
                     </div>
                     <div class="control">
                         <div class="select is-small">
                             <select :disabled="getMarkedCount() === 0" @change="handleMultiAction($event)">
-                                <option value="">[ Choose Action ]</option>
-                                <optgroup label="Status Changes">
-                                    <option value="s1">Set Status to 1</option>
-                                    <option value="s2">Set Status to 2</option>
-                                    <option value="s3">Set Status to 3</option>
-                                    <option value="s4">Set Status to 4</option>
-                                    <option value="s5">Set Status to 5</option>
-                                    <option value="s98">Set Status to Ignored</option>
-                                    <option value="s99">Set Status to Well Known</option>
-                                    <option value="spl1">Increment Status (+1)</option>
-                                    <option value="smi1">Decrement Status (-1)</option>
-                                    <option value="today">Set Today's Date</option>
+                                <option value=""><?= __('vocabulary.multi.choose_action') ?></option>
+                                <optgroup label="<?= $grpStatus ?>">
+                                    <option value="s1"><?= __('vocabulary.multi.set_status_1') ?></option>
+                                    <option value="s2"><?= __('vocabulary.multi.set_status_2') ?></option>
+                                    <option value="s3"><?= __('vocabulary.multi.set_status_3') ?></option>
+                                    <option value="s4"><?= __('vocabulary.multi.set_status_4') ?></option>
+                                    <option value="s5"><?= __('vocabulary.multi.set_status_5') ?></option>
+                                    <option value="s98"><?= __('vocabulary.multi.set_status_ignored') ?></option>
+                                    <option value="s99"><?= __('vocabulary.multi.set_status_well_known') ?></option>
+                                    <option value="spl1"><?= __('vocabulary.multi.increment_status') ?></option>
+                                    <option value="smi1"><?= __('vocabulary.multi.decrement_status') ?></option>
+                                    <option value="today"><?= __('vocabulary.multi.set_today') ?></option>
                                 </optgroup>
-                                <optgroup label="Edits">
-                                    <option value="lower">Set to Lowercase</option>
-                                    <option value="cap">Capitalize</option>
-                                    <option value="delsent">Clear Sentences</option>
-                                    <option value="addtag">Add Tag</option>
-                                    <option value="deltag">Remove Tag</option>
+                                <optgroup label="<?= $grpEdits ?>">
+                                    <option value="lower"><?= __('vocabulary.multi.set_lowercase') ?></option>
+                                    <option value="cap"><?= __('vocabulary.multi.capitalize') ?></option>
+                                    <option value="delsent"><?= __('vocabulary.multi.clear_sentences') ?></option>
+                                    <option value="addtag"><?= __('vocabulary.multi.add_tag') ?></option>
+                                    <option value="deltag"><?= __('vocabulary.multi.remove_tag') ?></option>
                                 </optgroup>
-                                <optgroup label="Export">
-                                    <option value="exp">Export (Anki)</option>
-                                    <option value="exptsv">Export (TSV)</option>
+                                <optgroup label="<?= $grpExport ?>">
+                                    <option value="exp"><?= __('vocabulary.multi.export_anki') ?></option>
+                                    <option value="exptsv"><?= __('vocabulary.multi.export_tsv') ?></option>
                                 </optgroup>
-                                <optgroup label="Other">
-                                    <option value="review">Review Selection</option>
+                                <optgroup label="<?= $grpOther ?>">
+                                    <option value="review"><?= __('vocabulary.multi.review_selection') ?></option>
                                 </optgroup>
-                                <optgroup label="Danger Zone">
-                                    <option value="del">Delete Selected</option>
+                                <optgroup label="<?= $grpDanger ?>">
+                                    <option value="del"><?= __('vocabulary.multi.delete_selected') ?></option>
                                 </optgroup>
                             </select>
                         </div>
@@ -361,21 +398,24 @@ echo PageLayoutHelper::buildActionCard([
         <table class="table is-striped is-hoverable is-fullwidth">
             <thead>
                 <tr>
-                    <th class="has-text-centered" style="width: 3em;">Mark</th>
-                    <th class="has-text-centered" style="width: 3em;">Act.</th>
-                    <th>Term</th>
-                    <th x-show="columns.romanization">Romanization</th>
-                    <th x-show="columns.translation">Translation</th>
-                    <th x-show="columns.tags">Tags</th>
-                    <th class="has-text-centered" style="width: 6em;" x-show="columns.sentence">Sentence</th>
-                    <th class="has-text-centered" style="width: 5em;" x-show="columns.status">Status</th>
-                    <th class="has-text-centered" style="width: 5em;" x-show="columns.score">Score</th>
+                    <th class="has-text-centered" style="width: 3em;"><?= __('vocabulary.common.mark') ?></th>
+                    <th class="has-text-centered" style="width: 3em;"><?= __('vocabulary.common.action_short') ?></th>
+                    <th><?= __('vocabulary.list.col_term') ?></th>
+                    <th x-show="columns.romanization"><?= __('vocabulary.list.col_romanization') ?></th>
+                    <th x-show="columns.translation"><?= __('vocabulary.list.col_translation') ?></th>
+                    <th x-show="columns.tags"><?= __('vocabulary.list.col_tags') ?></th>
+                    <th class="has-text-centered" style="width: 6em;" x-show="columns.sentence">
+                        <?= __('vocabulary.list.col_sentence') ?></th>
+                    <th class="has-text-centered" style="width: 5em;" x-show="columns.status">
+                        <?= __('vocabulary.list.col_status') ?></th>
+                    <th class="has-text-centered" style="width: 5em;" x-show="columns.score">
+                        <?= __('vocabulary.list.col_score') ?></th>
                     <th
                         class="has-text-centered"
                         style="width: 5em;"
                         x-show="filters.sort === 7"
-                        title="Word Count in Active Texts"
-                    >WCnt</th>
+                        title="<?= $titleWcnt ?>"
+                    ><?= __('vocabulary.list.col_word_count') ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -395,12 +435,12 @@ echo PageLayoutHelper::buildActionCard([
                                 <a
                                     :href="'/words/' + word.id + '/edit'"
                                     class="button is-small is-ghost"
-                                    title="Edit"
+                                    title="<?= $titleEdit ?>"
                                 >
                                     <?php
                                     echo IconHelper::render(
                                         'file-pen-line',
-                                        ['title' => 'Edit', 'alt' => 'Edit']
+                                        ['title' => __('vocabulary.common.edit'), 'alt' => __('vocabulary.common.edit')]
                                     );
                                     ?>
                                 </a>
@@ -428,10 +468,14 @@ echo PageLayoutHelper::buildActionCard([
                                     <div class="buttons are-small mt-1">
                                         <button type="button" class="button is-small is-success"
                                             @click="saveEdit()" :disabled="editSaving">
-                                            <?php echo IconHelper::render('check', ['alt' => 'Save']); ?>
+                                            <?php
+                                            echo IconHelper::render('check', ['alt' => __('vocabulary.common.save')]);
+                                            ?>
                                         </button>
                                         <button type="button" class="button is-small" @click="cancelEdit()">
-                                            <?php echo IconHelper::render('x', ['alt' => 'Cancel']); ?>
+                                            <?php
+                                            echo IconHelper::render('x', ['alt' => __('vocabulary.common.cancel')]);
+                                            ?>
                                         </button>
                                     </div>
                                 </span>
@@ -457,10 +501,14 @@ echo PageLayoutHelper::buildActionCard([
                                     <div class="buttons are-small mt-1">
                                         <button type="button" class="button is-small is-success"
                                             @click="saveEdit()" :disabled="editSaving">
-                                            <?php echo IconHelper::render('check', ['alt' => 'Save']); ?>
+                                            <?php
+                                            echo IconHelper::render('check', ['alt' => __('vocabulary.common.save')]);
+                                            ?>
                                         </button>
                                         <button type="button" class="button is-small" @click="cancelEdit()">
-                                            <?php echo IconHelper::render('x', ['alt' => 'Cancel']); ?>
+                                            <?php
+                                            echo IconHelper::render('x', ['alt' => __('vocabulary.common.cancel')]);
+                                            ?>
                                         </button>
                                     </div>
                                 </span>
@@ -481,12 +529,14 @@ echo PageLayoutHelper::buildActionCard([
                         <td class="has-text-centered" x-show="columns.sentence">
                             <template x-if="word.sentenceOk">
                                 <span class="has-text-success" :title="word.sentence">
-                                    <?php echo IconHelper::render('circle-check', ['alt' => 'Yes']); ?>
+                                    <?php
+                                    echo IconHelper::render('circle-check', ['alt' => __('vocabulary.list.yes')]);
+                                    ?>
                                 </span>
                             </template>
                             <template x-if="!word.sentenceOk">
-                                <span class="has-text-danger" title="No valid sentence">
-                                    <?php echo IconHelper::render('circle-x', ['alt' => 'No']); ?>
+                                <span class="has-text-danger" title="<?= $titleNoSent ?>">
+                                    <?php echo IconHelper::render('circle-x', ['alt' => __('vocabulary.list.no')]); ?>
                                 </span>
                             </template>
                         </td>
@@ -586,12 +636,12 @@ echo PageLayoutHelper::buildActionCard([
                                         class="button is-small is-success"
                                         @click="saveEdit()"
                                         :disabled="editSaving"
-                                    >Save</button>
+                                    ><?= __('vocabulary.common.save') ?></button>
                                     <button
                                         type="button"
                                         class="button is-small"
                                         @click="cancelEdit()"
-                                    >Cancel</button>
+                                    ><?= __('vocabulary.common.cancel') ?></button>
                                 </div>
                             </span>
                         </template>
@@ -609,13 +659,18 @@ echo PageLayoutHelper::buildActionCard([
                             <span x-show="word.tags" class="tag is-light" x-text="word.tags"></span>
                             <template x-if="columns.sentence && word.sentenceOk">
                                 <span class="tag is-success is-light" :title="word.sentence">
-                                    <?php echo IconHelper::render('message-square', ['alt' => 'Has sentence']); ?>
+                                    <?php
+                                    $altHasSent = __('vocabulary.list.has_sentence');
+                                    echo IconHelper::render('message-square', ['alt' => $altHasSent]);
+                                    ?>
                                 </span>
                             </template>
                         </div>
                         <div class="buttons are-small">
                             <a :href="'/words/' + word.id + '/edit'" class="button is-small is-info is-light">
-                                <?php echo IconHelper::render('file-pen-line', ['alt' => 'Edit']); ?>
+                                <?php
+                                echo IconHelper::render('file-pen-line', ['alt' => __('vocabulary.common.edit')]);
+                                ?>
                             </a>
                         </div>
                     </div>
@@ -641,15 +696,15 @@ echo PageLayoutHelper::buildActionCard([
                             class="button is-small"
                             :disabled="isFirstPage()"
                             @click="goToPage(1)"
-                            title="First page">
-                        <?php echo IconHelper::render('chevrons-left', ['alt' => 'First']); ?>
+                            title="<?= $titleFirstPage ?>">
+                        <?php echo IconHelper::render('chevrons-left', ['alt' => __('vocabulary.list.first')]); ?>
                     </button>
                     <button type="button"
                             class="button is-small"
                             :disabled="isFirstPage()"
                             @click="goToPrevPage()"
-                            title="Previous page">
-                        <?php echo IconHelper::render('chevron-left', ['alt' => 'Previous']); ?>
+                            title="<?= $titlePrevPage ?>">
+                        <?php echo IconHelper::render('chevron-left', ['alt' => __('vocabulary.list.previous')]); ?>
                     </button>
                     <span
                         class="button is-static is-small"
@@ -659,15 +714,15 @@ echo PageLayoutHelper::buildActionCard([
                             class="button is-small"
                             :disabled="isLastPage()"
                             @click="goToNextPage()"
-                            title="Next page">
-                        <?php echo IconHelper::render('chevron-right', ['alt' => 'Next']); ?>
+                            title="<?= $titleNextPage ?>">
+                        <?php echo IconHelper::render('chevron-right', ['alt' => __('vocabulary.list.next')]); ?>
                     </button>
                     <button type="button"
                             class="button is-small"
                             :disabled="isLastPage()"
                             @click="goToLastPage()"
-                            title="Last page">
-                        <?php echo IconHelper::render('chevrons-right', ['alt' => 'Last']); ?>
+                            title="<?= $titleLastPage ?>">
+                        <?php echo IconHelper::render('chevrons-right', ['alt' => __('vocabulary.list.last')]); ?>
                     </button>
                 </div>
             </div>

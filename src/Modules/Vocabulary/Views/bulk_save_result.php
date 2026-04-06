@@ -40,8 +40,12 @@ assert(is_array($newWords));
 assert(is_string($todoContent));
 
 ?>
+<?php
+$loadingAlt = __('vocabulary.common.loading');
+?>
 <p id="displ_message">
-    <?php echo IconHelper::render('loader-2', ['class' => 'icon-spin', 'alt' => 'Loading...']); ?> Updating Texts
+    <?php echo IconHelper::render('loader-2', ['class' => 'icon-spin', 'alt' => $loadingAlt]); ?>
+    <?= __('vocabulary.result.updating_texts') ?>
 </p>
 
 <script type="application/json" data-lwt-bulk-save-result-config>

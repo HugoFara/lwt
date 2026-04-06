@@ -28,6 +28,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 // Validate injected variables
 assert(isset($email) && is_string($email));
 $error = isset($error) && is_string($error) ? $error : null;
+
+$t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
 ?>
 <section class="section">
     <div class="container">
@@ -35,10 +37,8 @@ $error = isset($error) && is_string($error) ? $error : null;
             <div class="column is-5-tablet is-4-desktop">
                 <div class="box">
                     <div class="has-text-centered mb-5">
-                        <h1 class="title is-4">Link Google Account</h1>
-                        <p class="subtitle is-6 has-text-grey">
-                            An account already exists with this email
-                        </p>
+                        <h1 class="title is-4"><?php echo $t('google_link.title'); ?></h1>
+                        <p class="subtitle is-6 has-text-grey"><?php echo $t('google_link.subtitle'); ?></p>
                     </div>
 
                     <?php if ($error !== null) : ?>
@@ -50,26 +50,29 @@ $error = isset($error) && is_string($error) ? $error : null;
 
                     <div class="notification is-info is-light">
                         <p>
-                            An LWT account already exists for
-                            <strong><?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?></strong>.
+                            <?php
+                            echo __('user.google_link.exists_html', [
+                                'email' => htmlspecialchars($email, ENT_QUOTES, 'UTF-8'),
+                            ]);
+                            ?>
                         </p>
-                        <p class="mt-2">
-                            Enter your password to link your Google account, or cancel to go back.
-                        </p>
+                        <p class="mt-2"><?php echo $t('google_link.enter_password'); ?></p>
                     </div>
 
                     <form method="POST" action="/google/link-confirm">
                         <?php echo FormHelper::csrfField(); ?>
 
                         <div class="field">
-                            <label class="label" for="password">Password</label>
+                            <label class="label" for="password">
+                                <?php echo $t('google_link.password_label'); ?>
+                            </label>
                             <div class="control has-icons-left">
                                 <input
                                     type="password"
                                     id="password"
                                     name="password"
                                     class="input"
-                                    placeholder="Enter your LWT password"
+                                    placeholder="<?php echo $t('google_link.password_placeholder'); ?>"
                                     required
                                     autofocus
                                 >
@@ -82,12 +85,12 @@ $error = isset($error) && is_string($error) ? $error : null;
                         <div class="field is-grouped">
                             <div class="control is-expanded">
                                 <button type="submit" name="action" value="link" class="button is-primary is-fullwidth">
-                                    Link Account
+                                    <?php echo $t('google_link.link_button'); ?>
                                 </button>
                             </div>
                             <div class="control">
                                 <button type="submit" name="action" value="cancel" class="button is-light">
-                                    Cancel
+                                    <?php echo $t('google_link.cancel_button'); ?>
                                 </button>
                             </div>
                         </div>
@@ -95,8 +98,8 @@ $error = isset($error) && is_string($error) ? $error : null;
 
                     <hr>
                     <p class="has-text-centered is-size-7 has-text-grey">
-                        Don't remember your password?
-                        <a href="/password/forgot">Reset it here</a>
+                        <?php echo $t('google_link.forgot_prompt'); ?>
+                        <a href="/password/forgot"><?php echo $t('google_link.reset_link'); ?></a>
                     </p>
                 </div>
             </div>

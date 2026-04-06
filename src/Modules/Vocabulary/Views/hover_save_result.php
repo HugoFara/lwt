@@ -39,9 +39,10 @@ assert(is_int($textId));
 assert(is_string($todoContent));
 
 ?>
-<p>Status: <?php echo StatusHelper::getColoredMessage($status); ?></p><br />
+<p><?= __('vocabulary.result.status_label') ?> <?php echo StatusHelper::getColoredMessage($status); ?></p><br />
 <?php if ($translation != '*') : ?>
-<p>Translation: <b><?php echo htmlspecialchars($translation, ENT_QUOTES, 'UTF-8'); ?></b></p>
+<p><?= __('vocabulary.result.translation_label') ?> <b><?php
+echo htmlspecialchars($translation, ENT_QUOTES, 'UTF-8'); ?></b></p>
 <?php endif; ?>
 
 <script type="application/json" data-lwt-hover-save-result-config>

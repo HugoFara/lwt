@@ -29,13 +29,28 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  * @var int $currentLang Current language ID (for pre-selection)
  */
 
+$esc = static fn(string $key): string => htmlspecialchars(__($key), ENT_QUOTES, 'UTF-8');
+$titleRequired = $esc('feed.new_required');
+$phName = $esc('feed.new_placeholder_name');
+$phUrl = $esc('feed.new_placeholder_url');
+$phArticleSection = $esc('feed.new_placeholder_article_section');
+$phFilterTags = $esc('feed.new_placeholder_filter_tags');
+$phCharset = $esc('feed.new_opt_charset_placeholder');
+$phAutoTag = $esc('feed.new_opt_auto_tag_placeholder');
+$phSource = $esc('feed.new_opt_source_placeholder');
+
 $actions = [
-    ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
-    ['url' => '/feeds/new', 'label' => 'New Feed Wizard', 'icon' => 'wand-2', 'class' => 'is-info']
+    ['url' => '/feeds?page=1', 'label' => __('feed.new_action_feeds'), 'icon' => 'list'],
+    [
+        'url' => '/feeds/new',
+        'label' => __('feed.new_action_wizard'),
+        'icon' => 'wand-2',
+        'class' => 'is-info',
+    ],
 ];
 
 ?>
-<h2 class="title is-4">New Feed</h2>
+<h2 class="title is-4"><?= __('feed.new_title') ?></h2>
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
@@ -67,7 +82,7 @@ $actions = [
     <div class="box">
         <!-- Language -->
         <div class="field">
-            <label class="label" for="NfLgID">Language</label>
+            <label class="label" for="NfLgID"><?= __('feed.new_label_language') ?></label>
             <div class="control">
                 <div class="select is-fullwidth">
                     <select name="NfLgID" id="NfLgID">
@@ -86,15 +101,15 @@ $actions = [
         <!-- Name -->
         <div class="field">
             <label class="label" for="NfName">
-                Name
-                <span class="has-text-danger" title="Required">*</span>
+                <?= __('feed.new_label_name') ?>
+                <span class="has-text-danger" title="<?= $titleRequired ?>">*</span>
             </label>
             <div class="control">
                 <input class="input notempty"
                        type="text"
                        name="NfName"
                        id="NfName"
-                       placeholder="Feed name"
+                       placeholder="<?= $phName ?>"
                        required />
             </div>
         </div>
@@ -102,15 +117,15 @@ $actions = [
         <!-- Newsfeed URL -->
         <div class="field">
             <label class="label" for="NfSourceURI">
-                Newsfeed URL
-                <span class="has-text-danger" title="Required">*</span>
+                <?= __('feed.new_label_url') ?>
+                <span class="has-text-danger" title="<?= $titleRequired ?>">*</span>
             </label>
             <div class="control">
                 <input class="input notempty"
                        type="url"
                        name="NfSourceURI"
                        id="NfSourceURI"
-                       placeholder="https://example.com/feed.xml"
+                       placeholder="<?= $phUrl ?>"
                        required />
             </div>
         </div>
@@ -118,50 +133,50 @@ $actions = [
         <!-- Article Section -->
         <div class="field">
             <label class="label" for="NfArticleSectionTags">
-                Article Section
-                <span class="has-text-danger" title="Required">*</span>
+                <?= __('feed.new_label_article_section') ?>
+                <span class="has-text-danger" title="<?= $titleRequired ?>">*</span>
             </label>
             <div class="control">
                 <input class="input notempty"
                        type="text"
                        name="NfArticleSectionTags"
                        id="NfArticleSectionTags"
-                       placeholder="CSS selector for article content"
+                       placeholder="<?= $phArticleSection ?>"
                        required />
             </div>
         </div>
 
         <!-- Filter Tags -->
         <div class="field">
-            <label class="label" for="NfFilterTags">Filter Tags</label>
+            <label class="label" for="NfFilterTags"><?= __('feed.new_label_filter_tags') ?></label>
             <div class="control">
                 <input class="input"
                        type="text"
                        name="NfFilterTags"
                        id="NfFilterTags"
-                       placeholder="Optional: CSS selectors to filter out" />
+                       placeholder="<?= $phFilterTags ?>" />
             </div>
         </div>
 
         <!-- Options Section -->
         <div class="field">
-            <label class="label">Options</label>
+            <label class="label"><?= __('feed.new_label_options') ?></label>
             <div class="box" style="background-color: var(--bulma-scheme-main-bis);">
                 <div class="columns is-multiline">
                     <!-- Edit Text -->
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="edit_text" x-model="editText" checked />
-                            <strong>Review before importing</strong>
+                            <strong><?= __('feed.new_opt_review_before_importing') ?></strong>
                         </label>
-                        <p class="help">Show the article text for editing before saving it</p>
+                        <p class="help"><?= __('feed.new_opt_review_help') ?></p>
                     </div>
 
                     <!-- Auto Update -->
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_autoupdate" x-model="autoUpdate" />
-                            <strong>Auto-refresh feed</strong>
+                            <strong><?= __('feed.new_opt_auto_refresh') ?></strong>
                         </label>
                         <div class="field has-addons mt-2" x-show="autoUpdate" x-transition>
                             <div class="control">
@@ -179,9 +194,9 @@ $actions = [
                                 <div class="select is-small">
                                     <select name="autoupdate_unit" x-model="autoUpdateUnit"
                                         :disabled="!autoUpdate">
-                                        <option value="h">Hour(s)</option>
-                                        <option value="d">Day(s)</option>
-                                        <option value="w">Week(s)</option>
+                                        <option value="h"><?= __('feed.new_opt_unit_hours') ?></option>
+                                        <option value="d"><?= __('feed.new_opt_unit_days') ?></option>
+                                        <option value="w"><?= __('feed.new_opt_unit_weeks') ?></option>
                                     </select>
                                 </div>
                             </div>
@@ -192,9 +207,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_max_links" x-model="maxLinks" />
-                            <strong>Limit stored articles</strong>
+                            <strong><?= __('feed.new_opt_limit_articles') ?></strong>
                         </label>
-                        <p class="help">Maximum number of article links to keep</p>
+                        <p class="help"><?= __('feed.new_opt_limit_articles_help') ?></p>
                         <div class="control mt-2" x-show="maxLinks" x-transition>
                             <input class="input is-small posintnumber maxint_300"
                                    :class="maxLinks ? 'notempty' : ''"
@@ -213,9 +228,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_charset" x-model="charset" />
-                            <strong>Character encoding</strong>
+                            <strong><?= __('feed.new_opt_charset') ?></strong>
                         </label>
-                        <p class="help">Override the feed's character encoding (e.g. UTF-8)</p>
+                        <p class="help"><?= __('feed.new_opt_charset_help') ?></p>
                         <div class="control mt-2" x-show="charset" x-transition>
                             <input class="input is-small"
                                    :class="charset ? 'notempty' : ''"
@@ -223,7 +238,7 @@ $actions = [
                                    name="charset"
                                    data_info="Charset"
                                    x-model="charsetValue"
-                                   placeholder="e.g., UTF-8"
+                                   placeholder="<?= $phCharset ?>"
                                    :disabled="!charset" />
                         </div>
                     </div>
@@ -232,9 +247,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_max_texts" x-model="maxTexts" />
-                            <strong>Limit imported texts</strong>
+                            <strong><?= __('feed.new_opt_limit_texts') ?></strong>
                         </label>
-                        <p class="help">Maximum number of texts to import at once</p>
+                        <p class="help"><?= __('feed.new_opt_limit_texts_help') ?></p>
                         <div class="control mt-2" x-show="maxTexts" x-transition>
                             <input class="input is-small posintnumber maxint_30"
                                    :class="maxTexts ? 'notempty' : ''"
@@ -253,9 +268,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_tag" x-model="tag" />
-                            <strong>Auto-tag imported texts</strong>
+                            <strong><?= __('feed.new_opt_auto_tag') ?></strong>
                         </label>
-                        <p class="help">Automatically add a tag to every text imported from this feed</p>
+                        <p class="help"><?= __('feed.new_opt_auto_tag_help') ?></p>
                         <div class="control mt-2" x-show="tag" x-transition>
                             <input class="input is-small"
                                    :class="tag ? 'notempty' : ''"
@@ -263,7 +278,7 @@ $actions = [
                                    name="tag"
                                    data_info="Tag"
                                    x-model="tagValue"
-                                   placeholder="Tag name"
+                                   placeholder="<?= $phAutoTag ?>"
                                    :disabled="!tag" />
                         </div>
                     </div>
@@ -272,9 +287,9 @@ $actions = [
                     <div class="column is-full">
                         <label class="checkbox">
                             <input type="checkbox" name="c_article_source" x-model="articleSource" />
-                            <strong>Source attribution</strong>
+                            <strong><?= __('feed.new_opt_source') ?></strong>
                         </label>
-                        <p class="help">Identifier shown on imported texts to track their origin</p>
+                        <p class="help"><?= __('feed.new_opt_source_help') ?></p>
                         <div class="control mt-2" x-show="articleSource" x-transition>
                             <input class="input is-small"
                                    :class="articleSource ? 'notempty' : ''"
@@ -282,7 +297,7 @@ $actions = [
                                    name="article_source"
                                    data_info="Article Source"
                                    x-model="articleSourceValue"
-                                   placeholder="Source identifier"
+                                   placeholder="<?= $phSource ?>"
                                    :disabled="!articleSource" />
                         </div>
                     </div>
@@ -298,7 +313,7 @@ $actions = [
                     class="button is-light"
                     data-action="navigate"
                     data-url="/feeds/manage">
-                Cancel
+                <?= __('feed.new_cancel') ?>
             </button>
         </div>
         <div class="control">
@@ -306,7 +321,7 @@ $actions = [
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
-                <span>Save</span>
+                <span><?= __('feed.new_save') ?></span>
             </button>
         </div>
     </div>

@@ -34,11 +34,22 @@ assert(is_int($recno));
 
 // Action buttons for navigation
 $actions = [
-    ['url' => '/word/upload', 'label' => 'Import More Terms', 'icon' => 'file-up', 'class' => 'is-primary'],
-    ['url' => '/words', 'label' => 'My Terms', 'icon' => 'list'],
-    ['url' => '/', 'label' => 'Home', 'icon' => 'home']
+    [
+        'url' => '/word/upload',
+        'label' => __('vocabulary.actions.import_more_terms'),
+        'icon' => 'file-up',
+        'class' => 'is-primary'
+    ],
+    ['url' => '/words', 'label' => __('vocabulary.actions.my_terms'), 'icon' => 'list'],
+    ['url' => '/', 'label' => __('vocabulary.actions.home'), 'icon' => 'home']
 ];
 echo PageLayoutHelper::buildActionCard($actions);
+
+$termsImportedLabel = $recno == 1
+    ? __('vocabulary.upload.terms_imported_one')
+    : __('vocabulary.upload.terms_imported_other');
+$titleSentence = htmlspecialchars(__('vocabulary.common.sentence'), ENT_QUOTES, 'UTF-8');
+$colStatus = __('vocabulary.upload.results.status');
 ?>
 
 <!-- Import Result Feedback -->
@@ -50,9 +61,9 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <?php echo IconHelper::render('check', ['alt' => 'Success']); ?>
             </span>
             <span>
-                <strong>Import successful!</strong>
+                <strong><?= __('vocabulary.upload.import_successful') ?></strong>
                 <span id="recno"><?php echo $recno; ?></span>
-                term<?php echo ($recno == 1 ? '' : 's'); ?> imported.
+                <?= $termsImportedLabel ?>
             </span>
         </span>
     </div>
@@ -65,8 +76,8 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <?php echo IconHelper::render('alert-triangle', ['alt' => 'Warning']); ?>
             </span>
             <span>
-                <strong>No terms were imported.</strong>
-                This could mean all terms already exist or the input was empty.
+                <strong><?= __('vocabulary.upload.no_terms_warning') ?></strong>
+                <?= __('vocabulary.upload.no_terms_reason') ?>
             </span>
         </span>
     </div>
@@ -83,7 +94,7 @@ echo PageLayoutHelper::buildActionCard($actions);
     <!-- No terms message -->
     <template x-if="!hasTerms && !isLoading">
         <p class="has-text-centered has-text-grey py-4">
-            No terms imported.
+            <?= __('vocabulary.upload.no_terms_imported') ?>
         </p>
     </template>
 
@@ -121,7 +132,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                                 </span>
                             </span>
                             <span class="pagination-list">
-                                <span class="mr-2">Page</span>
+                                <span class="mr-2"><?= __('vocabulary.upload.results.page') ?></span>
                                 <template x-if="totalPages <= 1">
                                     <span>1</span>
                                 </template>
@@ -136,7 +147,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                                         </template>
                                     </select>
                                 </template>
-                                <span class="ml-1 mr-1">of</span>
+                                <span class="ml-1 mr-1"><?= __('vocabulary.upload.results.of') ?></span>
                                 <span x-text="totalPages"></span>
                             </span>
                             <span class="pagination-next" x-show="currentPage < totalPages">
@@ -157,11 +168,12 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <table class="table is-striped is-hoverable is-fullwidth sortable">
                     <thead>
                         <tr>
-                            <th class="is-clickable">Term / Romanization</th>
-                            <th class="is-clickable">Translation</th>
-                            <th>Tags</th>
-                            <th class="has-text-centered" title="Sentence">Se.</th>
-                            <th class="has-text-centered is-clickable">Status</th>
+                            <th class="is-clickable"><?= __('vocabulary.upload.results.term_romanization') ?></th>
+                            <th class="is-clickable"><?= __('vocabulary.upload.results.translation') ?></th>
+                            <th><?= __('vocabulary.upload.results.tags') ?></th>
+                            <th class="has-text-centered" title="<?= $titleSentence ?>">
+                                <?= __('vocabulary.upload.results.sentence_short') ?></th>
+                            <th class="has-text-centered is-clickable"><?= $colStatus ?></th>
                         </tr>
                     </thead>
                     <tbody x-effect="setTableBodyHtml($el)">

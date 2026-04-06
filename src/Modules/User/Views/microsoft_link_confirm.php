@@ -24,21 +24,24 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 // Validate injected variables
 assert(isset($email) && is_string($email));
 $error = isset($error) && is_string($error) ? $error : null;
+
+$t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
 ?>
 <div class="container">
     <div class="columns is-centered">
         <div class="column is-half">
             <div class="box mt-6">
-                <h1 class="title is-4 has-text-centered">Link Microsoft Account</h1>
+                <h1 class="title is-4 has-text-centered"><?php echo $t('microsoft_link.title'); ?></h1>
 
                 <div class="notification is-info is-light">
                     <p>
-                        An account with the email <strong><?= htmlspecialchars($email) ?></strong>
-                        already exists.
+                        <?php
+                        echo __('user.microsoft_link.exists_html', [
+                            'email' => htmlspecialchars($email, ENT_QUOTES, 'UTF-8'),
+                        ]);
+                        ?>
                     </p>
-                    <p class="mt-2">
-                        Enter your password to link your Microsoft account to your existing LWT account.
-                    </p>
+                    <p class="mt-2"><?php echo $t('microsoft_link.enter_password'); ?></p>
                 </div>
 
                 <?php if ($error !== null) : ?>
@@ -51,7 +54,9 @@ $error = isset($error) && is_string($error) ? $error : null;
                     <?= FormHelper::csrfField() ?>
 
                     <div class="field">
-                        <label class="label" for="password">Password</label>
+                        <label class="label" for="password">
+                            <?php echo $t('microsoft_link.password_label'); ?>
+                        </label>
                         <div class="control">
                             <input
                                 class="input"
@@ -60,7 +65,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                                 name="password"
                                 required
                                 autofocus
-                                placeholder="Enter your LWT password"
+                                placeholder="<?php echo $t('microsoft_link.password_placeholder'); ?>"
                             >
                         </div>
                     </div>
@@ -73,7 +78,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                                 value="link"
                                 class="button is-primary"
                             >
-                                Link Account
+                                <?php echo $t('microsoft_link.link_button'); ?>
                             </button>
                         </div>
                         <div class="control">
@@ -83,7 +88,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                                 value="cancel"
                                 class="button is-light"
                             >
-                                Cancel
+                                <?php echo $t('microsoft_link.cancel_button'); ?>
                             </button>
                         </div>
                     </div>
@@ -92,7 +97,7 @@ $error = isset($error) && is_string($error) ? $error : null;
                 <hr>
 
                 <p class="has-text-centered has-text-grey">
-                    <a href="/login">Back to login</a>
+                    <a href="/login"><?php echo $t('microsoft_link.back_to_login'); ?></a>
                 </p>
             </div>
         </div>

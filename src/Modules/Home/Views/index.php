@@ -64,7 +64,7 @@ $base = UrlUtilities::getBasePath();
     <button
         type="button"
         class="delete"
-        aria-label="<?= htmlspecialchars(__('home.dismiss') ?? 'Dismiss', ENT_QUOTES, 'UTF-8') ?>"
+        aria-label="<?= htmlspecialchars(__('home.dismiss'), ENT_QUOTES, 'UTF-8') ?>"
         @click="dismissUpdateWarning()"
     ></button>
     <p>

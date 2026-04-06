@@ -37,9 +37,9 @@ assert(is_string($todoContent));
 $hex = StringUtils::toClassName($termLc);
 ?>
 <?php if ($deleted) : ?>
-<p>OK, term deleted.</p>
+<p><?= __('vocabulary.result.term_deleted') ?></p>
 <?php else : ?>
-<p>Term not found or already deleted.</p>
+<p><?= __('vocabulary.result.term_not_found') ?></p>
 <?php endif; ?>
 
 <script type="application/json" data-lwt-delete-result-config>

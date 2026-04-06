@@ -37,19 +37,19 @@ assert(is_string($todoContent));
 <?php
 if ($status == 98) {
     if ($count > 1) {
-        echo "Ignored all $count words!";
+        echo __('vocabulary.result.ignored_all', ['count' => $count]);
     } elseif ($count == 1) {
-        echo "Ignored 1 word.";
+        echo __('vocabulary.result.ignored_one');
     } else {
-        echo "No new word ignored!";
+        echo __('vocabulary.result.ignored_none');
     }
 } else {
     if ($count > 1) {
-        echo "You know all $count words well!";
+        echo __('vocabulary.result.know_all', ['count' => $count]);
     } elseif ($count == 1) {
-        echo "1 new word added as known";
+        echo __('vocabulary.result.know_one');
     } else {
-        echo "No new known word added!";
+        echo __('vocabulary.result.know_none');
     }
 }
 ?>

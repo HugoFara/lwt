@@ -42,22 +42,27 @@ assert(isset($newScore) && is_int($newScore));
 
 PageLayoutHelper::renderPageStart("Term: " . $wordText, false);
 
+$newStatusBadge = StatusHelper::buildColoredMessage(
+    $newStatus,
+    StatusHelper::getName($newStatus),
+    StatusHelper::getAbbr($newStatus)
+);
+
 if ($oldStatus == $newStatus) {
-    echo '<p>Status ' . StatusHelper::buildColoredMessage(
-        $newStatus,
-        StatusHelper::getName($newStatus),
-        StatusHelper::getAbbr($newStatus)
-    ) . ' not changed.</p>';
+    echo '<p>' . __('review.status.unchanged', ['status' => $newStatusBadge]) . '</p>';
 } else {
-    echo '<p>Status changed from ' . StatusHelper::buildColoredMessage(
+    $oldStatusBadge = StatusHelper::buildColoredMessage(
         $oldStatus,
         StatusHelper::getName($oldStatus),
         StatusHelper::getAbbr($oldStatus)
-    ) . ' to ' . StatusHelper::buildColoredMessage(
-        $newStatus,
-        StatusHelper::getName($newStatus),
-        StatusHelper::getAbbr($newStatus)
-    ) . '.</p>';
+    );
+    echo '<p>' . __('review.status.changed', [
+        'old' => $oldStatusBadge,
+        'new' => $newStatusBadge,
+    ]) . '</p>';
 }
 
-echo "<p>Old score was $oldScore, new score is now $newScore.</p>";
+echo '<p>' . __('review.status.score_summary', [
+    'old' => (string) $oldScore,
+    'new' => (string) $newScore,
+]) . '</p>';

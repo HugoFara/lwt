@@ -70,10 +70,19 @@ $scrdirTyped = $scrdir;
 // Build actions only for edit mode (not new text)
 $actions = [];
 if (!$isNew) {
-    $actions[] = ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'];
-    $actions[] = ['url' => '/book/import', 'label' => 'Import EPUB', 'icon' => 'book'];
-    $actions[] = ['url' => '/books', 'label' => 'My Books', 'icon' => 'library'];
-    $actions[] = ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'];
+    $actions[] = [
+        'url' => '/texts/new',
+        'label' => __('text.list.new_text'),
+        'icon' => 'circle-plus',
+        'class' => 'is-primary'
+    ];
+    $actions[] = ['url' => '/book/import', 'label' => __('text.new.import_epub'), 'icon' => 'book'];
+    $actions[] = ['url' => '/books', 'label' => __('text.new.my_books'), 'icon' => 'library'];
+    $actions[] = [
+        'url' => '/texts?query=&page=1',
+        'label' => __('text.list.active_texts'),
+        'icon' => 'book-open'
+    ];
 }
 
 ?>
@@ -83,9 +92,12 @@ if (!$isNew) {
 
 <?php if (!$isNew) : ?>
 <h2 class="title is-4 is-flex is-align-items-center">
-    Edit Text
+    <?= __e('text.edit.heading') ?>
     <a target="_blank" href="docs/info.html#howtotext" class="ml-2">
-        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
+        <?php echo IconHelper::render(
+            'help-circle',
+            ['title' => __('text.common.help'), 'alt' => __('text.common.help')]
+        ); ?>
     </a>
 </h2>
     <?php echo PageLayoutHelper::buildActionCard($actions); ?>
@@ -120,7 +132,10 @@ if (!$isNew) {
                         Where to find texts?
                     </h4>
                     <span class="icon">
-                        <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
+                        <i
+                            :class="open ? 'rotate-180' : ''"
+                            class="transition-transform"
+                            data-lucide="chevron-down"></i>
                     </span>
                 </header>
 
@@ -142,21 +157,36 @@ if (!$isNew) {
                     <h5 class="mb-2">Simplified News (great for learners)</h5>
                     <ul>
                         <li>
-                            <a href="https://www3.nhk.or.jp/news/easy/" target="_blank" rel="noopener">NHK News Web Easy</a>
+                            <a href="https://www3.nhk.or.jp/news/easy/" target="_blank" rel="noopener">
+                                NHK News Web Easy
+                            </a>
                             &mdash; Simplified Japanese news with furigana
                         </li>
                         <li>
-                            <a href="https://www.dw.com/de/deutsch-lernen/nachrichten/s-8030" target="_blank" rel="noopener">DW Langsam gesprochene Nachrichten</a>
+                            <a
+                                href="https://www.dw.com/de/deutsch-lernen/nachrichten/s-8030"
+                                target="_blank"
+                                rel="noopener">DW Langsam gesprochene Nachrichten</a>
                             &mdash; Slow German news with transcripts
                         </li>
                         <li>
-                            <a href="https://savoirs.rfi.fr/fr/apprendre-enseigner/langue-francaise/journal-en-francais-facile" target="_blank" rel="noopener">RFI Journal en fran&ccedil;ais facile</a>
+                            <?php
+                            $rfiUrl = 'https://savoirs.rfi.fr/fr/apprendre-enseigner/langue-francaise/'
+                                . 'journal-en-francais-facile';
+                            ?>
+                            <a href="<?php echo $rfiUrl; ?>" target="_blank" rel="noopener">
+                                RFI Journal en fran&ccedil;ais facile
+                            </a>
                             &mdash; Simple French news with transcripts
                         </li>
                         <li>
-                            <a href="https://learningenglish.voanews.com/" target="_blank" rel="noopener">VOA Learning English</a>
+                            <a href="https://learningenglish.voanews.com/" target="_blank" rel="noopener">
+                                VOA Learning English
+                            </a>
                             &mdash; Slow-spoken English news (also has
-                            <a href="https://learningenglish.voanews.com/rssfeeds" target="_blank" rel="noopener">RSS feeds</a>)
+                            <a href="https://learningenglish.voanews.com/rssfeeds" target="_blank" rel="noopener">
+                                RSS feeds
+                            </a>)
                         </li>
                     </ul>
 
@@ -175,7 +205,9 @@ if (!$isNew) {
                     <h5 class="mb-2">Other Sources</h5>
                     <ul>
                         <li>
-                            <a href="https://simple.wikipedia.org/" target="_blank" rel="noopener">Simple English Wikipedia</a>
+                            <a href="https://simple.wikipedia.org/" target="_blank" rel="noopener">
+                                Simple English Wikipedia
+                            </a>
                             &mdash; Articles in simplified English
                         </li>
                         <li>
@@ -189,7 +221,8 @@ if (!$isNew) {
                     </ul>
 
                     <p class="has-text-grey mt-3">
-                        Tip: Use <strong>Import from URL &rarr; Web Page</strong> above to fetch text directly from any of these sites. Just paste the article URL and click &ldquo;Fetch Content&rdquo;.
+                        Tip: Use <strong>Import from URL &rarr; Web Page</strong> above to fetch text directly
+                        from any of these sites. Just paste the article URL and click &ldquo;Fetch Content&rdquo;.
                     </p>
                 </div>
             </div>
@@ -200,32 +233,54 @@ if (!$isNew) {
             <label class="label is-medium mb-3">How do you want to add your text?</label>
 
             <!-- Source cards -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem;" class="mb-4">
-                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('paste')" @click="selectSource('paste')" style="cursor: pointer;">
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem;"
+                class="mb-4">
+                <div
+                    class="box has-text-centered p-3 is-clickable"
+                    :class="sourceActive('paste')"
+                    @click="selectSource('paste')"
+                    style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
                         <?php echo IconHelper::render('pencil', ['alt' => 'Paste']); ?>
                     </span>
                     <p class="is-size-7 has-text-weight-medium mt-1">Paste Text</p>
                 </div>
-                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('url')" @click="selectSource('url')" style="cursor: pointer;">
+                <div
+                    class="box has-text-centered p-3 is-clickable"
+                    :class="sourceActive('url')"
+                    @click="selectSource('url')"
+                    style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
                         <?php echo IconHelper::render('globe', ['alt' => 'URL']); ?>
                     </span>
                     <p class="is-size-7 has-text-weight-medium mt-1">Web / URL</p>
                 </div>
-                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('file')" @click="selectSource('file')" style="cursor: pointer;">
+                <div
+                    class="box has-text-centered p-3 is-clickable"
+                    :class="sourceActive('file')"
+                    @click="selectSource('file')"
+                    style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
                         <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
                     </span>
                     <p class="is-size-7 has-text-weight-medium mt-1">Upload File</p>
                 </div>
-                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('gutenberg')" @click="selectSource('gutenberg')" style="cursor: pointer;">
+                <div
+                    class="box has-text-centered p-3 is-clickable"
+                    :class="sourceActive('gutenberg')"
+                    @click="selectSource('gutenberg')"
+                    style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
                         <?php echo IconHelper::render('book-open-text', ['alt' => 'Gutenberg']); ?>
                     </span>
                     <p class="is-size-7 has-text-weight-medium mt-1">Gutenberg</p>
                 </div>
-                <div class="box has-text-centered p-3 is-clickable" :class="sourceActive('feeds')" @click="selectSource('feeds')" style="cursor: pointer;">
+                <div
+                    class="box has-text-centered p-3 is-clickable"
+                    :class="sourceActive('feeds')"
+                    @click="selectSource('feeds')"
+                    style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
                         <?php echo IconHelper::render('rss', ['alt' => 'Feeds']); ?>
                     </span>
@@ -267,15 +322,25 @@ if (!$isNew) {
                 <label class="label">Or from the server's media folder</label>
                 <div class="control" id="mediaselect">
                     <?php $mediaJson = json_encode($mediaPaths); ?>
-                    <p class="help mb-2">Files in "../<?php echo htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>/media":</p>
+                    <?php $mediaBase = htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                    <p class="help mb-2">Files in "../<?php echo $mediaBase; ?>/media":</p>
                     <p id="mediaSelectErrorMessage"></p>
-                    <?php echo IconHelper::render('loader-2', ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']); ?>
-                    <select name="Dir" class="input" data-action="media-dir-select" data-target-field="TxAudioURI"></select>
+                    <?php echo IconHelper::render(
+                        'loader-2',
+                        ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']
+                    ); ?>
+                    <select
+                        name="Dir"
+                        class="input"
+                        data-action="media-dir-select"
+                        data-target-field="TxAudioURI"></select>
                     <span class="click" data-action="refresh-media-select">
                         <?php echo IconHelper::render('refresh-cw', ['title' => 'Refresh', 'alt' => 'Refresh']); ?>
                         Refresh
                     </span>
-                    <script type="application/json" data-lwt-media-select-config><?php echo $mediaJson !== false ? $mediaJson : '{}'; ?></script>
+                    <script type="application/json" data-lwt-media-select-config>
+                        <?php echo $mediaJson !== false ? $mediaJson : '{}'; ?>
+                    </script>
                 </div>
             </div>
 
@@ -397,7 +462,10 @@ if (!$isNew) {
                             </button>
                         </div>
                     </div>
-                    <p class="help">Paste any article or web page URL. The main text content will be extracted automatically.</p>
+                    <p class="help">
+                        Paste any article or web page URL.
+                        The main text content will be extracted automatically.
+                    </p>
                     <p id="webpageImportStatus" class="help mt-2"></p>
                 </div>
             </div>
@@ -413,7 +481,10 @@ if (!$isNew) {
                                id="TxMediaURL"
                                placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
                     </div>
-                    <p class="help">YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL. Captions will be imported if available.</p>
+                    <p class="help">
+                        YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL.
+                        Captions will be imported if available.
+                    </p>
                 </div>
 
                 <?php if ($youtubeConfigured) : ?>
@@ -461,7 +532,9 @@ if (!$isNew) {
                 <!-- Loading state -->
                 <div x-show="loading && books.length === 0" class="has-text-centered py-4">
                     <span class="icon is-large has-text-grey-light">
-                        <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+                        <i
+                            data-lucide="loader"
+                            style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
                     </span>
                 </div>
 
@@ -472,10 +545,14 @@ if (!$isNew) {
                 <div x-show="books.length > 0"
                      style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
                     <template x-for="book in books" :key="book.id">
-                        <div class="box p-3" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 160px;">
+                        <div
+                            class="box p-3"
+                            style="display: flex; flex-direction: column;
+                                   justify-content: space-between; min-height: 160px;">
                             <div>
                                 <p class="has-text-weight-semibold is-size-7" x-text="book.title"
-                                   style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"></p>
+                                   style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+                                          -webkit-line-clamp: 2; -webkit-box-orient: vertical;"></p>
                                 <div class="mb-1">
                                     <span x-show="book.difficultyTier"
                                           class="tag is-rounded" style="font-size: 0.65rem;"
@@ -541,7 +618,9 @@ if (!$isNew) {
                 <!-- Loading feeds -->
                 <div x-show="loadingFeeds" class="has-text-centered py-4">
                     <span class="icon is-large has-text-grey-light">
-                        <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+                        <i
+                            data-lucide="loader"
+                            style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
                     </span>
                 </div>
 
@@ -590,7 +669,9 @@ if (!$isNew) {
                     <!-- Loading articles -->
                     <div x-show="loadingArticles" class="has-text-centered py-4">
                         <span class="icon has-text-grey-light">
-                            <i data-lucide="loader" style="width: 24px; height: 24px; animation: spin 1s linear infinite;"></i>
+                            <i
+                                data-lucide="loader"
+                                style="width: 24px; height: 24px; animation: spin 1s linear infinite;"></i>
                         </span>
                     </div>
 
@@ -604,7 +685,9 @@ if (!$isNew) {
                     <div x-show="articles.length > 0">
                         <template x-for="article in articles" :key="article.id">
                             <div class="box p-3 mb-2">
-                                <div class="is-flex is-align-items-start is-justify-content-space-between" style="gap: 0.5rem;">
+                                <div
+                                    class="is-flex is-align-items-start is-justify-content-space-between"
+                                    style="gap: 0.5rem;">
                                     <div style="flex: 1; min-width: 0;">
                                         <p class="has-text-weight-semibold is-size-7" x-text="article.title"
                                            style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
@@ -624,14 +707,18 @@ if (!$isNew) {
                         </template>
 
                         <!-- Pagination -->
-                        <div x-show="showPagination()" class="is-flex is-justify-content-center mt-3" style="gap: 0.5rem;">
+                        <div
+                            x-show="showPagination()"
+                            class="is-flex is-justify-content-center mt-3"
+                            style="gap: 0.5rem;">
                             <button type="button" class="button is-small"
                                     :disabled="canGoPrev()"
                                     @click="prevPage()">
                                 <span class="icon"><i data-lucide="chevron-left"></i></span>
                             </button>
                             <span class="is-size-7 is-flex is-align-items-center">
-                                Page <span x-text="articlePage" class="mx-1"></span> of <span x-text="articleTotalPages" class="ml-1"></span>
+                                Page <span x-text="articlePage" class="mx-1"></span>
+                                of <span x-text="articleTotalPages" class="ml-1"></span>
                             </span>
                             <button type="button" class="button is-small"
                                     :disabled="canGoNext()"
@@ -693,7 +780,9 @@ if (!$isNew) {
                               class="textarea notempty checkoutsidebmp"
                               data_info="Text"
                               rows="10"
-                              placeholder="Paste or edit your text here..."><?php echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                              placeholder="Paste or edit your text here..."><?php
+                                  echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8');
+                                ?></textarea>
                 </div>
             </div>
 
@@ -778,9 +867,9 @@ if (!$isNew) {
         <!-- Language -->
         <div class="field">
             <label class="label" for="TxLgID">
-                Language
-                <span class="icon has-text-danger is-small" title="Required field">
-                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                <?= __e('text.common.language') ?>
+                <span class="icon has-text-danger is-small" title="<?= __e('text.common.field_required') ?>">
+                    <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                 </span>
             </label>
             <div class="control">
@@ -790,7 +879,7 @@ if (!$isNew) {
                     [
                         'name' => 'TxLgID',
                         'id' => 'TxLgID',
-                        'placeholder' => '[Choose...]',
+                        'placeholder' => __('text.common.choose'),
                         'required' => true,
                         'dataAction' => 'change-language'
                     ]
@@ -801,9 +890,9 @@ if (!$isNew) {
         <!-- Title -->
         <div class="field">
             <label class="label" for="TxTitle">
-                Title
-                <span class="icon has-text-danger is-small" title="Required field">
-                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                <?= __e('text.common.title') ?>
+                <span class="icon has-text-danger is-small" title="<?= __e('text.common.field_required') ?>">
+                    <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                 </span>
             </label>
             <div class="control">
@@ -821,9 +910,9 @@ if (!$isNew) {
         <!-- Text Content -->
         <div class="field">
             <label class="label" for="TxText">
-                Text
-                <span class="icon has-text-danger is-small" title="Required field">
-                    <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                <?= __e('text.common.text') ?>
+                <span class="icon has-text-danger is-small" title="<?= __e('text.common.field_required') ?>">
+                    <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                 </span>
             </label>
             <div class="control">
@@ -839,7 +928,7 @@ if (!$isNew) {
 
         <!-- Annotated Text (only for existing texts) -->
         <div class="field">
-            <label class="label">Annotated Text</label>
+            <label class="label"><?= __e('text.common.annotated_text') ?></label>
             <div class="control">
                 <?php if ($annotated) : ?>
                 <div class="notification is-info is-light">
@@ -847,7 +936,7 @@ if (!$isNew) {
                         <span class="icon has-text-success">
                             <?php echo IconHelper::render('check', ['alt' => 'Has Annotation']); ?>
                         </span>
-                        <span>Exists - May be partially or fully lost if you change the text!</span>
+                        <span><?= __e('text.edit.exists_warning') ?></span>
                     </span>
                     <div class="mt-2">
                         <button type="button"
@@ -857,7 +946,7 @@ if (!$isNew) {
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('printer', ['alt' => 'Print']); ?>
                             </span>
-                            <span>Print/Edit...</span>
+                            <span><?= __e('text.edit.print_edit') ?></span>
                         </button>
                     </div>
                 </div>
@@ -867,7 +956,7 @@ if (!$isNew) {
                         <span class="icon has-text-grey">
                             <?php echo IconHelper::render('x', ['alt' => 'No Annotation']); ?>
                         </span>
-                        <span>None</span>
+                        <span><?= __e('text.edit.no_annotation') ?></span>
                     </span>
                 </div>
                 <?php endif; ?>
@@ -876,7 +965,7 @@ if (!$isNew) {
 
         <!-- Source URI -->
         <div class="field">
-            <label class="label" for="TxSourceURI">Source URI</label>
+            <label class="label" for="TxSourceURI"><?= __e('text.common.source_uri') ?></label>
             <div class="control">
                 <input type="url"
                        class="input checkurl checkoutsidebmp"
@@ -891,7 +980,7 @@ if (!$isNew) {
 
         <!-- Tags -->
         <div class="field">
-            <label class="label">Tags</label>
+            <label class="label"><?= __e('text.common.tags') ?></label>
             <div class="control">
                 <?php echo $textTagsHtml; ?>
             </div>
@@ -899,7 +988,7 @@ if (!$isNew) {
 
         <!-- Media URI -->
         <div class="field">
-            <label class="label" for="TxAudioURI">Media URI</label>
+            <label class="label" for="TxAudioURI"><?= __e('text.common.media_uri') ?></label>
             <div class="control">
                 <input type="text"
                        class="input checkoutsidebmp"
@@ -923,31 +1012,31 @@ if (!$isNew) {
                     class="button is-light"
                     data-action="cancel-form"
                     data-url="/texts#rec<?php echo $textIdTyped; ?>">
-                Cancel
+                <?= __e('text.common.cancel') ?>
             </button>
         </div>
         <div class="control">
             <button type="submit" name="op" value="Check" class="button is-info is-outlined">
                 <span class="icon is-small">
-                    <?php echo IconHelper::render('check', ['alt' => 'Check']); ?>
+                    <?php echo IconHelper::render('check', ['alt' => __('text.common.check')]); ?>
                 </span>
-                <span>Check</span>
+                <span><?= __e('text.common.check') ?></span>
             </button>
         </div>
         <div class="control">
             <button type="submit" name="op" value="Change" class="button is-primary">
                 <span class="icon is-small">
-                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                    <?php echo IconHelper::render('save', ['alt' => __('text.common.save')]); ?>
                 </span>
-                <span>Save Changes</span>
+                <span><?= __e('text.common.save_changes') ?></span>
             </button>
         </div>
         <div class="control">
             <button type="submit" name="op" value="Change and Open" class="button is-success">
                 <span class="icon is-small">
-                    <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
+                    <?php echo IconHelper::render('book-open', ['alt' => __('text.common.save_and_open')]); ?>
                 </span>
-                <span>Save &amp; Open</span>
+                <span><?= __e('text.common.save_and_open') ?></span>
             </button>
         </div>
     </div>

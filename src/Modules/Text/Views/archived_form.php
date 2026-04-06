@@ -48,9 +48,12 @@ assert(is_string($archivedTextTagsHtml));
 */
 $languagesTyped = $languages;
 ?>
-<h2 class="title is-4">Edit Archived Text</h2>
+<h2 class="title is-4"><?= __e('text.edit.heading_archived') ?></h2>
 
-<form class="validate" action="/text/archived/<?php echo $textIdTyped; ?>/edit#rec<?php echo $textIdTyped; ?>" method="post">
+<form
+    class="validate"
+    action="/text/archived/<?php echo $textIdTyped; ?>/edit#rec<?php echo $textIdTyped; ?>"
+    method="post">
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
 
@@ -58,7 +61,7 @@ $languagesTyped = $languages;
         <!-- Language -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="TxLgID">Language</label>
+                <label class="label" for="TxLgID"><?= __e('text.common.language') ?></label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -70,15 +73,15 @@ $languagesTyped = $languages;
                             [
                                 'name' => 'TxLgID',
                                 'id' => 'TxLgID',
-                                'placeholder' => '[Choose...]',
+                                'placeholder' => __('text.common.choose'),
                                 'required' => true
                             ]
                         );
                         ?>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        <span class="icon has-text-danger" title="<?= __e('text.common.field_required') ?>">
+                            <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                         </span>
                     </div>
                 </div>
@@ -88,7 +91,7 @@ $languagesTyped = $languages;
         <!-- Title -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="TxTitle">Title</label>
+                <label class="label" for="TxTitle"><?= __e('text.common.title') ?></label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -103,8 +106,8 @@ $languagesTyped = $languages;
                                required />
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        <span class="icon has-text-danger" title="<?= __e('text.common.field_required') ?>">
+                            <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                         </span>
                     </div>
                 </div>
@@ -114,7 +117,7 @@ $languagesTyped = $languages;
         <!-- Text Content -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="TxText">Text</label>
+                <label class="label" for="TxText"><?= __e('text.common.text') ?></label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -128,8 +131,8 @@ $languagesTyped = $languages;
                                   required><?php echo htmlspecialchars($recordText, ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
-                            <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                        <span class="icon has-text-danger" title="<?= __e('text.common.field_required') ?>">
+                            <?php echo IconHelper::render('asterisk', ['alt' => __('text.common.required')]); ?>
                         </span>
                     </div>
                 </div>
@@ -139,7 +142,7 @@ $languagesTyped = $languages;
         <!-- Annotated Text -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label">Annotated Text</label>
+                <label class="label"><?= __e('text.common.annotated_text') ?></label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -150,7 +153,7 @@ $languagesTyped = $languages;
                                 <span class="icon has-text-success">
                                     <?php echo IconHelper::render('check', ['alt' => 'Has Annotation']); ?>
                                 </span>
-                                <span>Exists - May be partially or fully lost if you change the text!</span>
+                                <span><?= __e('text.edit.exists_warning') ?></span>
                             </span>
                         </div>
                         <?php else : ?>
@@ -159,7 +162,7 @@ $languagesTyped = $languages;
                                 <span class="icon has-text-grey">
                                     <?php echo IconHelper::render('x', ['alt' => 'No Annotation']); ?>
                                 </span>
-                                <span>None</span>
+                                <span><?= __e('text.edit.no_annotation') ?></span>
                             </span>
                         </div>
                         <?php endif; ?>
@@ -171,7 +174,7 @@ $languagesTyped = $languages;
         <!-- Source URI -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="TxSourceURI">Source URI</label>
+                <label class="label" for="TxSourceURI"><?= __e('text.common.source_uri') ?></label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -192,7 +195,7 @@ $languagesTyped = $languages;
         <!-- Tags -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label">Tags</label>
+                <label class="label"><?= __e('text.common.tags') ?></label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -206,7 +209,7 @@ $languagesTyped = $languages;
         <!-- Audio URI -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label" for="TxAudioURI">Audio URI</label>
+                <label class="label" for="TxAudioURI"><?= __e('text.common.audio_uri') ?></label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -235,7 +238,7 @@ $languagesTyped = $languages;
                     class="button is-light"
                     data-action="cancel-navigate"
                     data-url="/text/archived#rec<?php echo $textIdTyped; ?>">
-                Cancel
+                <?= __e('text.common.cancel') ?>
             </button>
         </div>
         <div class="control">
@@ -243,7 +246,7 @@ $languagesTyped = $languages;
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
-                <span>Save Changes</span>
+                <span><?= __e('text.common.save_changes') ?></span>
             </button>
         </div>
     </div>

@@ -54,6 +54,9 @@ assert(is_string($dictLinksHtml));
 assert(is_string($sentenceAreaHtml));
 assert(is_string($wordTagsHtml));
 
+$phLemmaEx = htmlspecialchars(__('vocabulary.form.placeholder_lemma_example'), ENT_QUOTES, 'UTF-8');
+$valChange = htmlspecialchars(__('vocabulary.common.change'), ENT_QUOTES, 'UTF-8');
+
 ?>
 <form name="editword" class="validate" action="/word/edit" method="post"
 data-lwt-form-check="true" data-lwt-clear-frame="true">
@@ -66,33 +69,33 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
 <input type="hidden" name="tid" value="<?php echo InputValidator::getString('tid'); ?>" />
 <input type="hidden" name="ord" value="<?php echo InputValidator::getString('ord'); ?>" />
 <table class="table is-bordered is-fullwidth">
-   <tr title="Only change uppercase/lowercase!">
-       <td class="has-text-right"><b>Edit Term:</b></td>
+   <tr title="<?= htmlspecialchars(__('vocabulary.form.uppercase_only_hint'), ENT_QUOTES, 'UTF-8') ?>">
+       <td class="has-text-right"><b><?= __('vocabulary.form.edit_term') ?>:</b></td>
        <td class="">
            <input <?php echo $scrdir; ?> class="notempty checkoutsidebmp"
            data_info="Term" type="text"
            name="WoText" id="WoText"
            value="<?php echo htmlspecialchars($term, ENT_QUOTES, 'UTF-8'); ?>" maxlength="250" size="35" />
            <?php echo IconHelper::render('circle-x', [
-               'title' => 'Field must not be empty',
-               'alt' => 'Field must not be empty'
+               'title' => __('vocabulary.common.field_required'),
+               'alt' => __('vocabulary.common.field_required')
            ]); ?>
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Lemma:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.lemma_label') ?></td>
        <td class="">
            <input <?php echo $scrdir; ?> type="text"
            class="checkoutsidebmp checklength" data_maxlength="250"
            data_info="Lemma" name="WoLemma" id="WoLemma"
            value="<?php echo htmlspecialchars($wordData['WoLemma'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
            maxlength="250" size="35"
-           placeholder="Base form (e.g., 'run' for 'running')" />
+           placeholder="<?= $phLemmaEx ?>" />
        </td>
    </tr>
    <?php echo $similarTermsRow; ?>
    <tr>
-       <td class="has-text-right">Translation:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.translation_label') ?></td>
        <td class="">
            <textarea name="WoTranslation"
            class="setfocus textarea-noreturn checklength checkoutsidebmp"
@@ -101,13 +104,13 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Tags:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.tags_label') ?></td>
        <td class="">
            <?php echo $wordTagsHtml; ?>
        </td>
    </tr>
    <tr class="<?php echo ($showRoman ? '' : 'is-hidden'); ?>">
-       <td class="has-text-right">Romaniz.:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.romaniz_label') ?></td>
        <td class="">
            <input type="text" class="checkoutsidebmp"
            data_info="Romanization" name="WoRomanization" maxlength="100"
@@ -116,7 +119,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Sentence<br />Term in {...}:</td>
+       <td class="has-text-right"><?= __('vocabulary.show.sentence_term_in_braces') ?></td>
        <td class="">
            <textarea <?php echo $scrdir; ?> name="WoSentence" id="WoSentence"
            class="textarea-noreturn checklength checkoutsidebmp"
@@ -125,7 +128,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Notes:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.notes_label') ?></td>
        <td class="">
            <textarea name="WoNotes" id="WoNotes"
            class="textarea-noreturn checklength checkoutsidebmp"
@@ -134,7 +137,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        </td>
    </tr>
    <tr>
-       <td class="has-text-right">Status:</td>
+       <td class="has-text-right"><?= __('vocabulary.form.status_label') ?></td>
        <td class="">
            <?php echo SelectOptionsBuilder::forWordStatusRadio($status); ?>
        </td>
@@ -143,7 +146,7 @@ data-lwt-form-check="true" data-lwt-clear-frame="true">
        <td class="has-text-right" colspan="2">
            <?php echo $dictLinksHtml; ?>
            &nbsp; &nbsp; &nbsp;
-           <input type="submit" name="op" value="Change" />
+           <input type="submit" name="op" value="<?= $valChange ?>" />
        </td>
    </tr>
 </table>

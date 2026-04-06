@@ -83,6 +83,9 @@ $langLocalDictMode = isset($language->localdictmode) && is_numeric($language->lo
 $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->pipervoiceid)
     ? $language->pipervoiceid : null;
 
+// Pre-computed translated attribute strings (kept short to satisfy line-length rules)
+$importMoreTitle = htmlspecialchars(__('language.form.import_more_entries'), ENT_QUOTES, 'UTF-8');
+
 ?>
 <script type="application/json" id="language-form-config">
 <?php echo json_encode([
@@ -95,7 +98,13 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
 ]); ?>
 </script>
 
-<form class="validate" action="<?php echo url($isNew ? '/languages/new' : '/languages/' . (int) $langId . '/edit'); ?>" method="post" name="lg_form"
+<?php
+$formAction = url($isNew ? '/languages/new' : '/languages/' . (int) $langId . '/edit');
+?>
+<form class="validate"
+      action="<?php echo $formAction; ?>"
+      method="post"
+      name="lg_form"
       x-data="{
           textSize: <?php echo $langTextSize; ?>,
           parserType: '<?php echo htmlspecialchars($langParserType, ENT_QUOTES, 'UTF-8'); ?>',
@@ -110,9 +119,8 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
     <!-- Edit Warning -->
     <article class="message is-warning mb-4">
         <div class="message-body">
-            <strong>Warning:</strong> Changing certain language settings
-            (e.g. RegExp Word Characters, etc.) may cause partial or complete
-            loss of improved annotated texts!
+            <strong><?php echo __('language.form.warning_label'); ?></strong>
+            <?php echo __('language.form.warning_body'); ?>
         </div>
     </article>
     <?php endif; ?>
@@ -121,7 +129,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
     <div class="container mb-5" style="max-width: 400px;">
         <div class="field">
             <label class="label is-medium" for="LgName">
-                Display name
+                <?php echo __('language.form.display_name_label'); ?>
             </label>
             <div class="control">
                 <input type="text"
@@ -134,7 +142,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                        @input="showJapaneseOptions = ($event.target.value === 'Japanese')"
                        required />
             </div>
-            <p class="help">A friendly name to identify this language in your lists</p>
+            <p class="help"><?php echo __('language.form.display_name_help'); ?></p>
         </div>
 
         <!-- Save button (primary action) -->
@@ -143,16 +151,16 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <?php if ($isNew) : ?>
                 <button type="submit" name="op" value="Save" class="button is-primary is-medium is-fullwidth">
                     <span class="icon">
-                        <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                        <?php echo IconHelper::render('save', ['alt' => __('language.form.save')]); ?>
                     </span>
-                    <span>Save</span>
+                    <span><?php echo __('language.form.save'); ?></span>
                 </button>
                 <?php else : ?>
                 <button type="submit" name="op" value="Change" class="button is-primary is-medium is-fullwidth">
                     <span class="icon">
-                        <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                        <?php echo IconHelper::render('save', ['alt' => __('language.form.save')]); ?>
                     </span>
-                    <span>Save Changes</span>
+                    <span><?php echo __('language.form.save_changes'); ?></span>
                 </button>
                 <?php endif; ?>
             </div>
@@ -160,7 +168,9 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
 
         <!-- Cancel link -->
         <div class="has-text-centered mt-3">
-            <a href="<?php echo url('/languages'); ?>" class="has-text-grey">Cancel</a>
+            <a href="<?php echo url('/languages'); ?>" class="has-text-grey">
+                <?php echo __('language.form.cancel'); ?>
+            </a>
         </div>
     </div>
 
@@ -171,9 +181,9 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     @click="open = !open">
                 <h4 class="title is-5 mb-0 is-flex is-align-items-center">
                     <span class="icon mr-2">
-                        <?php echo IconHelper::render('settings', ['alt' => 'Settings']); ?>
+                        <?php echo IconHelper::render('settings', ['alt' => __('language.form.advanced_settings')]); ?>
                     </span>
-                    Advanced Settings
+                    <?php echo __('language.form.advanced_settings'); ?>
                 </h4>
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
@@ -182,36 +192,41 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
 
             <div x-show="open" x-transition x-cloak class="mt-4">
                 <!-- Dictionaries & Translation -->
-                <h5 class="title is-6 mt-4 mb-3">Dictionaries & Translation</h5>
+                <h5 class="title is-6 mt-4 mb-3"><?php echo __('language.form.section_dictionaries'); ?></h5>
 
                 <!-- Local Dictionaries (shown first - more valuable than online) -->
                 <?php if (!$isNew) : ?>
                 <div class="p-4 mb-4" style="border-radius: 6px; background-color: var(--lwt-panel-bg, #fafafa);">
                     <h6 class="title is-6 mb-3 is-flex is-align-items-center is-justify-content-space-between">
                         <span>
-                            <?php echo IconHelper::render('book-open', ['alt' => 'Dictionaries']); ?>
-                            Local Dictionaries
+                            <?php echo IconHelper::render(
+                                'book-open',
+                                ['alt' => __('language.form.local_dictionaries')]
+                            ); ?>
+                            <?php echo __('language.form.local_dictionaries'); ?>
                         </span>
                         <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
                            class="button is-primary is-small">
-                            <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
-                            <span class="ml-1">Import</span>
+                            <?php echo IconHelper::render('upload', ['alt' => __('language.form.import')]); ?>
+                            <span class="ml-1"><?php echo __('language.form.import'); ?></span>
                         </a>
                     </h6>
 
                     <?php if (empty($dictionaries)) : ?>
                     <p class="has-text-grey">
-                        No local dictionaries installed.
-                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>">Import one</a>
-                        to get offline lookups and auto-populate your vocabulary.
+                        <?php echo __('language.form.no_local_dictionaries'); ?>
+                        <a href="<?php echo url('/word/upload?tab=dictionary'); ?>">
+                            <?php echo __('language.form.import_one'); ?>
+                        </a>
+                        <?php echo __('language.form.no_local_dictionaries_help'); ?>
                     </p>
                     <?php else : ?>
                     <table class="table is-fullwidth is-narrow is-striped mb-0">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Entries</th>
-                                <th>Status</th>
+                                <th><?php echo __('language.form.dict_col_name'); ?></th>
+                                <th><?php echo __('language.form.dict_col_entries'); ?></th>
+                                <th><?php echo __('language.form.dict_col_status'); ?></th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -227,16 +242,23 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                 <td><?php echo number_format($dict->entryCount()); ?></td>
                                 <td>
                                     <?php if ($dict->isEnabled()) : ?>
-                                    <span class="tag is-success is-light">Enabled</span>
+                                    <span class="tag is-success is-light">
+                                        <?php echo __('language.form.dict_status_enabled'); ?>
+                                    </span>
                                     <?php else : ?>
-                                    <span class="tag is-warning is-light">Disabled</span>
+                                    <span class="tag is-warning is-light">
+                                        <?php echo __('language.form.dict_status_disabled'); ?>
+                                    </span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="has-text-right">
                                     <a href="<?php echo url('/word/upload?tab=dictionary'); ?>"
                                        class="button is-small is-info is-outlined"
-                                       title="Import more entries">
-                                        <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
+                                       title="<?php echo $importMoreTitle; ?>">
+                                        <?php echo IconHelper::render(
+                                            'upload',
+                                            ['alt' => __('language.form.import')]
+                                        ); ?>
                                     </a>
                                 </td>
                             </tr>
@@ -245,29 +267,29 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     </table>
                     <p class="help mt-2">
                         <a href="<?php echo url('/languages/' . $langId . '/dictionaries'); ?>">
-                            Manage dictionaries
+                            <?php echo __('language.form.manage_dictionaries'); ?>
                         </a>
-                        (enable/disable, delete, change priority)
+                        <?php echo __('language.form.manage_dictionaries_help'); ?>
                     </p>
                     <?php endif; ?>
 
                     <!-- Local Dictionary Mode -->
                     <div class="field mt-3">
-                        <label class="label is-small">Lookup Mode</label>
+                        <label class="label is-small"><?php echo __('language.form.lookup_mode'); ?></label>
                         <div class="control">
                             <div class="select is-small">
                                 <select name="LgLocalDictMode" id="LgLocalDictMode">
                                     <option value="0" <?php echo $langLocalDictMode === 0 ? 'selected' : ''; ?>>
-                                        Online dictionaries only
+                                        <?php echo __('language.form.lookup_mode_online_only'); ?>
                                     </option>
                                     <option value="1" <?php echo $langLocalDictMode === 1 ? 'selected' : ''; ?>>
-                                        Local first, online fallback
+                                        <?php echo __('language.form.lookup_mode_local_first'); ?>
                                     </option>
                                     <option value="2" <?php echo $langLocalDictMode === 2 ? 'selected' : ''; ?>>
-                                        Local dictionaries only
+                                        <?php echo __('language.form.lookup_mode_local_only'); ?>
                                     </option>
                                     <option value="3" <?php echo $langLocalDictMode === 3 ? 'selected' : ''; ?>>
-                                        Combined (show both)
+                                        <?php echo __('language.form.lookup_mode_combined'); ?>
                                     </option>
                                 </select>
                             </div>
@@ -283,8 +305,15 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <!-- Dictionary 1 URI -->
                 <div class="field">
                     <label class="label">
-                        Dictionary 1 URI
-                        <span class="has-text-danger" title="Required">*</span>
+                        <?php echo __('language.form.dict1_uri'); ?>
+                        <span
+                            class="has-text-danger"
+                            title="<?php echo htmlspecialchars(
+                                __('language.form.required_marker_title'),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>"
+                        >*</span>
                     </label>
                     <div class="control">
                         <input type="url"
@@ -297,13 +326,13 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     <label class="checkbox mt-2">
                         <input type="checkbox" name="LgDict1PopUp" id="LgDict1PopUp" value="1"
                                <?php echo $langDict1Popup ? 'checked' : ''; ?> />
-                        <span class="has-text-grey-dark">Open in Pop-Up</span>
+                        <span class="has-text-grey-dark"><?php echo __('language.form.open_in_popup'); ?></span>
                     </label>
                 </div>
 
                 <!-- Dictionary 2 URI -->
                 <div class="field">
-                    <label class="label">Dictionary 2 URI</label>
+                    <label class="label"><?php echo __('language.form.dict2_uri'); ?></label>
                     <div class="control">
                         <input type="url"
                                class="input checkdicturl checkoutsidebmp"
@@ -315,22 +344,30 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     <label class="checkbox mt-2">
                         <input type="checkbox" name="LgDict2PopUp" id="LgDict2PopUp" value="1"
                                <?php echo $langDict2Popup ? 'checked' : ''; ?> />
-                        <span class="has-text-grey-dark">Open in Pop-Up</span>
+                        <span class="has-text-grey-dark"><?php echo __('language.form.open_in_popup'); ?></span>
                     </label>
                 </div>
 
                 <!-- Sentence Translator URI -->
                 <div class="field">
-                    <label class="label">Sentence Translator</label>
+                    <label class="label"><?php echo __('language.form.sentence_translator'); ?></label>
                     <div class="field">
                         <div class="control">
                             <div class="select is-fullwidth">
                                 <select name="LgTranslatorName"
                                         @change="showTranslatorKey = ($event.target.value === 'libretranslate')">
-                                    <option value="google_translate">Google Translate (webpage)</option>
-                                    <option value="libretranslate">LibreTranslate API</option>
-                                    <option value="ggl">GoogleTranslate API</option>
-                                    <option value="glosbe" class="is-hidden">Glosbe API</option>
+                                    <option value="google_translate">
+                                        <?php echo __('language.form.translator_google_webpage'); ?>
+                                    </option>
+                                    <option value="libretranslate">
+                                        <?php echo __('language.form.translator_libretranslate'); ?>
+                                    </option>
+                                    <option value="ggl">
+                                        <?php echo __('language.form.translator_google_api'); ?>
+                                    </option>
+                                    <option value="glosbe" class="is-hidden">
+                                        <?php echo __('language.form.translator_glosbe'); ?>
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -343,12 +380,18 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                    value="<?php echo htmlspecialchars($langTranslatorUri, ENT_QUOTES, 'UTF-8'); ?>"
                                    maxlength="200"
                                    data_info="GoogleTranslate URI"
-                                   placeholder="Translator URI" />
+                                   placeholder="<?php echo htmlspecialchars(
+                                       __('language.form.translator_uri_placeholder'),
+                                       ENT_QUOTES,
+                                       'UTF-8'
+                                   ); ?>" />
                         </div>
                     </div>
 
                     <div class="field" x-show="showTranslatorKey" x-transition>
-                        <label class="label is-small" for="LgTranslatorKey">API Key</label>
+                        <label class="label is-small" for="LgTranslatorKey">
+                            <?php echo __('language.form.api_key'); ?>
+                        </label>
                         <div class="control">
                             <input type="text" class="input is-small" id="LgTranslatorKey" name="LgTranslatorKey" />
                         </div>
@@ -357,7 +400,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                     <label class="checkbox mt-2">
                         <input type="checkbox" name="LgGoogleTranslatePopUp" id="LgGoogleTranslatePopUp" value="1"
                                <?php echo $langTranslatorPopup ? 'checked' : ''; ?> />
-                        <span class="has-text-grey-dark">Open in Pop-Up</span>
+                        <span class="has-text-grey-dark"><?php echo __('language.form.open_in_popup'); ?></span>
                     </label>
                     <p id="translator_error" class="help is-danger"></p>
                 </div>
@@ -366,7 +409,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <div class="columns mt-4">
                     <div class="column">
                         <div class="field">
-                            <label class="label">Source Language Code</label>
+                            <label class="label"><?php echo __('language.form.source_lang_code'); ?></label>
                             <div class="control">
                                 <input type="text"
                                        class="input"
@@ -376,12 +419,12 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                        maxlength="10"
                                        placeholder="e.g., de, ja, zh" />
                             </div>
-                            <p class="help">ISO code of the language you're learning</p>
+                            <p class="help"><?php echo __('language.form.source_lang_code_help'); ?></p>
                         </div>
                     </div>
                     <div class="column">
                         <div class="field">
-                            <label class="label">Target Language Code</label>
+                            <label class="label"><?php echo __('language.form.target_lang_code'); ?></label>
                             <div class="control">
                                 <input type="text"
                                        class="input"
@@ -391,7 +434,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                        maxlength="10"
                                        placeholder="e.g., en" />
                             </div>
-                            <p class="help">ISO code of your native language</p>
+                            <p class="help"><?php echo __('language.form.target_lang_code_help'); ?></p>
                         </div>
                     </div>
                 </div>
@@ -399,10 +442,10 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <hr class="my-5" />
 
                 <!-- Display Settings -->
-                <h5 class="title is-6 mb-3">Display Settings</h5>
+                <h5 class="title is-6 mb-3"><?php echo __('language.form.section_display'); ?></h5>
 
                 <div class="field">
-                    <label class="label">Text Size (%)</label>
+                    <label class="label"><?php echo __('language.form.text_size'); ?></label>
                     <div class="control">
                         <input name="LgTextSize"
                                type="number"
@@ -420,7 +463,11 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                    class="input"
                                    id="LgTextSizeExample"
                                    :style="'font-size: ' + textSize + '%'"
-                                   value="Text will be this size"
+                                   value="<?php echo htmlspecialchars(
+                                       __('language.form.text_size_example'),
+                                       ENT_QUOTES,
+                                       'UTF-8'
+                                   ); ?>"
                                    readonly />
                         </div>
                     </div>
@@ -429,11 +476,11 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <hr class="my-5" />
 
                 <!-- Text Processing -->
-                <h5 class="title is-6 mb-3">Text Processing</h5>
+                <h5 class="title is-6 mb-3"><?php echo __('language.form.section_text_processing'); ?></h5>
 
                 <!-- Parser Type -->
                 <div class="field">
-                    <label class="label">Parser Type</label>
+                    <label class="label"><?php echo __('language.form.parser_type'); ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="LgParserType" id="LgParserType" x-model="parserType">
@@ -445,7 +492,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                         <?php echo ($langParserType === $type) ? 'selected' : ''; ?>
                                         <?php echo !$infoAvailable ? 'disabled' : ''; ?>>
                                     <?php echo htmlspecialchars($infoName, ENT_QUOTES, 'UTF-8'); ?>
-                                    <?php echo !$infoAvailable ? ' (unavailable)' : ''; ?>
+                                    <?php echo !$infoAvailable ? __('language.form.parser_unavailable') : ''; ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
@@ -455,7 +502,7 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
 
                 <!-- Character Substitutions -->
                 <div class="field">
-                    <label class="label">Character Substitutions</label>
+                    <label class="label"><?php echo __('language.form.character_substitutions'); ?></label>
                     <div class="control">
                         <input type="text"
                                class="input checkoutsidebmp"
@@ -464,14 +511,22 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                value="<?php echo htmlspecialchars($langCharSubstitutions, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="500" />
                     </div>
-                    <p class="help">Replace characters before parsing (format: from=to, separated by |)</p>
+                    <p class="help"><?php echo __('language.form.character_substitutions_help'); ?></p>
                 </div>
 
                 <!-- RegExp Split Sentences (not needed for mecab) -->
                 <div class="field" x-show="parserType !== 'mecab'" x-transition x-cloak>
                     <label class="label">
-                        RegExp Split Sentences
-                        <span class="has-text-danger" title="Required" x-show="parserType === 'regex'">*</span>
+                        <?php echo __('language.form.regexp_split_sentences'); ?>
+                        <span
+                            class="has-text-danger"
+                            title="<?php echo htmlspecialchars(
+                                __('language.form.required_marker_title'),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>"
+                            x-show="parserType === 'regex'"
+                        >*</span>
                     </label>
                     <div class="control">
                         <input type="text"
@@ -486,13 +541,15 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
 
                 <!-- Exceptions Split Sentences (not needed for mecab) -->
                 <div class="field" x-show="parserType !== 'mecab'" x-transition x-cloak>
-                    <label class="label">Exceptions Split Sentences</label>
+                    <label class="label"><?php echo __('language.form.exceptions_split_sentences'); ?></label>
                     <div class="control">
                         <input type="text"
                                class="input checkoutsidebmp"
                                data_info="Exceptions Split Sentences"
                                name="LgExceptionsSplitSentences"
-                               value="<?php echo htmlspecialchars($langExceptionsSplitSentences, ENT_QUOTES, 'UTF-8'); ?>"
+                               value="<?php
+                                echo htmlspecialchars($langExceptionsSplitSentences, ENT_QUOTES, 'UTF-8');
+                                ?>"
                                maxlength="500" />
                     </div>
                 </div>
@@ -500,15 +557,22 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                 <!-- RegExp Word Characters (only for regex parser) -->
                 <div class="field" x-show="parserType === 'regex'" x-transition x-cloak>
                     <label class="label">
-                        RegExp Word Characters
-                        <span class="has-text-danger" title="Required">*</span>
+                        <?php echo __('language.form.regexp_word_characters'); ?>
+                        <span
+                            class="has-text-danger"
+                            title="<?php echo htmlspecialchars(
+                                __('language.form.required_marker_title'),
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>"
+                        >*</span>
                     </label>
                     <div x-show="showJapaneseOptions" x-transition class="field">
                         <div class="control">
                             <div class="select is-fullwidth">
                                 <select name="LgRegexpAlt">
-                                    <option value="regexp">Regular Expressions (demo)</option>
-                                    <option value="mecab">MeCab (recommended)</option>
+                                    <option value="regexp"><?php echo __('language.form.regexp_alt_regexp'); ?></option>
+                                    <option value="mecab"><?php echo __('language.form.regexp_alt_mecab'); ?></option>
                                 </select>
                             </div>
                         </div>
@@ -533,9 +597,9 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                id="LgSplitEachChar"
                                value="1"
                                <?php echo $langSplitEachChar ? "checked" : ""; ?> />
-                        <strong>Make each character a word</strong>
+                        <strong><?php echo __('language.form.split_each_char'); ?></strong>
                     </label>
-                    <p class="help ml-5">For Chinese, Japanese, etc.</p>
+                    <p class="help ml-5"><?php echo __('language.form.split_each_char_help'); ?></p>
                 </div>
 
                 <div class="field">
@@ -545,9 +609,9 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                id="LgRemoveSpaces"
                                value="1"
                                <?php echo $langRemoveSpaces ? "checked" : ""; ?> />
-                        <strong>Remove spaces</strong>
+                        <strong><?php echo __('language.form.remove_spaces'); ?></strong>
                     </label>
-                    <p class="help ml-5">For Chinese, Japanese, etc.</p>
+                    <p class="help ml-5"><?php echo __('language.form.remove_spaces_help'); ?></p>
                 </div>
 
                 <div class="field">
@@ -557,9 +621,9 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                id="LgRightToLeft"
                                value="1"
                                <?php echo $langRightToLeft ? "checked" : ""; ?> />
-                        <strong>Right-To-Left Script</strong>
+                        <strong><?php echo __('language.form.right_to_left'); ?></strong>
                     </label>
-                    <p class="help ml-5">For Arabic, Hebrew, Farsi, Urdu, etc.</p>
+                    <p class="help ml-5"><?php echo __('language.form.right_to_left_help'); ?></p>
                 </div>
 
                 <div class="field">
@@ -569,19 +633,19 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                id="LgShowRomanization"
                                value="1"
                                <?php echo $langShowRomanization ? "checked" : ""; ?> />
-                        <strong>Show Romanization</strong>
+                        <strong><?php echo __('language.form.show_romanization'); ?></strong>
                     </label>
-                    <p class="help ml-5">Recommended for Chinese, Japanese, etc.</p>
+                    <p class="help ml-5"><?php echo __('language.form.show_romanization_help'); ?></p>
                 </div>
 
                 <hr class="my-5" />
 
                 <!-- Export & TTS -->
-                <h5 class="title is-6 mb-3">Export & Text-to-Speech</h5>
+                <h5 class="title is-6 mb-3"><?php echo __('language.form.section_export_tts'); ?></h5>
 
                 <!-- Export Template -->
                 <div class="field">
-                    <label class="label">Export Template</label>
+                    <label class="label"><?php echo __('language.form.export_template'); ?></label>
                     <div class="control">
                         <input type="text"
                                class="input checkoutsidebmp"
@@ -590,18 +654,26 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                value="<?php echo htmlspecialchars($langExportTemplate, ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="1000" />
                     </div>
-                    <p class="help">Template for exporting terms (e.g., to Anki)</p>
+                    <p class="help"><?php echo __('language.form.export_template_help'); ?></p>
                 </div>
 
                 <!-- Third-Party Text-to-Speech Voice API -->
                 <div class="field">
-                    <label class="label">Third-Party Text-to-Speech Voice API</label>
+                    <label class="label"><?php echo __('language.form.tts_voice_api'); ?></label>
                     <div class="control mb-2">
                         <input type="text"
                                class="input"
                                name="LgVoiceAPIDemo"
-                               value="Read this demo text."
-                               placeholder="Demo text to test TTS" />
+                               value="<?php echo htmlspecialchars(
+                                   __('language.form.tts_demo_default'),
+                                   ENT_QUOTES,
+                                   'UTF-8'
+                               ); ?>"
+                               placeholder="<?php echo htmlspecialchars(
+                                   __('language.form.tts_demo_placeholder'),
+                                   ENT_QUOTES,
+                                   'UTF-8'
+                               ); ?>" />
                     </div>
                     <div class="control">
                         <textarea class="textarea checkoutsidebmp"
@@ -609,26 +681,30 @@ $langPiperVoiceId = isset($language->pipervoiceid) && is_string($language->piper
                                   name="LgTTSVoiceAPI"
                                   maxlength="2048"
                                   rows="4"
-                                  placeholder="JSON configuration for TTS API"><?php
-                                      echo htmlspecialchars($langTtsVoiceApi, ENT_QUOTES, 'UTF-8');
-                                    ?></textarea>
+                                  placeholder="<?php echo htmlspecialchars(
+                                      __('language.form.tts_json_placeholder'),
+                                      ENT_QUOTES,
+                                      'UTF-8'
+                                  ); ?>"><?php
+echo htmlspecialchars($langTtsVoiceApi, ENT_QUOTES, 'UTF-8');
+?></textarea>
                     </div>
                     <div class="buttons mt-3">
                         <button type="button"
                                 class="button is-small is-info is-outlined"
                                 data-action="check-voice-api">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('check', ['alt' => 'Check']); ?>
+                                <?php echo IconHelper::render('check', ['alt' => __('language.form.check')]); ?>
                             </span>
-                            <span>Check Voice API</span>
+                            <span><?php echo __('language.form.check_voice_api'); ?></span>
                         </button>
                         <button type="button"
                                 class="button is-small is-success is-outlined"
                                 data-action="test-voice-api">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('play', ['alt' => 'Test']); ?>
+                                <?php echo IconHelper::render('play', ['alt' => __('language.form.test')]); ?>
                             </span>
-                            <span>Test!</span>
+                            <span><?php echo __('language.form.test_voice_api'); ?></span>
                         </button>
                     </div>
                     <p class="help is-danger is-hidden" id="voice-api-message-zone"></p>

@@ -34,13 +34,13 @@ namespace Lwt\Views\Admin;
                             <h2 class="title is-5">
                                 <span class="icon-text">
                                     <span class="icon"><i data-lucide="settings"></i></span>
-                                    <span>Settings</span>
+                                    <span><?= __('admin.dashboard_settings_title') ?></span>
                                 </span>
                             </h2>
-                            <p class="mb-3">Configure newsfeeds and server-wide settings.</p>
+                            <p class="mb-3"><?= __('admin.dashboard_settings_description') ?></p>
                             <a href="/admin/settings" class="button is-primary is-outlined">
                                 <span class="icon"><i data-lucide="arrow-right"></i></span>
-                                <span>Open Settings</span>
+                                <span><?= __('admin.dashboard_open_settings') ?></span>
                             </a>
                         </div>
                     </div>
@@ -51,13 +51,13 @@ namespace Lwt\Views\Admin;
                             <h2 class="title is-5">
                                 <span class="icon-text">
                                     <span class="icon"><i data-lucide="database"></i></span>
-                                    <span>Backup &amp; Restore</span>
+                                    <span><?= __('admin.dashboard_backup_title') ?></span>
                                 </span>
                             </h2>
-                            <p class="mb-3">Download or restore database backups.</p>
+                            <p class="mb-3"><?= __('admin.dashboard_backup_description') ?></p>
                             <a href="/admin/backup" class="button is-primary is-outlined">
                                 <span class="icon"><i data-lucide="arrow-right"></i></span>
-                                <span>Open Backup</span>
+                                <span><?= __('admin.dashboard_open_backup') ?></span>
                             </a>
                         </div>
                     </div>
@@ -68,13 +68,13 @@ namespace Lwt\Views\Admin;
                             <h2 class="title is-5">
                                 <span class="icon-text">
                                     <span class="icon"><i data-lucide="wand-2"></i></span>
-                                    <span>Database Wizard</span>
+                                    <span><?= __('admin.dashboard_wizard_title') ?></span>
                                 </span>
                             </h2>
-                            <p class="mb-3">Configure database connection settings.</p>
+                            <p class="mb-3"><?= __('admin.dashboard_wizard_description') ?></p>
                             <a href="/admin/wizard" class="button is-primary is-outlined">
                                 <span class="icon"><i data-lucide="arrow-right"></i></span>
-                                <span>Open Wizard</span>
+                                <span><?= __('admin.dashboard_open_wizard') ?></span>
                             </a>
                         </div>
                     </div>
@@ -85,13 +85,13 @@ namespace Lwt\Views\Admin;
                             <h2 class="title is-5">
                                 <span class="icon-text">
                                     <span class="icon"><i data-lucide="download"></i></span>
-                                    <span>Install Demo</span>
+                                    <span><?= __('admin.dashboard_install_demo_title') ?></span>
                                 </span>
                             </h2>
-                            <p class="mb-3">Install the demo database with sample content.</p>
+                            <p class="mb-3"><?= __('admin.dashboard_install_demo_description') ?></p>
                             <a href="/admin/install-demo" class="button is-primary is-outlined">
                                 <span class="icon"><i data-lucide="arrow-right"></i></span>
-                                <span>Install Demo</span>
+                                <span><?= __('admin.dashboard_install_demo_button') ?></span>
                             </a>
                         </div>
                     </div>
@@ -102,13 +102,13 @@ namespace Lwt\Views\Admin;
                             <h2 class="title is-5">
                                 <span class="icon-text">
                                     <span class="icon"><i data-lucide="server"></i></span>
-                                    <span>Server Data</span>
+                                    <span><?= __('admin.dashboard_server_data_title') ?></span>
                                 </span>
                             </h2>
-                            <p class="mb-3">View server and PHP configuration details.</p>
+                            <p class="mb-3"><?= __('admin.dashboard_server_data_description') ?></p>
                             <a href="/admin/server-data" class="button is-primary is-outlined">
                                 <span class="icon"><i data-lucide="arrow-right"></i></span>
-                                <span>View Server Data</span>
+                                <span><?= __('admin.dashboard_view_server_data') ?></span>
                             </a>
                         </div>
                     </div>

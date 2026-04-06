@@ -335,7 +335,7 @@ class ReviewController extends BaseController
         // Get language settings
         $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql, $reviewParams);
         if ($langIdFromSql === null) {
-            PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
+            PageLayoutHelper::renderPageStartNobody(__('review.page_title'), 'full-width');
             include __DIR__ . '/../Views/no_terms.php';
             PageLayoutHelper::renderPageEnd();
             return;
@@ -393,7 +393,7 @@ class ReviewController extends BaseController
             'property' => $testData['property']
         ];
 
-        PageLayoutHelper::renderPageStartNobody('Review', 'full-width');
+        PageLayoutHelper::renderPageStartNobody(__('review.page_title'), 'full-width');
         include __DIR__ . '/../Views/review_desktop.php';
         PageLayoutHelper::renderPageEnd();
     }

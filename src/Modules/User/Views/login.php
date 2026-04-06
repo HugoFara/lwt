@@ -27,6 +27,8 @@ assert(isset($error) && (is_string($error) || $error === null));
 /** @var string|null $error */
 $success = null;
 
+$t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
+
 // Check for success message (e.g., after password reset)
 if (isset($_SESSION['auth_success'])) {
     /** @var mixed $authSuccess */
@@ -51,9 +53,7 @@ if (isset($_SESSION['auth_success'])) {
                                 <span>LWT</span>
                             </span>
                         </h1>
-                        <p class="subtitle is-6 has-text-grey">
-                            Learning With Texts
-                        </p>
+                        <p class="subtitle is-6 has-text-grey"><?php echo $t('app_subtitle'); ?></p>
                     </div>
 
                     <!-- Success message -->
@@ -76,14 +76,14 @@ if (isset($_SESSION['auth_success'])) {
                     <form method="POST" action="/login" x-data="{ loading: false }" @submit="loading = true">
                         <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                         <div class="field">
-                            <label class="label" for="username">Username or Email</label>
+                            <label class="label" for="username"><?php echo $t('login.username_label'); ?></label>
                             <div class="control has-icons-left">
                                 <input
                                     type="text"
                                     id="username"
                                     name="username"
                                     class="input"
-                                    placeholder="Enter your username or email"
+                                    placeholder="<?php echo $t('login.username_placeholder'); ?>"
                                     value="<?php echo htmlspecialchars($username, ENT_QUOTES, 'UTF-8'); ?>"
                                     required
                                     autofocus
@@ -95,14 +95,14 @@ if (isset($_SESSION['auth_success'])) {
                         </div>
 
                         <div class="field">
-                            <label class="label" for="password">Password</label>
+                            <label class="label" for="password"><?php echo $t('login.password_label'); ?></label>
                             <div class="control has-icons-left">
                                 <input
                                     type="password"
                                     id="password"
                                     name="password"
                                     class="input"
-                                    placeholder="Enter your password"
+                                    placeholder="<?php echo $t('login.password_placeholder'); ?>"
                                     required
                                 >
                                 <span class="icon is-small is-left">
@@ -116,11 +116,13 @@ if (isset($_SESSION['auth_success'])) {
                                 <div class="level-left">
                                     <label class="checkbox">
                                         <input type="checkbox" name="remember" value="1">
-                                        Remember me
+                                        <?php echo $t('login.remember_me'); ?>
                                     </label>
                                 </div>
                                 <div class="level-right">
-                                    <a href="/password/forgot" class="is-size-7">Forgot password?</a>
+                                    <a href="/password/forgot" class="is-size-7"><?php
+                                        echo $t('login.forgot_password');
+                                    ?></a>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +138,7 @@ if (isset($_SESSION['auth_success'])) {
                                     <span class="icon">
                                         <i data-lucide="log-in"></i>
                                     </span>
-                                    <span>Log In</span>
+                                    <span><?php echo $t('login.submit'); ?></span>
                                 </button>
                             </div>
                         </div>
@@ -145,8 +147,8 @@ if (isset($_SESSION['auth_success'])) {
                     <!-- Registration link -->
                     <hr>
                     <p class="has-text-centered">
-                        Don't have an account?
-                        <a href="/register">Create one</a>
+                        <?php echo $t('login.no_account'); ?>
+                        <a href="/register"><?php echo $t('login.create_one'); ?></a>
                     </p>
 
                     <!-- WordPress login link (if available) -->
@@ -157,7 +159,7 @@ if (isset($_SESSION['auth_success'])) {
                                 <span class="icon is-small">
                                     <i data-lucide="external-link"></i>
                                 </span>
-                                <span>Login with WordPress</span>
+                                <span><?php echo $t('login.with_wordpress'); ?></span>
                             </span>
                         </a>
                     </p>
@@ -197,7 +199,7 @@ if (isset($_SESSION['auth_success'])) {
                                         />
                                     </svg>
                                 </span>
-                                <span>Login with Google</span>
+                                <span><?php echo $t('login.with_google'); ?></span>
                             </span>
                         </a>
                     </p>
@@ -216,7 +218,7 @@ if (isset($_SESSION['auth_success'])) {
                                         <rect x="13" y="13" width="10" height="10" fill="#FFB900"/>
                                     </svg>
                                 </span>
-                                <span>Login with Microsoft</span>
+                                <span><?php echo $t('login.with_microsoft'); ?></span>
                             </span>
                         </a>
                     </p>

@@ -18,4 +18,6 @@ declare(strict_types=1);
 namespace Lwt\Views\Review;
 
 ?>
-<p class="has-text-centered">&nbsp;<br />Sorry - No terms to display or to review at this time.</p>
+<p class="has-text-centered">
+    &nbsp;<br /><?php echo \htmlspecialchars(__('review.no_terms'), ENT_QUOTES, 'UTF-8'); ?>
+</p>

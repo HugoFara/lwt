@@ -32,7 +32,7 @@ assert(is_bool($showAll));
 assert(is_string($todoContent));
 
 ?>
-<p>OK, term deleted.</p>
+<p><?= __('vocabulary.result.term_deleted') ?></p>
 
 <script type="application/json" data-lwt-delete-multi-result-config>
 <?php echo json_encode(

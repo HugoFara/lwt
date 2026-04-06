@@ -15,17 +15,25 @@ import { getReviewStore, initReviewStore } from '../stores/review_store';
 import { ReviewApi, type TableReviewWord } from '@modules/review/api/review_api';
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { saveSetting } from '@shared/utils/ajax_utilities';
+import { t } from '@shared/i18n/translator';
 
 /**
- * Review types configuration
+ * Review types configuration. Labels/titles resolved via i18n at build time.
  */
-const REVIEW_TYPES = [
-  { id: 1, label: 'Sentence → Translation', title: 'Show sentence with term highlighted, guess translation' },
-  { id: 2, label: 'Sentence → Term', title: 'Show sentence with translation, guess the term' },
-  { id: 3, label: 'Sentence → Both', title: 'Show sentence with hidden term, guess both term and translation' },
-  { id: 4, label: 'Term → Translation', title: 'Show term only, guess translation' },
-  { id: 5, label: 'Translation → Term', title: 'Show translation only, guess the term' },
-];
+function getReviewTypes(): { id: number; label: string; title: string }[] {
+  return [
+    { id: 1, label: t('review.type.sentence_to_translation.label'),
+      title: t('review.type.sentence_to_translation.title') },
+    { id: 2, label: t('review.type.sentence_to_term.label'),
+      title: t('review.type.sentence_to_term.title') },
+    { id: 3, label: t('review.type.sentence_to_both.label'),
+      title: t('review.type.sentence_to_both.title') },
+    { id: 4, label: t('review.type.term_to_translation.label'),
+      title: t('review.type.term_to_translation.title') },
+    { id: 5, label: t('review.type.translation_to_term.label'),
+      title: t('review.type.translation_to_term.title') },
+  ];
+}
 
 /**
  * Render the complete review interface.
@@ -62,7 +70,7 @@ function buildReviewToolbar(): string {
       <div class="level is-mobile">
         <div class="level-left">
           <div class="level-item">
-            <strong>Review: <span x-text="store.title"></span></strong>
+            <strong>${escapeHtml(t('review.toolbar.review_label'))} <span x-text="store.title"></span></strong>
           </div>
         </div>
         <div class="level-right">
@@ -71,25 +79,25 @@ function buildReviewToolbar(): string {
               <!-- Review type buttons -->
               <div class="control">
                 <div class="buttons are-small">
-                  ${REVIEW_TYPES.map(t => `
+                  ${getReviewTypes().map(rt => `
                     <button class="button"
-                            :class="{ 'is-primary': store.reviewType === ${t.id} && !store.isTableMode }"
-                            @click="switchReviewType(${t.id})"
-                            title="${escapeHtml(t.title)}">
-                      ${escapeHtml(t.label)}
+                            :class="{ 'is-primary': store.reviewType === ${rt.id} && !store.isTableMode }"
+                            @click="switchReviewType(${rt.id})"
+                            title="${escapeHtml(rt.title)}">
+                      ${escapeHtml(rt.label)}
                     </button>
                   `).join('')}
                   <button class="button"
                           :class="{ 'is-primary': store.isTableMode }"
                           @click="switchToTable">
-                    Table
+                    ${escapeHtml(t('review.header.button_table'))}
                   </button>
                 </div>
               </div>
               <div class="control">
                 <label class="checkbox">
                   <input type="checkbox" :checked="store.readAloudEnabled" @change="toggleReadAloud($event)">
-                  Read aloud
+                  ${escapeHtml(t('review.toolbar.read_aloud'))}
                 </label>
               </div>
             </div>
@@ -109,7 +117,7 @@ function buildProgressBar(): string {
       <div class="level is-mobile">
         <div class="level-left">
           <div class="level-item">
-            <span>Time: </span>
+            <span>${escapeHtml(t('review.progress.time'))} </span>
             <span x-text="store.timer.elapsed">00:00</span>
           </div>
         </div>
@@ -127,10 +135,14 @@ function buildProgressBar(): string {
 
         <div class="level-right">
           <div class="level-item">
-            <span class="tag is-medium is-light" title="Remaining words / Total words">
-              <span class="has-text-weight-semibold" title="Remaining" x-text="store.progress.remaining"></span>
+            <span class="tag is-medium is-light" title="${escapeHtml(t('review.progress.remaining_total_title'))}">
+              <span class="has-text-weight-semibold"
+                    title="${escapeHtml(t('review.progress.remaining_title'))}"
+                    x-text="store.progress.remaining"></span>
               <span class="mx-1 has-text-grey">/</span>
-              <span class="has-text-grey" title="Total" x-text="store.progress.total"></span>
+              <span class="has-text-grey"
+                    title="${escapeHtml(t('review.progress.total_title'))}"
+                    x-text="store.progress.total"></span>
             </span>
           </div>
         </div>
@@ -147,7 +159,7 @@ function buildMainContent(): string {
     <!-- Loading state -->
     <div x-show="store.isLoading && !store.isInitialized" class="has-text-centered py-6">
       <div class="loading-spinner"></div>
-      <p class="mt-4 has-text-grey">Loading review...</p>
+      <p class="mt-4 has-text-grey">${escapeHtml(t('review.loading'))}</p>
     </div>
 
     <!-- Error state -->
@@ -187,7 +199,7 @@ function buildFinishedMessage(): string {
           <span x-text="getTomorrowLabel()"></span>!
         </p>
         <div class="buttons is-centered mt-5">
-          <a href="/texts" class="button is-primary">Back to Texts</a>
+          <a href="/texts" class="button is-primary">${escapeHtml(t('review.back_to_texts'))}</a>
         </div>
       </div>
     </div>
@@ -222,7 +234,7 @@ function buildWordReviewArea(): string {
           <button x-show="!store.answerRevealed"
                   class="button is-primary is-large"
                   @click="revealAnswer">
-            Show Answer (Space)
+            ${escapeHtml(t('review.card.show_answer'))}
           </button>
         </div>
 
@@ -230,20 +242,20 @@ function buildWordReviewArea(): string {
         <div x-show="store.answerRevealed" class="mb-5">
           <div class="buttons is-centered">
             <button class="button is-danger" @click="decrementStatus" title="Arrow Down">
-              Wrong
+              ${escapeHtml(t('review.card.wrong'))}
             </button>
             <button class="button is-success" @click="incrementStatus" title="Arrow Up">
-              Correct
+              ${escapeHtml(t('review.card.correct'))}
             </button>
             <button class="button" @click="skipWord" title="Escape">
-              Skip
+              ${escapeHtml(t('review.card.skip'))}
             </button>
           </div>
         </div>
 
         <!-- Status buttons -->
         <div x-show="store.answerRevealed" class="mb-5">
-          <p class="is-size-7 has-text-grey mb-2">Set status directly:</p>
+          <p class="is-size-7 has-text-grey mb-2">${escapeHtml(t('review.card.set_status_directly'))}</p>
           <div class="buttons is-centered are-small">
             ${[1, 2, 3, 4, 5].map(s => `
               <button class="button status-btn"
@@ -251,10 +263,10 @@ function buildWordReviewArea(): string {
                       @click="setStatus(${s})">${s}</button>
             `).join('')}
             <button class="button" @click="setStatus(98)" title="Press I">
-              Ignore
+              ${escapeHtml(t('review.card.ignore'))}
             </button>
             <button class="button" @click="setStatus(99)" title="Press W">
-              Well Known
+              ${escapeHtml(t('review.card.well_known'))}
             </button>
           </div>
         </div>
@@ -262,7 +274,7 @@ function buildWordReviewArea(): string {
         <!-- Details button -->
         <div x-show="store.answerRevealed">
           <button class="button is-text is-small" @click="store.openModal()" title="Press E">
-            Details / Edit
+            ${escapeHtml(t('review.card.details_edit'))}
           </button>
         </div>
       </div>
@@ -278,12 +290,12 @@ function buildTableReview(): string {
     <!-- Loading -->
     <div x-show="isLoading" class="has-text-centered py-6">
       <div class="loading-spinner"></div>
-      <p class="mt-4 has-text-grey">Loading words...</p>
+      <p class="mt-4 has-text-grey">${escapeHtml(t('review.loading_words'))}</p>
     </div>
 
     <!-- No words -->
     <div x-show="!isLoading && words.length === 0" class="notification is-info is-light">
-      <p>No words available for table review.</p>
+      <p>${escapeHtml(t('review.table.no_words'))}</p>
     </div>
 
     <!-- Table -->
@@ -291,40 +303,50 @@ function buildTableReview(): string {
       <!-- Column toggles -->
       <div class="field is-grouped is-grouped-multiline mb-4">
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="columns.edit" @change="saveColumnSettings"> Edit</label>
+          <label class="checkbox"><input type="checkbox" x-model="columns.edit"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.col_edit'))}</label>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="columns.status" @change="saveColumnSettings"> Status</label>
+          <label class="checkbox"><input type="checkbox" x-model="columns.status"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.col_status'))}</label>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="columns.term" @change="saveColumnSettings"> Term</label>
+          <label class="checkbox"><input type="checkbox" x-model="columns.term"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.col_term'))}</label>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="columns.trans" @change="saveColumnSettings"> Translation</label>
+          <label class="checkbox"><input type="checkbox" x-model="columns.trans"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.col_translation'))}</label>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="columns.rom" @change="saveColumnSettings"> Romanization</label>
+          <label class="checkbox"><input type="checkbox" x-model="columns.rom"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.col_romanization'))}</label>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="columns.sentence" @change="saveColumnSettings"> Sentence</label>
+          <label class="checkbox"><input type="checkbox" x-model="columns.sentence"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.col_sentence'))}</label>
         </div>
         <div class="control ml-4">
-          <label class="checkbox"><input type="checkbox" x-model="hideTermContent" @change="saveColumnSettings"> Hide terms</label>
+          <label class="checkbox"><input type="checkbox" x-model="hideTermContent"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.hide_terms'))}</label>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="hideTransContent" @change="saveColumnSettings"> Hide translations</label>
+          <label class="checkbox"><input type="checkbox" x-model="hideTransContent"
+            @change="saveColumnSettings"> ${escapeHtml(t('review.table.hide_translations'))}</label>
         </div>
       </div>
       <!-- Context annotation toggles (affects sentence mode tests) -->
       <div class="field is-grouped is-grouped-multiline mb-4">
         <div class="control">
-          <span class="has-text-grey-dark is-size-7 mr-2">Sentence context annotations:</span>
+          <span class="has-text-grey-dark is-size-7 mr-2">${escapeHtml(t('review.table.context_annotations'))}</span>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="contextAnnotations.rom" @change="saveContextAnnotationSettings"> Romanization</label>
+          <label class="checkbox"><input type="checkbox" x-model="contextAnnotations.rom"
+            @change="saveContextAnnotationSettings"> ${escapeHtml(t('review.table.col_romanization'))}</label>
         </div>
         <div class="control">
-          <label class="checkbox"><input type="checkbox" x-model="contextAnnotations.trans" @change="saveContextAnnotationSettings"> Translation</label>
+          <label class="checkbox"><input type="checkbox" x-model="contextAnnotations.trans"
+            @change="saveContextAnnotationSettings"> ${escapeHtml(t('review.table.col_translation'))}</label>
         </div>
       </div>
 
@@ -332,12 +354,22 @@ function buildTableReview(): string {
         <table class="table is-striped is-hoverable is-fullwidth">
           <thead>
             <tr>
-              <th x-show="columns.edit" class="has-text-centered" style="width: 50px;">Ed</th>
-              <th x-show="columns.status" class="has-text-centered" style="width: 180px;">Status</th>
-              <th x-show="columns.term" class="has-text-centered">Term</th>
-              <th x-show="columns.trans" class="has-text-centered">Translation</th>
-              <th x-show="columns.rom" class="has-text-centered">Rom.</th>
-              <th x-show="columns.sentence">Sentence</th>
+              <th x-show="columns.edit" class="has-text-centered" style="width: 50px;">
+                ${escapeHtml(t('review.table.col_ed_short'))}
+              </th>
+              <th x-show="columns.status" class="has-text-centered" style="width: 180px;">
+                ${escapeHtml(t('review.table.col_status'))}
+              </th>
+              <th x-show="columns.term" class="has-text-centered">
+                ${escapeHtml(t('review.table.col_term'))}
+              </th>
+              <th x-show="columns.trans" class="has-text-centered">
+                ${escapeHtml(t('review.table.col_translation'))}
+              </th>
+              <th x-show="columns.rom" class="has-text-centered">
+                ${escapeHtml(t('review.table.col_rom_short'))}
+              </th>
+              <th x-show="columns.sentence">${escapeHtml(t('review.table.col_sentence'))}</th>
             </tr>
           </thead>
           <tbody>
@@ -345,7 +377,7 @@ function buildTableReview(): string {
               <tr>
                 <td x-show="columns.edit" class="has-text-centered">
                   <a :href="'/word/edit-term?wid=' + word.id" class="button is-small is-text">
-                    Edit
+                    ${escapeHtml(t('review.table.col_edit'))}
                   </a>
                 </td>
                 <td x-show="columns.status" class="has-text-centered">
@@ -390,7 +422,7 @@ function buildWordModal(): string {
       <div class="modal-background" @click="store.closeModal()"></div>
       <div class="modal-card" style="max-width: 500px;">
         <header class="modal-card-head py-3">
-          <p class="modal-card-title is-size-5">Word Details</p>
+          <p class="modal-card-title is-size-5">${escapeHtml(t('review.modal.word_details'))}</p>
           <button class="delete" aria-label="close" @click="store.closeModal()"></button>
         </header>
         <section class="modal-card-body">
@@ -401,7 +433,7 @@ function buildWordModal(): string {
                       :style="store.langSettings.rtl ? 'direction: rtl' : ''"
                       x-text="store.currentWord.text"></span>
                 <button class="button is-small" @click="speakWord">
-                  Listen
+                  ${escapeHtml(t('review.modal.listen'))}
                 </button>
               </div>
 
@@ -411,16 +443,19 @@ function buildWordModal(): string {
 
               <template x-if="store.hasDictUrl('dict1') || store.hasDictUrl('dict2') || store.hasDictUrl('translator')">
               <div class="mb-4">
-                <p class="is-size-7 has-text-grey mb-2">Look up in dictionary:</p>
+                <p class="is-size-7 has-text-grey mb-2">${escapeHtml(t('review.modal.lookup_in_dictionary'))}</p>
                 <div class="buttons">
-                  <a x-show="store.hasDictUrl('dict1')" :href="store.getDictUrl('dict1')" target="_blank" class="button is-outlined" rel="noopener">
-                    Dictionary 1
+                  <a x-show="store.hasDictUrl('dict1')" :href="store.getDictUrl('dict1')"
+                     target="_blank" class="button is-outlined" rel="noopener">
+                    ${escapeHtml(t('review.modal.dictionary_1'))}
                   </a>
-                  <a x-show="store.hasDictUrl('dict2')" :href="store.getDictUrl('dict2')" target="_blank" class="button is-outlined" rel="noopener">
-                    Dictionary 2
+                  <a x-show="store.hasDictUrl('dict2')" :href="store.getDictUrl('dict2')"
+                     target="_blank" class="button is-outlined" rel="noopener">
+                    ${escapeHtml(t('review.modal.dictionary_2'))}
                   </a>
-                  <a x-show="store.hasDictUrl('translator')" :href="store.getDictUrl('translator')" target="_blank" class="button is-outlined" rel="noopener">
-                    Translate
+                  <a x-show="store.hasDictUrl('translator')" :href="store.getDictUrl('translator')"
+                     target="_blank" class="button is-outlined" rel="noopener">
+                    ${escapeHtml(t('review.modal.translate'))}
                   </a>
                 </div>
               </div>
@@ -430,9 +465,9 @@ function buildWordModal(): string {
         </section>
         <footer class="modal-card-foot">
           <a :href="store.getEditUrl()" class="button is-info">
-            Edit Term
+            ${escapeHtml(t('review.modal.edit_term'))}
           </a>
-          <button class="button" @click="store.closeModal()">Close</button>
+          <button class="button" @click="store.closeModal()">${escapeHtml(t('review.modal.close'))}</button>
         </footer>
       </div>
     </div>
@@ -587,7 +622,8 @@ export function initReviewApp(): void {
 
   } catch (err) {
     console.error('Error initializing review app:', err);
-    container.innerHTML = '<div class="notification is-danger m-4">Failed to initialize review</div>';
+    container.innerHTML =
+      `<div class="notification is-danger m-4">${escapeHtml(t('review.init_failed'))}</div>`;
   }
 }
 
@@ -717,9 +753,9 @@ function registerReviewAppComponent(config: ReviewConfig): void {
     // Finished state helpers (CSP-compatible)
     getFinishedTitle(): string {
       if (this.store.progress.total > 0) {
-        return 'Nothing more to review here!';
+        return t('review.finished.nothing_more');
       }
-      return 'No vocabulary to review for the day.';
+      return t('review.no_vocabulary_title');
     },
 
     hasNoVocabulary(): boolean {
@@ -727,7 +763,7 @@ function registerReviewAppComponent(config: ReviewConfig): void {
     },
 
     getNoVocabularyHint(): string {
-      return 'Start reading a text and mark words to build your review queue.';
+      return t('review.no_vocabulary_hint');
     },
 
     hasTomorrowWords(): boolean {
@@ -735,7 +771,9 @@ function registerReviewAppComponent(config: ReviewConfig): void {
     },
 
     getTomorrowLabel(): string {
-      return this.store.tomorrowCount === 1 ? 'review' : 'reviews';
+      return this.store.tomorrowCount === 1
+        ? t('review.finished.tomorrow_one')
+        : t('review.finished.tomorrow_many');
     },
 
     // Safe accessors (CSP-compatible - avoid ?. in templates)

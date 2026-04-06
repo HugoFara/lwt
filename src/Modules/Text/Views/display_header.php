@@ -61,8 +61,8 @@ assert(is_string($mediaPlayerHtml));
         <span id="hidet" class="click" data-action="hide-translations">
             <?php
             echo IconHelper::render('lightbulb', [
-                'title' => 'Toggle Text Display (Now ON)',
-                'alt' => 'Toggle Text Display (Now ON)',
+                'title' => __('text.display.toggle_text_on'),
+                'alt' => __('text.display.toggle_text_on'),
                 'class' => 'click'
             ]);
             ?>
@@ -70,8 +70,8 @@ assert(is_string($mediaPlayerHtml));
         <span id="showt" style="display:none;" class="click" data-action="show-translations">
             <?php
             echo IconHelper::render('lightbulb-off', [
-                'title' => 'Toggle Text Display (Now OFF)',
-                'alt' => 'Toggle Text Display (Now OFF)',
+                'title' => __('text.display.toggle_text_off'),
+                'alt' => __('text.display.toggle_text_off'),
                 'class' => 'click'
             ]);
             ?>
@@ -79,8 +79,8 @@ assert(is_string($mediaPlayerHtml));
         <span id="hide" class="click" data-action="hide-annotations">
             <?php
             echo IconHelper::render('lightbulb', [
-                'title' => 'Toggle Annotation Display (Now ON)',
-                'alt' => 'Toggle Annotation Display (Now ON)',
+                'title' => __('text.display.toggle_annotation_on'),
+                'alt' => __('text.display.toggle_annotation_on'),
                 'class' => 'click'
             ]);
             ?>
@@ -88,8 +88,8 @@ assert(is_string($mediaPlayerHtml));
         <span id="show" style="display:none;" class="click" data-action="show-annotations">
             <?php
             echo IconHelper::render('lightbulb-off', [
-                'title' => 'Toggle Annotation Display (Now OFF)',
-                'alt' => 'Toggle Annotation Display (Now OFF)',
+                'title' => __('text.display.toggle_annotation_off'),
+                'alt' => __('text.display.toggle_annotation_off'),
                 'class' => 'click'
             ]);
             ?>
@@ -99,7 +99,8 @@ assert(is_string($mediaPlayerHtml));
         <?php
         if ($sourceUriTyped !== null && $sourceUriTyped !== '') {
             echo ' <a href="' . $sourceUriTyped . '" target="_blank">';
-            echo IconHelper::render('link', ['title' => 'Text Source', 'alt' => 'Text Source']);
+            $textSourceLabel = __('text.display.text_source');
+            echo IconHelper::render('link', ['title' => $textSourceLabel, 'alt' => $textSourceLabel]);
             echo '</a>';
         }
         echo $textLinksTyped;
@@ -108,7 +109,11 @@ assert(is_string($mediaPlayerHtml));
     <div>
         <span class="click" data-action="close-window">
             <?php
-            echo IconHelper::render('x', ['title' => 'Close Window', 'alt' => 'Close Window', 'class' => 'click']);
+            $closeLabel = __('text.display.close_window');
+            echo IconHelper::render(
+                'x',
+                ['title' => $closeLabel, 'alt' => $closeLabel, 'class' => 'click']
+            );
             ?>
         </span>
     </div>

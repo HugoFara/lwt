@@ -44,13 +44,17 @@ if (!empty($error)) :
 
 <?php
 echo PageLayoutHelper::buildActionCard([
-    ['url' => "/dictionaries?lang=$langId", 'label' => 'Back to Dictionaries', 'icon' => 'arrow-left'],
+    [
+        'url' => "/dictionaries?lang=$langId",
+        'label' => __('dictionary.back_to_dictionaries'),
+        'icon' => 'arrow-left',
+    ],
 ]);
 ?>
 
 <div class="box" x-data="dictionaryImport()">
-    <h3 class="title is-4">Import Dictionary</h3>
-    <p class="subtitle is-6">Import dictionary entries from CSV, JSON, or StarDict files.</p>
+    <h3 class="title is-4"><?php echo __('dictionary.import_dictionary'); ?></h3>
+    <p class="subtitle is-6"><?php echo __('dictionary.import_dictionary_subtitle'); ?></p>
 
     <form method="POST" action="/dictionaries/import" enctype="multipart/form-data"
           @submit="submitting = true">
@@ -59,27 +63,27 @@ echo PageLayoutHelper::buildActionCard([
 
         <!-- Dictionary Selection -->
         <div class="field">
-            <label class="label">Dictionary</label>
+            <label class="label"><?php echo __('dictionary.dictionary'); ?></label>
             <div class="control">
                 <?php if ($dictionary) : ?>
                 <input type="hidden" name="dict_id" value="<?php echo $dictionary->id(); ?>">
                 <input type="text" class="input"
                        value="<?php echo htmlspecialchars($dictionary->name(), ENT_QUOTES); ?>" readonly>
-                <p class="help">Adding entries to existing dictionary.</p>
+                <p class="help"><?php echo __('dictionary.adding_to_existing'); ?></p>
                 <?php elseif (!empty($dictionaries)) : ?>
                 <div class="select is-fullwidth">
                     <select name="dict_id">
-                        <option value="">-- Create new dictionary --</option>
+                        <option value=""><?php echo __('dictionary.create_new_option'); ?></option>
                         <?php foreach ($dictionaries as $dict) : ?>
                         <option value="<?php echo $dict->id(); ?>">
                             <?php echo htmlspecialchars($dict->name(), ENT_QUOTES); ?>
-                            (<?php echo number_format($dict->entryCount()); ?> entries)
+                            (<?php echo number_format($dict->entryCount()); ?>)
                         </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <?php else : ?>
-                <p class="help">A new dictionary will be created.</p>
+                <p class="help"><?php echo __('dictionary.new_dict_will_be_created'); ?></p>
                 <?php endif; ?>
             </div>
         </div>
@@ -87,24 +91,26 @@ echo PageLayoutHelper::buildActionCard([
         <!-- Dictionary Name (for new dictionaries) -->
         <?php if (!$dictionary) : ?>
         <div class="field">
-            <label class="label">Dictionary Name</label>
+            <label class="label"><?php echo __('dictionary.dictionary_name'); ?></label>
             <div class="control">
                 <input type="text" name="dict_name" class="input"
-                       placeholder="e.g., JMdict Japanese-English">
+                       placeholder="<?php
+                            echo htmlspecialchars(__('dictionary.dictionary_name_example'), ENT_QUOTES);
+                        ?>">
             </div>
-            <p class="help">Leave empty to auto-generate from filename.</p>
+            <p class="help"><?php echo __('dictionary.auto_generate_help'); ?></p>
         </div>
         <?php endif; ?>
 
         <!-- File Format -->
         <div class="field">
-            <label class="label">File Format</label>
+            <label class="label"><?php echo __('dictionary.file_format'); ?></label>
             <div class="control">
                 <div class="select is-fullwidth">
                     <select name="format" x-model="format" @change="resetOptions()">
-                        <option value="csv">CSV / TSV (Comma/Tab separated)</option>
-                        <option value="json">JSON</option>
-                        <option value="stardict">StarDict (.ifo file)</option>
+                        <option value="csv"><?php echo __('dictionary.format_csv'); ?></option>
+                        <option value="json"><?php echo __('dictionary.format_json'); ?></option>
+                        <option value="stardict"><?php echo __('dictionary.format_stardict'); ?></option>
                     </select>
                 </div>
             </div>
@@ -112,7 +118,7 @@ echo PageLayoutHelper::buildActionCard([
 
         <!-- File Upload -->
         <div class="field">
-            <label class="label">Dictionary File</label>
+            <label class="label"><?php echo __('dictionary.dictionary_file'); ?></label>
             <div class="file has-name is-fullwidth">
                 <label class="file-label">
                     <input class="file-input" type="file" name="file" required
@@ -120,32 +126,34 @@ echo PageLayoutHelper::buildActionCard([
                            :accept="acceptTypes[format]">
                     <span class="file-cta">
                         <span class="file-icon">
-                            <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
+                            <?php echo IconHelper::render('upload', ['alt' => __('common.upload')]); ?>
                         </span>
-                        <span class="file-label">Choose file...</span>
+                        <span class="file-label"><?php echo __('dictionary.choose_file'); ?></span>
                     </span>
-                    <span class="file-name" x-text="fileName || 'No file selected'"></span>
+                    <span class="file-name"
+                          x-text="fileName || '<?php
+                              echo htmlspecialchars(__('dictionary.no_file_selected'), ENT_QUOTES);
+                            ?>'"></span>
                 </label>
             </div>
-            <p class="help" x-show="format === 'csv'">CSV files with term and definition columns.</p>
-            <p class="help" x-show="format === 'json'">JSON array of objects with term/definition fields.</p>
-            <p class="help" x-show="format === 'stardict'">Select the .ifo file.
-                The .idx and .dict files must be in the same directory.</p>
+            <p class="help" x-show="format === 'csv'"><?php echo __('dictionary.csv_help'); ?></p>
+            <p class="help" x-show="format === 'json'"><?php echo __('dictionary.json_help'); ?></p>
+            <p class="help" x-show="format === 'stardict'"><?php echo __('dictionary.stardict_help'); ?></p>
         </div>
 
         <!-- CSV Options -->
         <div x-show="format === 'csv'" class="box">
-            <h5 class="title is-6">CSV Options</h5>
+            <h5 class="title is-6"><?php echo __('dictionary.csv_options'); ?></h5>
 
             <div class="field">
-                <label class="label">Delimiter</label>
+                <label class="label"><?php echo __('dictionary.delimiter'); ?></label>
                 <div class="control">
                     <div class="select">
                         <select name="delimiter">
-                            <option value=",">Comma (,)</option>
-                            <option value="tab">Tab</option>
-                            <option value=";">Semicolon (;)</option>
-                            <option value="|">Pipe (|)</option>
+                            <option value=","><?php echo __('dictionary.delimiter_comma'); ?></option>
+                            <option value="tab"><?php echo __('dictionary.delimiter_tab'); ?></option>
+                            <option value=";"><?php echo __('dictionary.delimiter_semicolon'); ?></option>
+                            <option value="|"><?php echo __('dictionary.delimiter_pipe'); ?></option>
                         </select>
                     </div>
                 </div>
@@ -154,24 +162,24 @@ echo PageLayoutHelper::buildActionCard([
             <div class="field">
                 <label class="checkbox">
                     <input type="checkbox" name="has_header" value="yes" checked>
-                    First row is header
+                    <?php echo __('dictionary.first_row_header'); ?>
                 </label>
             </div>
 
-            <h6 class="title is-6 mt-4">Column Mapping</h6>
+            <h6 class="title is-6 mt-4"><?php echo __('dictionary.column_mapping'); ?></h6>
             <div class="columns">
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">Term Column</label>
+                        <label class="label"><?php echo __('dictionary.term_column'); ?></label>
                         <div class="control">
                             <input type="number" name="term_column" class="input" value="0" min="0">
                         </div>
-                        <p class="help">0 = first column</p>
+                        <p class="help"><?php echo __('dictionary.first_column_help'); ?></p>
                     </div>
                 </div>
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">Definition Column</label>
+                        <label class="label"><?php echo __('dictionary.definition_column'); ?></label>
                         <div class="control">
                             <input type="number" name="definition_column" class="input" value="1" min="0">
                         </div>
@@ -179,17 +187,17 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">Reading Column</label>
+                        <label class="label"><?php echo __('dictionary.reading_column'); ?></label>
                         <div class="control">
-                            <input type="number" name="reading_column" class="input" placeholder="Optional">
+                            <input type="number" name="reading_column" class="input" placeholder="">
                         </div>
                     </div>
                 </div>
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">POS Column</label>
+                        <label class="label"><?php echo __('dictionary.pos_column'); ?></label>
                         <div class="control">
-                            <input type="number" name="pos_column" class="input" placeholder="Optional">
+                            <input type="number" name="pos_column" class="input" placeholder="">
                         </div>
                     </div>
                 </div>
@@ -198,40 +206,39 @@ echo PageLayoutHelper::buildActionCard([
 
         <!-- JSON Options -->
         <div x-show="format === 'json'" class="box">
-            <h5 class="title is-6">JSON Field Mapping</h5>
-            <p class="mb-3">Leave empty for auto-detection
-                (looks for common field names like term, word, definition, meaning, etc.)</p>
+            <h5 class="title is-6"><?php echo __('dictionary.json_field_mapping'); ?></h5>
+            <p class="mb-3"><?php echo __('dictionary.json_field_help'); ?></p>
 
             <div class="columns">
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">Term Field</label>
+                        <label class="label"><?php echo __('dictionary.term_field'); ?></label>
                         <div class="control">
-                            <input type="text" name="term_field" class="input" placeholder="e.g., word">
+                            <input type="text" name="term_field" class="input" placeholder="word">
                         </div>
                     </div>
                 </div>
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">Definition Field</label>
+                        <label class="label"><?php echo __('dictionary.definition_field'); ?></label>
                         <div class="control">
-                            <input type="text" name="definition_field" class="input" placeholder="e.g., meaning">
+                            <input type="text" name="definition_field" class="input" placeholder="meaning">
                         </div>
                     </div>
                 </div>
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">Reading Field</label>
+                        <label class="label"><?php echo __('dictionary.reading_field'); ?></label>
                         <div class="control">
-                            <input type="text" name="reading_field" class="input" placeholder="e.g., furigana">
+                            <input type="text" name="reading_field" class="input" placeholder="furigana">
                         </div>
                     </div>
                 </div>
                 <div class="column is-3">
                     <div class="field">
-                        <label class="label">POS Field</label>
+                        <label class="label"><?php echo __('dictionary.pos_field'); ?></label>
                         <div class="control">
-                            <input type="text" name="pos_field" class="input" placeholder="e.g., pos">
+                            <input type="text" name="pos_field" class="input" placeholder="pos">
                         </div>
                     </div>
                 </div>
@@ -240,14 +247,15 @@ echo PageLayoutHelper::buildActionCard([
 
         <!-- StarDict Info -->
         <div x-show="format === 'stardict'" class="box">
-            <h5 class="title is-6">StarDict Format</h5>
-            <p>StarDict dictionaries consist of three files:</p>
+            <h5 class="title is-6"><?php echo __('dictionary.stardict_format'); ?></h5>
+            <p><?php echo __('dictionary.stardict_intro'); ?></p>
             <ul class="mt-2 mb-2">
-                <li><strong>.ifo</strong> - Dictionary information (select this file)</li>
-                <li><strong>.idx</strong> - Word index</li>
-                <li><strong>.dict</strong> or <strong>.dict.dz</strong> - Definitions</li>
+                <li><strong>.ifo</strong> - <?php echo __('dictionary.stardict_ifo'); ?></li>
+                <li><strong>.idx</strong> - <?php echo __('dictionary.stardict_idx'); ?></li>
+                <li><strong>.dict</strong> / <strong>.dict.dz</strong> -
+                    <?php echo __('dictionary.stardict_dict'); ?></li>
             </ul>
-            <p class="has-text-info">All three files must be in the same directory.</p>
+            <p class="has-text-info"><?php echo __('dictionary.stardict_same_dir'); ?></p>
         </div>
 
         <!-- Submit -->
@@ -256,8 +264,8 @@ echo PageLayoutHelper::buildActionCard([
                 <button type="submit" class="button is-primary is-medium"
                         :disabled="submitting || !fileName"
                         :class="{'is-loading': submitting}">
-                    <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
-                    Import Dictionary
+                    <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
+                    <?php echo __('dictionary.import_dictionary'); ?>
                 </button>
             </div>
         </div>

@@ -29,15 +29,15 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 ?>
 <p>
     <input type="checkbox" id="cbEdit" <?php echo FormHelper::getChecked($settings['edit']); ?> />
-    Edit
+    <?php echo \htmlspecialchars(__('review.table.col_edit'), ENT_QUOTES, 'UTF-8'); ?>
     <input type="checkbox" id="cbStatus" <?php echo FormHelper::getChecked($settings['status']); ?> />
-    Status
+    <?php echo \htmlspecialchars(__('review.table.col_status'), ENT_QUOTES, 'UTF-8'); ?>
     <input type="checkbox" id="cbTerm" <?php echo FormHelper::getChecked($settings['term']); ?> />
-    Term
+    <?php echo \htmlspecialchars(__('review.table.col_term'), ENT_QUOTES, 'UTF-8'); ?>
     <input type="checkbox" id="cbTrans" <?php echo FormHelper::getChecked($settings['trans']); ?> />
-    Translation
+    <?php echo \htmlspecialchars(__('review.table.col_translation'), ENT_QUOTES, 'UTF-8'); ?>
     <input type="checkbox" id="cbRom" <?php echo FormHelper::getChecked($settings['rom']); ?> />
-    Romanization
+    <?php echo \htmlspecialchars(__('review.table.col_romanization'), ENT_QUOTES, 'UTF-8'); ?>
     <input type="checkbox" id="cbSentence" <?php echo FormHelper::getChecked($settings['sentence']); ?> />
-    Sentence
+    <?php echo \htmlspecialchars(__('review.table.col_sentence'), ENT_QUOTES, 'UTF-8'); ?>
 </p>

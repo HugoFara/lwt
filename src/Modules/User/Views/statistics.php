@@ -85,6 +85,7 @@ $frequencyChartTotals = [
     'ka' => (int)$frequencyStats['totals']['ka'],
 ];
 
+$t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
 ?>
 <div class="container">
 
@@ -95,7 +96,7 @@ $frequencyChartTotals = [
                 <span class="icon has-text-warning">
                     <?php echo IconHelper::render('flame', ['class' => 'icon']); ?>
                 </span>
-                <span>Your Activity</span>
+                <span><?php echo $t('statistics.activity_title'); ?></span>
             </span>
         </h2>
 
@@ -103,23 +104,26 @@ $frequencyChartTotals = [
         <div class="columns is-mobile is-multiline mb-3">
             <div class="column is-4-desktop is-6-mobile">
                 <div class="box has-background-light has-text-centered py-3">
-                    <p class="heading">Current Streak</p>
+                    <p class="heading"><?php echo $t('statistics.current_streak'); ?></p>
                     <p class="title is-5" x-text="streakLabel(currentStreak)">--</p>
                 </div>
             </div>
             <div class="column is-4-desktop is-6-mobile">
                 <div class="box has-background-light has-text-centered py-3">
-                    <p class="heading">Best Streak</p>
+                    <p class="heading"><?php echo $t('statistics.best_streak'); ?></p>
                     <p class="title is-5" x-text="streakLabel(bestStreak)">--</p>
                 </div>
             </div>
             <div class="column is-4-desktop is-12-mobile">
                 <div class="box has-background-light has-text-centered py-3">
-                    <p class="heading">Today</p>
+                    <p class="heading"><?php echo $t('statistics.today'); ?></p>
                     <p class="is-size-6">
-                        <span class="has-text-weight-semibold" x-text="todayCreated"></span> created,
-                        <span class="has-text-weight-semibold" x-text="todayReviewed"></span> reviewed,
-                        <span class="has-text-weight-semibold" x-text="todayTextsRead"></span> read
+                        <span class="has-text-weight-semibold" x-text="todayCreated"></span>
+                        <?php echo $t('statistics.today_created'); ?>,
+                        <span class="has-text-weight-semibold" x-text="todayReviewed"></span>
+                        <?php echo $t('statistics.today_reviewed'); ?>,
+                        <span class="has-text-weight-semibold" x-text="todayTextsRead"></span>
+                        <?php echo $t('statistics.today_read'); ?>
                     </p>
                 </div>
             </div>
@@ -128,9 +132,9 @@ $frequencyChartTotals = [
         <!-- Calendar heatmap -->
         <div x-data="calendarHeatmap">
             <div style="overflow-x: auto;">
-                <p class="heading mb-2">Activity (Last 12 Months)</p>
+                <p class="heading mb-2"><?php echo $t('statistics.activity_last_12_months'); ?></p>
                 <div x-show="loading" class="has-text-centered py-3">
-                    <span class="has-text-grey-light is-size-7">Loading activity...</span>
+                    <span class="has-text-grey-light is-size-7"><?php echo $t('statistics.loading_activity'); ?></span>
                 </div>
                 <div x-show="error" class="has-text-danger is-size-7" x-text="error"></div>
                 <div x-ref="svgContainer" style="min-width: 720px;"></div>
@@ -155,7 +159,7 @@ $frequencyChartTotals = [
                     <span class="icon has-text-info">
                         <?php echo IconHelper::render('bar-chart-2', ['class' => 'icon']); ?>
                     </span>
-                    <span>Learning Intensity</span>
+                    <span><?php echo $t('statistics.intensity_title'); ?></span>
                 </span>
             </h2>
             <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
@@ -166,7 +170,7 @@ $frequencyChartTotals = [
         <div class="collapsible-content" x-show="open" x-collapse>
         <!-- Intensity Chart -->
         <div class="box mb-4 mt-4">
-            <h3 class="subtitle is-6">Term Status Distribution by Language</h3>
+            <h3 class="subtitle is-6"><?php echo $t('statistics.intensity_chart_title'); ?></h3>
             <canvas id="intensityChart" height="100"></canvas>
         </div>
         </div>
@@ -180,7 +184,7 @@ $frequencyChartTotals = [
                     <span class="icon has-text-success">
                         <?php echo IconHelper::render('trending-up', ['class' => 'icon']); ?>
                     </span>
-                    <span>Learning Frequency</span>
+                    <span><?php echo $t('statistics.frequency_title'); ?></span>
                 </span>
             </h2>
             <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
@@ -191,7 +195,7 @@ $frequencyChartTotals = [
         <div class="collapsible-content" x-show="open" x-collapse>
         <!-- Frequency Chart -->
         <div class="box mb-4 mt-4">
-            <h3 class="subtitle is-6">Learning Activity Over Time (All Languages)</h3>
+            <h3 class="subtitle is-6"><?php echo $t('statistics.frequency_chart_title'); ?></h3>
             <canvas id="frequencyChart" height="80"></canvas>
         </div>
         </div>
@@ -202,7 +206,7 @@ $frequencyChartTotals = [
         <div class="control">
             <a href="/" class="button is-light">
                 <?php echo IconHelper::render('arrow-left'); ?>
-                <span>Back to Main Menu</span>
+                <span><?php echo $t('statistics.back_to_main'); ?></span>
             </a>
         </div>
     </div>

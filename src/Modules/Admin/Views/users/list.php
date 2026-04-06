@@ -24,6 +24,14 @@ $sort = isset($data['sort']) && is_string($data['sort']) ? $data['sort'] : 'user
 $dir = isset($data['dir']) && is_string($data['dir']) ? $data['dir'] : 'ASC';
 
 $base = UrlUtilities::getBasePath();
+$baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$titleEdit = htmlspecialchars(__('admin.users_action_edit'), ENT_QUOTES, 'UTF-8');
+$titleDeact = htmlspecialchars(__('admin.users_action_deactivate'), ENT_QUOTES, 'UTF-8');
+$titleAct = htmlspecialchars(__('admin.users_action_activate'), ENT_QUOTES, 'UTF-8');
+$titleDemote = htmlspecialchars(__('admin.users_action_demote'), ENT_QUOTES, 'UTF-8');
+$titlePromote = htmlspecialchars(__('admin.users_action_promote'), ENT_QUOTES, 'UTF-8');
+$titleDelete = htmlspecialchars(__('admin.users_action_delete'), ENT_QUOTES, 'UTF-8');
+$searchPlaceholder = htmlspecialchars(__('admin.users_search_placeholder'), ENT_QUOTES, 'UTF-8');
 
 /**
  * Build a sortable column header link.
@@ -52,25 +60,25 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
     <div class="columns is-multiline mb-4">
         <div class="column is-3">
             <div class="box has-text-centered">
-                <p class="heading">Total Users</p>
+                <p class="heading"><?= __('admin.users_total') ?></p>
                 <p class="title"><?php echo $stats['total'] ?? 0; ?></p>
             </div>
         </div>
         <div class="column is-3">
             <div class="box has-text-centered">
-                <p class="heading">Active</p>
+                <p class="heading"><?= __('admin.users_active') ?></p>
                 <p class="title has-text-success"><?php echo $stats['active'] ?? 0; ?></p>
             </div>
         </div>
         <div class="column is-3">
             <div class="box has-text-centered">
-                <p class="heading">Inactive</p>
+                <p class="heading"><?= __('admin.users_inactive') ?></p>
                 <p class="title has-text-grey"><?php echo $stats['inactive'] ?? 0; ?></p>
             </div>
         </div>
         <div class="column is-3">
             <div class="box has-text-centered">
-                <p class="heading">Admins</p>
+                <p class="heading"><?= __('admin.users_admins') ?></p>
                 <p class="title has-text-info"><?php echo $stats['admins'] ?? 0; ?></p>
             </div>
         </div>
@@ -81,19 +89,28 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
     <div class="level mb-4">
         <div class="level-left">
             <div class="level-item">
-                <form method="get" action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users">
+                <form method="get" action="<?= $baseEsc ?>/admin/users">
                     <div class="field has-addons">
                         <div class="control">
-                            <input class="input" type="text" name="search"
-                                   placeholder="Search users..."
-                                   value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>">
+                            <input
+                                class="input"
+                                type="text"
+                                name="search"
+                                placeholder="<?= $searchPlaceholder ?>"
+                                value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>"
+                            >
                         </div>
                         <div class="control">
-                            <button class="button is-info" type="submit">Search</button>
+                            <button class="button is-info" type="submit">
+                                <?= __('admin.users_search_button') ?>
+                            </button>
                         </div>
                         <?php if ($search !== '') : ?>
                         <div class="control">
-                            <a class="button" href="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users">Clear</a>
+                            <a
+                                class="button"
+                                href="<?= $baseEsc ?>/admin/users"
+                            ><?= __('admin.users_clear') ?></a>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -102,9 +119,9 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
         </div>
         <div class="level-right">
             <div class="level-item">
-                <a class="button is-primary" href="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/new">
+                <a class="button is-primary" href="<?= $baseEsc ?>/admin/users/new">
                     <?php echo IconHelper::render('user-plus', ['class' => 'icon']); ?>
-                    <span>Add New User</span>
+                    <span><?= __('admin.users_add_new') ?></span>
                 </a>
             </div>
         </div>
@@ -115,20 +132,20 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
         <table class="table is-striped is-hoverable is-fullwidth">
             <thead>
                 <tr>
-                    <th><?php echo $sortLink('username', 'Username'); ?></th>
-                    <th><?php echo $sortLink('email', 'Email'); ?></th>
-                    <th><?php echo $sortLink('role', 'Role'); ?></th>
-                    <th><?php echo $sortLink('active', 'Active'); ?></th>
-                    <th><?php echo $sortLink('last_login', 'Last Login'); ?></th>
-                    <th><?php echo $sortLink('created', 'Created'); ?></th>
-                    <th>Actions</th>
+                    <th><?php echo $sortLink('username', __('admin.users_col_username')); ?></th>
+                    <th><?php echo $sortLink('email', __('admin.users_col_email')); ?></th>
+                    <th><?php echo $sortLink('role', __('admin.users_col_role')); ?></th>
+                    <th><?php echo $sortLink('active', __('admin.users_col_active')); ?></th>
+                    <th><?php echo $sortLink('last_login', __('admin.users_col_last_login')); ?></th>
+                    <th><?php echo $sortLink('created', __('admin.users_col_created')); ?></th>
+                    <th><?= __('admin.users_col_actions') ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($items)) : ?>
                 <tr>
                     <td colspan="7" class="has-text-centered has-text-grey">
-                        <?php echo $search !== '' ? 'No users found matching your search.' : 'No users found.'; ?>
+                        <?= $search !== '' ? __('admin.users_none_search') : __('admin.users_none') ?>
                     </td>
                 </tr>
                 <?php endif; ?>
@@ -147,16 +164,16 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                     <td><?php echo htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>
                         <?php if ($isAdmin) : ?>
-                            <span class="tag is-info">Admin</span>
+                            <span class="tag is-info"><?= __('admin.users_role_admin') ?></span>
                         <?php else : ?>
-                            <span class="tag">User</span>
+                            <span class="tag"><?= __('admin.users_role_user') ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
                         <?php if ($isActive) : ?>
-                            <span class="tag is-success is-light">Active</span>
+                            <span class="tag is-success is-light"><?= __('admin.users_status_active') ?></span>
                         <?php else : ?>
-                            <span class="tag is-danger is-light">Inactive</span>
+                            <span class="tag is-danger is-light"><?= __('admin.users_status_inactive') ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -165,7 +182,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                         if ($lastLogin !== null) : ?>
                             <?php echo htmlspecialchars($lastLogin->format('Y-m-d H:i'), ENT_QUOTES, 'UTF-8'); ?>
                         <?php else : ?>
-                            <span class="has-text-grey">Never</span>
+                            <span class="has-text-grey"><?= __('admin.users_never') ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -175,8 +192,8 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                         <div class="buttons are-small">
                             <!-- Edit -->
                             <a class="button is-small"
-                               href="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/edit"
-                               title="Edit">
+                               href="<?= $baseEsc ?>/admin/users/<?php echo $userId; ?>/edit"
+                               title="<?= $titleEdit ?>">
                                 <?php echo IconHelper::render('edit', ['class' => 'icon']); ?>
                             </a>
 
@@ -184,21 +201,21 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                             <!-- Toggle Active -->
                                 <?php if ($isActive) : ?>
                             <form method="post"
-                                  action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/deactivate"
+                                  action="<?= $baseEsc ?>/admin/users/<?php echo $userId; ?>/deactivate"
                                   style="display:inline"
                                   @submit.prevent="toggleStatus(<?php echo $userId; ?>, 'deactivate', $event.target)">
                                     <?php echo FormHelper::csrfField(); ?>
-                                <button class="button is-small is-warning" type="submit" title="Deactivate">
+                                <button class="button is-small is-warning" type="submit" title="<?= $titleDeact ?>">
                                     <?php echo IconHelper::render('user-x', ['class' => 'icon']); ?>
                                 </button>
                             </form>
                                 <?php else : ?>
                             <form method="post"
-                                  action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/activate"
+                                  action="<?= $baseEsc ?>/admin/users/<?php echo $userId; ?>/activate"
                                   style="display:inline"
                                   @submit.prevent="toggleStatus(<?php echo $userId; ?>, 'activate', $event.target)">
                                     <?php echo FormHelper::csrfField(); ?>
-                                <button class="button is-small is-success" type="submit" title="Activate">
+                                <button class="button is-small is-success" type="submit" title="<?= $titleAct ?>">
                                     <?php echo IconHelper::render('user-check', ['class' => 'icon']); ?>
                                 </button>
                             </form>
@@ -207,23 +224,27 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                             <!-- Toggle Role -->
                                 <?php if ($isAdmin) : ?>
                             <form method="post"
-                                  action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/role"
+                                  action="<?= $baseEsc ?>/admin/users/<?php echo $userId; ?>/role"
                                   style="display:inline"
                                   @submit.prevent="toggleRole(<?php echo $userId; ?>, 'demote', $event.target)">
                                     <?php echo FormHelper::csrfField(); ?>
                                 <input type="hidden" name="action" value="demote">
-                                <button class="button is-small is-info is-light" type="submit" title="Demote to User">
+                                <button
+                                    class="button is-small is-info is-light"
+                                    type="submit"
+                                    title="<?= $titleDemote ?>"
+                                >
                                     <?php echo IconHelper::render('shield-off', ['class' => 'icon']); ?>
                                 </button>
                             </form>
                                 <?php else : ?>
                             <form method="post"
-                                  action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/role"
+                                  action="<?= $baseEsc ?>/admin/users/<?php echo $userId; ?>/role"
                                   style="display:inline"
                                   @submit.prevent="toggleRole(<?php echo $userId; ?>, 'promote', $event.target)">
                                     <?php echo FormHelper::csrfField(); ?>
                                 <input type="hidden" name="action" value="promote">
-                                <button class="button is-small is-info" type="submit" title="Promote to Admin">
+                                <button class="button is-small is-info" type="submit" title="<?= $titlePromote ?>">
                                     <?php echo IconHelper::render('shield', ['class' => 'icon']); ?>
                                 </button>
                             </form>
@@ -231,18 +252,18 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
 
                             <!-- Delete -->
                             <form method="post"
-                                  action="<?php echo htmlspecialchars($base, ENT_QUOTES, 'UTF-8'); ?>/admin/users/<?php echo $userId; ?>/delete"
+                                  action="<?= $baseEsc ?>/admin/users/<?php echo $userId; ?>/delete"
                                   style="display:inline"
                                   @submit="confirmDelete($event)">
                                 <?php echo FormHelper::csrfField(); ?>
-                                <button class="button is-small is-danger" type="submit" title="Delete">
+                                <button class="button is-small is-danger" type="submit" title="<?= $titleDelete ?>">
                                     <?php echo IconHelper::render('trash-2', ['class' => 'icon']); ?>
                                 </button>
                             </form>
                             <?php endif; ?>
 
                             <?php if ($isSelf) : ?>
-                                <span class="tag is-light">You</span>
+                                <span class="tag is-light"><?= __('admin.users_self_tag') ?></span>
                             <?php endif; ?>
                         </div>
                     </td>

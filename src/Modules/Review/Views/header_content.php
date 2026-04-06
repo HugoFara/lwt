@@ -38,11 +38,22 @@ assert(isset($totalCount) && is_int($totalCount));
 assert(isset($languageName) && is_string($languageName));
 
 ?>
-<h1>REVIEW - <?php echo \htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
+<h1><?php echo \htmlspecialchars(
+    __('review.heading', ['title' => $title]),
+    ENT_QUOTES,
+    'UTF-8'
+); ?></h1>
 <div class="test-word-count">
-    Word<?php echo $totalCount > 1 ? 's' : ''; ?> due today:
+    <?php echo \htmlspecialchars(
+        $totalCount > 1
+            ? __('review.header.words_due_today_many')
+            : __('review.header.words_due_today_one'),
+        ENT_QUOTES,
+        'UTF-8'
+    ); ?>
     <?php echo $totalCount; ?>,
-    <span class="todosty" id="not-tested-header"><?php echo $totalDue; ?></span> remaining.
+    <span class="todosty" id="not-tested-header"><?php echo $totalDue; ?></span>
+    <?php echo \htmlspecialchars(__('review.header.remaining'), ENT_QUOTES, 'UTF-8'); ?>
 </div>
 <div class="flex-spaced">
     <div>
@@ -65,12 +76,15 @@ assert(isset($languageName) && is_string($languageName));
             data-property="<?php echo \htmlspecialchars($property, ENT_QUOTES, 'UTF-8'); ?>" />
     </div>
     <div>
-        <input type="button" value="Table"
+        <input type="button"
+            value="<?php echo \htmlspecialchars(__('review.header.button_table'), ENT_QUOTES, 'UTF-8'); ?>"
             data-action="start-test-table"
             data-property="<?php echo \htmlspecialchars($property, ENT_QUOTES, 'UTF-8'); ?>" />
     </div>
     <div>
         <input type="checkbox" id="utterance-allowed" />
-        <label for="utterance-allowed">Read words aloud</label>
+        <label for="utterance-allowed">
+            <?php echo \htmlspecialchars(__('review.header.read_words_aloud'), ENT_QUOTES, 'UTF-8'); ?>
+        </label>
     </div>
 </div>

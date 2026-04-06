@@ -23,12 +23,21 @@ namespace Lwt\Views\Text;
 
 ?>
 <div x-data="wordModal" x-cloak>
-  <div class="modal" :class="{ 'is-active': isOpen }" role="dialog" aria-modal="true" aria-labelledby="word-modal-title">
+  <div
+    class="modal"
+    :class="{ 'is-active': isOpen }"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="word-modal-title">
     <div class="modal-background" @click="close"></div>
     <div class="modal-card" style="max-width: 500px;">
       <header class="modal-card-head py-3">
         <p class="modal-card-title is-size-6" id="word-modal-title" x-text="modalTitle"></p>
-        <button class="delete" aria-label="Close dialog" @click="close" :disabled="isLoading"></button>
+        <button
+          class="delete"
+          aria-label="<?= __e('text.modal.close') ?>"
+          @click="close"
+          :disabled="isLoading"></button>
       </header>
       <section class="modal-card-body">
         <!-- Loading overlay -->
@@ -36,7 +45,7 @@ namespace Lwt\Views\Text;
           <span class="icon is-large">
             <i data-lucide="loader-2" class="icon-spin" style="width:24px;height:24px" aria-hidden="true"></i>
           </span>
-          <p class="mt-2">Loading...</p>
+          <p class="mt-2"><?= __e('text.common.loading') ?></p>
         </div>
 
         <!-- INFO VIEW -->
@@ -45,7 +54,7 @@ namespace Lwt\Views\Text;
             <!-- Word text and audio -->
             <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
               <span class="is-size-4 has-text-weight-bold" x-text="wordText"></span>
-              <button class="button is-small is-rounded" @click="speakWord" title="Listen">
+              <button class="button is-small is-rounded" @click="speakWord" title="<?= __e('text.modal.listen') ?>">
                 <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('volume-2', ['size' => 16]); ?>
               </button>
             </div>
@@ -63,7 +72,7 @@ namespace Lwt\Views\Text;
             <!-- Notes for known words -->
             <template x-if="hasNotes">
               <div class="mb-3">
-                <p class="is-size-7 has-text-grey mb-1">Notes:</p>
+                <p class="is-size-7 has-text-grey mb-1"><?= __e('text.modal.notes_label') ?></p>
                 <p class="has-text-grey-dark is-size-7" x-text="$markdown(wordNotes)"></p>
               </div>
             </template>
@@ -78,7 +87,7 @@ namespace Lwt\Views\Text;
             <!-- Status buttons for known words -->
             <template x-if="!isUnknown">
               <div class="mb-4">
-                <p class="is-size-7 has-text-grey mb-2">Status:</p>
+                <p class="is-size-7 has-text-grey mb-2"><?= __e('text.modal.status') ?>:</p>
                 <div class="buttons are-small">
                   <template x-for="s in [1,2,3,4,5]" :key="s">
                     <button
@@ -108,15 +117,15 @@ namespace Lwt\Views\Text;
             <!-- Quick actions for unknown words -->
             <template x-if="isUnknown">
               <div class="mb-4">
-                <p class="is-size-7 has-text-grey mb-2">Quick actions:</p>
+                <p class="is-size-7 has-text-grey mb-2"><?= __e('text.modal.quick_actions') ?></p>
                 <div class="buttons">
                   <button class="button is-success" :disabled="isLoading" @click="markWellKnown">
                     <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('check', ['size' => 16]); ?>
-                    <span class="ml-1">I know this well</span>
+                    <span class="ml-1"><?= __e('text.modal.know_well') ?></span>
                   </button>
                   <button class="button is-warning" :disabled="isLoading" @click="markIgnored">
                     <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('x', ['size' => 16]); ?>
-                    <span class="ml-1">Ignore</span>
+                    <span class="ml-1"><?= __e('text.modal.ignore') ?></span>
                   </button>
                 </div>
               </div>
@@ -128,11 +137,11 @@ namespace Lwt\Views\Text;
                 <div class="buttons are-small">
                   <button class="button is-info is-outlined" @click="showEditForm" :disabled="isLoading">
                     <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('edit', ['size' => 14]); ?>
-                    <span class="ml-1">Edit</span>
+                    <span class="ml-1"><?= __e('text.common.edit') ?></span>
                   </button>
                   <button class="button is-danger is-outlined" :disabled="isLoading" @click="deleteWord">
                     <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('trash-2', ['size' => 14]); ?>
-                    <span class="ml-1">Delete</span>
+                    <span class="ml-1"><?= __e('text.common.delete') ?></span>
                   </button>
                 </div>
               </div>
@@ -143,7 +152,7 @@ namespace Lwt\Views\Text;
               <div class="mb-4">
                 <button class="button is-info" @click="showEditForm" :disabled="isLoading">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('edit', ['size' => 16]); ?>
-                  <span class="ml-1">Add with translation</span>
+                  <span class="ml-1"><?= __e('text.modal.add_with_translation') ?></span>
                 </button>
               </div>
             </template>
@@ -151,19 +160,34 @@ namespace Lwt\Views\Text;
             <!-- Dictionary links -->
             <template x-if="hasDictUrl('dict1') || hasDictUrl('dict2') || hasDictUrl('translator')">
             <div class="pt-3" style="border-top: 1px solid #dbdbdb;">
-              <p class="is-size-7 has-text-grey mb-2">Lookup:</p>
+              <p class="is-size-7 has-text-grey mb-2"><?= __e('text.modal.lookup') ?></p>
               <div class="buttons are-small">
-                <a x-show="hasDictUrl('dict1')" :href="getDictUrl('dict1')" target="_blank" class="button is-outlined is-link" rel="noopener">
+                <a
+                  x-show="hasDictUrl('dict1')"
+                  :href="getDictUrl('dict1')"
+                  target="_blank"
+                  class="button is-outlined is-link"
+                  rel="noopener">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['size' => 14]); ?>
-                  <span class="ml-1">Dict 1</span>
+                  <span class="ml-1"><?= __e('text.modal.dict1') ?></span>
                 </a>
-                <a x-show="hasDictUrl('dict2')" :href="getDictUrl('dict2')" target="_blank" class="button is-outlined is-link" rel="noopener">
+                <a
+                  x-show="hasDictUrl('dict2')"
+                  :href="getDictUrl('dict2')"
+                  target="_blank"
+                  class="button is-outlined is-link"
+                  rel="noopener">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('book-open', ['size' => 14]); ?>
-                  <span class="ml-1">Dict 2</span>
+                  <span class="ml-1"><?= __e('text.modal.dict2') ?></span>
                 </a>
-                <a x-show="hasDictUrl('translator')" :href="getDictUrl('translator')" target="_blank" class="button is-outlined is-link" rel="noopener">
+                <a
+                  x-show="hasDictUrl('translator')"
+                  :href="getDictUrl('translator')"
+                  target="_blank"
+                  class="button is-outlined is-link"
+                  rel="noopener">
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('languages', ['size' => 14]); ?>
-                  <span class="ml-1">Translate</span>
+                  <span class="ml-1"><?= __e('text.modal.translate') ?></span>
                 </a>
               </div>
             </div>
@@ -184,7 +208,7 @@ namespace Lwt\Views\Text;
 
             <!-- Term (read-only) -->
             <div class="field">
-              <label class="label is-small">Term</label>
+              <label class="label is-small"><?= __e('text.modal.term') ?></label>
               <div class="control">
                 <input class="input" type="text" :value="formText" disabled>
               </div>
@@ -192,7 +216,9 @@ namespace Lwt\Views\Text;
 
             <!-- Translation -->
             <div class="field">
-              <label class="label is-small">Translation <span class="has-text-danger">*</span></label>
+              <label class="label is-small">
+                <?= __e('text.modal.translation') ?> <span class="has-text-danger">*</span>
+              </label>
               <div class="control">
                 <textarea
                   class="textarea"
@@ -200,7 +226,7 @@ namespace Lwt\Views\Text;
                   x-model="translation"
                   @blur="validateField('translation')"
                   rows="2"
-                  placeholder="Enter translation..."
+                  placeholder="<?= __e('text.modal.translation_placeholder') ?>"
                 ></textarea>
               </div>
               <template x-if="hasFieldError('translation')">
@@ -211,7 +237,7 @@ namespace Lwt\Views\Text;
             <!-- Romanization (if enabled for language) -->
             <template x-if="showRomanization">
               <div class="field">
-                <label class="label is-small">Romanization</label>
+                <label class="label is-small"><?= __e('text.modal.romanization') ?></label>
                 <div class="control">
                   <input
                     class="input"
@@ -219,7 +245,7 @@ namespace Lwt\Views\Text;
                     type="text"
                     x-model="romanization"
                     @blur="validateField('romanization')"
-                    placeholder="Enter romanization..."
+                    placeholder="<?= __e('text.modal.romanization_placeholder') ?>"
                   >
                 </div>
                 <template x-if="hasFieldError('romanization')">
@@ -230,7 +256,7 @@ namespace Lwt\Views\Text;
 
             <!-- Sentence -->
             <div class="field">
-              <label class="label is-small">Example Sentence</label>
+              <label class="label is-small"><?= __e('text.modal.example_sentence') ?></label>
               <div class="control">
                 <textarea
                   class="textarea"
@@ -238,18 +264,18 @@ namespace Lwt\Views\Text;
                   x-model="sentence"
                   @blur="validateField('sentence')"
                   rows="2"
-                  placeholder="Example sentence with {term} in braces..."
+                  placeholder="<?= __e('text.modal.sentence_placeholder') ?>"
                 ></textarea>
               </div>
               <template x-if="hasFieldError('sentence')">
                 <p class="help is-danger" x-text="getFieldError('sentence')"></p>
               </template>
-              <p class="help">Use {curly braces} around the term</p>
+              <p class="help"><?= __e('text.modal.sentence_help') ?></p>
             </div>
 
             <!-- Notes -->
             <div class="field">
-              <label class="label is-small">Notes</label>
+              <label class="label is-small"><?= __e('text.modal.notes') ?></label>
               <div class="control">
                 <textarea
                   class="textarea"
@@ -257,7 +283,7 @@ namespace Lwt\Views\Text;
                   x-model="notes"
                   @blur="validateField('notes')"
                   rows="2"
-                  placeholder="Personal notes about this term..."
+                  placeholder="<?= __e('text.modal.notes_placeholder') ?>"
                 ></textarea>
               </div>
               <template x-if="hasFieldError('notes')">
@@ -267,7 +293,7 @@ namespace Lwt\Views\Text;
 
             <!-- Status -->
             <div class="field">
-              <label class="label is-small">Status</label>
+              <label class="label is-small"><?= __e('text.modal.status') ?></label>
               <div class="buttons are-small">
                 <template x-for="s in statuses" :key="s.value">
                   <button
@@ -283,7 +309,7 @@ namespace Lwt\Views\Text;
 
             <!-- Tags -->
             <div class="field">
-              <label class="label is-small">Tags</label>
+              <label class="label is-small"><?= __e('text.modal.tags') ?></label>
               <div class="control">
                 <!-- Current tags -->
                 <div class="tags mb-2" x-show="hasTags">
@@ -304,7 +330,7 @@ namespace Lwt\Views\Text;
                       @input="filterTags"
                       @keydown.enter.prevent="addTag(tagInput)"
                       @blur="hideTagSuggestions"
-                      placeholder="Add tag..."
+                      placeholder="<?= __e('text.modal.add_tag') ?>"
                     >
                   </div>
                   <div class="dropdown-menu" role="menu" style="width: 100%;">
@@ -322,7 +348,7 @@ namespace Lwt\Views\Text;
             <!-- Similar Terms -->
             <template x-if="hasSimilarTerms">
               <div class="field">
-                <label class="label is-small">Similar Terms</label>
+                <label class="label is-small"><?= __e('text.modal.similar_terms') ?></label>
                 <div class="is-size-7">
                   <template x-for="term in formSimilarTerms" :key="term.id">
                     <div class="is-flex is-justify-content-space-between is-align-items-center py-1"
@@ -357,12 +383,12 @@ namespace Lwt\Views\Text;
                   @click="save"
                 >
                   <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('save', ['size' => 16]); ?>
-                  <span class="ml-1">Save</span>
+                  <span class="ml-1"><?= __e('text.common.save') ?></span>
                 </button>
               </div>
               <div class="control">
                 <button type="button" class="button" @click="cancel" :disabled="isSubmitting">
-                  Cancel
+                  <?= __e('text.common.cancel') ?>
                 </button>
               </div>
             </div>

@@ -40,7 +40,7 @@ $data = is_array($data ?? null) ? $data : [];
 
 ?>
 <div class="container" x-data="serverDataApp()">
-    <p class="mb-4">This page shows server information useful for debugging and issue reports.</p>
+    <p class="mb-4"><?= __('admin.server_data_intro') ?></p>
 
     <!-- Server Section -->
     <div class="box mb-4">
@@ -49,25 +49,25 @@ $data = is_array($data ?? null) ? $data : [];
                 <span class="icon has-text-info">
                     <?php echo IconHelper::render('server', ['class' => 'icon']); ?>
                 </span>
-                <span>Server</span>
+                <span><?= __('admin.server_data_section_server') ?></span>
             </span>
         </h2>
         <table class="table is-striped is-fullwidth">
             <tbody>
                 <tr>
-                    <th style="width: 200px;">LWT version</th>
+                    <th style="width: 200px;"><?= __('admin.server_data_lwt_version') ?></th>
                     <td><?php echo htmlspecialchars($data["lwt_version"] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
                 </tr>
                 <tr>
                     <th>
                         <a href="https://en.wikipedia.org/wiki/Web_server" target="_blank" rel="noopener">
-                            Web Server
+                            <?= __('admin.server_data_web_server') ?>
                         </a>
                     </th>
                     <td><?php echo htmlspecialchars($data["server_soft"] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
                 </tr>
                 <tr>
-                    <th>Server Software</th>
+                    <th><?= __('admin.server_data_server_software') ?></th>
                     <td>
                         <a href="https://en.wikipedia.org/wiki/Apache_HTTP_Server" target="_blank" rel="noopener">
                             <?php echo htmlspecialchars($data["apache"] ?? '', ENT_QUOTES, 'UTF-8'); ?>
@@ -75,7 +75,7 @@ $data = is_array($data ?? null) ? $data : [];
                     </td>
                 </tr>
                 <tr>
-                    <th>Server Location</th>
+                    <th><?= __('admin.server_data_server_location') ?></th>
                     <td><code><?php
                         echo htmlspecialchars($data["server_location"] ?? '', ENT_QUOTES, 'UTF-8');
                     ?></code></td>
@@ -83,8 +83,8 @@ $data = is_array($data ?? null) ? $data : [];
                 <tr>
                     <th>
                         <a href="https://en.wikipedia.org/wiki/PHP" target="_blank" rel="noopener">
-                            PHP
-                        </a> Version
+                            <?= __('admin.server_data_php_version') ?>
+                        </a>
                     </th>
                     <td><?php echo htmlspecialchars($data["php"] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
                 </tr>
@@ -99,7 +99,7 @@ $data = is_array($data ?? null) ? $data : [];
                 <span class="icon has-text-success">
                     <?php echo IconHelper::render('database', ['class' => 'icon']); ?>
                 </span>
-                <span>Database</span>
+                <span><?= __('admin.server_data_section_database') ?></span>
             </span>
         </h2>
         <table class="table is-striped is-fullwidth">
@@ -107,20 +107,20 @@ $data = is_array($data ?? null) ? $data : [];
                 <tr>
                     <th style="width: 200px;">
                         <a href="https://en.wikipedia.org/wiki/Database" target="_blank" rel="noopener">
-                            Database
-                        </a> name
+                            <?= __('admin.server_data_db_name') ?>
+                        </a>
                     </th>
                     <td><code><?php echo htmlspecialchars($data["db_name"] ?? '', ENT_QUOTES, 'UTF-8'); ?></code></td>
                 </tr>
                 <tr>
-                    <th>Database Size</th>
+                    <th><?= __('admin.server_data_db_size') ?></th>
                     <td><?php echo htmlspecialchars((string)($data["db_size"] ?? ''), ENT_QUOTES, 'UTF-8'); ?> MB</td>
                 </tr>
                 <tr>
                     <th>
                         <a href="https://en.wikipedia.org/wiki/MySQL" target="_blank" rel="noopener">
-                            MySQL
-                        </a> Version
+                            <?= __('admin.server_data_mysql_version') ?>
+                        </a>
                     </th>
                     <td><?php echo htmlspecialchars($data["mysql"] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
                 </tr>
@@ -135,7 +135,7 @@ $data = is_array($data ?? null) ? $data : [];
                 <span class="icon has-text-warning">
                     <?php echo IconHelper::render('cloud', ['class' => 'icon']); ?>
                 </span>
-                <span>Client API</span>
+                <span><?= __('admin.server_data_section_client_api') ?></span>
             </span>
         </h2>
 
@@ -144,12 +144,12 @@ $data = is_array($data ?? null) ? $data : [];
             <span class="icon is-medium">
                 <span class="loader"></span>
             </span>
-            <span class="ml-2">Loading API information...</span>
+            <span class="ml-2"><?= __('admin.server_data_loading_api') ?></span>
         </div>
 
         <!-- Error State -->
         <div x-show="error && !isLoading" x-cloak class="notification is-danger is-light">
-            <p><strong>Error loading API information</strong></p>
+            <p><strong><?= __('admin.server_data_error_loading') ?></strong></p>
             <p x-text="error"></p>
         </div>
 
@@ -160,16 +160,16 @@ $data = is_array($data ?? null) ? $data : [];
                     <tr>
                         <th style="width: 200px;">
                             <a href="https://en.wikipedia.org/wiki/REST" target="_blank" rel="noopener">
-                                REST API
-                            </a> Version
+                                <?= __('admin.server_data_rest_version') ?>
+                            </a>
                         </th>
                         <td x-text="apiVersion"></td>
                     </tr>
                     <tr>
                         <th>
                             <a href="https://en.wikipedia.org/wiki/REST" target="_blank" rel="noopener">
-                                REST API
-                            </a> Release date
+                                <?= __('admin.server_data_rest_release_date') ?>
+                            </a>
                         </th>
                         <td x-text="apiReleaseDate"></td>
                     </tr>
@@ -183,7 +183,7 @@ $data = is_array($data ?? null) ? $data : [];
         <div class="control">
             <a href="/" class="button is-light">
                 <?php echo IconHelper::render('arrow-left'); ?>
-                <span>Back to Main Menu</span>
+                <span><?= __('admin.server_data_back_to_main') ?></span>
             </a>
         </div>
     </div>

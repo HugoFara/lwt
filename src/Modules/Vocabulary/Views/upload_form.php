@@ -75,8 +75,8 @@ $columnOptions = [
 
 // Action buttons for navigation
 $actions = [
-    ['url' => '/words', 'label' => 'My Terms', 'icon' => 'list', 'class' => 'is-primary'],
-    ['url' => '/term-tags', 'label' => 'Term Tags', 'icon' => 'tags'],
+    ['url' => '/words', 'label' => __('vocabulary.actions.my_terms'), 'icon' => 'list', 'class' => 'is-primary'],
+    ['url' => '/term-tags', 'label' => __('vocabulary.actions.term_tags'), 'icon' => 'tags'],
 ];
 echo PageLayoutHelper::buildActionCard($actions);
 ?>
@@ -104,7 +104,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon is-small">
                     <?php echo IconHelper::render('trending-up', ['alt' => 'Frequency']); ?>
                 </span>
-                <span>Frequency Words</span>
+                <span><?= __('vocabulary.upload.frequency_words') ?></span>
             </a>
         </li>
         <li :class="{ 'is-active': activeTab === 'dictionary' }">
@@ -112,7 +112,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon is-small">
                     <?php echo IconHelper::render('book-open', ['alt' => 'Dictionaries']); ?>
                 </span>
-                <span>Dictionaries</span>
+                <span><?= __('vocabulary.upload.dictionaries') ?></span>
             </a>
         </li>
         <li :class="{ 'is-active': activeTab === 'manual' }">
@@ -120,7 +120,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon is-small">
                     <?php echo IconHelper::render('file-up', ['alt' => 'Manual']); ?>
                 </span>
-                <span>Manual Upload</span>
+                <span><?= __('vocabulary.upload.manual_upload') ?></span>
             </a>
         </li>
     </ul>
@@ -132,7 +132,7 @@ echo PageLayoutHelper::buildActionCard($actions);
 
     <?php if (empty($currentLanguageName)) : ?>
     <div class="notification is-warning">
-        Please select a language from the navbar first.
+        <?= __('vocabulary.upload.select_language_first') ?>
     </div>
     <?php elseif (!$isFrequencyAvailable) : ?>
     <div class="notification is-info is-light">

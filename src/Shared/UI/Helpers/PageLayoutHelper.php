@@ -650,6 +650,26 @@ HTML;
             return ['preferences'];
         }
 
+        if (
+            str_starts_with($path, '/login')
+            || str_starts_with($path, '/register')
+            || str_starts_with($path, '/password/forgot')
+            || str_starts_with($path, '/password/reset')
+            || str_starts_with($path, '/profile')
+            || str_starts_with($path, '/google/link-confirm')
+            || str_starts_with($path, '/microsoft/link-confirm')
+        ) {
+            return ['user'];
+        }
+
+        if (str_starts_with($path, '/book')) {
+            return ['book'];
+        }
+
+        if (str_starts_with($path, '/dictionar')) {
+            return ['dictionary'];
+        }
+
         return [];
     }
 

@@ -100,11 +100,11 @@ if (!isset($bookContext) || !is_array($bookContext)) {
           <div class="field is-grouped is-grouped-multiline">
             <div class="control">
               <a href="/review?text=<?php echo $textId; ?>"
-                class="button is-small">Review</a>
+                class="button is-small"><?= __e('text.common.review') ?></a>
             </div>
             <div class="control">
               <a href="/texts/<?php echo $textId; ?>/edit"
-                class="button is-small">Edit</a>
+                class="button is-small"><?= __e('text.common.edit') ?></a>
             </div>
             <!-- Display settings dropdown -->
             <div class="control">
@@ -115,7 +115,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                       <i data-lucide="sliders"
                         style="width:14px;height:14px"></i>
                     </span>
-                    <span>Display</span>
+                    <span><?= __e('text.read.display') ?></span>
                   </button>
                 </div>
                 <div class="dropdown-menu" style="min-width:220px">
@@ -129,7 +129,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                         <i x-show="!showAll" data-lucide="square"
                           style="width:14px;height:14px"></i>
                       </span>
-                      Multi-word expressions
+                      <?= __e('text.read.multi_word') ?>
                     </a>
                     <a class="dropdown-item"
                       @click.prevent="toggleTranslations()">
@@ -141,13 +141,13 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                           data-lucide="square"
                           style="width:14px;height:14px"></i>
                       </span>
-                      Translations
+                      <?= __e('text.read.translations') ?>
                     </a>
                     <hr class="dropdown-divider">
                     <!-- Text size -->
                     <div class="dropdown-item">
                       <label class="label is-small mb-1">
-                        Text size
+                        <?= __e('text.read.text_size') ?>
                       </label>
                       <div class="field has-addons">
                         <p class="control">
@@ -181,7 +181,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                     <!-- Reader width -->
                     <div class="dropdown-item">
                       <label class="label is-small mb-1">
-                        Reading width
+                        <?= __e('text.read.reading_width') ?>
                       </label>
                       <input type="range" min="40" max="100"
                         step="5"
@@ -198,7 +198,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
                         <i data-lucide="printer"
                           style="width:14px;height:14px"></i>
                       </span>
-                      Print
+                      <?= __e('text.common.print') ?>
                     </a>
                   </div>
                 </div>
@@ -208,17 +208,17 @@ if (!isset($bookContext) || !is_array($bookContext)) {
             <div class="control">
               <div class="dropdown is-hoverable is-right">
                 <div class="dropdown-trigger">
-                  <button class="button is-small">Actions</button>
+                  <button class="button is-small"><?= __e('text.read.actions') ?></button>
                 </div>
                 <div class="dropdown-menu">
                   <div class="dropdown-content">
                     <a class="dropdown-item"
                       @click.prevent="markAllWellKnown()">
-                      Mark all Well Known
+                      <?= __e('text.read.mark_all_well_known') ?>
                     </a>
                     <a class="dropdown-item"
                       @click.prevent="markAllIgnored()">
-                      Mark all Ignored
+                      <?= __e('text.read.mark_all_ignored') ?>
                     </a>
                   </div>
                 </div>
@@ -257,7 +257,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
     <div class="level is-mobile">
       <div class="level-left">
         <div class="level-item">
-          <a href="/book/<?php echo $bookId; ?>" class="has-text-grey-dark" title="View book">
+          <a href="/book/<?php echo $bookId; ?>" class="has-text-grey-dark" title="<?= __e('text.read.view_book') ?>">
             <span class="icon is-small mr-1">
               <i data-lucide="book-open" style="width:14px;height:14px"></i>
             </span>
@@ -277,18 +277,18 @@ if (!isset($bookContext) || !is_array($bookContext)) {
             <!-- Previous chapter -->
             <?php if ($prevTextId !== null) : ?>
             <a href="/text/<?php echo $prevTextId; ?>/read"
-               class="button is-small" title="Previous chapter">
+               class="button is-small" title="<?= __e('text.read.previous_chapter') ?>">
               <span class="icon is-small">
                 <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
               </span>
-              <span>Prev</span>
+              <span><?= __e('text.read.prev') ?></span>
             </a>
             <?php else : ?>
-            <button class="button is-small" disabled title="No previous chapter">
+            <button class="button is-small" disabled title="<?= __e('text.read.no_previous_chapter') ?>">
               <span class="icon is-small">
                 <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
               </span>
-              <span>Prev</span>
+              <span><?= __e('text.read.prev') ?></span>
             </button>
             <?php endif; ?>
 
@@ -318,15 +318,15 @@ if (!isset($bookContext) || !is_array($bookContext)) {
             <!-- Next chapter -->
             <?php if ($nextTextId !== null) : ?>
             <a href="/text/<?php echo $nextTextId; ?>/read"
-               class="button is-small" title="Next chapter">
-              <span>Next</span>
+               class="button is-small" title="<?= __e('text.read.next_chapter') ?>">
+              <span><?= __e('text.read.next') ?></span>
               <span class="icon is-small">
                 <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
               </span>
             </a>
             <?php else : ?>
-            <button class="button is-small" disabled title="No next chapter">
-              <span>Next</span>
+            <button class="button is-small" disabled title="<?= __e('text.read.no_next_chapter') ?>">
+              <span><?= __e('text.read.next') ?></span>
               <span class="icon is-small">
                 <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
               </span>
@@ -342,7 +342,7 @@ if (!isset($bookContext) || !is_array($bookContext)) {
   <!-- Loading state -->
   <div x-show="isLoading" class="has-text-centered py-6">
     <div class="loading-spinner"></div>
-    <p class="mt-4 has-text-grey">Loading text...</p>
+    <p class="mt-4 has-text-grey"><?= __e('text.read.loading') ?></p>
   </div>
 
   <!-- Error state -->

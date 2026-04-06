@@ -42,11 +42,18 @@ assert(is_string($dictLinksHtml));
 assert(is_string($wordTagsHtml));
 
 $actions = [
-    ['url' => '/words', 'label' => 'My Terms', 'icon' => 'list', 'class' => 'is-primary'],
-    ['url' => '/word/upload', 'label' => 'Import Terms', 'icon' => 'upload'],
-    ['url' => '/term-tags', 'label' => 'Term Tags', 'icon' => 'tags'],
+    ['url' => '/words', 'label' => __('vocabulary.actions.my_terms'), 'icon' => 'list', 'class' => 'is-primary'],
+    ['url' => '/word/upload', 'label' => __('vocabulary.actions.import_terms'), 'icon' => 'upload'],
+    ['url' => '/term-tags', 'label' => __('vocabulary.actions.term_tags'), 'icon' => 'tags'],
 ];
 echo PageLayoutHelper::buildActionCard($actions);
+
+$phWord = htmlspecialchars(__('vocabulary.form.placeholder_word'), ENT_QUOTES, 'UTF-8');
+$phLemma = htmlspecialchars(__('vocabulary.form.placeholder_lemma_optional'), ENT_QUOTES, 'UTF-8');
+$phTrans = htmlspecialchars(__('vocabulary.form.placeholder_translation'), ENT_QUOTES, 'UTF-8');
+$phRom = htmlspecialchars(__('vocabulary.form.placeholder_romanization'), ENT_QUOTES, 'UTF-8');
+$phSent = htmlspecialchars(__('vocabulary.form.placeholder_sentence'), ENT_QUOTES, 'UTF-8');
+$phNotes = htmlspecialchars(__('vocabulary.form.placeholder_notes'), ENT_QUOTES, 'UTF-8');
 
 ?>
 
@@ -58,7 +65,7 @@ data-lwt-clear-frame="true">
 
     <div class="box">
         <div class="field">
-            <label class="label" for="WoText">New Term</label>
+            <label class="label" for="WoText"><?= __('vocabulary.form.new_term') ?></label>
             <div class="control has-icons-right">
                 <input <?php echo $scrdir; ?>
                        class="input notempty setfocus checkoutsidebmp"
@@ -68,18 +75,18 @@ data-lwt-clear-frame="true">
                        id="WoText"
                        value=""
                        maxlength="250"
-                       placeholder="Enter a word or expression" />
+                       placeholder="<?= $phWord ?>" />
                 <span class="icon is-small is-right">
                     <?php echo IconHelper::render('circle-x', [
-                        'title' => 'Field must not be empty',
-                        'alt' => 'Required'
+                        'title' => __('vocabulary.common.field_required'),
+                        'alt' => __('vocabulary.common.required')
                     ]); ?>
                 </span>
             </div>
         </div>
 
         <div class="field">
-            <label class="label" for="WoLemma">Lemma</label>
+            <label class="label" for="WoLemma"><?= __('vocabulary.common.lemma') ?></label>
             <div class="control">
                 <input <?php echo $scrdir; ?>
                        type="text"
@@ -90,13 +97,13 @@ data-lwt-clear-frame="true">
                        id="WoLemma"
                        value=""
                        maxlength="250"
-                       placeholder="Base form (optional)" />
+                       placeholder="<?= $phLemma ?>" />
             </div>
         </div>
 
 <?php if ($showSimilarTerms) : ?>
         <div class="field">
-            <label class="label">Similar Terms</label>
+            <label class="label"><?= __('vocabulary.form.similar_terms') ?></label>
             <div class="control">
                 <span id="simwords" class="is-size-7">&nbsp;</span>
             </div>
@@ -104,19 +111,19 @@ data-lwt-clear-frame="true">
 <?php endif; ?>
 
         <div class="field">
-            <label class="label">Translation</label>
+            <label class="label"><?= __('vocabulary.common.translation') ?></label>
             <div class="control">
                 <textarea class="textarea textarea-noreturn checklength checkoutsidebmp"
                           data_maxlength="500"
                           data_info="Translation"
                           name="WoTranslation"
                           rows="3"
-                          placeholder="Meaning in your language"></textarea>
+                          placeholder="<?= $phTrans ?>"></textarea>
             </div>
         </div>
 
         <div class="field">
-            <label class="label">Tags</label>
+            <label class="label"><?= __('vocabulary.common.tags') ?></label>
             <div class="control">
                 <?php echo $wordTagsHtml; ?>
             </div>
@@ -124,7 +131,7 @@ data-lwt-clear-frame="true">
 
 <?php if ($showRoman) : ?>
         <div class="field">
-            <label class="label">Romanization</label>
+            <label class="label"><?= __('vocabulary.common.romanization') ?></label>
             <div class="control">
                 <input type="text"
                        class="input checkoutsidebmp"
@@ -132,13 +139,13 @@ data-lwt-clear-frame="true">
                        name="WoRomanization"
                        value=""
                        maxlength="100"
-                       placeholder="Pronunciation / transliteration" />
+                       placeholder="<?= $phRom ?>" />
             </div>
         </div>
 <?php endif; ?>
 
         <div class="field">
-            <label class="label">Sentence</label>
+            <label class="label"><?= __('vocabulary.form.sentence_label') ?></label>
             <div class="control">
                 <textarea <?php echo $scrdir; ?>
                           name="WoSentence"
@@ -147,13 +154,13 @@ data-lwt-clear-frame="true">
                           class="textarea textarea-noreturn checklength checkoutsidebmp"
                           data_maxlength="1000"
                           data_info="Sentence"
-                          placeholder="Example sentence with term in {curly braces}"></textarea>
+                          placeholder="<?= $phSent ?>"></textarea>
             </div>
-            <p class="help">Wrap the term in {curly braces}, e.g. "I {love} languages."</p>
+            <p class="help"><?= __('vocabulary.form.help_sentence_braces') ?></p>
         </div>
 
         <div class="field">
-            <label class="label">Notes</label>
+            <label class="label"><?= __('vocabulary.common.notes') ?></label>
             <div class="control">
                 <textarea name="WoNotes"
                           id="WoNotes"
@@ -161,19 +168,19 @@ data-lwt-clear-frame="true">
                           class="textarea textarea-noreturn checklength checkoutsidebmp"
                           data_maxlength="1000"
                           data_info="Notes"
-                          placeholder="Personal notes (optional)"></textarea>
+                          placeholder="<?= $phNotes ?>"></textarea>
             </div>
         </div>
 
         <div class="field">
-            <label class="label">Status</label>
+            <label class="label"><?= __('vocabulary.common.status') ?></label>
             <div class="control">
                 <?php echo SelectOptionsBuilder::forWordStatusRadio(1, true); ?>
             </div>
         </div>
 
         <div class="field">
-            <label class="label">Dictionary Lookup</label>
+            <label class="label"><?= __('vocabulary.form.dictionary_lookup') ?></label>
             <div class="control">
                 <?php echo $dictLinksHtml; ?>
             </div>
@@ -183,9 +190,9 @@ data-lwt-clear-frame="true">
             <div class="control">
                 <button type="submit" name="op" value="Save" class="button is-primary">
                     <span class="icon is-small">
-                        <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                        <?php echo IconHelper::render('save', ['alt' => __('vocabulary.common.save')]); ?>
                     </span>
-                    <span>Save</span>
+                    <span><?= __('vocabulary.common.save') ?></span>
                 </button>
             </div>
         </div>

@@ -19,10 +19,20 @@ namespace Lwt\Views\Review;
 
 ?>
 <tr>
-    <th class="">Ed</th>
-    <th class="clickable">Status</th>
-    <th class="clickable">Term</th>
-    <th class="clickable">Translation</th>
-    <th class="clickable">Romanization</th>
-    <th class="clickable">Sentence</th>
+    <th class=""><?php echo \htmlspecialchars(__('review.table.col_ed_short'), ENT_QUOTES, 'UTF-8'); ?></th>
+    <th class="clickable">
+        <?php echo \htmlspecialchars(__('review.table.col_status'), ENT_QUOTES, 'UTF-8'); ?>
+    </th>
+    <th class="clickable">
+        <?php echo \htmlspecialchars(__('review.table.col_term'), ENT_QUOTES, 'UTF-8'); ?>
+    </th>
+    <th class="clickable">
+        <?php echo \htmlspecialchars(__('review.table.col_translation'), ENT_QUOTES, 'UTF-8'); ?>
+    </th>
+    <th class="clickable">
+        <?php echo \htmlspecialchars(__('review.table.col_romanization'), ENT_QUOTES, 'UTF-8'); ?>
+    </th>
+    <th class="clickable">
+        <?php echo \htmlspecialchars(__('review.table.col_sentence'), ENT_QUOTES, 'UTF-8'); ?>
+    </th>
 </tr>

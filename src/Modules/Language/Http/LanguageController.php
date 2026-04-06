@@ -90,7 +90,7 @@ class LanguageController extends BaseController
             // On error, fall through to show the form with error message
         }
 
-        PageLayoutHelper::renderPageStart('Languages', true);
+        PageLayoutHelper::renderPageStart(__('language.page_title'), true);
         $this->showNewForm();
         PageLayoutHelper::renderPageEnd();
     }
@@ -106,7 +106,7 @@ class LanguageController extends BaseController
      */
     public function edit(int $id): void
     {
-        PageLayoutHelper::renderPageStart('Languages', true);
+        PageLayoutHelper::renderPageStart(__('language.page_title'), true);
 
         $message = '';
 
@@ -192,7 +192,7 @@ class LanguageController extends BaseController
      */
     public function index(array $params): void
     {
-        PageLayoutHelper::renderPageStart('Languages', true);
+        PageLayoutHelper::renderPageStart(__('language.page_title'), true);
 
         // Check for message from redirect (e.g., after refresh/delete)
         $message = $this->hasParam('message') ? $this->param('message') :
@@ -235,9 +235,12 @@ class LanguageController extends BaseController
 
         ?>
         <h2>
-            New Language
+            <?php echo __('language.form.new_title'); ?>
             <a target="_blank" href="docs/info.html#howtolang">
-                <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
+                <?php echo IconHelper::render(
+                    'help-circle',
+                    ['title' => __('language.form.help'), 'alt' => __('language.form.help')]
+                ); ?>
             </a>
         </h2>
         <?php
@@ -274,7 +277,7 @@ class LanguageController extends BaseController
         if ($languageEntity === null) {
             echo '<div class="notification is-danger">' .
                 '<button class="delete" aria-label="close"></button>' .
-                'Language not found.</div>';
+                __('language.errors.language_not_found') . '</div>';
             return;
         }
 
@@ -294,9 +297,12 @@ class LanguageController extends BaseController
         $dictionaries = $this->dictionaryFacade->getAllForLanguage($lid);
 
         ?>
-    <h2>Edit Language
+    <h2><?php echo __('language.form.edit_title'); ?>
         <a target="_blank" href="docs/info.html#howtolang">
-            <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
+            <?php echo IconHelper::render(
+                'help-circle',
+                ['title' => __('language.form.help'), 'alt' => __('language.form.help')]
+            ); ?>
         </a>
     </h2>
         <?php

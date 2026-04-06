@@ -40,8 +40,17 @@ PageLayoutHelper::renderMessage($messageTyped, false);
 
 echo PageLayoutHelper::buildActionCard(
     [
-    ['url' => '/texts/new', 'label' => 'New Text', 'icon' => 'circle-plus', 'class' => 'is-primary'],
-    ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
+    [
+        'url' => '/texts/new',
+        'label' => __('text.list.new_text'),
+        'icon' => 'circle-plus',
+        'class' => 'is-primary'
+    ],
+    [
+        'url' => '/texts?query=&page=1',
+        'label' => __('text.list.active_texts'),
+        'icon' => 'book-open'
+    ],
     ]
 );
 ?>
@@ -54,7 +63,7 @@ echo PageLayoutHelper::buildActionCard(
         <span class="icon is-large">
             <i data-lucide="loader-2" class="icon-spin"></i>
         </span>
-        <p class="mt-2">Loading archived texts...</p>
+        <p class="mt-2"><?= __e('text.list.loading_archived_texts') ?></p>
     </div>
 
     <!-- Global sort control -->
@@ -73,11 +82,13 @@ echo PageLayoutHelper::buildActionCard(
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small">Sort</span>
+                            <span class="button is-static is-small"><?= __e('text.common.sort') ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select @change="handleSortChange($event)" aria-label="Sort texts by">
+                                <select
+                                    @change="handleSortChange($event)"
+                                    aria-label="<?= __e('text.list.sort_aria') ?>">
                                     <?php echo SelectOptionsBuilder::forTextSort(); ?>
                                 </select>
                             </div>
@@ -132,11 +143,11 @@ echo PageLayoutHelper::buildActionCard(
                             <div class="buttons are-small">
                                 <button type="button" class="button" @click="markAll(lang.id, true)">
                                     <?php echo IconHelper::render('check-square', ['size' => 14]); ?>
-                                    <span class="ml-1">Mark All</span>
+                                    <span class="ml-1"><?= __e('text.common.mark_all') ?></span>
                                 </button>
                                 <button type="button" class="button" @click="markAll(lang.id, false)">
                                     <?php echo IconHelper::render('square', ['size' => 14]); ?>
-                                    <span class="ml-1">Mark None</span>
+                                    <span class="ml-1"><?= __e('text.common.mark_none') ?></span>
                                 </button>
                                 <span
                                     x-show="hasMarkedInLanguage(lang.id)"
@@ -151,7 +162,7 @@ echo PageLayoutHelper::buildActionCard(
                                 <div class="control">
                                     <span class="button is-static is-small">
                                         <?php echo IconHelper::render('zap', ['size' => 14]); ?>
-                                        <span class="ml-1">Actions</span>
+                                        <span class="ml-1"><?= __e('text.common.actions') ?></span>
                                     </span>
                                 </div>
                                 <div class="control">
@@ -159,7 +170,7 @@ echo PageLayoutHelper::buildActionCard(
                                         <select
                                             :disabled="!hasMarkedInLanguage(lang.id)"
                                             @change="handleMultiAction(lang.id, $event)"
-                                            aria-label="Bulk actions for selected texts">
+                                            aria-label="<?= __e('text.list.bulk_aria') ?>">
                                             <?php echo SelectOptionsBuilder::forMultipleArchivedTextsActions(); ?>
                                         </select>
                                     </div>
@@ -186,18 +197,18 @@ echo PageLayoutHelper::buildActionCard(
                                     </label>
                                     <p class="card-header-title" x-text="text.title"></p>
                                     <div class="card-header-icon card-icons">
-                                        <span x-show="text.has_audio" title="With Audio">
+                                        <span x-show="text.has_audio" title="<?= __e('text.common.with_audio') ?>">
                                             <?php echo IconHelper::render('volume-2', ['size' => 16]); ?>
                                         </span>
                                         <a
                                             x-show="text.has_source"
                                             :href="text.source_uri"
                                             target="_blank"
-                                            title="Source Link"
+                                            title="<?= __e('text.common.source_link') ?>"
                                             @click.stop>
                                             <?php echo IconHelper::render('external-link', ['size' => 16]); ?>
                                         </a>
-                                        <span x-show="text.annotated" title="Annotated Text">
+                                        <span x-show="text.annotated" title="<?= __e('text.common.annotated_text') ?>">
                                             <?php echo IconHelper::render('file-text', ['size' => 16]); ?>
                                         </span>
                                     </div>
@@ -217,7 +228,7 @@ echo PageLayoutHelper::buildActionCard(
                                     <div class="archive-badge">
                                         <span class="tag is-warning is-light">
                                             <?php echo IconHelper::render('archive', ['size' => 12]); ?>
-                                            <span class="ml-1">Archived</span>
+                                            <span class="ml-1"><?= __e('text.common.archived') ?></span>
                                         </span>
                                     </div>
                                 </div>
@@ -228,11 +239,11 @@ echo PageLayoutHelper::buildActionCard(
                                         class="card-footer-item is-primary-action"
                                         @click.prevent="handlePostAction($event, '/texts/' + text.id + '/unarchive')">
                                         <?php echo IconHelper::render('archive-restore', ['size' => 16]); ?>
-                                        <span>Unarchive</span>
+                                        <span><?= __e('text.common.unarchive') ?></span>
                                     </a>
                                     <a :href="'/text/archived/' + text.id + '/edit'" class="card-footer-item">
                                         <?php echo IconHelper::render('file-pen', ['size' => 16]); ?>
-                                        <span>Edit</span>
+                                        <span><?= __e('text.common.edit') ?></span>
                                     </a>
                                     <a
                                         class="card-footer-item has-text-danger"
@@ -240,7 +251,7 @@ echo PageLayoutHelper::buildActionCard(
                                             $event, '/text/archived/' + text.id
                                         )">
                                         <?php echo IconHelper::render('trash-2', ['size' => 16]); ?>
-                                        <span>Delete</span>
+                                        <span><?= __e('text.common.delete') ?></span>
                                     </a>
                                 </footer>
                             </div>
@@ -257,7 +268,7 @@ echo PageLayoutHelper::buildActionCard(
                         <span class="icon">
                             <i data-lucide="chevron-down"></i>
                         </span>
-                        <span>Show More</span>
+                        <span><?= __e('text.common.show_more') ?></span>
                     </button>
                 </div>
             </div>
@@ -266,7 +277,7 @@ echo PageLayoutHelper::buildActionCard(
 
     <!-- Empty state -->
     <div x-show="!loading && languages.length === 0" class="notification is-info is-light">
-        <p>No archived texts found. Texts you archive will appear here.</p>
+        <p><?= __e('text.list.empty_archived') ?></p>
     </div>
 </div>
 
