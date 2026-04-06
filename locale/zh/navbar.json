@@ -1,0 +1,23 @@
+{
+    "main_navigation": "主导航",
+    "menu": "菜单",
+    "texts": "文本",
+    "new_text_title": "新建文本",
+    "vocabulary": "词汇",
+    "new_term_title": "新建词条",
+    "languages": "语言",
+    "new_language_title": "新建语言",
+    "statistics_title": "统计",
+    "switch_to_dark_mode": "切换到深色模式",
+    "switch_to_light_mode": "切换到浅色模式",
+    "user": "用户",
+    "preferences": "偏好设置",
+    "profile": "个人资料",
+    "help": "帮助",
+    "admin": "管理员",
+    "database_operations": "数据库操作",
+    "admin_settings": "管理员设置",
+    "users": "用户",
+    "server_data": "服务器数据",
+    "add_new": "新增"
+}
