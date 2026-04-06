@@ -38,5 +38,10 @@
     "go": "Перейти",
     "read": "Читать",
     "view": "Просмотр",
-    "select_language": "Выберите язык"
+    "select_language": "Выберите язык",
+    "status_learning": "Изучается",
+    "status_learned": "Изучено",
+    "status_well_known": "Хорошо известно",
+    "status_ignored": "Игнорируется",
+    "status_unknown": "Неизвестно"
 }

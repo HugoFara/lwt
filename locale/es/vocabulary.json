@@ -94,7 +94,7 @@
     "list.col_status": "Estado",
     "list.col_score": "Puntuación",
     "list.col_term": "Término",
-    "list.col_word_count": "NPal",
+    "list.col_word_count": "Núm. palabras",
     "list.col_word_count_title": "Número de palabras en textos activos",
     "list.has_sentence": "Tiene oración",
     "list.no_valid_sentence": "Sin oración válida",
@@ -176,9 +176,10 @@
 
     "bulk.choose_placeholder": "[Elegir...]",
     "bulk.change_status": "Cambiar estado",
-    "bulk.set_status_to": "Establecer estado a [{n}]",
-    "bulk.set_status_wkn": "Establecer estado a [WKn]",
-    "bulk.set_status_ign": "Establecer estado a [Ign]",
+    "bulk.set_status_to": "Establecer estado a {n}",
+    "bulk.set_status_to_prefix": "Cambiar estado a",
+    "bulk.set_status_wkn": "Establecer estado a Bien conocida",
+    "bulk.set_status_ign": "Establecer estado a Ignorada",
     "bulk.set_to_lowercase": "Pasar a minúsculas",
     "bulk.delete_translation": "Eliminar traducción",
 

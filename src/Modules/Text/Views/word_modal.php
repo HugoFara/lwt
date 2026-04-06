@@ -103,13 +103,13 @@ namespace Lwt\Views\Text;
                     :class="isCurrentStatus(99) ? 'is-success' : 'is-outlined is-success'"
                     :disabled="isLoading"
                     @click="setStatus(99)"
-                  >WKn</button>
+                  ><?= __e('common.status_well_known') ?></button>
                   <button
                     class="button"
                     :class="isCurrentStatus(98) ? 'is-warning' : 'is-outlined is-warning'"
                     :disabled="isLoading"
                     @click="setStatus(98)"
-                  >Ign</button>
+                  ><?= __e('common.status_ignored') ?></button>
                 </div>
               </div>
             </template>

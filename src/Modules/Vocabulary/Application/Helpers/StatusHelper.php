@@ -162,9 +162,12 @@ class StatusHelper
     public static function buildColoredMessage(int $status, string $name, string $abbr): string
     {
         $escapedName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-        $escapedAbbr = htmlspecialchars($abbr, ENT_QUOTES, 'UTF-8');
+        $bracket = '';
+        if ($abbr !== '' && $abbr !== $name) {
+            $bracket = '&nbsp;[' . htmlspecialchars($abbr, ENT_QUOTES, 'UTF-8') . ']';
+        }
         return '<span class="status' . $status . '">&nbsp;' . $escapedName
-            . '&nbsp;[' . $escapedAbbr . ']&nbsp;</span>';
+            . $bracket . '&nbsp;</span>';
     }
 
     /**
@@ -184,9 +187,13 @@ class StatusHelper
         string $suffix = ''
     ): string {
         $escapedName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
-        $escapedAbbr = htmlspecialchars($abbr, ENT_QUOTES, 'UTF-8');
-        return '<option value="s' . $status . $suffix . '">Set Status to '
-            . $escapedName . ' [' . $escapedAbbr . ']</option>';
+        $bracket = '';
+        if ($abbr !== '' && $abbr !== $name) {
+            $bracket = ' [' . htmlspecialchars($abbr, ENT_QUOTES, 'UTF-8') . ']';
+        }
+        return '<option value="s' . $status . $suffix . '">'
+            . htmlspecialchars(__('vocabulary.bulk.set_status_to_prefix'), ENT_QUOTES, 'UTF-8')
+            . ' ' . $escapedName . $bracket . '</option>';
     }
 
     /**

@@ -36,14 +36,14 @@ final class WordStatusTest extends TestCase
         $this->assertEquals('5', $statuses[5]['abbr']);
         $this->assertEquals('Learned', $statuses[5]['name']);
 
-        // Test status 99 (Well Known)
+        // Test status 99 (Well Known) — no language-neutral abbreviation
         $this->assertArrayHasKey(99, $statuses);
-        $this->assertEquals('WKn', $statuses[99]['abbr']);
+        $this->assertEquals('', $statuses[99]['abbr']);
         $this->assertEquals('Well Known', $statuses[99]['name']);
 
-        // Test status 98 (Ignored)
+        // Test status 98 (Ignored) — no language-neutral abbreviation
         $this->assertArrayHasKey(98, $statuses);
-        $this->assertEquals('Ign', $statuses[98]['abbr']);
+        $this->assertEquals('', $statuses[98]['abbr']);
         $this->assertEquals('Ignored', $statuses[98]['name']);
     }
 
@@ -68,6 +68,5 @@ final class WordStatusTest extends TestCase
         }
 
         $this->assertNotEquals($statuses[98]['name'], $statuses[99]['name']);
-        $this->assertNotEquals($statuses[98]['abbr'], $statuses[99]['abbr']);
     }
 }

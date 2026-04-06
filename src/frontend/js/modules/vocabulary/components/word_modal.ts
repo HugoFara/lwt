@@ -16,9 +16,13 @@ import { speechDispatcher } from '@shared/utils/user_interactions';
 import { initIcons } from '@shared/icons/lucide_icons';
 import { trapFocus, releaseFocus } from '@shared/accessibility/focus_trap';
 import { announce } from '@shared/accessibility/aria_live';
+import { t } from '@shared/i18n/translator';
 
 /**
  * Status display information.
+ *
+ * `abbr` is a language-neutral short label ("1".."5"); empty for 98/99 where
+ * the localized full `label` should be shown instead.
  */
 interface StatusInfo {
   value: number;
@@ -28,17 +32,25 @@ interface StatusInfo {
 }
 
 /**
- * Status definitions.
+ * Status definitions. Computed lazily so that translations are loaded.
  */
-const STATUSES: StatusInfo[] = [
-  { value: 1, label: 'Learning (1)', abbr: '1', class: 'is-danger' },
-  { value: 2, label: 'Learning (2)', abbr: '2', class: 'is-warning' },
-  { value: 3, label: 'Learning (3)', abbr: '3', class: 'is-info' },
-  { value: 4, label: 'Learning (4)', abbr: '4', class: 'is-primary' },
-  { value: 5, label: 'Learned', abbr: '5', class: 'is-success' },
-  { value: 99, label: 'Well Known', abbr: 'WKn', class: 'is-success is-light' },
-  { value: 98, label: 'Ignored', abbr: 'Ign', class: 'is-light' }
-];
+function buildStatuses(): StatusInfo[] {
+  const learning = t('common.status_learning');
+  const learned = t('common.status_learned');
+  const wellKnown = t('common.status_well_known');
+  const ignored = t('common.status_ignored');
+  // For numeric statuses `abbr` is the digit (button label).
+  // For 98/99 the localized full name doubles as the button label.
+  return [
+    { value: 1, label: `${learning} (1)`, abbr: '1', class: 'is-danger' },
+    { value: 2, label: `${learning} (2)`, abbr: '2', class: 'is-warning' },
+    { value: 3, label: `${learning} (3)`, abbr: '3', class: 'is-info' },
+    { value: 4, label: `${learning} (4)`, abbr: '4', class: 'is-primary' },
+    { value: 5, label: learned, abbr: '5', class: 'is-success' },
+    { value: 99, label: wellKnown, abbr: wellKnown, class: 'is-success is-light' },
+    { value: 98, label: ignored, abbr: ignored, class: 'is-light' }
+  ];
+}
 
 /**
  * View mode for the modal.
@@ -193,7 +205,7 @@ export function wordModalData(): WordModalData {
     },
 
     get statuses(): StatusInfo[] {
-      return STATUSES;
+      return buildStatuses();
     },
 
     // CSP-safe null-safe proxies for word.* — during batched reactive updates
@@ -265,7 +277,7 @@ export function wordModalData(): WordModalData {
       if (!word) return;
 
       await this.store.setStatus(word.hex, status);
-      const statusInfo = STATUSES.find(s => s.value === status);
+      const statusInfo = buildStatuses().find(s => s.value === status);
       announce(`Changed to ${statusInfo?.label || 'status ' + status}`);
     },
 
@@ -322,7 +334,7 @@ export function wordModalData(): WordModalData {
     },
 
     getStatusButtonClass(status: number): string {
-      const statusInfo = STATUSES.find(s => s.value === status);
+      const statusInfo = buildStatuses().find(s => s.value === status);
       const baseClass = statusInfo?.class || '';
 
       if (this.isCurrentStatus(status)) {

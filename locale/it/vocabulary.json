@@ -94,7 +94,7 @@
     "list.col_status": "Stato",
     "list.col_score": "Punteggio",
     "list.col_term": "Termine",
-    "list.col_word_count": "NPar",
+    "list.col_word_count": "N. parole",
     "list.col_word_count_title": "Numero di parole nei testi attivi",
     "list.has_sentence": "Ha una frase",
     "list.no_valid_sentence": "Nessuna frase valida",
@@ -175,9 +175,10 @@
 
     "bulk.choose_placeholder": "[Scegli...]",
     "bulk.change_status": "Cambia stato",
-    "bulk.set_status_to": "Imposta stato a [{n}]",
-    "bulk.set_status_wkn": "Imposta stato a [BCo]",
-    "bulk.set_status_ign": "Imposta stato a [Ign]",
+    "bulk.set_status_to": "Imposta lo stato su {n}",
+    "bulk.set_status_to_prefix": "Imposta lo stato su",
+    "bulk.set_status_wkn": "Imposta lo stato su Ben conosciuta",
+    "bulk.set_status_ign": "Imposta lo stato su Ignorata",
     "bulk.set_to_lowercase": "Imposta in minuscolo",
     "bulk.delete_translation": "Elimina traduzione",
 

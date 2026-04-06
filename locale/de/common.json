@@ -38,5 +38,10 @@
     "go": "Los",
     "read": "Lesen",
     "view": "Anzeigen",
-    "select_language": "Sprache auswählen"
+    "select_language": "Sprache auswählen",
+    "status_learning": "Lernen",
+    "status_learned": "Gelernt",
+    "status_well_known": "Bekannt",
+    "status_ignored": "Ignoriert",
+    "status_unknown": "Unbekannt"
 }

@@ -315,18 +315,17 @@ class TextProcessingTest extends TestCase
 
     public function testGetStatusAbbrReturnsStrings(): void
     {
-        // Test all valid statuses
+        // Numeric statuses 1-5 have language-neutral digit abbreviations.
         for ($i = 1; $i <= 5; $i++) {
             $abbr = StatusHelper::getAbbr($i);
             $this->assertIsString($abbr);
             $this->assertNotEmpty($abbr);
         }
 
-        $ignored = StatusHelper::getAbbr(98);
-        $this->assertEquals('Ign', $ignored);
-
-        $wellKnown = StatusHelper::getAbbr(99);
-        $this->assertEquals('WKn', $wellKnown);
+        // 98/99 no longer carry hand-invented abbreviations; display code
+        // falls back to the localized full status name when abbr is empty.
+        $this->assertSame('', StatusHelper::getAbbr(98));
+        $this->assertSame('', StatusHelper::getAbbr(99));
     }
 
     public function testCheckStatusRangeWithValidRanges(): void

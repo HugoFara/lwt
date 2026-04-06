@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Core\Container;
 
+use Lwt\Shared\I18n\Translator;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\ContainerException;
 use Lwt\Shared\Infrastructure\Container\NotFoundException;
@@ -31,7 +32,14 @@ class ContainerTest extends TestCase
 
     protected function tearDown(): void
     {
+        // Restore the bootstrap singleton with its Translator binding so that
+        // subsequent tests using Container::getInstance() (e.g. via __()) get
+        // a working translator instead of an empty container.
         Container::setInstance(null);
+        Container::getInstance()->singleton(
+            Translator::class,
+            static fn () => new Translator(__DIR__ . '/../../../../locale', 'en')
+        );
         parent::tearDown();
     }
 

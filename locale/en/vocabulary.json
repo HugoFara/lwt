@@ -94,7 +94,7 @@
     "list.col_status": "Status",
     "list.col_score": "Score",
     "list.col_term": "Term",
-    "list.col_word_count": "WCnt",
+    "list.col_word_count": "Word count",
     "list.col_word_count_title": "Word Count in Active Texts",
     "list.has_sentence": "Has sentence",
     "list.no_valid_sentence": "No valid sentence",
@@ -175,9 +175,10 @@
 
     "bulk.choose_placeholder": "[Choose...]",
     "bulk.change_status": "Change Status",
-    "bulk.set_status_to": "Set Status To [{n}]",
-    "bulk.set_status_wkn": "Set Status To [WKn]",
-    "bulk.set_status_ign": "Set Status To [Ign]",
+    "bulk.set_status_to": "Set Status To {n}",
+    "bulk.set_status_to_prefix": "Set Status to",
+    "bulk.set_status_wkn": "Set Status To Well Known",
+    "bulk.set_status_ign": "Set Status To Ignored",
     "bulk.set_to_lowercase": "Set To Lowercase",
     "bulk.delete_translation": "Delete Translation",
 

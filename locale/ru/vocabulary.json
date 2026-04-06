@@ -94,7 +94,7 @@
     "list.col_status": "Статус",
     "list.col_score": "Оценка",
     "list.col_term": "Слово",
-    "list.col_word_count": "Кол-во",
+    "list.col_word_count": "Кол-во слов",
     "list.col_word_count_title": "Количество слов в активных текстах",
     "list.has_sentence": "Есть предложение",
     "list.no_valid_sentence": "Нет корректного предложения",
@@ -175,9 +175,10 @@
 
     "bulk.choose_placeholder": "[Выбрать...]",
     "bulk.change_status": "Изменить статус",
-    "bulk.set_status_to": "Установить статус [{n}]",
-    "bulk.set_status_wkn": "Установить статус [WKn]",
-    "bulk.set_status_ign": "Установить статус [Ign]",
+    "bulk.set_status_to": "Установить статус {n}",
+    "bulk.set_status_to_prefix": "Установить статус:",
+    "bulk.set_status_wkn": "Установить статус Хорошо известно",
+    "bulk.set_status_ign": "Установить статус Игнорируется",
     "bulk.set_to_lowercase": "В нижний регистр",
     "bulk.delete_translation": "Удалить перевод",
 

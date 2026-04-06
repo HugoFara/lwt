@@ -164,8 +164,8 @@ $lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUO
                                 <option value="3">[3]</option>
                                 <option value="4">[4]</option>
                                 <option value="5">[5]</option>
-                                <option value="99">[WKn]</option>
-                                <option value="98">[Ign]</option>
+                                <option value="99"><?= __e('common.status_well_known') ?></option>
+                                <option value="98"><?= __e('common.status_ignored') ?></option>
                             </select>
                         </div>
                         <input type="hidden"

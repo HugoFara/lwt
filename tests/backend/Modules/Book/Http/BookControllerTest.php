@@ -371,11 +371,11 @@ class BookControllerTest extends TestCase
     #[Test]
     public function processImportValidatesLanguageId(): void
     {
-        // Verify language ID validation: $languageId <= 0
+        // Verify language ID validation triggers the localized "select language" flash.
         $source = file_get_contents(
             (new \ReflectionClass(BookController::class))->getFileName()
         );
-        $this->assertStringContainsString('Please select a language', $source);
+        $this->assertStringContainsString('book.flash.select_language', $source);
     }
 
     #[Test]
@@ -384,7 +384,7 @@ class BookControllerTest extends TestCase
         $source = file_get_contents(
             (new \ReflectionClass(BookController::class))->getFileName()
         );
-        $this->assertStringContainsString('Please select an EPUB file to upload', $source);
+        $this->assertStringContainsString('book.flash.select_epub', $source);
     }
 
     #[Test]

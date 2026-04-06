@@ -284,12 +284,13 @@ class IntegrationTest extends TestCase
 
     public function testGetStatusAbbr(): void
     {
-        // Abbreviations are just numbers for 1-5, special for 98/99
+        // Abbreviations are language-neutral digits for 1-5;
+        // 98/99 have no abbreviation — display falls back to localized full name.
         $this->assertEquals('1', StatusHelper::getAbbr(1));
         $this->assertEquals('2', StatusHelper::getAbbr(2));
         $this->assertEquals('5', StatusHelper::getAbbr(5));
-        $this->assertEquals('Ign', StatusHelper::getAbbr(98));
-        $this->assertEquals('WKn', StatusHelper::getAbbr(99));
+        $this->assertEquals('', StatusHelper::getAbbr(98));
+        $this->assertEquals('', StatusHelper::getAbbr(99));
     }
 
     public function testGetColoredStatusMsg(): void

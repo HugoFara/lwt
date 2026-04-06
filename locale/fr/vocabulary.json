@@ -94,7 +94,7 @@
     "list.col_status": "Statut",
     "list.col_score": "Score",
     "list.col_term": "Terme",
-    "list.col_word_count": "NbMot",
+    "list.col_word_count": "Nb mots",
     "list.col_word_count_title": "Nombre de mots dans les textes actifs",
     "list.has_sentence": "A une phrase",
     "list.no_valid_sentence": "Aucune phrase valide",
@@ -175,9 +175,10 @@
 
     "bulk.choose_placeholder": "[Choisir...]",
     "bulk.change_status": "Changer le statut",
-    "bulk.set_status_to": "Définir le statut à [{n}]",
-    "bulk.set_status_wkn": "Définir le statut à [BCo]",
-    "bulk.set_status_ign": "Définir le statut à [Ign]",
+    "bulk.set_status_to": "Définir le statut sur {n}",
+    "bulk.set_status_to_prefix": "Définir le statut sur",
+    "bulk.set_status_wkn": "Définir le statut sur Bien connue",
+    "bulk.set_status_ign": "Définir le statut sur Ignorée",
     "bulk.set_to_lowercase": "Mettre en minuscules",
     "bulk.delete_translation": "Supprimer la traduction",
 

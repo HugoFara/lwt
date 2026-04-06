@@ -38,5 +38,10 @@
     "go": "実行",
     "read": "読む",
     "view": "表示",
-    "select_language": "言語を選択"
+    "select_language": "言語を選択",
+    "status_learning": "学習中",
+    "status_learned": "習得済み",
+    "status_well_known": "熟知",
+    "status_ignored": "無視",
+    "status_unknown": "不明"
 }

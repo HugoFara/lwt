@@ -483,7 +483,11 @@ class SelectOptionsBuilder
             if ($useFullLabels) {
                 // For numeric statuses (1-5), show "1 - Learning" to distinguish levels
                 $label = ($n <= 5) ? $escapedAbbr . ' - ' . $escapedName : $escapedName;
-                $title = $escapedAbbr;
+                $title = $escapedName;
+            } elseif ($escapedAbbr === '') {
+                // 98/99: no language-neutral abbreviation — show the full name
+                $label = $escapedName;
+                $title = $escapedName;
             } else {
                 $label = $escapedAbbr;
                 $title = $escapedName;
@@ -527,9 +531,13 @@ class SelectOptionsBuilder
             if ($not9899 && ($n == 98 || $n == 99)) {
                 continue;
             }
+            $escapedName = htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8');
+            $bracket = '';
+            if ($status['abbr'] !== '' && $status['abbr'] !== $status['name']) {
+                $bracket = ' [' . htmlspecialchars($status['abbr'], ENT_QUOTES, 'UTF-8') . ']';
+            }
             $result .= '<option value="' . $n . '"' . FormHelper::getSelected($selected, $n != 0 ? $n : '0')
-                    . '>' . htmlspecialchars($status['name'], ENT_QUOTES, 'UTF-8') . ' ['
-                    . htmlspecialchars($status['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+                    . '>' . $escapedName . $bracket . '</option>';
         }
         if ($all) {
             $result .= '<option disabled="disabled">--------</option>';
@@ -574,8 +582,8 @@ class SelectOptionsBuilder
                     . htmlspecialchars($statuses[5]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
             $result .= '<option disabled="disabled">--------</option>';
             $result .= '<option value="599"' . FormHelper::getSelected($selected, 599)
-                    . '>All known [' . htmlspecialchars($statuses[5]['abbr'], ENT_QUOTES, 'UTF-8') . '+'
-                    . htmlspecialchars($statuses[99]['abbr'], ENT_QUOTES, 'UTF-8') . ']</option>';
+                    . '>All known [5+'
+                    . htmlspecialchars($statuses[99]['name'], ENT_QUOTES, 'UTF-8') . ']</option>';
         }
         return $result;
     }

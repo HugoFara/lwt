@@ -38,5 +38,10 @@
     "go": "Ir",
     "read": "Ler",
     "view": "Ver",
-    "select_language": "Selecione um idioma"
+    "select_language": "Selecione um idioma",
+    "status_learning": "Aprendendo",
+    "status_learned": "Aprendida",
+    "status_well_known": "Bem conhecida",
+    "status_ignored": "Ignorada",
+    "status_unknown": "Desconhecida"
 }

@@ -94,7 +94,7 @@
     "list.col_status": "Status",
     "list.col_score": "Pontuação",
     "list.col_term": "Termo",
-    "list.col_word_count": "QtdP",
+    "list.col_word_count": "Núm. palavras",
     "list.col_word_count_title": "Quantidade de Palavras nos Textos Ativos",
     "list.has_sentence": "Tem frase",
     "list.no_valid_sentence": "Sem frase válida",
@@ -175,9 +175,10 @@
 
     "bulk.choose_placeholder": "[Escolher...]",
     "bulk.change_status": "Alterar Status",
-    "bulk.set_status_to": "Definir Status como [{n}]",
-    "bulk.set_status_wkn": "Definir Status como [BCn]",
-    "bulk.set_status_ign": "Definir Status como [Ign]",
+    "bulk.set_status_to": "Definir Status como {n}",
+    "bulk.set_status_to_prefix": "Definir status para",
+    "bulk.set_status_wkn": "Definir Status como Bem conhecida",
+    "bulk.set_status_ign": "Definir Status como Ignorada",
     "bulk.set_to_lowercase": "Definir como Minúsculas",
     "bulk.delete_translation": "Excluir Tradução",
 

@@ -8,6 +8,7 @@
  */
 
 import { getDelimiter } from '@modules/language/stores/language_config';
+import { t } from '@shared/i18n/translator';
 
 // Tooltip configuration
 const TOOLTIP_CONFIG = {
@@ -35,12 +36,12 @@ function getAttr(el: HTMLElement, attr: string): string {
  * Get status name from status number.
  */
 function getStatusName(status: number): string {
-  if (status === 0) return 'Unknown [?]';
-  if (status < 5) return 'Learning [' + status + ']';
-  if (status === 5) return 'Learned [5]';
-  if (status === 98) return 'Ignored [Ign]';
-  if (status === 99) return 'Well Known [WKn]';
-  return 'Unknown';
+  if (status === 0) return t('common.status_unknown') + ' [?]';
+  if (status < 5) return t('common.status_learning') + ' [' + status + ']';
+  if (status === 5) return t('common.status_learned') + ' [5]';
+  if (status === 98) return t('common.status_ignored');
+  if (status === 99) return t('common.status_well_known');
+  return t('common.status_unknown');
 }
 
 /**

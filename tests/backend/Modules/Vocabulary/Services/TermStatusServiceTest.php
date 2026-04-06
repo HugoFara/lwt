@@ -65,26 +65,28 @@ class TermStatusServiceTest extends TestCase
     }
 
     #[Test]
-    public function getStatusesReturnsCachedInstance(): void
+    public function getStatusesReturnsEqualResults(): void
     {
         $first = TermStatusService::getStatuses();
         $second = TermStatusService::getStatuses();
-        $this->assertSame($first, $second);
+        $this->assertEquals($first, $second);
     }
 
     #[Test]
-    public function getStatusesWellKnownHasCorrectAbbr(): void
+    public function getStatusesWellKnownHasNoAbbreviation(): void
     {
+        // Status 99 no longer carries a hand-invented English abbreviation;
+        // display code falls back to the localized full name.
         $statuses = TermStatusService::getStatuses();
-        $this->assertSame('WKn', $statuses[99]['abbr']);
+        $this->assertSame('', $statuses[99]['abbr']);
         $this->assertSame('Well Known', $statuses[99]['name']);
     }
 
     #[Test]
-    public function getStatusesIgnoredHasCorrectAbbr(): void
+    public function getStatusesIgnoredHasNoAbbreviation(): void
     {
         $statuses = TermStatusService::getStatuses();
-        $this->assertSame('Ign', $statuses[98]['abbr']);
+        $this->assertSame('', $statuses[98]['abbr']);
         $this->assertSame('Ignored', $statuses[98]['name']);
     }
 
@@ -196,8 +198,10 @@ class TermStatusServiceTest extends TestCase
         $this->assertSame('1', TermStatusService::getStatusAbbr(1));
         $this->assertSame('2', TermStatusService::getStatusAbbr(2));
         $this->assertSame('5', TermStatusService::getStatusAbbr(5));
-        $this->assertSame('WKn', TermStatusService::getStatusAbbr(99));
-        $this->assertSame('Ign', TermStatusService::getStatusAbbr(98));
+        // Statuses 98 and 99 no longer have hand-invented English abbreviations.
+        // Display code falls back to the localized full name when abbr is empty.
+        $this->assertSame('', TermStatusService::getStatusAbbr(99));
+        $this->assertSame('', TermStatusService::getStatusAbbr(98));
     }
 
     #[Test]

@@ -412,7 +412,7 @@ echo PageLayoutHelper::buildActionCard([
                         <?= __('vocabulary.list.col_score') ?></th>
                     <th
                         class="has-text-centered"
-                        style="width: 5em;"
+                        style="width: 7em;"
                         x-show="filters.sort === 7"
                         title="<?= $titleWcnt ?>"
                     ><?= __('vocabulary.list.col_word_count') ?></th>

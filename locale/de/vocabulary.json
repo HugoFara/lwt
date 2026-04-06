@@ -94,7 +94,7 @@
     "list.col_status": "Status",
     "list.col_score": "Punktzahl",
     "list.col_term": "Begriff",
-    "list.col_word_count": "WAnz",
+    "list.col_word_count": "Wortanzahl",
     "list.col_word_count_title": "Wortanzahl in aktiven Texten",
     "list.has_sentence": "Hat Satz",
     "list.no_valid_sentence": "Kein gültiger Satz",
@@ -175,9 +175,10 @@
 
     "bulk.choose_placeholder": "[Auswählen...]",
     "bulk.change_status": "Status ändern",
-    "bulk.set_status_to": "Status setzen auf [{n}]",
-    "bulk.set_status_wkn": "Status setzen auf [GBk]",
-    "bulk.set_status_ign": "Status setzen auf [Ign]",
+    "bulk.set_status_to": "Status setzen auf {n}",
+    "bulk.set_status_to_prefix": "Status setzen auf",
+    "bulk.set_status_wkn": "Status setzen auf Bekannt",
+    "bulk.set_status_ign": "Status setzen auf Ignoriert",
     "bulk.set_to_lowercase": "In Kleinbuchstaben umwandeln",
     "bulk.delete_translation": "Übersetzung löschen",
 

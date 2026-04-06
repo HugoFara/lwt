@@ -80,31 +80,41 @@ class TermStatusService
     ];
 
     /**
-     * @var array<int, array{abbr: string, name: string}>|null Cached statuses
-     */
-    private static ?array $statuses = null;
-
-    /**
      * Return an associative array of all possible statuses.
+     *
+     * Names are localized via the i18n translator (common.status_*).
+     * Abbreviations are language-neutral: "1".."5" for learning levels,
+     * empty string for 98/99 — display code should fall back to the
+     * full localized name when the abbreviation is empty.
      *
      * @return array<int, array{abbr: string, name: string}>
      *         Keys are 1, 2, 3, 4, 5, 98, 99.
-     *         Values are associative arrays with abbr and name.
      */
     public static function getStatuses(): array
     {
-        if (self::$statuses === null) {
-            self::$statuses = [
-                TermStatus::NEW => ["abbr" => "1", "name" => "Learning"],
-                TermStatus::LEARNING_2 => ["abbr" => "2", "name" => "Learning"],
-                TermStatus::LEARNING_3 => ["abbr" => "3", "name" => "Learning"],
-                TermStatus::LEARNING_4 => ["abbr" => "4", "name" => "Learning"],
-                TermStatus::LEARNED => ["abbr" => "5", "name" => "Learned"],
-                TermStatus::WELL_KNOWN => ["abbr" => "WKn", "name" => "Well Known"],
-                TermStatus::IGNORED => ["abbr" => "Ign", "name" => "Ignored"],
-            ];
-        }
-        return self::$statuses;
+        $learning  = self::translateStatus('common.status_learning', 'Learning');
+        $learned   = self::translateStatus('common.status_learned', 'Learned');
+        $wellKnown = self::translateStatus('common.status_well_known', 'Well Known');
+        $ignored   = self::translateStatus('common.status_ignored', 'Ignored');
+        return [
+            TermStatus::NEW         => ["abbr" => "1", "name" => $learning],
+            TermStatus::LEARNING_2  => ["abbr" => "2", "name" => $learning],
+            TermStatus::LEARNING_3  => ["abbr" => "3", "name" => $learning],
+            TermStatus::LEARNING_4  => ["abbr" => "4", "name" => $learning],
+            TermStatus::LEARNED     => ["abbr" => "5", "name" => $learned],
+            TermStatus::WELL_KNOWN  => ["abbr" => "",  "name" => $wellKnown],
+            TermStatus::IGNORED     => ["abbr" => "",  "name" => $ignored],
+        ];
+    }
+
+    /**
+     * Resolve a status translation key, falling back to the English label
+     * when the translator is unavailable (e.g. during a Container reset).
+     */
+    private static function translateStatus(string $key, string $fallback): string
+    {
+        $value = __($key);
+        return ($value === $key) ? $fallback : $value;
     }
 
     /**

@@ -38,5 +38,10 @@
     "go": "前往",
     "read": "阅读",
     "view": "查看",
-    "select_language": "选择语言"
+    "select_language": "选择语言",
+    "status_learning": "学习中",
+    "status_learned": "已学会",
+    "status_well_known": "熟知",
+    "status_ignored": "已忽略",
+    "status_unknown": "未知"
 }

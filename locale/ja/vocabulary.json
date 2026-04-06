@@ -94,7 +94,7 @@
     "list.col_status": "ステータス",
     "list.col_score": "スコア",
     "list.col_term": "用語",
-    "list.col_word_count": "出現数",
+    "list.col_word_count": "単語数",
     "list.col_word_count_title": "アクティブテキスト内の単語数",
     "list.has_sentence": "文あり",
     "list.no_valid_sentence": "有効な文なし",
@@ -175,9 +175,10 @@
 
     "bulk.choose_placeholder": "[選択...]",
     "bulk.change_status": "ステータスを変更",
-    "bulk.set_status_to": "ステータスを [{n}] に設定",
-    "bulk.set_status_wkn": "ステータスを [WKn] に設定",
-    "bulk.set_status_ign": "ステータスを [Ign] に設定",
+    "bulk.set_status_to": "ステータスを {n} に設定",
+    "bulk.set_status_to_prefix": "ステータスを設定:",
+    "bulk.set_status_wkn": "ステータスを熟知に設定",
+    "bulk.set_status_ign": "ステータスを無視に設定",
     "bulk.set_to_lowercase": "小文字に変換",
     "bulk.delete_translation": "翻訳を削除",
 
