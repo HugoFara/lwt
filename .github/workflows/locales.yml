@@ -1,0 +1,36 @@
+name: Locale completion
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  check:
+    name: Check locale completion
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Report completion
+        run: php bin/check-locales.php
+
+      - name: Generate shields.io badges
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: php bin/check-locales.php --badges=badges
+
+      - name: Publish badges to badges branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./badges
+          publish_branch: badges
+          keep_files: false
+          commit_message: "chore(i18n): update locale badges"
