@@ -114,7 +114,6 @@ class Settings
         }
 
         // Fall back to global row (StUsID=0)
-        $dft = SettingDefinitions::getAll();
         try {
             $val = (string) QueryBuilder::table('settings')
                 ->where('StKey', '=', $key)
@@ -126,10 +125,7 @@ class Settings
         } catch (\RuntimeException $e) {
             // DB not available — fall through to default
         }
-        if (isset($dft[$key])) {
-            return $dft[$key]['dft'];
-        }
-        return '';
+        return SettingDefinitions::getDefault($key) ?? '';
     }
 
     /**
@@ -144,17 +140,18 @@ class Settings
      */
     public static function save(string $k, mixed $v): void
     {
-        $dft = SettingDefinitions::getAll();
+        $defs = SettingDefinitions::getAll();
         if (!isset($v)) {
             throw new \InvalidArgumentException('Value is not set');
         }
-        if (isset($dft[$k]) && $dft[$k]['num']) {
+        if (SettingDefinitions::isNumeric($k)) {
             $v = (int)$v;
-            if (isset($dft[$k]['min']) && $v < $dft[$k]['min']) {
-                $v = $dft[$k]['dft'];
+            $default = SettingDefinitions::getDefault($k) ?? '';
+            if (isset($defs[$k]['min']) && $v < $defs[$k]['min']) {
+                $v = $default;
             }
-            if (isset($dft[$k]['max']) && $v > $dft[$k]['max']) {
-                $v = $dft[$k]['dft'];
+            if (isset($defs[$k]['max']) && $v > $defs[$k]['max']) {
+                $v = $default;
             }
         }
         // Use INSERT ... ON DUPLICATE KEY UPDATE for atomic upsert
@@ -180,17 +177,18 @@ class Settings
      */
     public static function saveForUser(string $k, mixed $v, int $userId): void
     {
-        $dft = SettingDefinitions::getAll();
+        $defs = SettingDefinitions::getAll();
         if (!isset($v)) {
             throw new \InvalidArgumentException('Value is not set');
         }
-        if (isset($dft[$k]) && $dft[$k]['num']) {
+        if (SettingDefinitions::isNumeric($k)) {
             $v = (int)$v;
-            if (isset($dft[$k]['min']) && $v < $dft[$k]['min']) {
-                $v = $dft[$k]['dft'];
+            $default = SettingDefinitions::getDefault($k) ?? '';
+            if (isset($defs[$k]['min']) && $v < $defs[$k]['min']) {
+                $v = $default;
             }
-            if (isset($dft[$k]['max']) && $v > $dft[$k]['max']) {
-                $v = $dft[$k]['dft'];
+            if (isset($defs[$k]['max']) && $v > $defs[$k]['max']) {
+                $v = $default;
             }
         }
         Connection::preparedExecute(

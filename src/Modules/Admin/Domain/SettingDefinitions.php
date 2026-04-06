@@ -42,130 +42,132 @@ final class SettingDefinitions
      * Setting definitions with defaults, validation rules, and scope.
      *
      * Each setting has:
-     * - dft: Default value (string)
-     * - num: Whether it's numeric (0 = no, 1 = yes)
+     * - default: Default value (string). The legacy "dft" key is still
+     *   accepted on read for backwards compatibility but is deprecated.
+     * - numeric: Whether it holds a numeric value (bool). The legacy "num"
+     *   key (int 0/1) is still accepted on read but is deprecated.
      * - min: Minimum value (for numeric settings)
      * - max: Maximum value (for numeric settings)
      * - scope: 'admin' or 'user' (defaults to 'user' if not set)
      *
-     * @var array<string, array{dft: string, num: int, min?: int, max?: int, scope: string}>
+     * @var array<string, array{default: string, numeric: bool, min?: int, max?: int, scope: string}>
      */
     private const DEFINITIONS = [
         // User preferences: reading
         'set-words-to-do-buttons' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-tooltip-mode' => [
-            "dft" => '2', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '2', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-display-text-frame-term-translation' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-text-frame-annotation-position' => [
-            "dft" => '2', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '2', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-text-visit-statuses-via-key' => [
-            "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-show-text-word-counts' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_USER
         ],
 
         // User preferences: review
         'set-test-main-frame-waiting-time' => [
-            "dft" => '0', "num" => 1, "min" => 0, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '0', "numeric" => true, "min" => 0, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-test-edit-frame-waiting-time' => [
-            "dft" => '500', "num" => 1, "min" => 0, "max" => 99999999, "scope" => self::SCOPE_USER
+            "default" => '500', "numeric" => true, "min" => 0, "max" => 99999999, "scope" => self::SCOPE_USER
         ],
         'set-test-sentence-count' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-term-sentence-count' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-similar-terms-count' => [
-            "dft" => '0', "num" => 1, "min" => 0, "max" => 9, "scope" => self::SCOPE_USER
+            "default" => '0', "numeric" => true, "min" => 0, "max" => 9, "scope" => self::SCOPE_USER
         ],
         'set-term-translation-delimiters' => [
-            "dft" => '/;|', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '/;|', "numeric" => false, "scope" => self::SCOPE_USER
         ],
 
         // User preferences: TTS
         'set-tts' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_USER
         ],
         'set-hts' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_USER
         ],
 
         // User preferences: pagination
         'set-archived_texts-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '100', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-texts-per-page' => [
-            "dft" => '10', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '10', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-terms-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '100', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-tags-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '100', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-articles-per-page' => [
-            "dft" => '10', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '10', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-feeds-per-page' => [
-            "dft" => '50', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '50', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-ggl-translation-per-page' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
+            "default" => '100', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_USER
         ],
         'set-regex-mode' => [
-            "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '', "numeric" => false, "scope" => self::SCOPE_USER
         ],
 
         // User preferences: reading layout
         'set-reader-width' => [
-            "dft" => '100', "num" => 1, "min" => 40, "max" => 100,
+            "default" => '100', "numeric" => true, "min" => 40, "max" => 100,
             "scope" => self::SCOPE_USER
         ],
         'set-reader-text-size' => [
-            "dft" => '0', "num" => 1, "min" => 0, "max" => 300,
+            "default" => '0', "numeric" => true, "min" => 0, "max" => 300,
             "scope" => self::SCOPE_USER
         ],
 
         // User preferences: appearance
         'set-theme-dir' => [
-            "dft" => '', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => '', "numeric" => false, "scope" => self::SCOPE_USER
         ],
 
         // User preferences: language/locale
         'app_language' => [
-            "dft" => 'en', "num" => 0, "scope" => self::SCOPE_USER
+            "default" => 'en', "numeric" => false, "scope" => self::SCOPE_USER
         ],
 
         // Admin settings: feed limits
         'set-max-articles-with-text' => [
-            "dft" => '100', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
+            "default" => '100', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
         ],
         'set-max-articles-without-text' => [
-            "dft" => '250', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
+            "default" => '250', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
         ],
         'set-max-texts-per-feed' => [
-            "dft" => '20', "num" => 1, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
+            "default" => '20', "numeric" => true, "min" => 1, "max" => 9999, "scope" => self::SCOPE_ADMIN
         ],
 
         // Admin settings: multi-user
         'set-allow-registration' => [
-            "dft" => '1', "num" => 0, "scope" => self::SCOPE_ADMIN
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_ADMIN
         ]
     ];
 
     /**
      * Get all setting definitions.
      *
-     * @return array<string, array{dft: string, num: int, min?: int, max?: int, scope: string}>
+     * @return array<string, array{default: string, numeric: bool, min?: int, max?: int, scope: string}>
      */
     public static function getAll(): array
     {
@@ -177,7 +179,7 @@ final class SettingDefinitions
      *
      * @param string $key Setting key
      *
-     * @return array{dft: string, num: int, min?: int, max?: int, scope: string}|null
+     * @return array{default: string, numeric: bool, min?: int, max?: int, scope: string}|null
      */
     public static function get(string $key): ?array
     {
@@ -187,13 +189,55 @@ final class SettingDefinitions
     /**
      * Get the default value for a setting.
      *
+     * Reads the "default" field, falling back to the deprecated "dft"
+     * field if a definition still uses the legacy key.
+     *
      * @param string $key Setting key
      *
      * @return string|null Default value or null if not defined
      */
     public static function getDefault(string $key): ?string
     {
-        return self::DEFINITIONS[$key]['dft'] ?? null;
+        $def = self::DEFINITIONS[$key] ?? null;
+        if ($def === null) {
+            return null;
+        }
+        if (isset($def['default'])) {
+            return $def['default'];
+        }
+        // Back-compat: accept the legacy "dft" key from any third-party
+        // setting definitions still using the old field name.
+        /** @var array<string, mixed> $def */
+        if (isset($def['dft']) && is_string($def['dft'])) {
+            return $def['dft'];
+        }
+        return null;
+    }
+
+    /**
+     * Check if a setting is numeric.
+     *
+     * Reads the "numeric" field, falling back to the deprecated "num"
+     * field if a definition still uses the legacy key.
+     *
+     * @param string $key Setting key
+     *
+     * @return bool True if the setting holds a numeric value
+     */
+    public static function isNumeric(string $key): bool
+    {
+        $def = self::DEFINITIONS[$key] ?? null;
+        if ($def === null) {
+            return false;
+        }
+        if (isset($def['numeric'])) {
+            return $def['numeric'];
+        }
+        /** @var array<string, mixed> $def */
+        if (isset($def['num'])) {
+            return (bool)$def['num'];
+        }
+        return false;
     }
 
     /**

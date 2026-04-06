@@ -1458,9 +1458,9 @@ class DatabaseConnectTest extends TestCase
         $this->assertArrayHasKey('set-texts-per-page', $settings);
         $this->assertArrayHasKey('set-show-text-word-counts', $settings);
 
-        // Each setting should have structure: dft, num, min, max (for numeric)
+        // Each setting should have structure: default, num, min, max (for numeric)
         $this->assertIsArray($settings['set-texts-per-page']);
-        $this->assertArrayHasKey('dft', $settings['set-texts-per-page']);
+        $this->assertArrayHasKey('default', $settings['set-texts-per-page']);
     }
 
     /**

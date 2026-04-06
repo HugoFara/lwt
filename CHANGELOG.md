@@ -26,6 +26,10 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Cleaner setting definition keys**: `SettingDefinitions` entries now use
+  `default` (string) and `numeric` (bool) instead of the cryptic `dft` (string)
+  and `num` (int 0/1). The legacy keys are still accepted on read for
+  backwards compatibility but are deprecated.
 * **Renamed `dev` branch to `develop`**: All CI workflows and documentation
   updated to reference the new branch name.
 * **Upgraded dev tooling to latest major versions**:
