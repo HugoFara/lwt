@@ -193,6 +193,10 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </span>
                     </div>
                 </div>
+                <p class="help">
+                    Which bulk-action buttons appear on the reading screen for unknown
+                    words: just "I Know All", or also "Ignore All".
+                </p>
             </div>
 
             <div class="field">
@@ -211,6 +215,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </span>
                     </div>
                 </div>
+                <p class="help">
+                    Style of the popup that appears when hovering a word while reading.
+                </p>
             </div>
 
             <div class="field">
@@ -240,6 +247,10 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </span>
                     </div>
                 </div>
+                <p class="help">
+                    How many machine-translation suggestions to fetch per page when
+                    looking up a new term.
+                </p>
             </div>
         </div>
     </div>
@@ -762,6 +773,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                 </span>
                             </div>
                         </div>
+                        <p class="help">Number of rows shown on the active texts list.</p>
                     </div>
                 </div>
 
@@ -792,6 +804,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                 </span>
                             </div>
                         </div>
+                        <p class="help">Number of rows shown on the archived texts list.</p>
                     </div>
                 </div>
             </div>
@@ -824,6 +837,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                 </span>
                             </div>
                         </div>
+                        <p class="help">Number of vocabulary entries shown per page on the terms list.</p>
                     </div>
                 </div>
 
@@ -854,6 +868,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                 </span>
                             </div>
                         </div>
+                        <p class="help">Number of tags shown per page on the tag management screens.</p>
                     </div>
                 </div>
             </div>
@@ -886,6 +901,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                 </span>
                             </div>
                         </div>
+                        <p class="help">Number of articles to display when browsing a single newsfeed.</p>
                     </div>
                 </div>
 
@@ -916,6 +932,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                 </span>
                             </div>
                         </div>
+                        <p class="help">Number of feeds shown per page on the newsfeeds list.</p>
                     </div>
                 </div>
             </div>
@@ -929,6 +946,10 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </select>
                     </div>
                 </div>
+                <p class="help">
+                    How filter boxes interpret your input: plain text matching or
+                    full regular expressions.
+                </p>
             </div>
         </div>
     </div>
