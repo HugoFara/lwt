@@ -1,0 +1,6 @@
+{
+    "error_404_title": "404 - Página Não Encontrada",
+    "error_404_body": "A página solicitada {path} não foi encontrada.",
+    "error_500_title": "500 - Erro Interno do Servidor",
+    "return_home": "Voltar para a Página Inicial"
+}

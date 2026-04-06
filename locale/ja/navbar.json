@@ -1,0 +1,23 @@
+{
+    "main_navigation": "メインナビゲーション",
+    "menu": "メニュー",
+    "texts": "テキスト",
+    "new_text_title": "新規テキスト",
+    "vocabulary": "語彙",
+    "new_term_title": "新規用語",
+    "languages": "言語",
+    "new_language_title": "新規言語",
+    "statistics_title": "統計",
+    "switch_to_dark_mode": "ダークモードに切り替え",
+    "switch_to_light_mode": "ライトモードに切り替え",
+    "user": "ユーザー",
+    "preferences": "個人設定",
+    "profile": "プロフィール",
+    "help": "ヘルプ",
+    "admin": "管理者",
+    "database_operations": "データベース操作",
+    "admin_settings": "管理者設定",
+    "users": "ユーザー",
+    "server_data": "サーバー情報",
+    "add_new": "新規追加"
+}
