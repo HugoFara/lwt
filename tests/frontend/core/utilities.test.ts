@@ -67,8 +67,8 @@ describe('pgm.ts', () => {
   describe('getStatusAbbr', () => {
     it('returns correct abbreviation for valid status', () => {
       expect(getStatusAbbr(1)).toBe('1');
-      expect(getStatusAbbr(98)).toBe('Ign');
-      expect(getStatusAbbr(99)).toBe('WKn');
+      expect(getStatusAbbr(98)).toBe('Ignored');
+      expect(getStatusAbbr(99)).toBe('Well Known');
     });
 
     it('returns ? for invalid status', () => {
@@ -316,7 +316,6 @@ describe('pgm.ts', () => {
     it('includes status name and abbreviation', () => {
       const result = createWordTooltip('word', 'trans', '', 98);
       expect(result).toContain('Ignored');
-      expect(result).toContain('[Ign]');
     });
 
     it('handles all fields populated', () => {

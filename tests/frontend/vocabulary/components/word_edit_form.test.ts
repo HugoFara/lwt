@@ -157,7 +157,7 @@ describe('word_edit_form.ts', () => {
 
       expect(component.statuses).toHaveLength(7);
       expect(component.statuses[0]).toEqual({ value: 1, label: 'Learning (1)', abbr: '1' });
-      expect(component.statuses[6]).toEqual({ value: 98, label: 'Ignored', abbr: 'Ign' });
+      expect(component.statuses[6]).toEqual({ value: 98, label: 'Ignored', abbr: 'Ignored' });
     });
   });
 

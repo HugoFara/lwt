@@ -93,6 +93,7 @@ export const lucideMock: Record<string, unknown> = {
   Mic: icon,
   Minimize2: icon,
   Minus: icon,
+  Moon: icon,
   Notebook: icon,
   NotebookPen: icon,
   NotepadText: icon,

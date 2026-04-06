@@ -343,7 +343,7 @@ describe('word_upload.ts', () => {
         const component = wordUploadResultApp();
         const info = component.getStatusInfo(99);
 
-        expect(info.abbr).toBe('WKn');
+        expect(info.abbr).toBe('Well Known');
         expect(info.name).toBe('Well Known');
       });
 

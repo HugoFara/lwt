@@ -42,6 +42,16 @@ export const statuses: Record<number, WordStatus> = new Proxy({} as Record<numbe
       case 98: return { abbr: ignored, name: ignored };
       default: return undefined;
     }
+  },
+  ownKeys(): string[] {
+    return ['1', '2', '3', '4', '5', '98', '99'];
+  },
+  getOwnPropertyDescriptor(): PropertyDescriptor {
+    return { enumerable: true, configurable: true };
+  },
+  has(_target, prop: string | symbol): boolean {
+    const key = Number(prop);
+    return [1, 2, 3, 4, 5, 98, 99].includes(key);
   }
 });
 

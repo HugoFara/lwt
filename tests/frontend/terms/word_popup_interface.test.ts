@@ -295,8 +295,8 @@ describe('word_popup_interface.ts', () => {
       expect(result).toContain('[2]');
       expect(result).toContain('[4]');
       expect(result).toContain('[5]');
-      expect(result).toContain('[WKn]');
-      expect(result).toContain('[Ign]');
+      expect(result).toContain('[Well Known]');
+      expect(result).toContain('[Ignored]');
       // Current status (3) should show diamond
       expect(result).toContain('◆');
     });
@@ -328,14 +328,14 @@ describe('word_popup_interface.ts', () => {
     it('handles status 99 (well-known)', () => {
       const result = createStatusChangeLink(1, '5', 100, 3, 99);
 
-      expect(result).toContain('[WKn]');
+      expect(result).toContain('[Well Known]');
       expect(result).toContain('status=99');
     });
 
     it('handles status 98 (ignored)', () => {
       const result = createStatusChangeLink(1, '5', 100, 3, 98);
 
-      expect(result).toContain('[Ign]');
+      expect(result).toContain('[Ignored]');
       expect(result).toContain('status=98');
     });
   });

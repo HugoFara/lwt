@@ -132,5 +132,14 @@ export default defineConfig({
       pattern: 'https://github.com/HugoFara/lwt/edit/main/docs-src/:path',
       text: 'Edit this page on GitHub'
     }
+  },
+
+  // Raise esbuild target so VitePress's internal client bundle (which uses
+  // destructuring) can be transpiled. Default targets like "chrome87" trip up
+  // esbuild on destructuring patterns; "esnext" leaves them intact.
+  vite: {
+    build: {
+      target: 'esnext'
+    }
   }
 })

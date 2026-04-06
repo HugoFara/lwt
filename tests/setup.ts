@@ -3,6 +3,42 @@
  * Sets up mocks for browser APIs not available in jsdom
  */
 import { vi } from 'vitest';
+import { readFileSync, readdirSync } from 'fs';
+import { resolve, join } from 'path';
+
+// Load all English locale namespaces and inject as the i18n blob expected by
+// `src/frontend/js/shared/i18n/translator.ts`. Without this, `t()` returns the
+// raw key, which breaks tests that assert on translated strings.
+try {
+  const localeDir = resolve(__dirname, '../locale/en');
+  const flat: Record<string, string> = {};
+  const flatten = (obj: Record<string, unknown>, prefix: string): void => {
+    for (const [k, v] of Object.entries(obj)) {
+      const key = prefix ? `${prefix}.${k}` : k;
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        flatten(v as Record<string, unknown>, key);
+      } else if (typeof v === 'string') {
+        flat[key] = v;
+      }
+    }
+  };
+  for (const file of readdirSync(localeDir)) {
+    if (!file.endsWith('.json')) continue;
+    const ns = file.replace(/\.json$/, '');
+    const data = JSON.parse(readFileSync(join(localeDir, file), 'utf8')) as Record<string, unknown>;
+    flatten(data, ns);
+  }
+  if (typeof document !== 'undefined') {
+    const el = document.createElement('script');
+    el.type = 'application/json';
+    el.id = 'lwt-i18n';
+    el.textContent = JSON.stringify(flat);
+    document.head.appendChild(el);
+  }
+} catch (e) {
+  // Non-fatal: tests that don't depend on i18n still run.
+  console.warn('i18n test setup failed:', e);
+}
 
 // Suppress jsdom "Not implemented" warnings that are expected in test environment
 // These warnings are normal for DOM methods jsdom hasn't fully implemented

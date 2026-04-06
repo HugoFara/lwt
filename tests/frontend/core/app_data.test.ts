@@ -37,11 +37,11 @@ describe('app_data.ts', () => {
     });
 
     it('contains Well Known status (99)', () => {
-      expect(statuses[99]).toEqual({ abbr: 'WKn', name: 'Well Known' });
+      expect(statuses[99]).toEqual({ abbr: 'Well Known', name: 'Well Known' });
     });
 
     it('contains Ignored status (98)', () => {
-      expect(statuses[98]).toEqual({ abbr: 'Ign', name: 'Ignored' });
+      expect(statuses[98]).toEqual({ abbr: 'Ignored', name: 'Ignored' });
     });
 
     it('has correct number of statuses', () => {

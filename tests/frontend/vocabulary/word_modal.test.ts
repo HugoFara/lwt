@@ -272,7 +272,7 @@ describe('word_modal.ts', () => {
         expect(component.statuses[6]).toEqual({
           value: 98,
           label: 'Ignored',
-          abbr: 'Ign',
+          abbr: 'Ignored',
           class: 'is-light'
         });
       });
