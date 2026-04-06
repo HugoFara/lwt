@@ -20,7 +20,8 @@ declare(strict_types=1);
 namespace Lwt\Views\Feed;
 
 ?>
-   <input id="markaction" type="submit" value="Save" />
-   <input type="button" value="Cancel" data-action="navigate" data-url="/feeds" />
+   <input id="markaction" type="submit" value="<?php echo __e('feed.edit_text_footer_save'); ?>" />
+   <input type="button" value="<?php echo __e('feed.edit_text_footer_cancel'); ?>"
+          data-action="navigate" data-url="/feeds" />
    <input type="hidden" name="checked_feeds_save" value="1" />
    </form>

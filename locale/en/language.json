@@ -7,7 +7,6 @@
     "export_template_tag": "Export Template",
     "export_template_title": "Custom export template available",
     "export_template_short_title": "Export template",
-
     "list.all_languages": "All Languages",
     "list.col_language": "Language",
     "list.col_texts": "Texts",
@@ -21,18 +20,15 @@
     "list.edit": "Edit",
     "list.set_current": "Set as Current",
     "list.delete": "Delete",
-
     "delete.confirm_title": "Confirm Delete",
     "delete.confirm_question": "Are you sure you want to delete the language",
     "delete.warning": "This action cannot be undone.",
     "delete.button": "Delete",
     "delete.cancel": "Cancel",
     "delete.close": "close",
-
     "wizard.l2_label": "The language you want to study",
     "wizard.l1_label": "Your native language",
     "wizard.choose_placeholder": "[Choose...]",
-
     "form.new_title": "New Language",
     "form.edit_title": "Edit Language",
     "form.help": "Help",
@@ -44,7 +40,6 @@
     "form.save_changes": "Save Changes",
     "form.cancel": "Cancel",
     "form.advanced_settings": "Advanced Settings",
-
     "form.section_dictionaries": "Dictionaries & Translation",
     "form.local_dictionaries": "Local Dictionaries",
     "form.import": "Import",
@@ -64,7 +59,6 @@
     "form.lookup_mode_local_first": "Local first, online fallback",
     "form.lookup_mode_local_only": "Local dictionaries only",
     "form.lookup_mode_combined": "Combined (show both)",
-
     "form.dict1_uri": "Dictionary 1 URI",
     "form.dict2_uri": "Dictionary 2 URI",
     "form.required_marker_title": "Required",
@@ -76,16 +70,13 @@
     "form.translator_glosbe": "Glosbe API",
     "form.translator_uri_placeholder": "Translator URI",
     "form.api_key": "API Key",
-
     "form.source_lang_code": "Source Language Code",
     "form.source_lang_code_help": "ISO code of the language you're learning",
     "form.target_lang_code": "Target Language Code",
     "form.target_lang_code_help": "ISO code of your native language",
-
     "form.section_display": "Display Settings",
     "form.text_size": "Text Size (%)",
     "form.text_size_example": "Text will be this size",
-
     "form.section_text_processing": "Text Processing",
     "form.parser_type": "Parser Type",
     "form.parser_unavailable": " (unavailable)",
@@ -96,7 +87,6 @@
     "form.regexp_word_characters": "RegExp Word Characters",
     "form.regexp_alt_regexp": "Regular Expressions (demo)",
     "form.regexp_alt_mecab": "MeCab (recommended)",
-
     "form.split_each_char": "Make each character a word",
     "form.split_each_char_help": "For Chinese, Japanese, etc.",
     "form.remove_spaces": "Remove spaces",
@@ -105,7 +95,6 @@
     "form.right_to_left_help": "For Arabic, Hebrew, Farsi, Urdu, etc.",
     "form.show_romanization": "Show Romanization",
     "form.show_romanization_help": "Recommended for Chinese, Japanese, etc.",
-
     "form.section_export_tts": "Export & Text-to-Speech",
     "form.export_template": "Export Template",
     "form.export_template_help": "Template for exporting terms (e.g., to Anki)",
@@ -117,6 +106,29 @@
     "form.test_voice_api": "Test!",
     "form.check": "Check",
     "form.test": "Test",
-
-    "errors.language_not_found": "Language not found."
+    "errors.language_not_found": "Language not found.",
+    "errors.name_required": "Language name is required",
+    "errors.name_too_long": "Language name must be 40 characters or less",
+    "errors.name_duplicate": "A language with this name already exists",
+    "errors.split_sentences_required": "Sentence split characters are required",
+    "errors.word_chars_required": "Word characters pattern is required",
+    "errors.text_size_range": "Text size must be between 50 and 300",
+    "errors.tts_voice_api_invalid": "TTS Voice API must be valid JSON",
+    "errors.load_failed": "Failed to load language",
+    "errors.save_failed": "Failed to save language",
+    "errors.create_failed": "Failed to create language",
+    "errors.update_failed": "Failed to update language",
+    "errors.fix_validation": "Please fix validation errors",
+    "errors.id_missing": "Language ID is missing",
+    "list.set_current_success": "\"{name}\" is now the current language",
+    "list.set_current_failed": "Failed to set default language",
+    "list.cannot_delete": "Cannot delete: language has texts, words, or feeds",
+    "list.delete_success": "\"{name}\" has been deleted",
+    "list.delete_failed": "Failed to delete language",
+    "list.reparsing": "Reparsing texts for \"{name}\"...",
+    "list.reparse_success": "Texts for \"{name}\" have been reparsed",
+    "list.reparse_failed": "Failed to reparse texts",
+    "flash.updated_with_reparse": "Updated: 1 / Reparsed texts: {count}",
+    "flash.updated_no_reparse": "Updated: 1 / Reparsing not needed",
+    "flash.refresh_summary": "Sentences deleted: {sentencesDeleted} / Text items deleted: {textItemsDeleted} / Sentences added: {sentencesAdded} / Text items added: {textItemsAdded}"
 }

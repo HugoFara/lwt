@@ -98,7 +98,7 @@ class CreateBookFromTexts
         if (trim($text) === '') {
             return [
                 'success' => false,
-                'message' => 'Text content is empty',
+                'message' => __('book.flash.text_empty'),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -112,7 +112,7 @@ class CreateBookFromTexts
         if (count($chapters) === 1 && !$this->textSplitter->needsSplit($text)) {
             return [
                 'success' => false,
-                'message' => 'Text does not need splitting',
+                'message' => __('book.flash.no_split_needed'),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -186,7 +186,7 @@ class CreateBookFromTexts
 
             return [
                 'success' => true,
-                'message' => "Created book '{$title}' with " . count($textIds) . " chapters",
+                'message' => __('book.flash.created_from_text', ['title' => $title, 'count' => count($textIds)]),
                 'bookId' => $bookId,
                 'chapterCount' => count($textIds),
                 'textIds' => $textIds,

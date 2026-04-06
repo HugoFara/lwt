@@ -61,7 +61,8 @@ $configJson = json_encode([
             <span class="icon">
                 <?php echo IconHelper::render('alert-circle', ['alt' => 'Error']); ?>
             </span>
-            <span><strong>Error:</strong> Please check your newsfeed URI!</span>
+            <span><strong><?php echo __e('feed.wizard.step1.error_label'); ?></strong>
+                <?php echo __e('feed.wizard.step1.error_check_uri'); ?></span>
         </span>
     </div>
     <?php endif; ?>
@@ -74,7 +75,7 @@ $configJson = json_encode([
                     <span class="icon is-small">
                         <?php echo IconHelper::render('library', ['alt' => 'Browse']); ?>
                     </span>
-                    <span>Browse Sources</span>
+                    <span><?php echo __e('feed.wizard.step1.tab_browse'); ?></span>
                 </a>
             </li>
             <li :class="{ 'is-active': activeTab === 'wizard' }">
@@ -82,7 +83,7 @@ $configJson = json_encode([
                     <span class="icon is-small">
                         <?php echo IconHelper::render('wand-2', ['alt' => 'Wizard']); ?>
                     </span>
-                    <span>Enter Feed URL</span>
+                    <span><?php echo __e('feed.wizard.step1.tab_wizard'); ?></span>
                 </a>
             </li>
             <li :class="{ 'is-active': activeTab === 'manual' }">
@@ -90,7 +91,7 @@ $configJson = json_encode([
                     <span class="icon is-small">
                         <?php echo IconHelper::render('settings', ['alt' => 'Manual']); ?>
                     </span>
-                    <span>Manual Setup</span>
+                    <span><?php echo __e('feed.wizard.step1.tab_manual'); ?></span>
                 </a>
             </li>
         </ul>
@@ -99,7 +100,7 @@ $configJson = json_encode([
     <!-- ===================== TAB 1: Browse Curated Sources ===================== -->
     <div class="box" x-show="activeTab === 'browse'" x-transition>
         <p class="mb-4 has-text-grey">
-            Pick from pre-configured news sources. Selectors and options are already set up for you.
+            <?php echo __e('feed.wizard.step1.browse_intro'); ?>
         </p>
 
         <!-- Language filter -->
@@ -107,7 +108,7 @@ $configJson = json_encode([
             <div class="control">
                 <div class="select">
                     <select x-model="browseLanguageFilter">
-                        <option value="">All languages</option>
+                        <option value=""><?php echo __e('feed.wizard.step1.browse_all_languages'); ?></option>
                         <template x-for="group in curatedFeeds" :key="group.language">
                             <option :value="group.language" x-text="group.languageName"></option>
                         </template>
@@ -115,7 +116,8 @@ $configJson = json_encode([
                 </div>
             </div>
             <div class="control is-expanded">
-                <input class="input" type="search" placeholder="Search feeds..."
+                <input class="input" type="search"
+                       placeholder="<?php echo __e('feed.wizard.step1.browse_search_placeholder'); ?>"
                        x-model="browseSearch" />
             </div>
         </div>
@@ -123,7 +125,7 @@ $configJson = json_encode([
         <!-- Feed cards grouped by language -->
         <template x-if="filteredCuratedFeeds.length === 0">
             <div class="notification is-light">
-                No feeds match your search.
+                <?php echo __e('feed.wizard.step1.browse_no_match'); ?>
             </div>
         </template>
 
@@ -163,7 +165,7 @@ $configJson = json_encode([
                     <span class="icon is-small">
                         <?php echo IconHelper::render('plus', ['alt' => 'Add']); ?>
                     </span>
-                    <span>Add Selected Feeds</span>
+                    <span><?php echo __e('feed.wizard.step1.browse_add_selected'); ?></span>
                 </button>
             </div>
         </div>
@@ -184,7 +186,7 @@ $configJson = json_encode([
     <!-- ===================== TAB 2: Wizard (Enter Feed URL) ===================== -->
     <div class="box" x-show="activeTab === 'wizard'" x-transition>
         <p class="mb-4 has-text-grey">
-            Enter a feed URL and we'll guide you through configuring article extraction step by step.
+            <?php echo __e('feed.wizard.step1.wizard_intro'); ?>
         </p>
 
         <form class="validate" action="/feeds/wizard" method="post">
@@ -195,8 +197,8 @@ $configJson = json_encode([
 
             <div class="field">
                 <label class="label" for="rss_url">
-                    Feed URI
-                    <span class="has-text-danger" title="Required">*</span>
+                    <?php echo __e('feed.wizard.step1.feed_uri_label'); ?>
+                    <span class="has-text-danger" title="<?php echo __e('feed.wizard.step1.required'); ?>">*</span>
                 </label>
                 <div class="control">
                     <input class="input notempty"
@@ -208,21 +210,23 @@ $configJson = json_encode([
                            :class="{ 'is-success': isValidUrl, 'is-danger': rssUrl && !isValidUrl }"
                            required />
                 </div>
-                <p class="help">Enter the URL of an RSS or Atom feed</p>
+                <p class="help"><?php echo __e('feed.wizard.step1.feed_uri_help'); ?></p>
             </div>
 
             <!-- Form Actions -->
             <div class="field is-grouped is-grouped-right mt-5">
                 <div class="control">
                     <button type="button" class="button is-danger is-outlined" @click="cancel">
-                        Cancel
+                        <?php echo __e('feed.wizard.step1.cancel'); ?>
                     </button>
                 </div>
                 <div class="control">
                     <button type="submit" class="button is-primary" :disabled="!isValidUrl">
-                        <span>Next</span>
+                        <span><?php echo __e('feed.wizard.step1.next'); ?></span>
                         <span class="icon is-small">
-                            <?php echo IconHelper::render('arrow-right', ['alt' => 'Next']); ?>
+                            <?php
+                            echo IconHelper::render('arrow-right', ['alt' => __('feed.wizard.step1.next')]);
+                            ?>
                         </span>
                     </button>
                 </div>
@@ -233,7 +237,7 @@ $configJson = json_encode([
     <!-- ===================== TAB 3: Manual Setup ===================== -->
     <div class="box" x-show="activeTab === 'manual'" x-transition>
         <p class="mb-4 has-text-grey">
-            Set up a feed manually. You'll need to know the RSS URL, article CSS selectors, and filter selectors.
+            <?php echo __e('feed.wizard.step1.manual_intro'); ?>
         </p>
 
         <script type="application/json" id="feed-form-config">
@@ -267,15 +271,15 @@ $configJson = json_encode([
                 <!-- Name -->
                 <div class="field">
                     <label class="label" for="manual_NfName">
-                        Name
-                        <span class="has-text-danger" title="Required">*</span>
+                        <?php echo __e('feed.wizard.step1.name_label'); ?>
+                        <span class="has-text-danger" title="<?php echo __e('feed.wizard.step1.required'); ?>">*</span>
                     </label>
                     <div class="control">
                         <input class="input notempty"
                                type="text"
                                name="NfName"
                                id="manual_NfName"
-                               placeholder="Feed name"
+                               placeholder="<?php echo __e('feed.wizard.step1.name_placeholder'); ?>"
                                required />
                     </div>
                 </div>
@@ -283,15 +287,15 @@ $configJson = json_encode([
                 <!-- Newsfeed URL -->
                 <div class="field">
                     <label class="label" for="manual_NfSourceURI">
-                        Newsfeed URL
-                        <span class="has-text-danger" title="Required">*</span>
+                        <?php echo __e('feed.wizard.step1.url_label'); ?>
+                        <span class="has-text-danger" title="<?php echo __e('feed.wizard.step1.required'); ?>">*</span>
                     </label>
                     <div class="control">
                         <input class="input notempty"
                                type="url"
                                name="NfSourceURI"
                                id="manual_NfSourceURI"
-                               placeholder="https://example.com/feed.xml"
+                               placeholder="<?php echo __e('feed.wizard.step1.url_placeholder'); ?>"
                                required />
                     </div>
                 </div>
@@ -299,50 +303,52 @@ $configJson = json_encode([
                 <!-- Article Section -->
                 <div class="field">
                     <label class="label" for="manual_NfArticleSectionTags">
-                        Article Section
-                        <span class="has-text-danger" title="Required">*</span>
+                        <?php echo __e('feed.wizard.step1.article_section_label'); ?>
+                        <span class="has-text-danger" title="<?php echo __e('feed.wizard.step1.required'); ?>">*</span>
                     </label>
                     <div class="control">
                         <input class="input notempty"
                                type="text"
                                name="NfArticleSectionTags"
                                id="manual_NfArticleSectionTags"
-                               placeholder="CSS selector for article content"
+                               placeholder="<?php echo __e('feed.wizard.step1.article_section_placeholder'); ?>"
                                required />
                     </div>
                 </div>
 
                 <!-- Filter Tags -->
                 <div class="field">
-                    <label class="label" for="manual_NfFilterTags">Filter Tags</label>
+                    <label class="label" for="manual_NfFilterTags">
+                        <?php echo __e('feed.wizard.step1.filter_tags_label'); ?>
+                    </label>
                     <div class="control">
                         <input class="input"
                                type="text"
                                name="NfFilterTags"
                                id="manual_NfFilterTags"
-                               placeholder="Optional: CSS selectors to filter out" />
+                               placeholder="<?php echo __e('feed.wizard.step1.filter_tags_placeholder'); ?>" />
                     </div>
                 </div>
 
                 <!-- Options Section -->
                 <div class="field">
-                    <label class="label">Options</label>
+                    <label class="label"><?php echo __e('feed.wizard.step1.options_label'); ?></label>
                     <div class="box" style="background-color: var(--bulma-scheme-main-bis);">
                         <div class="columns is-multiline">
                             <!-- Edit Text -->
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="edit_text" x-model="editText" checked />
-                                    <strong>Review before importing</strong>
+                                    <strong><?php echo __e('feed.wizard.step1.opt_review'); ?></strong>
                                 </label>
-                                <p class="help">Show the article text for editing before saving it</p>
+                                <p class="help"><?php echo __e('feed.wizard.step1.opt_review_help'); ?></p>
                             </div>
 
                             <!-- Auto Update -->
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_autoupdate" x-model="autoUpdate" />
-                                    <strong>Auto-refresh feed</strong>
+                                    <strong><?php echo __e('feed.wizard.step1.opt_auto_refresh'); ?></strong>
                                 </label>
                                 <div class="field has-addons mt-2" x-show="autoUpdate" x-transition>
                                     <div class="control">
@@ -360,9 +366,15 @@ $configJson = json_encode([
                                         <div class="select is-small">
                                             <select name="autoupdate_unit" x-model="autoUpdateUnit"
                                                 :disabled="!autoUpdate">
-                                                <option value="h">Hour(s)</option>
-                                                <option value="d">Day(s)</option>
-                                                <option value="w">Week(s)</option>
+                                                <option value="h">
+                                                    <?php echo __e('feed.wizard.step1.opt_unit_hours'); ?>
+                                                </option>
+                                                <option value="d">
+                                                    <?php echo __e('feed.wizard.step1.opt_unit_days'); ?>
+                                                </option>
+                                                <option value="w">
+                                                    <?php echo __e('feed.wizard.step1.opt_unit_weeks'); ?>
+                                                </option>
                                             </select>
                                         </div>
                                     </div>
@@ -373,9 +385,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_max_links" x-model="maxLinks" />
-                                    <strong>Limit stored articles</strong>
+                                    <strong><?php echo __e('feed.wizard.step1.opt_limit_articles'); ?></strong>
                                 </label>
-                                <p class="help">Maximum number of article links to keep</p>
+                                <p class="help"><?php echo __e('feed.wizard.step1.opt_limit_articles_help'); ?></p>
                                 <div class="control mt-2" x-show="maxLinks" x-transition>
                                     <input class="input is-small posintnumber maxint_300"
                                            :class="maxLinks ? 'notempty' : ''"
@@ -394,9 +406,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_charset" x-model="charset" />
-                                    <strong>Character encoding</strong>
+                                    <strong><?php echo __e('feed.wizard.step1.opt_charset'); ?></strong>
                                 </label>
-                                <p class="help">Override the feed's character encoding (e.g. UTF-8)</p>
+                                <p class="help"><?php echo __e('feed.wizard.step1.opt_charset_help'); ?></p>
                                 <div class="control mt-2" x-show="charset" x-transition>
                                     <input class="input is-small"
                                            :class="charset ? 'notempty' : ''"
@@ -413,9 +425,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_max_texts" x-model="maxTexts" />
-                                    <strong>Limit imported texts</strong>
+                                    <strong><?php echo __e('feed.wizard.step1.opt_limit_texts'); ?></strong>
                                 </label>
-                                <p class="help">Maximum number of texts to import at once</p>
+                                <p class="help"><?php echo __e('feed.wizard.step1.opt_limit_texts_help'); ?></p>
                                 <div class="control mt-2" x-show="maxTexts" x-transition>
                                     <input class="input is-small posintnumber maxint_30"
                                            :class="maxTexts ? 'notempty' : ''"
@@ -434,9 +446,9 @@ $configJson = json_encode([
                             <div class="column is-half">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_tag" x-model="tag" />
-                                    <strong>Auto-tag imported texts</strong>
+                                    <strong><?php echo __e('feed.wizard.step1.opt_auto_tag'); ?></strong>
                                 </label>
-                                <p class="help">Automatically add a tag to every text imported from this feed</p>
+                                <p class="help"><?php echo __e('feed.wizard.step1.opt_auto_tag_help'); ?></p>
                                 <div class="control mt-2" x-show="tag" x-transition>
                                     <input class="input is-small"
                                            :class="tag ? 'notempty' : ''"
@@ -453,7 +465,7 @@ $configJson = json_encode([
                             <div class="column is-full">
                                 <label class="checkbox">
                                     <input type="checkbox" name="c_article_source" x-model="articleSource" />
-                                    <strong>Article Source</strong>
+                                    <strong><?php echo __e('feed.wizard.step1.opt_article_source'); ?></strong>
                                 </label>
                                 <div class="control mt-2" x-show="articleSource" x-transition>
                                     <input class="input is-small"
@@ -475,15 +487,15 @@ $configJson = json_encode([
             <div class="field is-grouped is-grouped-right">
                 <div class="control">
                     <button type="button" class="button is-light" @click="cancel">
-                        Cancel
+                        <?php echo __e('feed.wizard.step1.cancel'); ?>
                     </button>
                 </div>
                 <div class="control">
                     <button type="submit" class="button is-primary">
                         <span class="icon is-small">
-                            <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                            <?php echo IconHelper::render('save', ['alt' => __('feed.wizard.step1.save')]); ?>
                         </span>
-                        <span>Save</span>
+                        <span><?php echo __e('feed.wizard.step1.save'); ?></span>
                     </button>
                 </div>
             </div>

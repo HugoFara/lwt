@@ -112,7 +112,7 @@ class WordCrudService
 
             return [
                 'id' => $wid,
-                'message' => 'Term saved',
+                'message' => __('vocabulary.flash.term_saved'),
                 'success' => true,
                 'textlc' => $textlc,
                 'text' => $text
@@ -120,9 +120,9 @@ class WordCrudService
         } catch (\RuntimeException $e) {
             $errorMsg = $e->getMessage();
             if (strpos($errorMsg, 'Duplicate entry') !== false) {
-                $message = 'Error: Duplicate entry for "' . $textlc . '"';
+                $message = __('vocabulary.flash.error_prefix', ['message' => 'Duplicate entry for "' . $textlc . '"']);
             } else {
-                $message = 'Error: ' . $errorMsg;
+                $message = __('vocabulary.flash.error_prefix', ['message' => $errorMsg]);
             }
 
             return [
@@ -186,7 +186,7 @@ class WordCrudService
 
         return [
             'id' => $wordId,
-            'message' => 'Updated',
+            'message' => __('vocabulary.flash.term_updated_short'),
             'success' => true,
             'textlc' => $textlc,
             'text' => $text

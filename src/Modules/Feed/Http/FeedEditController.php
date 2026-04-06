@@ -166,7 +166,7 @@ class FeedEditController
             ];
 
             $feedId = $this->feedFacade->createFeed($data);
-            $this->flashService->success('Feed created successfully');
+            $this->flashService->success(__('feed.flash.created'));
             $this->redirect(url('/feeds/' . $feedId . '/edit'));
             return;
         }
@@ -196,7 +196,7 @@ class FeedEditController
         $feed = $this->feedFacade->getFeedById($id);
 
         if ($feed === null) {
-            $this->flashService->error('Feed not found');
+            $this->flashService->error(__('feed.flash.not_found'));
             $this->redirect(url('/feeds/manage'));
             return;
         }
@@ -213,7 +213,7 @@ class FeedEditController
             ];
 
             $this->feedFacade->updateFeed($id, $data);
-            $this->flashService->success('Feed updated successfully');
+            $this->flashService->success(__('feed.flash.updated'));
             $this->redirect(url('/feeds/manage'));
             return;
         }
@@ -239,9 +239,9 @@ class FeedEditController
         $result = $this->feedFacade->deleteFeeds((string)$id);
 
         if ($result['feeds'] > 0) {
-            $this->flashService->success('Feed deleted successfully');
+            $this->flashService->success(__('feed.flash.deleted'));
         } else {
-            $this->flashService->error('Failed to delete feed');
+            $this->flashService->error(__('feed.flash.delete_failed'));
         }
 
         $this->redirect(url('/feeds/manage'));

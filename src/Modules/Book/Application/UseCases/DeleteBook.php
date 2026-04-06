@@ -55,7 +55,7 @@ class DeleteBook
         if ($book === null) {
             return [
                 'success' => false,
-                'message' => 'Book not found',
+                'message' => __('book.flash.book_not_found'),
             ];
         }
 
@@ -67,13 +67,13 @@ class DeleteBook
         if (!$deleted) {
             return [
                 'success' => false,
-                'message' => 'Failed to delete book',
+                'message' => __('book.flash.delete_failed'),
             ];
         }
 
         return [
             'success' => true,
-            'message' => "Deleted book '{$title}' and {$chapterCount} chapters",
+            'message' => __('book.flash.deleted', ['title' => $title, 'count' => $chapterCount]),
         ];
     }
 }

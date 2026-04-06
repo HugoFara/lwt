@@ -9,6 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
+import { t } from '@shared/i18n/translator';
 import {
   LanguagesApi,
   type LanguageDefinition,
@@ -219,7 +220,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
         const response = await LanguagesApi.get(id);
 
         if (response.error || !response.data) {
-          this.errors.general = response.error || 'Failed to load language';
+          this.errors.general = response.error || t('language.errors.load_failed');
           this.isLoading = false;
           return;
         }
@@ -255,7 +256,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
         await this.loadDefinitions();
       } catch (error) {
         console.error('Error loading language:', error);
-        this.errors.general = 'Failed to load language';
+        this.errors.general = t('language.errors.load_failed');
       }
 
       this.isLoading = false;
@@ -360,14 +361,14 @@ function createLanguageFormStore(): LanguageFormStoreState {
       switch (field) {
         case 'name':
           if (!this.formData.name.trim()) {
-            this.errors.name = 'Language name is required';
+            this.errors.name = t('language.errors.name_required');
           } else if (this.formData.name.length > 40) {
-            this.errors.name = 'Language name must be 40 characters or less';
+            this.errors.name = t('language.errors.name_too_long');
           } else {
             // Check for duplicate name (only among other languages)
             const existingId = this.allLanguages[this.formData.name];
             if (existingId && existingId !== this.languageId) {
-              this.errors.name = 'A language with this name already exists';
+              this.errors.name = t('language.errors.name_duplicate');
             } else {
               this.errors.name = null;
             }
@@ -376,8 +377,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
 
         case 'regexpSplitSentences':
           if (!this.formData.regexpSplitSentences.trim()) {
-            this.errors.regexpSplitSentences =
-              'Sentence split characters are required';
+            this.errors.regexpSplitSentences = t('language.errors.split_sentences_required');
           } else {
             this.errors.regexpSplitSentences = null;
           }
@@ -385,8 +385,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
 
         case 'regexpWordCharacters':
           if (!this.formData.regexpWordCharacters.trim()) {
-            this.errors.regexpWordCharacters =
-              'Word characters pattern is required';
+            this.errors.regexpWordCharacters = t('language.errors.word_chars_required');
           } else {
             this.errors.regexpWordCharacters = null;
           }
@@ -394,7 +393,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
 
         case 'textSize':
           if (this.formData.textSize < 50 || this.formData.textSize > 300) {
-            this.errors.textSize = 'Text size must be between 50 and 300';
+            this.errors.textSize = t('language.errors.text_size_range');
           } else {
             this.errors.textSize = null;
           }
@@ -407,7 +406,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
               JSON.parse(this.formData.ttsVoiceApi);
               this.errors.ttsVoiceApi = null;
             } catch {
-              this.errors.ttsVoiceApi = 'TTS Voice API must be valid JSON';
+              this.errors.ttsVoiceApi = t('language.errors.tts_voice_api_invalid');
             }
           } else {
             this.errors.ttsVoiceApi = null;
@@ -422,7 +421,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
     async save(): Promise<LanguageSaveResult> {
       // Validate first
       if (!this.validate()) {
-        return { success: false, error: 'Please fix validation errors' };
+        return { success: false, error: t('language.errors.fix_validation') };
       }
 
       this.isSubmitting = true;
@@ -439,7 +438,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
             const errorMsg =
               response.error ||
               response.data?.error ||
-              'Failed to create language';
+              t('language.errors.create_failed');
             this.errors.general = errorMsg;
             this.isSubmitting = false;
             return { success: false, error: errorMsg };
@@ -455,7 +454,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
           // Update existing language
           if (this.languageId === null) {
             this.isSubmitting = false;
-            return { success: false, error: 'Language ID is missing' };
+            return { success: false, error: t('language.errors.id_missing') };
           }
 
           const updateData: LanguageUpdateRequest = { ...this.formData };
@@ -469,7 +468,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
             const errorMsg =
               response.error ||
               response.data?.error ||
-              'Failed to update language';
+              t('language.errors.update_failed');
             this.errors.general = errorMsg;
             this.isSubmitting = false;
             return { success: false, error: errorMsg };
@@ -486,7 +485,7 @@ function createLanguageFormStore(): LanguageFormStoreState {
         }
       } catch (error) {
         console.error('Error saving language:', error);
-        this.errors.general = 'Failed to save language';
+        this.errors.general = t('language.errors.save_failed');
         this.isSubmitting = false;
         return { success: false, error: this.errors.general };
       }

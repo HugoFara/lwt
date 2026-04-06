@@ -38,20 +38,21 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  */
 
 $actions = [
-    ['url' => '/feeds?page=1', 'label' => 'Feeds', 'icon' => 'list'],
+    ['url' => '/feeds?page=1', 'label' => __('feed.edit_action_feeds'), 'icon' => 'list'],
     [
         'url' => '/feeds/wizard?step=2&edit_feed=' . (int)$feed['NfID'],
-        'label' => 'Feed Wizard',
+        'label' => __('feed.edit_action_wizard'),
         'icon' => 'wand-2',
         'class' => 'is-info'
     ]
 ];
 
+$helpLabel = __('feed.edit_help');
 ?>
 <h2 class="title is-4 is-flex is-align-items-center">
-    Edit Feed
+    <?php echo __e('feed.edit_title'); ?>
     <a target="_blank" href="docs/info.html#new_feed" class="ml-2">
-        <?php echo IconHelper::render('help-circle', ['title' => 'Help', 'alt' => 'Help']); ?>
+        <?php echo IconHelper::render('help-circle', ['title' => $helpLabel, 'alt' => $helpLabel]); ?>
     </a>
 </h2>
 
@@ -86,7 +87,7 @@ $actions = [
     <div class="box">
         <!-- Language -->
         <div class="field">
-            <label class="label" for="NfLgID">Language</label>
+            <label class="label" for="NfLgID"><?php echo __e('feed.edit_label_language'); ?></label>
             <div class="control">
                 <div class="select is-fullwidth">
                     <select name="NfLgID" id="NfLgID">
@@ -104,8 +105,8 @@ $actions = [
         <!-- Name -->
         <div class="field">
             <label class="label" for="NfName">
-                Name
-                <span class="has-text-danger" title="Required">*</span>
+                <?php echo __e('feed.edit_label_name'); ?>
+                <span class="has-text-danger" title="<?php echo __e('feed.edit_required'); ?>">*</span>
             </label>
             <div class="control">
                 <input class="input notempty"
@@ -120,8 +121,8 @@ $actions = [
         <!-- Newsfeed URL -->
         <div class="field">
             <label class="label" for="NfSourceURI">
-                Newsfeed URL
-                <span class="has-text-danger" title="Required">*</span>
+                <?php echo __e('feed.edit_label_url'); ?>
+                <span class="has-text-danger" title="<?php echo __e('feed.edit_required'); ?>">*</span>
             </label>
             <div class="control">
                 <input class="input notempty"
@@ -136,8 +137,8 @@ $actions = [
         <!-- Article Section -->
         <div class="field">
             <label class="label" for="NfArticleSectionTags">
-                Article Section
-                <span class="has-text-danger" title="Required">*</span>
+                <?php echo __e('feed.edit_label_article_section'); ?>
+                <span class="has-text-danger" title="<?php echo __e('feed.edit_required'); ?>">*</span>
             </label>
             <div class="control">
                 <?php
@@ -155,7 +156,7 @@ $actions = [
 
         <!-- Filter Tags -->
         <div class="field">
-            <label class="label" for="NfFilterTags">Filter Tags</label>
+            <label class="label" for="NfFilterTags"><?php echo __e('feed.edit_label_filter_tags'); ?></label>
             <div class="control">
                 <?php
                 $filterTags = $feed['NfFilterTags'] ?? '';
@@ -171,23 +172,23 @@ $actions = [
 
         <!-- Options Section -->
         <div class="field">
-            <label class="label">Options</label>
+            <label class="label"><?php echo __e('feed.edit_label_options'); ?></label>
             <div class="box" style="background-color: var(--bulma-scheme-main-bis);">
                 <div class="columns is-multiline">
                     <!-- Edit Text -->
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="edit_text" x-model="editText" />
-                            <strong>Review before importing</strong>
+                            <strong><?php echo __e('feed.edit_opt_review_before_importing'); ?></strong>
                         </label>
-                        <p class="help">Show the article text for editing before saving it</p>
+                        <p class="help"><?php echo __e('feed.edit_opt_review_help'); ?></p>
                     </div>
 
                     <!-- Auto Update -->
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_autoupdate" x-model="autoUpdate" />
-                            <strong>Auto-refresh feed</strong>
+                            <strong><?php echo __e('feed.edit_opt_auto_refresh'); ?></strong>
                         </label>
                         <div class="field has-addons mt-2" x-show="autoUpdate" x-transition>
                             <div class="control">
@@ -206,9 +207,9 @@ $actions = [
                                     <select name="autoupdate_unit"
                                             x-model="autoUpdateUnit"
                                             :disabled="!autoUpdate">
-                                        <option value="h">Hour(s)</option>
-                                        <option value="d">Day(s)</option>
-                                        <option value="w">Week(s)</option>
+                                        <option value="h"><?php echo __e('feed.edit_opt_unit_hours'); ?></option>
+                                        <option value="d"><?php echo __e('feed.edit_opt_unit_days'); ?></option>
+                                        <option value="w"><?php echo __e('feed.edit_opt_unit_weeks'); ?></option>
                                     </select>
                                 </div>
                             </div>
@@ -219,9 +220,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_max_links" x-model="maxLinks" />
-                            <strong>Limit stored articles</strong>
+                            <strong><?php echo __e('feed.edit_opt_limit_articles'); ?></strong>
                         </label>
-                        <p class="help">Maximum number of article links to keep</p>
+                        <p class="help"><?php echo __e('feed.edit_opt_limit_articles_help'); ?></p>
                         <div class="control mt-2" x-show="maxLinks" x-transition>
                             <input class="input is-small posintnumber maxint_300"
                                    :class="maxLinks ? 'notempty' : ''"
@@ -240,9 +241,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_charset" x-model="charset" />
-                            <strong>Character encoding</strong>
+                            <strong><?php echo __e('feed.edit_opt_charset'); ?></strong>
                         </label>
-                        <p class="help">Override the feed's character encoding (e.g. UTF-8)</p>
+                        <p class="help"><?php echo __e('feed.edit_opt_charset_help'); ?></p>
                         <div class="control mt-2" x-show="charset" x-transition>
                             <input class="input is-small"
                                    :class="charset ? 'notempty' : ''"
@@ -258,9 +259,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_max_texts" x-model="maxTexts" />
-                            <strong>Limit imported texts</strong>
+                            <strong><?php echo __e('feed.edit_opt_limit_texts'); ?></strong>
                         </label>
-                        <p class="help">Maximum number of texts to import at once</p>
+                        <p class="help"><?php echo __e('feed.edit_opt_limit_texts_help'); ?></p>
                         <div class="control mt-2" x-show="maxTexts" x-transition>
                             <input class="input is-small posintnumber maxint_30"
                                    :class="maxTexts ? 'notempty' : ''"
@@ -279,9 +280,9 @@ $actions = [
                     <div class="column is-half">
                         <label class="checkbox">
                             <input type="checkbox" name="c_tag" x-model="tag" />
-                            <strong>Auto-tag imported texts</strong>
+                            <strong><?php echo __e('feed.edit_opt_auto_tag'); ?></strong>
                         </label>
-                        <p class="help">Automatically add a tag to every text imported from this feed</p>
+                        <p class="help"><?php echo __e('feed.edit_opt_auto_tag_help'); ?></p>
                         <div class="control mt-2" x-show="tag" x-transition>
                             <input class="input is-small"
                                    :class="tag ? 'notempty' : ''"
@@ -297,9 +298,9 @@ $actions = [
                     <div class="column is-full">
                         <label class="checkbox">
                             <input type="checkbox" name="c_article_source" x-model="articleSource" />
-                            <strong>Source attribution</strong>
+                            <strong><?php echo __e('feed.edit_opt_source'); ?></strong>
                         </label>
-                        <p class="help">Identifier shown on imported texts to track their origin</p>
+                        <p class="help"><?php echo __e('feed.edit_opt_source_help'); ?></p>
                         <div class="control mt-2" x-show="articleSource" x-transition>
                             <input class="input is-small"
                                    :class="articleSource ? 'notempty' : ''"
@@ -322,15 +323,15 @@ $actions = [
                     class="button is-light"
                     data-action="navigate"
                     data-url="/feeds/manage">
-                Cancel
+                <?php echo __e('feed.edit_cancel'); ?>
             </button>
         </div>
         <div class="control">
             <button type="submit" class="button is-primary">
                 <span class="icon is-small">
-                    <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
+                    <?php echo IconHelper::render('save', ['alt' => __('feed.edit_save')]); ?>
                 </span>
-                <span>Update</span>
+                <span><?php echo __e('feed.edit_update'); ?></span>
             </button>
         </div>
     </div>

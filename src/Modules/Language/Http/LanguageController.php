@@ -118,9 +118,9 @@ class LanguageController extends BaseController
             if ($result['error'] !== null) {
                 $message = $result['error'];
             } elseif ($result['reparsed'] !== null) {
-                $message = "Updated: 1 / Reparsed texts: {$result['reparsed']}";
+                $message = __('language.flash.updated_with_reparse', ['count' => $result['reparsed']]);
             } else {
-                $message = "Updated: 1 / Reparsing not needed";
+                $message = __('language.flash.updated_no_reparse');
             }
             // After successful update, redirect to languages list
             if ($result['error'] === null) {
@@ -171,10 +171,12 @@ class LanguageController extends BaseController
     {
         $result = $this->languageFacade->refresh($id);
 
-        $message = "Sentences deleted: {$result['sentencesDeleted']} / " .
-            "Text items deleted: {$result['textItemsDeleted']} / " .
-            "Sentences added: {$result['sentencesAdded']} / " .
-            "Text items added: {$result['textItemsAdded']}";
+        $message = __('language.flash.refresh_summary', [
+            'sentencesDeleted' => $result['sentencesDeleted'],
+            'textItemsDeleted' => $result['textItemsDeleted'],
+            'sentencesAdded' => $result['sentencesAdded'],
+            'textItemsAdded' => $result['textItemsAdded'],
+        ]);
 
         // Redirect to languages list with message
         header('Location: ' . url('/languages') . '?message=' . urlencode($message));

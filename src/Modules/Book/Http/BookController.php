@@ -79,12 +79,12 @@ class BookController
         // Get languages for filter dropdown
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
         $languages = $languageFacade->getLanguagesForSelect();
-        $languagesOption = SelectOptionsBuilder::forLanguages($languages, $languageId, "[All Languages]");
+        $languagesOption = SelectOptionsBuilder::forLanguages($languages, $languageId, __('book.all_languages_option'));
 
         // Extract flash message from query string
         $message = InputValidator::getString('message');
 
-        PageLayoutHelper::renderPageStart('My Books', true, 'books');
+        PageLayoutHelper::renderPageStart(__('book.my_books'), true, 'books');
         include $this->viewPath . 'index.php';
         PageLayoutHelper::renderPageEnd();
     }
@@ -140,12 +140,12 @@ class BookController
         // Show import form
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
         $languages = $languageFacade->getLanguagesForSelect();
-        $languagesOption = SelectOptionsBuilder::forLanguages($languages, null, "[Choose...]");
+        $languagesOption = SelectOptionsBuilder::forLanguages($languages, null, __('book.choose_option'));
 
         // Show info notice when redirected from text import page
         $showFromTextNotice = InputValidator::getString('from') === 'text';
 
-        PageLayoutHelper::renderPageStart('Import EPUB', true, 'books');
+        PageLayoutHelper::renderPageStart(__('book.import_epub'), true, 'books');
         include $this->viewPath . 'import_epub_form.php';
         PageLayoutHelper::renderPageEnd();
     }
@@ -170,14 +170,14 @@ class BookController
         }
 
         if ($languageId <= 0) {
-            $message = 'Please select a language';
+            $message = __('book.flash.select_language');
             $messageType = 'is-danger';
             $this->showImportResult($message, $messageType, null);
             return;
         }
 
         if ($uploadedFile === null || !isset($uploadedFile['tmp_name']) || $uploadedFile['tmp_name'] === '') {
-            $message = 'Please select an EPUB file to upload';
+            $message = __('book.flash.select_epub');
             $messageType = 'is-danger';
             $this->showImportResult($message, $messageType, null);
             return;
@@ -215,7 +215,7 @@ class BookController
      */
     private function showImportResult(string $message, string $messageType, ?int $bookId): void
     {
-        PageLayoutHelper::renderPageStart('Import Result', true, 'books');
+        PageLayoutHelper::renderPageStart(__('book.import_result_title'), true, 'books');
         include $this->viewPath . 'import_result.php';
         PageLayoutHelper::renderPageEnd();
     }
@@ -230,7 +230,7 @@ class BookController
     public function delete(array $params): void
     {
         $bookId = (int) ($params['id'] ?? 0);
-        $message = 'Invalid book ID';
+        $message = __('book.flash.invalid_book_id');
 
         if ($bookId > 0) {
             $result = $this->bookFacade->deleteBook($bookId);

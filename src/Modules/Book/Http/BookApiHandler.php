@@ -185,7 +185,7 @@ class BookApiHandler implements ApiRoutableInterface
 
         return [
             'success' => true,
-            'message' => 'Reading progress updated',
+            'message' => __('book.flash.progress_updated'),
         ];
     }
 

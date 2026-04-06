@@ -89,7 +89,7 @@ class UpdateLanguage
             ->getPrepared();
 
         if (empty($records)) {
-            return ['success' => false, 'reparsed' => 0, 'message' => 'Language not found'];
+            return ['success' => false, 'reparsed' => 0, 'message' => __('language.errors.language_not_found')];
         }
 
         $record = $records[0];

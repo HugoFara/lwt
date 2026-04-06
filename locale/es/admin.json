@@ -14,7 +14,6 @@
     "dashboard_server_data_title": "Datos del Servidor",
     "dashboard_server_data_description": "Ver detalles del servidor y configuración de PHP.",
     "dashboard_view_server_data": "Ver Datos del Servidor",
-
     "settings_preferences_link": "¿Buscas ajustes de lectura, repaso, apariencia o paginación?",
     "settings_preferences_link_target": "Ir a Preferencias",
     "settings_section_newsfeeds": "Fuentes de noticias",
@@ -35,7 +34,6 @@
     "settings_save": "Guardar",
     "settings_field_required": "El campo no puede estar vacío",
     "settings_toggle_section": "alternar sección",
-
     "server_data_intro": "Esta página muestra información del servidor útil para depuración y reportes de incidencias.",
     "server_data_section_server": "Servidor",
     "server_data_lwt_version": "Versión de LWT",
@@ -53,7 +51,6 @@
     "server_data_rest_version": "Versión de la API REST",
     "server_data_rest_release_date": "Fecha de publicación de la API REST",
     "server_data_back_to_main": "Volver al menú principal",
-
     "install_demo_title": "Instalar base de datos de demostración",
     "install_demo_intro": "La base de datos de demostración incluye textos y vocabulario de ejemplo en varios idiomas para ayudarte a explorar las funciones de LWT.",
     "install_demo_warning_heading": "Advertencia: esta acción reemplazará tus datos actuales",
@@ -71,7 +68,6 @@
     "install_demo_included_tags": "Etiquetas para organizar el contenido",
     "install_demo_included_settings": "Ajustes de ejemplo optimizados para el aprendizaje",
     "install_demo_included_audio": "Archivos de audio para practicar pronunciación",
-
     "backup_intro_db": "La base de datos <strong>{db}</strong> se exportará a un archivo SQL comprimido (gzip).",
     "backup_section_backup": "Copia de seguridad",
     "backup_section_restore": "Restaurar",
@@ -104,7 +100,6 @@
     "empty_db_confirm": "¿Estás seguro? Esto ELIMINARÁ todos tus datos.",
     "empty_db_loading": "Vaciando base de datos...",
     "backup_back_to_main": "Volver al menú principal",
-
     "wizard_title": "Asistente de conexión a la base de datos",
     "wizard_server_label": "Dirección del servidor",
     "wizard_server_help": "Normalmente \"localhost\" para instalaciones locales",
@@ -122,7 +117,6 @@
     "wizard_btn_check": "Comprobar",
     "wizard_btn_save": "Guardar cambios",
     "wizard_footer": "LWT - Learning With Texts",
-
     "users_total": "Usuarios totales",
     "users_active": "Activos",
     "users_inactive": "Inactivos",
@@ -152,7 +146,6 @@
     "users_action_promote": "Promover a administrador",
     "users_action_delete": "Eliminar",
     "users_self_tag": "Tú",
-
     "user_form_edit_title": "Editar usuario",
     "user_form_create_title": "Crear nuevo usuario",
     "user_form_username": "Usuario",
@@ -178,5 +171,11 @@
     "user_form_never": "Nunca",
     "user_form_save_changes": "Guardar cambios",
     "user_form_create": "Crear usuario",
-    "user_form_cancel": "Cancelar"
+    "user_form_cancel": "Cancelar",
+    "users.flash.created": "Usuario creado correctamente",
+    "users.flash.updated": "Usuario actualizado correctamente",
+    "users.flash.deleted": "Usuario eliminado correctamente",
+    "users.flash.not_found": "Error: usuario no encontrado",
+    "users.flash.error_prefix": "Error: {message}",
+    "users.flash.unknown_error": "Error desconocido"
 }

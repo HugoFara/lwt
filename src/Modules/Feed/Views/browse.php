@@ -54,10 +54,14 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  */
 
 echo PageLayoutHelper::buildActionCard([
-    ['url' => '/feeds/new', 'label' => 'New Feed', 'icon' => 'rss', 'class' => 'is-primary'],
-    ['url' => '/feeds/manage', 'label' => 'Manage Feeds', 'icon' => 'settings'],
-    ['url' => '/texts?query=&page=1', 'label' => 'Active Texts', 'icon' => 'book-open'],
-    ['url' => '/text/archived?query=&page=1', 'label' => 'Archived Texts', 'icon' => 'archive'],
+    ['url' => '/feeds/new', 'label' => __('feed.browse_action_new_feed'), 'icon' => 'rss', 'class' => 'is-primary'],
+    ['url' => '/feeds/manage', 'label' => __('feed.browse_action_manage'), 'icon' => 'settings'],
+    ['url' => '/texts?query=&page=1', 'label' => __('feed.browse_action_active_texts'), 'icon' => 'book-open'],
+    [
+        'url' => '/text/archived?query=&page=1',
+        'label' => __('feed.browse_action_archived_texts'),
+        'icon' => 'archive'
+    ],
 ]);
 $queryEscaped = htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8');
 $queryModeEscaped = htmlspecialchars($currentQueryMode, ENT_QUOTES, 'UTF-8');
@@ -80,25 +84,25 @@ $queryModeEscaped = htmlspecialchars($currentQueryMode, ENT_QUOTES, 'UTF-8');
                        name="query"
                        class="input"
                        value="<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="Search articles... (e.g., lang:Spanish feed:news title)"
+                       placeholder="<?php echo __e('feed.browse_search_placeholder'); ?>"
                        disabled />
                 <span class="icon is-left">
-                    <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
+                    <?php echo IconHelper::render('search', ['alt' => __('feed.browse_search_button')]); ?>
                 </span>
             </div>
             <div class="control">
                 <button type="button" class="button is-info" disabled>
-                    Search
+                    <?php echo __e('feed.browse_search_button'); ?>
                 </button>
             </div>
         </div>
         <p class="help has-text-grey">
             <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
-            Search functionality is being redesigned. Full filtering will be available soon.
+            <?php echo __e('feed.browse_search_redesign_notice'); ?>
         </p>
 
 <?php if (empty($feeds)) : ?>
-        <p class="mt-4">No feed available.</p>
+        <p class="mt-4"><?php echo __e('feed.browse_no_feed_available'); ?></p>
     </div>
 </form>
     <?php return;
@@ -110,7 +114,8 @@ endif; ?>
             <div class="level-left">
                 <div class="level-item">
                     <span class="tag is-info is-medium">
-                        <?php echo $recno; ?> Article<?php echo $recno == 1 ? '' : 's'; ?>
+                        <?php echo $recno; ?>
+                        <?php echo __e($recno == 1 ? 'feed.browse_article_one' : 'feed.browse_article_many'); ?>
                     </span>
                 </div>
             </div>
@@ -135,7 +140,7 @@ endif; ?>
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small">Sort</span>
+                            <span class="button is-static is-small"><?php echo __e('feed.browse_sort'); ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">
@@ -161,41 +166,42 @@ endif; ?>
   <table class="table is-bordered is-fullwidth">
   <tr>
     <th class="" colspan="2">
-        Multi Actions
-        <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
+        <?php echo __e('feed.browse_multi_actions'); ?>
+        <?php $multiAct = __('feed.browse_multi_actions'); ?>
+        <?php echo IconHelper::render('zap', ['title' => $multiAct, 'alt' => $multiAct]); ?>
     </th>
   </tr>
   <tr><td class="has-text-centered feeds-filter-cell">
-  <input type="button" value="Mark All" @click="markAll()" />
-  <input type="button" value="Mark None" @click="markNone()" />
+  <input type="button" value="<?php echo __e('feed.browse_mark_all'); ?>" @click="markAll()" />
+  <input type="button" value="<?php echo __e('feed.browse_mark_none'); ?>" @click="markNone()" />
   </td><td class="has-text-centered">
-  Marked Texts:&nbsp;
-  <input id="markaction" type="submit" value="Get Marked Texts" />&nbsp;&nbsp;
+    <?php echo __e('feed.browse_marked_texts'); ?>&nbsp;
+  <input id="markaction" type="submit" value="<?php echo __e('feed.browse_get_marked'); ?>" />&nbsp;&nbsp;
   </td></tr></table>
   <table class="table is-bordered is-fullwidth sortable">
   <tr>
-  <th class="sorttable_nosort">Mark</th>
-  <th class="clickable">Articles</th>
-  <th class="sorttable_nosort">Link</th>
-  <th class="clickable feeds-date-col">Date</th>
+  <th class="sorttable_nosort"><?php echo __e('feed.browse_col_mark'); ?></th>
+  <th class="clickable"><?php echo __e('feed.browse_col_articles'); ?></th>
+  <th class="sorttable_nosort"><?php echo __e('feed.browse_col_link'); ?></th>
+  <th class="clickable feeds-date-col"><?php echo __e('feed.browse_col_date'); ?></th>
   </tr>
     <?php foreach ($articles as $row) : ?>
         <tr>
         <?php if ($row['TxID'] !== null && $row['TxArchivedAt'] === null) : ?>
             <td class="has-text-centered">
                 <a href="/text/<?php echo $row['TxID']; ?>/read">
-                <?php echo IconHelper::render('book-open', ['title' => 'Read', 'alt' => '-']); ?>
+                <?php echo IconHelper::render('book-open', ['title' => __('feed.browse_read_alt'), 'alt' => '-']); ?>
                 </a>
         <?php elseif ($row['TxID'] !== null && $row['TxArchivedAt'] !== null) : ?>
             <td class="has-text-centered">
-                <span title="archived">
+                <span title="<?php echo __e('feed.browse_archived_title'); ?>">
                     <?php echo IconHelper::render('circle-x', ['alt' => '-']); ?>
                 </span>
         <?php elseif ($row['FlLink'] !== '' && str_starts_with($row['FlLink'], ' ')) : ?>
             <td class="has-text-centered">
             <span class="not_found"
                   name="<?php echo $row['FlID']; ?>"
-                  title="download error"
+                  title="<?php echo __e('feed.browse_download_error_title'); ?>"
                   @click="handleNotFoundClick($event)">
                 <?php echo IconHelper::render('alert-circle', ['alt' => '-']); ?>
             </span>
@@ -232,7 +238,9 @@ endif; ?>
                rel="noopener">
             <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>
         <?php endif; ?>
-        </td><td class="has-text-centered"><?php echo htmlspecialchars($row['FlDate'], ENT_QUOTES, 'UTF-8'); ?></td></tr>
+        </td><td class="has-text-centered">
+            <?php echo htmlspecialchars($row['FlDate'], ENT_QUOTES, 'UTF-8'); ?>
+        </td></tr>
     <?php endforeach; ?>
 
     </table>
@@ -260,7 +268,7 @@ endif; ?>
     </form>
     <?php endif; ?>
 <?php else : ?>
-<p>No articles found.</p>
+<p><?php echo __e('feed.browse_no_articles_found'); ?></p>
 <?php endif; ?>
 </div>
 <!-- Feed browse component: feeds/components/feed_browse_component.ts -->

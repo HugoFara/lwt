@@ -44,7 +44,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <span class="icon has-text-info">
                         <?php echo IconHelper::render('download', ['class' => 'icon']); ?>
                     </span>
-                    <span>Backup</span>
+                    <span><?php echo __e('admin.backup_section_backup'); ?></span>
                 </span>
             </h2>
             <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
@@ -55,8 +55,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
         <div class="collapsible-content" x-show="open" x-collapse>
             <div class="content mt-4">
                 <p>
-                    The database <strong><?php echo $escapedDbName; ?></strong>
-                    will be exported to a gzipped SQL file.
+                    <?php echo __('admin.backup_intro_db', ['db' => $escapedDbName]); ?>
                 </p>
             </div>
 
@@ -68,12 +67,13 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                         </span>
                     </div>
                     <div class="column">
-                        <p class="has-text-weight-semibold mb-1">Keep your backup safe</p>
+                        <p class="has-text-weight-semibold mb-1">
+                            <?php echo __e('admin.backup_keep_safe_heading'); ?>
+                        </p>
                         <ul class="is-size-7 mt-0">
-                            <li>You can restore this backup using the Restore function below</li>
-                            <li>The <strong>Official LWT Backup</strong> doesn't include
-                                news_feeds, saved text positions, or settings</li>
-                            <li>Large backup files may not be restorable (see upload limits below)</li>
+                            <li><?php echo __e('admin.backup_keep_safe_li1'); ?></li>
+                            <li><?php echo __('admin.backup_keep_safe_li2'); ?></li>
+                            <li><?php echo __e('admin.backup_keep_safe_li3'); ?></li>
                         </ul>
                     </div>
                 </div>
@@ -85,13 +85,13 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <div class="control">
                         <button type="submit" name="orig_backup" class="button is-info is-outlined">
                             <?php echo IconHelper::render('download'); ?>
-                            <span>Download Official LWT Backup</span>
+                            <span><?php echo __e('admin.backup_download_official'); ?></span>
                         </button>
                     </div>
                     <div class="control">
                         <button type="submit" name="backup" class="button is-info">
                             <?php echo IconHelper::render('download'); ?>
-                            <span>Download Full LWT Backup</span>
+                            <span><?php echo __e('admin.backup_download_full'); ?></span>
                         </button>
                     </div>
                 </div>
@@ -107,7 +107,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <span class="icon has-text-warning">
                         <?php echo IconHelper::render('upload', ['class' => 'icon']); ?>
                     </span>
-                    <span>Restore</span>
+                    <span><?php echo __e('admin.backup_section_restore'); ?></span>
                 </span>
             </h2>
             <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
@@ -125,10 +125,11 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                         </span>
                     </div>
                     <div class="column">
-                        <p class="has-text-weight-semibold mb-1">Restore Disabled</p>
+                        <p class="has-text-weight-semibold mb-1">
+                            <?php echo __e('admin.restore_disabled_heading'); ?>
+                        </p>
                         <p class="is-size-7">
-                            Database restore is disabled for security reasons in multi-user mode.<br>
-                            To enable, set <code>BACKUP_RESTORE_ENABLED=true</code> in your <code>.env</code> file.
+                            <?php echo __('admin.restore_disabled_body'); ?>
                         </p>
                     </div>
                 </div>
@@ -136,9 +137,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             <?php else : ?>
             <div class="content mt-4">
                 <p>
-                    The database <strong><?php echo $escapedDbName; ?></strong>
-                    will be <strong>replaced</strong> by the data in the specified backup file
-                    (gzipped or normal SQL file).
+                    <?php echo __('admin.restore_intro_db', ['db' => $escapedDbName]); ?>
                 </p>
             </div>
 
@@ -150,7 +149,9 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                         </span>
                     </div>
                     <div class="column">
-                        <p class="has-text-weight-semibold mb-1">Upload Limits</p>
+                        <p class="has-text-weight-semibold mb-1">
+                            <?php echo __e('admin.restore_upload_limits_heading'); ?>
+                        </p>
                         <p class="is-size-7">
                             Large backup files may fail to restore due to PHP limits:<br>
                             <code>post_max_size = <?php echo $postMaxSize; ?></code> /
@@ -170,10 +171,11 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                         </span>
                     </div>
                     <div class="column">
-                        <p class="has-text-weight-semibold mb-1">Security Note</p>
+                        <p class="has-text-weight-semibold mb-1">
+                            <?php echo __e('admin.restore_security_heading'); ?>
+                        </p>
                         <p class="is-size-7">
-                            Backup files are validated before restore. Only standard LWT backup SQL statements
-                            (DROP TABLE, CREATE TABLE, INSERT INTO) for known tables are allowed.
+                            <?php echo __e('admin.restore_security_body'); ?>
                         </p>
                     </div>
                 </div>
@@ -182,11 +184,11 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             <form action="<?php echo $base; ?>/admin/backup" method="post" enctype="multipart/form-data"
                   @submit="restoring = true"
                   x-show="!restoring"
-                  data-confirm-submit="Are you sure? This will REPLACE all existing data!">
+                  data-confirm-submit="<?php echo __e('admin.restore_confirm'); ?>">
                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                 <input type="hidden" name="restore" value="1">
                 <div class="field">
-                    <label class="label">Backup File</label>
+                    <label class="label"><?php echo __e('admin.restore_file_label'); ?></label>
                     <div class="file has-name is-fullwidth">
                         <label class="file-label">
                             <input class="file-input" type="file" name="thefile"
@@ -196,9 +198,10 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                                 <span class="file-icon">
                                     <?php echo IconHelper::render('upload'); ?>
                                 </span>
-                                <span class="file-label">Choose a file…</span>
+                                <span class="file-label"><?php echo __e('admin.restore_choose_file'); ?></span>
                             </span>
-                            <span class="file-name" x-text="fileName || 'No file selected'"></span>
+                            <span class="file-name"
+                                  x-text="fileName || '<?php echo __e('admin.restore_no_file'); ?>'"></span>
                         </label>
                     </div>
                 </div>
@@ -210,7 +213,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                             <span class="icon">
                                 <?php echo IconHelper::render('triangle-alert'); ?>
                             </span>
-                            <span>Restore from Backup</span>
+                            <span><?php echo __e('admin.restore_button'); ?></span>
                         </button>
                     </div>
                 </div>
@@ -222,9 +225,9 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <span class="icon is-medium has-text-info">
                         <span class="loader"></span>
                     </span>
-                    <span class="ml-2">Restoring database...</span>
+                    <span class="ml-2"><?php echo __e('admin.restore_loading'); ?></span>
                 </p>
-                <p class="has-text-grey is-size-7">This may take a while. Please don't close this page.</p>
+                <p class="has-text-grey is-size-7"><?php echo __e('admin.restore_loading_help'); ?></p>
             </div>
             <?php endif; ?>
         </div>
@@ -238,7 +241,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <span class="icon has-text-success">
                         <?php echo IconHelper::render('package', ['class' => 'icon']); ?>
                     </span>
-                    <span>Install Demo Database</span>
+                    <span><?php echo __e('admin.backup_section_install_demo'); ?></span>
                 </span>
             </h2>
             <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
@@ -249,12 +252,10 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
         <div class="collapsible-content" x-show="open" x-collapse>
             <div class="content mt-4">
                 <p>
-                    The database <strong><?php echo $escapedDbName; ?></strong>
-                    will be <strong>replaced</strong> by the LWT demo database.
+                    <?php echo __('admin.install_demo_warning_db', ['db' => $escapedDbName]); ?>
                 </p>
                 <p class="is-size-7 has-text-grey">
-                    The demo includes sample texts and vocabulary in multiple languages
-                    to help you explore LWT's features.
+                    <?php echo __e('admin.install_demo_intro'); ?>
                 </p>
             </div>
 
@@ -262,7 +263,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                 <div class="control">
                     <a href="<?php echo $base; ?>/admin/install-demo" class="button is-success is-outlined">
                         <?php echo IconHelper::render('download'); ?>
-                        <span>Install Demo Database</span>
+                        <span><?php echo __e('admin.install_demo_button'); ?></span>
                     </a>
                 </div>
             </div>
@@ -277,7 +278,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <span class="icon has-text-danger">
                         <?php echo IconHelper::render('trash-2', ['class' => 'icon']); ?>
                     </span>
-                    <span>Empty Database</span>
+                    <span><?php echo __e('admin.backup_section_empty'); ?></span>
                 </span>
             </h2>
             <span class="icon collapse-icon" :class="{ 'is-rotated': open }">
@@ -288,8 +289,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
         <div class="collapsible-content" x-show="open" x-collapse>
             <div class="content mt-4">
                 <p>
-                    Delete the contents of all tables (except Settings) in database
-                    <strong><?php echo $escapedDbName; ?></strong>.
+                    <?php echo __('admin.empty_db_intro', ['db' => $escapedDbName]); ?>
                 </p>
             </div>
 
@@ -301,9 +301,11 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                         </span>
                     </div>
                     <div class="column">
-                        <p class="has-text-weight-semibold">Warning: This action cannot be undone!</p>
+                        <p class="has-text-weight-semibold">
+                            <?php echo __e('admin.empty_db_warning_heading'); ?>
+                        </p>
                         <p class="is-size-7">
-                            All your texts, vocabulary, and learning progress will be permanently deleted.
+                            <?php echo __e('admin.empty_db_warning_body'); ?>
                         </p>
                     </div>
                 </div>
@@ -312,14 +314,14 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
             <form action="<?php echo $base; ?>/admin/backup" method="post"
                   @submit="emptying = true"
                   x-show="!emptying"
-                  data-confirm-submit="Are you sure? This will DELETE all your data!">
+                  data-confirm-submit="<?php echo __e('admin.empty_db_confirm'); ?>">
                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                 <input type="hidden" name="empty" value="1">
                 <div class="field" x-show="!emptying">
                     <label class="checkbox">
                         <input type="checkbox" x-model="confirmEmpty">
                         <span class="has-text-weight-medium">
-                            I understand that this will permanently delete all my data
+                            <?php echo __e('admin.empty_db_understand'); ?>
                         </span>
                     </label>
                 </div>
@@ -331,7 +333,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                             <span class="icon">
                                 <?php echo IconHelper::render('trash-2'); ?>
                             </span>
-                            <span>Empty Database</span>
+                            <span><?php echo __e('admin.empty_db_button'); ?></span>
                         </button>
                     </div>
                 </div>
@@ -343,7 +345,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <span class="icon is-medium has-text-danger">
                         <span class="loader"></span>
                     </span>
-                    <span class="ml-2">Emptying database...</span>
+                    <span class="ml-2"><?php echo __e('admin.empty_db_loading'); ?></span>
                 </p>
             </div>
         </div>
@@ -354,7 +356,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
         <div class="control">
             <a href="<?php echo $base; ?>/" class="button is-light">
                 <?php echo IconHelper::render('arrow-left'); ?>
-                <span>Back to Main Menu</span>
+                <span><?php echo __e('admin.backup_back_to_main'); ?></span>
             </a>
         </div>
     </div>

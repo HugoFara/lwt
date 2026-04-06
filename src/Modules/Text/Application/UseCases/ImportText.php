@@ -70,7 +70,7 @@ class ImportText
         // Validate text length
         if (!$this->validateTextLength($text)) {
             return [
-                'message' => 'Text too long, must be below 65000 bytes',
+                'message' => __('text.flash.text_too_long'),
                 'textId' => null
             ];
         }

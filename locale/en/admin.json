@@ -14,7 +14,6 @@
     "dashboard_server_data_title": "Server Data",
     "dashboard_server_data_description": "View server and PHP configuration details.",
     "dashboard_view_server_data": "View Server Data",
-
     "settings_preferences_link": "Looking for reading, review, appearance, or pagination settings?",
     "settings_preferences_link_target": "Go to Preferences",
     "settings_section_newsfeeds": "Newsfeeds",
@@ -35,7 +34,6 @@
     "settings_save": "Save",
     "settings_field_required": "Field must not be empty",
     "settings_toggle_section": "toggle section",
-
     "server_data_intro": "This page shows server information useful for debugging and issue reports.",
     "server_data_section_server": "Server",
     "server_data_lwt_version": "LWT version",
@@ -53,7 +51,6 @@
     "server_data_rest_version": "REST API Version",
     "server_data_rest_release_date": "REST API Release date",
     "server_data_back_to_main": "Back to Main Menu",
-
     "install_demo_title": "Install Demo Database",
     "install_demo_intro": "The demo database includes sample texts and vocabulary in multiple languages to help you explore LWT's features.",
     "install_demo_warning_heading": "Warning: This action will replace your current data",
@@ -71,7 +68,6 @@
     "install_demo_included_tags": "Tags for organizing content",
     "install_demo_included_settings": "Example settings optimized for learning",
     "install_demo_included_audio": "Audio files for pronunciation practice",
-
     "backup_intro_db": "The database <strong>{db}</strong> will be exported to a gzipped SQL file.",
     "backup_section_backup": "Backup",
     "backup_section_restore": "Restore",
@@ -104,7 +100,6 @@
     "empty_db_confirm": "Are you sure? This will DELETE all your data!",
     "empty_db_loading": "Emptying database...",
     "backup_back_to_main": "Back to Main Menu",
-
     "wizard_title": "Database Connection Wizard",
     "wizard_server_label": "Server Address",
     "wizard_server_help": "Usually \"localhost\" for local installations",
@@ -122,7 +117,6 @@
     "wizard_btn_check": "Check",
     "wizard_btn_save": "Save Changes",
     "wizard_footer": "LWT - Learning With Texts",
-
     "users_total": "Total Users",
     "users_active": "Active",
     "users_inactive": "Inactive",
@@ -152,7 +146,6 @@
     "users_action_promote": "Promote to Admin",
     "users_action_delete": "Delete",
     "users_self_tag": "You",
-
     "user_form_edit_title": "Edit User",
     "user_form_create_title": "Create New User",
     "user_form_username": "Username",
@@ -178,5 +171,11 @@
     "user_form_never": "Never",
     "user_form_save_changes": "Save Changes",
     "user_form_create": "Create User",
-    "user_form_cancel": "Cancel"
+    "user_form_cancel": "Cancel",
+    "users.flash.created": "User created successfully",
+    "users.flash.updated": "User updated successfully",
+    "users.flash.deleted": "User deleted successfully",
+    "users.flash.not_found": "Error: User not found",
+    "users.flash.error_prefix": "Error: {message}",
+    "users.flash.unknown_error": "Unknown error"
 }

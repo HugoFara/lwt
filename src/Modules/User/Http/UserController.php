@@ -135,7 +135,7 @@ class UserController extends BaseController
 
         // Basic validation
         if (empty($usernameOrEmail) || empty($password)) {
-            $this->flash->error('Please enter your username/email and password');
+            $this->flash->error(__('user.flash.login_missing_credentials'));
             $this->formData->setUsername($usernameOrEmail);
             return $this->redirect('/login');
         }
@@ -221,13 +221,13 @@ class UserController extends BaseController
 
         // Basic validation
         if (empty($username) || empty($email) || empty($password)) {
-            $this->flash->error('Please fill in all required fields');
+            $this->flash->error(__('user.flash.register_missing_fields'));
             return $this->redirect('/register');
         }
 
         // Password confirmation
         if ($password !== $passwordConfirm) {
-            $this->flash->error('Passwords do not match');
+            $this->flash->error(__('user.flash.register_passwords_mismatch'));
             return $this->redirect('/register');
         }
 
@@ -245,12 +245,12 @@ class UserController extends BaseController
             $this->formData->clearEmail();
 
             // Redirect to home with success message
-            $message = 'Account created successfully. Welcome to LWT!';
+            $message = __('user.flash.register_success');
             if ($user->isAdmin()) {
-                $message .= ' You have been granted admin privileges as the first user.';
+                $message .= ' ' . __('user.flash.register_admin_granted');
             }
             if (!$user->isEmailVerified()) {
-                $message .= ' Please check your email to verify your account.';
+                $message .= ' ' . __('user.flash.register_verify_email');
             }
             $this->flash->success($message);
             return $this->redirect('/');
@@ -258,7 +258,7 @@ class UserController extends BaseController
             $this->flash->error($e->getMessage());
             return $this->redirect('/register');
         } catch (\RuntimeException $e) {
-            $this->flash->error('Registration failed. Please try again.');
+            $this->flash->error(__('user.flash.register_failed'));
             return $this->redirect('/register');
         }
     }
@@ -347,7 +347,7 @@ class UserController extends BaseController
         $email = $this->post('email');
 
         if (empty($username) || empty($email)) {
-            $this->flash->error('Please fill in all required fields');
+            $this->flash->error(__('user.flash.profile_missing_fields'));
             return $this->redirect('/profile');
         }
 
@@ -356,9 +356,9 @@ class UserController extends BaseController
 
             if ($emailChanged) {
                 $this->userFacade->sendVerificationEmail($user);
-                $this->flash->success('Profile updated. Please verify your new email address.');
+                $this->flash->success(__('user.flash.profile_updated_verify'));
             } else {
-                $this->flash->success('Profile updated successfully.');
+                $this->flash->success(__('user.flash.profile_updated'));
             }
         } catch (\InvalidArgumentException $e) {
             $this->flash->error($e->getMessage());
@@ -390,18 +390,18 @@ class UserController extends BaseController
         $confirmPassword = $this->post('new_password_confirm');
 
         if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-            $this->flash->error('Please fill in all password fields');
+            $this->flash->error(__('user.flash.password_missing_fields'));
             return $this->redirect('/profile');
         }
 
         if ($newPassword !== $confirmPassword) {
-            $this->flash->error('New passwords do not match');
+            $this->flash->error(__('user.flash.password_mismatch'));
             return $this->redirect('/profile');
         }
 
         try {
             $this->userFacade->changePassword($user, $currentPassword, $newPassword);
-            $this->flash->success('Password changed successfully.');
+            $this->flash->success(__('user.flash.password_changed'));
         } catch (\InvalidArgumentException $e) {
             $this->flash->error($e->getMessage());
         }
@@ -476,9 +476,9 @@ class UserController extends BaseController
         $result = $this->userFacade->saveUserPreferences();
 
         if ($result['success']) {
-            $this->flash->success('Preferences saved successfully.');
+            $this->flash->success(__('user.flash.preferences_saved'));
         } else {
-            $this->flash->error('Failed to save preferences.');
+            $this->flash->error(__('user.flash.preferences_failed'));
         }
 
         return $this->redirect('/profile/preferences');
@@ -500,18 +500,18 @@ class UserController extends BaseController
         $token = $this->param('token');
 
         if (empty($token)) {
-            $this->flash->error('Invalid verification link.');
+            $this->flash->error(__('user.flash.verify_invalid_link'));
             return $this->redirect('/');
         }
 
         $user = $this->userFacade->verifyEmail($token);
 
         if ($user === null) {
-            $this->flash->error('Invalid or expired verification link. Please request a new one.');
+            $this->flash->error(__('user.flash.verify_expired'));
             return $this->redirect('/');
         }
 
-        $this->flash->success('Your email has been verified successfully!');
+        $this->flash->success(__('user.flash.verify_success'));
         return $this->redirect('/');
     }
 
@@ -534,12 +534,12 @@ class UserController extends BaseController
         }
 
         if ($user->isEmailVerified()) {
-            $this->flash->success('Your email is already verified.');
+            $this->flash->success(__('user.flash.verify_already'));
             return $this->redirect('/');
         }
 
         $this->userFacade->sendVerificationEmail($user);
-        $this->flash->success('Verification email sent. Please check your inbox.');
+        $this->flash->success(__('user.flash.verify_sent'));
         return $this->redirect('/');
     }
 
@@ -592,14 +592,14 @@ class UserController extends BaseController
         $email = $this->post('email');
 
         if (empty($email)) {
-            $this->flash->error('Please enter your email address');
+            $this->flash->error(__('user.flash.forgot_missing_email'));
             $this->redirect('/password/forgot');
         }
 
         // Always show success message (prevents email enumeration)
         $this->userFacade->requestPasswordReset($email);
 
-        $this->flash->success('If an account exists with that email, you will receive a password reset link shortly.');
+        $this->flash->success(__('user.flash.forgot_sent'));
         $this->redirect('/password/forgot');
     }
 
@@ -620,13 +620,13 @@ class UserController extends BaseController
         $token = $this->get('token');
 
         if (empty($token)) {
-            $this->flash->error('Invalid or missing reset token');
+            $this->flash->error(__('user.flash.reset_invalid_token'));
             $this->redirect('/password/forgot');
         }
 
         // Validate token before showing form
         if (!$this->userFacade->validatePasswordResetToken($token)) {
-            $this->flash->error('This password reset link has expired or is invalid. Please request a new one.');
+            $this->flash->error(__('user.flash.reset_expired'));
             $this->redirect('/password/forgot');
         }
 
@@ -657,17 +657,17 @@ class UserController extends BaseController
         $passwordConfirm = $this->post('password_confirm');
 
         if (empty($token)) {
-            $this->flash->error('Invalid reset token');
+            $this->flash->error(__('user.flash.reset_token_invalid'));
             $this->redirect('/password/forgot');
         }
 
         if (empty($password)) {
-            $this->flash->error('Please enter a new password');
+            $this->flash->error(__('user.flash.reset_missing_password'));
             $this->redirect('/password/reset?token=' . urlencode($token));
         }
 
         if ($password !== $passwordConfirm) {
-            $this->flash->error('Passwords do not match');
+            $this->flash->error(__('user.flash.reset_passwords_mismatch'));
             $this->redirect('/password/reset?token=' . urlencode($token));
         }
 
@@ -675,12 +675,10 @@ class UserController extends BaseController
             $success = $this->userFacade->completePasswordReset($token, $password);
 
             if ($success) {
-                $this->flash->success(
-                    'Your password has been reset successfully. Please log in with your new password.'
-                );
+                $this->flash->success(__('user.flash.reset_success'));
                 $this->redirect('/login');
             } else {
-                $this->flash->error('This password reset link has expired or is invalid. Please request a new one.');
+                $this->flash->error(__('user.flash.reset_expired'));
                 $this->redirect('/password/forgot');
             }
         } catch (\InvalidArgumentException $e) {

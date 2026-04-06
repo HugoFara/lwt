@@ -53,45 +53,43 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
 </script>
 
 <div x-data="starterVocab" class="container" style="max-width: 640px;">
-    <h2 class="title is-4 mb-4">Starter Vocabulary</h2>
+    <h2 class="title is-4 mb-4"><?= __e('vocabulary.starter.title') ?></h2>
 
     <?php if (!$isAvailable && empty($curatedDictionaries)) : ?>
     <div class="notification is-warning">
-        Starter vocabulary is not available for
-        <strong><?= $escapedLangName ?></strong>.
-        You can import terms manually later.
+        <?= __('vocabulary.starter.not_available_html', ['lang' => $escapedLangName]) ?>
     </div>
     <a class="button is-primary" href="<?= $escapedSkipUrl ?>">
-        Continue to Text Import
+        <?= __e('vocabulary.starter.continue_to_text') ?>
     </a>
     <?php else : ?>
     <!-- Step 1: Choose sources and options -->
     <template x-if="step === 'choose'">
         <div class="box">
             <p class="mb-4">
-                Build starter vocabulary for
-                <strong><?= $escapedLangName ?></strong>.
-                Pick your sources and enrichment mode, then import.
+                <?= __('vocabulary.starter.intro_html', ['lang' => $escapedLangName]) ?>
             </p>
 
             <div class="field">
-                <label class="label">Enrichment mode</label>
+                <label class="label"><?= __e('vocabulary.starter.enrichment_mode') ?></label>
                 <div class="control">
                     <label class="radio">
                         <input type="radio" x-model="mode" value="translation">
-                        Translation <span class="has-text-grey is-size-7">(English glosses &mdash; for beginners)</span>
+                        <?= __e('vocabulary.starter.translation') ?>
+                        <span class="has-text-grey is-size-7"><?= __e('vocabulary.starter.translation_hint') ?></span>
                     </label>
                 </div>
                 <div class="control mt-1">
                     <label class="radio">
                         <input type="radio" x-model="mode" value="definition">
-                        Definition <span class="has-text-grey is-size-7">(monolingual &mdash; for advanced learners)</span>
+                        <?= __e('vocabulary.starter.definition') ?>
+                        <span class="has-text-grey is-size-7"><?= __e('vocabulary.starter.definition_hint') ?></span>
                     </label>
                 </div>
             </div>
 
             <hr>
-            <label class="label">Sources</label>
+            <label class="label"><?= __e('vocabulary.starter.sources') ?></label>
 
             <?php if ($isAvailable) : ?>
             <!-- Wiktionary frequency words source -->
@@ -102,16 +100,17 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
                            :checked="useWiktionary"
                            @change="toggleWiktionary()">
                     <div class="is-flex-grow-1">
-                        <p class="has-text-weight-semibold mb-1">Most common words (Wiktionary)</p>
+                        <p class="has-text-weight-semibold mb-1">
+                            <?= __e('vocabulary.starter.most_common') ?>
+                        </p>
                         <p class="is-size-7 has-text-grey mb-2">
-                            Frequency-ranked words from the
-                            <a href="https://github.com/hermitdave/FrequencyWords" target="_blank" rel="noopener">FrequencyWords</a>
-                            project, enriched via
-                            <a href="https://kaikki.org" target="_blank" rel="noopener">Wiktionary</a>.
+                            <?= __('vocabulary.starter.most_common_help_html') ?>
                         </p>
                         <template x-if="useWiktionary">
                             <div class="field">
-                                <label class="label is-small">How many words?</label>
+                                <label class="label is-small">
+                                    <?= __e('vocabulary.starter.how_many') ?>
+                                </label>
                                 <div class="buttons has-addons are-small">
                                     <button :class="sizeClass(50)"
                                             @click="setSize(50)">50</button>
@@ -147,9 +146,9 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
                             </div>
                             <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
                             <p class="is-size-7 has-text-warning-dark" x-show="!source.directDownload">
-                                Manual download required &mdash;
+                                <?= __e('vocabulary.starter.manual_download') ?>
                                 <a :href="source.url" target="_blank" rel="noopener">
-                                    visit site <?= $externalLinkIcon ?>
+                                    <?= __e('vocabulary.starter.visit_site') ?> <?= $externalLinkIcon ?>
                                 </a>
                             </p>
                         </div>
@@ -163,12 +162,12 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
                             :disabled="!canImport()"
                             @click="startImport()">
                         <?= $downloadIcon ?>
-                        <span class="ml-1">Import</span>
+                        <span class="ml-1"><?= __e('vocabulary.starter.import') ?></span>
                     </button>
                 </div>
                 <div class="control">
                     <a class="button" href="<?= $escapedSkipUrl ?>">
-                        Skip
+                        <?= __e('vocabulary.starter.skip') ?>
                     </a>
                 </div>
             </div>
@@ -179,11 +178,11 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
     <template x-if="step === 'importing'">
         <div class="box">
             <p class="mb-3">
-                <strong>Fetching and importing frequency words...</strong>
+                <strong><?= __e('vocabulary.starter.fetching') ?></strong>
             </p>
             <progress class="progress is-info" max="100"></progress>
             <p class="has-text-grey is-size-7">
-                This may take a few seconds depending on your connection.
+                <?= __e('vocabulary.starter.fetching_help') ?>
             </p>
         </div>
     </template>
@@ -196,9 +195,11 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
             </p>
             <progress class="progress is-success" :value="enrichProgress" max="100"></progress>
             <p class="is-size-7 mb-3">
-                <span x-text="enrichStats.done"></span> of <span x-text="enrichStats.total"></span> words enriched
+                <span x-text="enrichStats.done"></span> <?= __e('vocabulary.starter.of') ?>
+                <span x-text="enrichStats.total"></span> <?= __e('vocabulary.starter.words_enriched') ?>
                 <template x-if="enrichStats.failed > 0">
-                    <span class="has-text-grey">(<span x-text="enrichStats.failed"></span> not found)</span>
+                    <span class="has-text-grey">(<span x-text="enrichStats.failed"></span>
+                        <?= __e('vocabulary.starter.not_found') ?>)</span>
                 </template>
             </p>
 
@@ -210,7 +211,7 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
             <div class="field is-grouped">
                 <div class="control">
                     <button class="button is-warning is-small" @click="stopEnrichment()">
-                        Stop &amp; Continue
+                        <?= __e('vocabulary.starter.stop_continue') ?>
                     </button>
                 </div>
             </div>
@@ -221,13 +222,13 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
     <template x-if="step === 'dictImporting'">
         <div class="box">
             <p class="mb-3">
-                <strong>Importing dictionaries...</strong>
+                <strong><?= __e('vocabulary.starter.importing_dicts') ?></strong>
             </p>
             <progress class="progress is-info"
                       :value="dictBatchCurrent" :max="dictBatchTotal"></progress>
             <p class="is-size-7 has-text-grey">
-                Dictionary <span x-text="dictBatchCurrent"></span>
-                of <span x-text="dictBatchTotal"></span>
+                <?= __e('vocabulary.starter.dictionary') ?> <span x-text="dictBatchCurrent"></span>
+                <?= __e('vocabulary.starter.of') ?> <span x-text="dictBatchTotal"></span>
             </p>
         </div>
     </template>
@@ -238,16 +239,20 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
             <div class="notification is-success is-light">
                 <template x-if="wiktResult.imported > 0 || wiktResult.skipped > 0">
                     <p>
-                        Imported <strong x-text="wiktResult.imported"></strong> words
+                        <?= __e('vocabulary.starter.imported') ?>
+                        <strong x-text="wiktResult.imported"></strong>
+                        <?= __e('vocabulary.starter.words') ?>
                         <template x-if="wiktResult.skipped > 0">
-                            <span>(<span x-text="wiktResult.skipped"></span> already existed)</span>
+                            <span>(<span x-text="wiktResult.skipped"></span>
+                                <?= __e('vocabulary.starter.already_existed') ?>)</span>
                         </template>
-                        for <strong><?= $escapedLangName ?></strong>.
+                        <?= __e('vocabulary.starter.for_lang') ?> <strong><?= $escapedLangName ?></strong>.
                     </p>
                 </template>
                 <template x-if="enrichStats.done > 0">
                     <p class="mt-1">
-                        <span x-text="enrichStats.done"></span> words enriched with
+                        <span x-text="enrichStats.done"></span>
+                        <?= __e('vocabulary.starter.enriched_with') ?>
                         <span x-text="enrichedModeLabel()"></span>.
                     </p>
                 </template>
@@ -259,12 +264,12 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
             <div class="field is-grouped">
                 <div class="control">
                     <a class="button is-primary" href="<?= $escapedSkipUrl ?>">
-                        Continue to Text Import
+                        <?= __e('vocabulary.starter.continue_to_text') ?>
                     </a>
                 </div>
                 <div class="control">
                     <a class="button" href="<?= $escapedVocabUrl ?>">
-                        View Vocabulary
+                        <?= __e('vocabulary.starter.view_vocabulary') ?>
                     </a>
                 </div>
             </div>
@@ -275,15 +280,18 @@ $externalLinkIcon = IconHelper::render('external-link', ['alt' => 'Download', 's
     <template x-if="step === 'error'">
         <div class="box">
             <div class="notification is-danger is-light">
-                <strong>Import failed:</strong> <span x-text="errorMessage"></span>
+                <strong><?= __e('vocabulary.starter.import_failed') ?></strong>
+                <span x-text="errorMessage"></span>
             </div>
             <div class="field is-grouped">
                 <div class="control">
-                    <button class="button" @click="retryImport()">Try Again</button>
+                    <button class="button" @click="retryImport()">
+                        <?= __e('vocabulary.starter.try_again') ?>
+                    </button>
                 </div>
                 <div class="control">
                     <a class="button" href="<?= $escapedSkipUrl ?>">
-                        Skip
+                        <?= __e('vocabulary.starter.skip') ?>
                     </a>
                 </div>
             </div>

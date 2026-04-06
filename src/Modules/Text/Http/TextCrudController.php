@@ -377,7 +377,7 @@ class TextCrudController extends BaseController
 
         if (!$needsAutoSplit && !$this->textService->validateTextLength($txText)) {
             return [
-                'message' => "Error: Text too long, must be below 65000 Bytes",
+                'message' => __('text.flash.error_prefix', ['message' => __('text.flash.text_too_long')]),
                 'redirect' => false,
             ];
         }
@@ -469,7 +469,10 @@ class TextCrudController extends BaseController
             );
 
             if (!$result['success']) {
-                return ['message' => 'Error: ' . $result['message'], 'redirect' => false];
+                return [
+                    'message' => __('text.flash.error_prefix', ['message' => $result['message']]),
+                    'redirect' => false,
+                ];
             }
 
             if ($openAfter && isset($result['textIds']) && count($result['textIds']) > 0) {
@@ -482,7 +485,10 @@ class TextCrudController extends BaseController
 
             return ['message' => $result['message'], 'redirect' => true];
         } catch (\Throwable $e) {
-            return ['message' => 'Error creating book: ' . $e->getMessage(), 'redirect' => false];
+            return [
+                'message' => __('text.flash.error_creating_book', ['error' => $e->getMessage()]),
+                'redirect' => false,
+            ];
         }
     }
 

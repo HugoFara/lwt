@@ -15,7 +15,6 @@
     "list_mark_all": "Marcar todas",
     "list_mark_none": "Desmarcar todas",
     "list_marked_tags": "Etiquetas marcadas",
-
     "list_col_mark": "Marca",
     "list_col_actions": "Acciones",
     "list_col_text": "Texto de la etiqueta",
@@ -23,13 +22,11 @@
     "list_col_items_with_tag_terms": "Términos con la etiqueta",
     "list_col_items_with_tag_texts": "Textos con la etiqueta",
     "list_col_archived_with_tag": "Textos archivados con la etiqueta",
-
     "action_edit": "Editar",
     "action_delete": "Eliminar",
     "label_archived": "Archivados",
     "items_label_terms": "Términos",
     "items_label_texts": "Textos",
-
     "form_edit_title": "Editar etiqueta",
     "form_new_title": "Nueva etiqueta",
     "form_label_tag": "Etiqueta",
@@ -41,5 +38,13 @@
     "form_field_required": "El campo no puede estar vacío",
     "form_cancel": "Cancelar",
     "form_save": "Guardar",
-    "form_change": "Cambiar"
+    "form_change": "Cambiar",
+    "flash.deleted": "Eliminada",
+    "flash.delete_failed": "No se pudo eliminar la etiqueta",
+    "flash.saved": "Guardada",
+    "flash.updated": "Actualizada",
+    "flash.error_prefix": "Error: {message}",
+    "flash.unknown_error": "Error desconocido",
+    "flash.not_found": "Etiqueta no encontrada",
+    "flash.deleted_zero": "Eliminada (0 filas afectadas)"
 }

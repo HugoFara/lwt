@@ -73,7 +73,14 @@ class TermTagController extends AbstractCrudController
 
         // Handle form submission
         if ($this->param('op') === 'Save') {
-            $message = $this->handleCreate();
+            $text = $this->param('TgText', '');
+            $comment = $this->param('TgComment', '');
+            $result = $this->facade->create($text, $comment);
+            $message = $result['success']
+                ? __('tags.flash.saved')
+                : __('tags.flash.error_prefix', [
+                    'message' => $result['error'] ?? __('tags.flash.unknown_error'),
+                ]);
             $this->message($message, false);
         }
 
@@ -96,13 +103,20 @@ class TermTagController extends AbstractCrudController
 
         // Handle form submission
         if ($this->param('op') === 'Change') {
-            $message = $this->handleUpdate($id);
-            if (!str_starts_with($message, 'Error')) {
+            $text = $this->param('TgText', '');
+            $comment = $this->param('TgComment', '');
+            $result = $this->facade->update($id, $text, $comment);
+            if ($result['success']) {
                 // Redirect to list on success
                 header('Location: ' . url('/tags'));
                 exit;
             }
-            $this->message($message, false);
+            $this->message(
+                __('tags.flash.error_prefix', [
+                    'message' => $result['error'] ?? __('tags.flash.unknown_error'),
+                ]),
+                false
+            );
         }
 
         $this->renderEditForm($id);
@@ -123,9 +137,9 @@ class TermTagController extends AbstractCrudController
         $result = $this->facade->delete($id);
 
         if ($result['success']) {
-            header('Location: ' . url('/tags') . '?message=' . urlencode('Deleted'));
+            header('Location: ' . url('/tags') . '?message=' . urlencode(__('tags.flash.deleted')));
         } else {
-            header('Location: ' . url('/tags') . '?error=' . urlencode('Failed to delete tag'));
+            header('Location: ' . url('/tags') . '?error=' . urlencode(__('tags.flash.delete_failed')));
         }
         exit;
     }
@@ -314,7 +328,7 @@ class TermTagController extends AbstractCrudController
         $tag = $this->facade->getById($id);
 
         if ($tag === null) {
-            $this->message("Tag not found", false);
+            $this->message(__('tags.flash.not_found'), false);
             return;
         }
 

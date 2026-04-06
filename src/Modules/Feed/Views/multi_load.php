@@ -37,8 +37,8 @@ namespace Lwt\Views\Feed;
 <table class="table is-bordered" style="border-left: none;border-top: none; background-color:inherit">
 <tr>
 <th class="borderleft" colspan="2">
-<input type="button" value="Mark All" @click="markAll()" />
-<input type="button" value="Mark None" @click="markNone()" /></th>
+<input type="button" value="<?php echo __e('feed.multi_load_mark_all'); ?>" @click="markAll()" />
+<input type="button" value="<?php echo __e('feed.multi_load_mark_none'); ?>" @click="markNone()" /></th>
 <th class="borderright" colspan="2">&nbsp;</th>
 </tr>
 <tr>
@@ -47,9 +47,9 @@ namespace Lwt\Views\Feed;
            border-left: none;background-color: transparent;">
 <table class="table is-bordered is-fullwidth sortable">
 <tr>
-<th class="sorttable_nosort">Mark</th>
-<th class="clickable" colspan="2">Newsfeeds</th>
-<th class="sorttable_numeric clickable">Last Update</th>
+<th class="sorttable_nosort"><?php echo __e('feed.multi_load_col_mark'); ?></th>
+<th class="clickable" colspan="2"><?php echo __e('feed.multi_load_col_newsfeeds'); ?></th>
+<th class="sorttable_numeric clickable"><?php echo __e('feed.multi_load_col_last_update'); ?></th>
 </tr>
     <?php
     $time = time();
@@ -77,9 +77,9 @@ namespace Lwt\Views\Feed;
 <tr>
 <th class="borderleft" colspan="3"><input id="map" type="hidden" name="selected_feed" value="" />
 <input type="hidden" name="load_feed" value="1" />
-<button id="markaction" @click="collectAndSubmit()">Update Marked Newsfeeds</button></th>
+<button id="markaction" @click="collectAndSubmit()"><?php echo __e('feed.multi_load_update_marked'); ?></button></th>
 <th class="borderright">
-    <input type="button" value="Cancel" @click="cancel()" /></th></tr>
+    <input type="button" value="<?php echo __e('feed.multi_load_cancel'); ?>" @click="cancel()" /></th></tr>
 </table>
 </form>
 </div>

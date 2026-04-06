@@ -118,19 +118,19 @@ class UpdateTerm
 
             return [
                 'id' => $term->id()->toInt(),
-                'message' => 'Term updated',
+                'message' => __('vocabulary.flash.term_updated'),
                 'success' => true
             ];
         } catch (\InvalidArgumentException $e) {
             return [
                 'id' => 0,
-                'message' => 'Error: ' . $e->getMessage(),
+                'message' => __('vocabulary.flash.error_prefix', ['message' => $e->getMessage()]),
                 'success' => false
             ];
         } catch (\Exception $e) {
             return [
                 'id' => 0,
-                'message' => 'Error: ' . $e->getMessage(),
+                'message' => __('vocabulary.flash.error_prefix', ['message' => $e->getMessage()]),
                 'success' => false
             ];
         }

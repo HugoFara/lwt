@@ -38,6 +38,14 @@ require_once __DIR__ . '/../src/Shared/Infrastructure/Globals.php';
 // Initialize Globals
 Globals::initialize();
 
+// Register the i18n Translator in the DI container so __() resolves keys in tests.
+// Without this, the helper returns the raw key, breaking tests that assert on the
+// translated text.
+\Lwt\Shared\Infrastructure\Container\Container::getInstance()->singleton(
+    \Lwt\Shared\I18n\Translator::class,
+    static fn () => new \Lwt\Shared\I18n\Translator(__DIR__ . '/../locale', 'en')
+);
+
 // Load the .env configuration
 EnvLoader::load(__DIR__ . '/../.env');
 

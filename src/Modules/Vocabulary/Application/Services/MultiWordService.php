@@ -107,7 +107,7 @@ class MultiWordService
 
         return [
             'id' => $wid,
-            'message' => 'Term saved'
+            'message' => __('vocabulary.flash.term_saved')
         ];
     }
 
@@ -165,7 +165,7 @@ class MultiWordService
 
         return [
             'id' => $wordId,
-            'message' => 'Updated',
+            'message' => __('vocabulary.flash.term_updated_short'),
             'status' => $newStatus
         ];
     }

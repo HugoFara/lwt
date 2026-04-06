@@ -13,6 +13,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { t } from '@shared/i18n/translator';
 import {
   WordsApi,
   type WordItem,
@@ -476,7 +477,7 @@ export function wordListData(): WordListData {
 
       const ids = this.getMarkedIds();
       if (ids.length === 0) {
-        alert('No terms selected');
+        alert(t('vocabulary.list.no_terms_selected'));
         select.value = '';
         return;
       }
@@ -485,13 +486,13 @@ export function wordListData(): WordListData {
 
       // Handle actions that need extra data
       if (action === 'addtag' || action === 'deltag') {
-        const tag = prompt('Enter tag (max 20 chars, no spaces/commas):');
+        const tag = prompt(t('vocabulary.list.prompt_tag'));
         if (!tag) {
           select.value = '';
           return;
         }
         if (tag.includes(' ') || tag.includes(',') || tag.length > 20) {
-          alert('Invalid tag: must be <= 20 chars with no spaces or commas');
+          alert(t('vocabulary.list.invalid_tag'));
           select.value = '';
           return;
         }
@@ -500,7 +501,7 @@ export function wordListData(): WordListData {
 
       // Confirm destructive actions
       if (action === 'del') {
-        if (!confirm(`Delete ${ids.length} term(s)? This cannot be undone.`)) {
+        if (!confirm(t('vocabulary.list.confirm_delete', { count: ids.length }))) {
           select.value = '';
           return;
         }
@@ -526,7 +527,7 @@ export function wordListData(): WordListData {
         this.marked.clear();
         await this.loadWords();
       } else {
-        alert(response.data?.message || response.error || 'Action failed');
+        alert(response.data?.message || response.error || t('vocabulary.list.action_failed'));
       }
 
       select.value = '';
@@ -539,7 +540,7 @@ export function wordListData(): WordListData {
 
       if (
         !confirm(
-          `Apply action to ALL ${this.pagination.total} filtered term(s)?`
+          t('vocabulary.list.confirm_apply_all', { count: this.pagination.total })
         )
       ) {
         select.value = '';
@@ -549,7 +550,7 @@ export function wordListData(): WordListData {
       let data: string | undefined;
 
       if (action.endsWith('addtag') || action.endsWith('deltag')) {
-        const tag = prompt('Enter tag:');
+        const tag = prompt(t('vocabulary.list.prompt_tag_simple'));
         if (!tag) {
           select.value = '';
           return;
@@ -565,7 +566,7 @@ export function wordListData(): WordListData {
       if (response.data?.success) {
         await this.loadWords();
       } else {
-        alert(response.data?.message || response.error || 'Action failed');
+        alert(response.data?.message || response.error || t('vocabulary.list.action_failed'));
       }
 
       select.value = '';
@@ -612,7 +613,7 @@ export function wordListData(): WordListData {
           }
         }
       } else {
-        alert(response.data?.error || response.error || 'Save failed');
+        alert(response.data?.error || response.error || t('vocabulary.list.save_failed'));
       }
 
       this.editingWord = null;
@@ -660,15 +661,22 @@ export function wordListData(): WordListData {
     },
 
     termCountLabel(): string {
-      return this.pagination.total + ' Term' + (this.pagination.total === 1 ? '' : 's');
+      const total = this.pagination.total;
+      return t(
+        total === 1 ? 'vocabulary.list.term_count_one' : 'vocabulary.list.term_count_other',
+        { count: total }
+      );
     },
 
     pageLabel(): string {
-      return 'Page ' + this.pagination.page + ' of ' + this.pagination.total_pages;
+      return t('vocabulary.list.page_x_of_y', {
+        page: this.pagination.page,
+        total: this.pagination.total_pages
+      });
     },
 
     markedCountLabel(): string {
-      return this.getMarkedCount() + ' selected';
+      return t('vocabulary.list.marked_count', { count: this.getMarkedCount() });
     },
 
     /**
@@ -688,7 +696,9 @@ export function wordListData(): WordListData {
      */
     updatePageTitle(): void {
       const langName = this.getSelectedLanguageName();
-      const title = langName ? `${langName} Terms` : 'Terms';
+      const title = langName
+        ? t('vocabulary.list.title_lang_terms', { lang: langName })
+        : t('vocabulary.list.title_terms');
 
       // Update the h1 element
       const h1 = document.querySelector('h1');
@@ -703,7 +713,7 @@ export function wordListData(): WordListData {
       }
 
       // Update the document title
-      document.title = `LWT :: ${title}`;
+      document.title = t('vocabulary.list.document_title', { title });
     },
 
     // Helper method to create and submit export form

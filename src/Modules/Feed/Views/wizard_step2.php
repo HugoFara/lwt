@@ -97,16 +97,16 @@ $configJson = json_encode([
     <div id="adv" class="box mb-2" x-show="isMinimized" x-cloak>
         <div class="buttons">
             <button type="button" class="button is-small is-danger is-outlined" @click="cancel">
-                Cancel
+                <?php echo __e('feed.wizard.common.cancel'); ?>
             </button>
             <button type="button" class="button is-small is-info" @click="getAdvanced" x-show="store.isAdvancedOpen">
-                Get
+                <?php echo __e('feed.wizard.common.get'); ?>
             </button>
         </div>
         <!-- Advanced options will be rendered here when in advanced mode -->
         <template x-if="store.isAdvancedOpen">
             <div class="content">
-                <p class="is-size-7 mb-2">Select XPath option:</p>
+                <p class="is-size-7 mb-2"><?php echo __e('feed.wizard.common.select_xpath_option'); ?></p>
                 <template x-for="option in store.advancedOptions" :key="option.value">
                     <div class="field">
                         <label class="radio">
@@ -114,22 +114,27 @@ $configJson = json_encode([
                                    :value="option.value"
                                    @click="selectAdvancedOption(option.value)" />
                             <span x-text="option.label"></span>
-                            <span class="tag is-small is-light" x-text="'(' + option.count + ' matches)'"></span>
+                            <span class="tag is-small is-light"
+                                  x-text="'(' + option.count + ' ' + $t('feed.wizard.common.matches') + ')'"></span>
                         </label>
                     </div>
                 </template>
                 <div class="field">
                     <label class="radio">
                         <input type="radio" name="adv_xpath" value="" @click="selectAdvancedOption('')" />
-                        Custom:
+                        <?php echo __e('feed.wizard.common.custom'); ?>
                         <input type="text" class="input is-small" style="width: 300px;"
                                x-model="store.customXPath"
                                :class="{ 'is-danger': store.customXPath && !store.customXPathValid }" />
                     </label>
                 </div>
                 <div class="buttons mt-3">
-                    <button type="button" class="button is-small" @click="cancelAdvanced">Cancel</button>
-                    <button type="button" class="button is-small is-info" @click="getAdvanced">Get</button>
+                    <button type="button" class="button is-small" @click="cancelAdvanced">
+                        <?php echo __e('feed.wizard.common.cancel'); ?>
+                    </button>
+                    <button type="button" class="button is-small is-info" @click="getAdvanced">
+                        <?php echo __e('feed.wizard.common.get'); ?>
+                    </button>
                 </div>
             </div>
         </template>
@@ -142,39 +147,41 @@ $configJson = json_encode([
             <header class="modal-card-head">
                 <p class="modal-card-title">
                     <span class="icon mr-2">
-                        <?php echo IconHelper::render('settings', ['alt' => 'Settings']); ?>
+                        <?php echo IconHelper::render('settings', ['alt' => __('feed.wizard.common.settings')]); ?>
                     </span>
-                    Feed Wizard Settings
+                    <?php echo __e('feed.wizard.common.settings_title'); ?>
                 </p>
                 <button class="delete" aria-label="close" type="button" @click="settingsOpen = false"></button>
             </header>
             <section class="modal-card-body">
                 <div class="field">
-                    <label class="label">Selection Mode</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.selection_mode'); ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select x-model="store.selectionMode" @change="changeSelectMode">
-                                <option value="smart">Smart Selection</option>
-                                <option value="all">Get All Attributes</option>
-                                <option value="adv">Advanced Selection</option>
+                                <option value="smart"><?php echo __e('feed.wizard.common.mode_smart'); ?></option>
+                                <option value="all"><?php echo __e('feed.wizard.common.mode_all'); ?></option>
+                                <option value="adv"><?php echo __e('feed.wizard.common.mode_advanced'); ?></option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="field">
-                    <label class="label">Hide Images</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.hide_images'); ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select x-model="store.hideImages" @change="changeHideImages">
-                                <option :value="true">Yes</option>
-                                <option :value="false">No</option>
+                                <option :value="true"><?php echo __e('feed.wizard.common.yes'); ?></option>
+                                <option :value="false"><?php echo __e('feed.wizard.common.no'); ?></option>
                             </select>
                         </div>
                     </div>
                 </div>
             </section>
             <footer class="modal-card-foot">
-                <button type="button" class="button is-success" @click="settingsOpen = false">OK</button>
+                <button type="button" class="button is-success" @click="settingsOpen = false">
+                    <?php echo __e('feed.wizard.common.ok'); ?>
+                </button>
             </footer>
         </div>
     </div>
@@ -184,25 +191,33 @@ $configJson = json_encode([
         <div class="steps is-small mb-4">
             <div class="step-item is-completed is-success">
                 <div class="step-marker">1</div>
-                <div class="step-details"><p class="step-title">Feed URL</p></div>
+                <div class="step-details">
+                    <p class="step-title"><?php echo __e('feed.wizard.common.step_feed_url'); ?></p>
+                </div>
             </div>
             <div class="step-item is-active is-primary">
                 <div class="step-marker">2</div>
-                <div class="step-details"><p class="step-title">Select Article</p></div>
+                <div class="step-details">
+                    <p class="step-title"><?php echo __e('feed.wizard.common.step_select_article'); ?></p>
+                </div>
             </div>
             <div class="step-item">
                 <div class="step-marker">3</div>
-                <div class="step-details"><p class="step-title">Filter Text</p></div>
+                <div class="step-details">
+                    <p class="step-title"><?php echo __e('feed.wizard.common.step_filter_text'); ?></p>
+                </div>
             </div>
             <div class="step-item">
                 <div class="step-marker">4</div>
-                <div class="step-details"><p class="step-title">Save</p></div>
+                <div class="step-details">
+                    <p class="step-title"><?php echo __e('feed.wizard.common.step_save'); ?></p>
+                </div>
             </div>
         </div>
 
         <!-- Selected elements list -->
         <div class="box mb-4" style="background-color: var(--bulma-scheme-main-bis);">
-            <p class="is-size-7 has-text-grey mb-2">Selected elements:</p>
+            <p class="is-size-7 has-text-grey mb-2"><?php echo __e('feed.wizard.step2.selected_elements'); ?></p>
             <ol id="lwt_sel" class="ml-4">
                 <template x-for="selector in articleSelectors" :key="selector.id">
                     <li class="is-flex is-align-items-center mb-1"
@@ -234,7 +249,7 @@ $configJson = json_encode([
         <div class="box">
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Name</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.name'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -246,8 +261,11 @@ $configJson = json_encode([
                                    required />
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                            <span class="icon has-text-danger"
+                                  title="<?php echo __e('feed.wizard.common.field_required'); ?>">
+                                <?php
+                                echo IconHelper::render('asterisk', ['alt' => __('feed.wizard.common.required')]);
+                                ?>
                             </span>
                         </div>
                     </div>
@@ -256,7 +274,7 @@ $configJson = json_encode([
 
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Newsfeed URL</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.newsfeed_url'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field">
@@ -269,14 +287,14 @@ $configJson = json_encode([
 
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Article Source</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.article_source'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
                         <div class="control">
                             <div class="select">
                                 <select name="NfArticleSection" x-model="articleSource" @change="changeArticleSection">
-                                    <option value="">Webpage Link</option>
+                                    <option value=""><?php echo __e('feed.wizard.common.webpage_link'); ?></option>
                                     <?php foreach ($articleSources as $source) : ?>
                                     <option value="<?php echo $source; ?>"><?php echo $source; ?></option>
                                     <?php endforeach; ?>
@@ -300,7 +318,7 @@ $configJson = json_encode([
                 <div class="level-item">
                     <input type="hidden" name="rss_url" :value="config.rssUrl" />
                     <button type="button" class="button is-danger is-outlined" @click="cancel">
-                        Cancel
+                        <?php echo __e('feed.wizard.common.cancel'); ?>
                     </button>
                 </div>
             </div>
@@ -341,7 +359,7 @@ $configJson = json_encode([
                     <div class="control">
                         <div class="select">
                             <select name="mark_action" @change="handleMarkActionChange">
-                                <option value="">[Click On Text]</option>
+                                <option value=""><?php echo __e('feed.wizard.common.click_on_text'); ?></option>
                                 <template x-for="option in markActionOptions" :key="option.value">
                                     <option :value="option.value" x-text="option.label"></option>
                                 </template>
@@ -351,11 +369,17 @@ $configJson = json_encode([
                     <div class="control">
                         <button type="button" class="button is-info"
                                 :disabled="!currentXPath"
-                                @click="getSelection">Get</button>
+                                @click="getSelection"><?php echo __e('feed.wizard.common.get'); ?></button>
                     </div>
                     <div class="control">
                         <button type="button" class="button" @click="settingsOpen = true">
-                            <?php echo IconHelper::render('settings', ['title' => 'Settings', 'alt' => 'Settings']); ?>
+                            <?php
+                            $settingsLabel = __('feed.wizard.common.settings');
+                            echo IconHelper::render(
+                                'settings',
+                                ['title' => $settingsLabel, 'alt' => $settingsLabel]
+                            );
+                            ?>
                         </button>
                     </div>
                 </div>
@@ -366,16 +390,20 @@ $configJson = json_encode([
                     <div class="buttons">
                         <button type="button" class="button" @click="goBack">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?>
+                                <?php
+                                echo IconHelper::render('arrow-left', ['alt' => __('feed.wizard.common.back')]);
+                                ?>
                             </span>
-                            <span>Back</span>
+                            <span><?php echo __e('feed.wizard.common.back'); ?></span>
                         </button>
                         <button type="button" class="button is-primary"
                                 :disabled="!canProceed"
                                 @click="goNext">
-                            <span>Next</span>
+                            <span><?php echo __e('feed.wizard.common.next'); ?></span>
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('arrow-right', ['alt' => 'Next']); ?>
+                                <?php
+                                echo IconHelper::render('arrow-right', ['alt' => __('feed.wizard.common.next')]);
+                                ?>
                             </span>
                         </button>
                     </div>
@@ -385,9 +413,9 @@ $configJson = json_encode([
 
         <button type="button" class="button is-small wizard-minmax mt-2" @click="toggleMinimize">
             <span class="icon is-small">
-                <?php echo IconHelper::render('minimize-2', ['alt' => 'Toggle']); ?>
+                <?php echo IconHelper::render('minimize-2', ['alt' => __('feed.wizard.common.min_max')]); ?>
             </span>
-            <span>min/max</span>
+            <span><?php echo __e('feed.wizard.common.min_max'); ?></span>
         </button>
 
         <input type="hidden" name="step" value="2" />

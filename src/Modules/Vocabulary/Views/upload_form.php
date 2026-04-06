@@ -65,12 +65,12 @@ if (!isset($activeTab)) {
 
 // Column options for reuse (manual upload mode)
 $columnOptions = [
-    'w' => 'Term',
-    't' => 'Translation',
-    'r' => 'Romanization',
-    's' => 'Sentence',
-    'g' => 'Tag List',
-    'x' => "Don't import"
+    'w' => __('vocabulary.upload.manual.col_term'),
+    't' => __('vocabulary.upload.manual.col_translation'),
+    'r' => __('vocabulary.upload.manual.col_romanization'),
+    's' => __('vocabulary.upload.manual.col_sentence'),
+    'g' => __('vocabulary.upload.manual.col_tag_list'),
+    'x' => __('vocabulary.upload.manual.col_dont_import'),
 ];
 
 // Action buttons for navigation
@@ -136,34 +136,37 @@ echo PageLayoutHelper::buildActionCard($actions);
     </div>
     <?php elseif (!$isFrequencyAvailable) : ?>
     <div class="notification is-info is-light">
-        Frequency word lists are not available for
-        <strong><?php echo htmlspecialchars($currentLanguageName, ENT_QUOTES, 'UTF-8'); ?></strong>.
-        Try the <strong>Dictionaries</strong> or <strong>Manual Upload</strong> tabs instead.
+        <?= __('vocabulary.upload.freq.not_available_html', [
+            'lang' => htmlspecialchars($currentLanguageName, ENT_QUOTES, 'UTF-8'),
+        ]) ?>
     </div>
     <?php else : ?>
     <!-- Step: Choose -->
     <template x-if="freqStep === 'choose'">
         <div class="box">
             <p class="mb-4">
-                Import the most common words for
-                <strong><?php echo htmlspecialchars($currentLanguageName, ENT_QUOTES, 'UTF-8'); ?></strong>
-                from frequency lists, with optional enrichment from Wiktionary.
+                <?= __('vocabulary.upload.freq.intro_html', [
+                    'lang' => htmlspecialchars($currentLanguageName, ENT_QUOTES, 'UTF-8'),
+                ]) ?>
             </p>
 
             <div class="field">
-                <label class="label">Enrichment mode</label>
+                <label class="label"><?= __e('vocabulary.upload.freq.enrichment_mode') ?></label>
                 <div class="control">
                     <label class="radio">
                         <input type="radio" x-model="freqMode" value="translation">
-                        Translation <span class="has-text-grey is-size-7">(English glosses &mdash; for beginners)</span>
+                        <?= __e('vocabulary.upload.freq.translation') ?>
+                        <span class="has-text-grey is-size-7">
+                            <?= __e('vocabulary.upload.freq.translation_hint') ?>
+                        </span>
                     </label>
                 </div>
                 <div class="control mt-1">
                     <label class="radio">
                         <input type="radio" x-model="freqMode" value="definition">
-                        Definition
+                        <?= __e('vocabulary.upload.freq.definition') ?>
                         <span class="has-text-grey is-size-7">
-                            (monolingual &mdash; for advanced learners)
+                            <?= __e('vocabulary.upload.freq.definition_hint') ?>
                         </span>
                     </label>
                 </div>
@@ -171,7 +174,7 @@ echo PageLayoutHelper::buildActionCard($actions);
 
             <hr>
             <div class="field">
-                <label class="label">How many words?</label>
+                <label class="label"><?= __e('vocabulary.upload.freq.how_many') ?></label>
                 <div class="buttons has-addons">
                     <button type="button" :class="sizeClass(50)"
                             @click="setSize(50)">50</button>
@@ -181,12 +184,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                             @click="setSize(500)">500</button>
                 </div>
                 <p class="help has-text-grey">
-                    Frequency-ranked words from the
-                    <a href="https://github.com/hermitdave/FrequencyWords"
-                        target="_blank"
-                        rel="noopener">FrequencyWords</a>
-                    project, enriched via
-                    <a href="https://kaikki.org" target="_blank" rel="noopener">Wiktionary</a>.
+                    <?= __('vocabulary.upload.freq.source_help_html') ?>
                 </p>
             </div>
 
@@ -197,7 +195,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                         <span class="icon is-small">
                             <?php echo IconHelper::render('download', ['alt' => 'Import']); ?>
                         </span>
-                        <span>Import</span>
+                        <span><?= __e('vocabulary.upload.import') ?></span>
                     </button>
                 </div>
             </div>
@@ -208,11 +206,11 @@ echo PageLayoutHelper::buildActionCard($actions);
     <template x-if="freqStep === 'importing'">
         <div class="box">
             <p class="mb-3">
-                <strong>Fetching and importing frequency words...</strong>
+                <strong><?= __e('vocabulary.upload.freq.fetching') ?></strong>
             </p>
             <progress class="progress is-info" max="100"></progress>
             <p class="has-text-grey is-size-7">
-                This may take a few seconds depending on your connection.
+                <?= __e('vocabulary.upload.freq.fetching_help') ?>
             </p>
         </div>
     </template>
@@ -225,9 +223,13 @@ echo PageLayoutHelper::buildActionCard($actions);
             </p>
             <progress class="progress is-success" :value="enrichProgress" max="100"></progress>
             <p class="is-size-7 mb-3">
-                <span x-text="enrichStats.done"></span> of <span x-text="enrichStats.total"></span> words enriched
+                <span x-text="enrichStats.done"></span>
+                <?= __e('vocabulary.upload.freq.words_enriched_of') ?>
+                <span x-text="enrichStats.total"></span>
+                <?= __e('vocabulary.upload.freq.words_enriched_suffix') ?>
                 <template x-if="enrichStats.failed > 0">
-                    <span class="has-text-grey">(<span x-text="enrichStats.failed"></span> not found)</span>
+                    <span class="has-text-grey">(<span x-text="enrichStats.failed"></span>
+                        <?= __e('vocabulary.upload.freq.not_found') ?>)</span>
                 </template>
             </p>
 
@@ -238,7 +240,7 @@ echo PageLayoutHelper::buildActionCard($actions);
             <div class="field is-grouped">
                 <div class="control">
                     <button type="button" class="button is-warning is-small" @click="stopEnrichment()">
-                        Stop &amp; Continue
+                        <?= __e('vocabulary.upload.freq.stop_continue') ?>
                     </button>
                 </div>
             </div>
@@ -251,16 +253,21 @@ echo PageLayoutHelper::buildActionCard($actions);
             <div class="notification is-success is-light">
                 <template x-if="freqResult.imported > 0 || freqResult.skipped > 0">
                     <p>
-                        Imported <strong x-text="freqResult.imported"></strong> words
+                        <?= __e('vocabulary.upload.freq.imported_words') ?>
+                        <strong x-text="freqResult.imported"></strong>
+                        <?= __e('vocabulary.upload.freq.words') ?>
                         <template x-if="freqResult.skipped > 0">
-                            <span>(<span x-text="freqResult.skipped"></span> already existed)</span>
+                            <span>(<span x-text="freqResult.skipped"></span>
+                                <?= __e('vocabulary.upload.freq.already_existed') ?>)</span>
                         </template>
-                        for <strong><?php echo htmlspecialchars($currentLanguageName, ENT_QUOTES, 'UTF-8'); ?></strong>.
+                        <?= __e('vocabulary.upload.freq.for_lang') ?>
+                        <strong><?php echo htmlspecialchars($currentLanguageName, ENT_QUOTES, 'UTF-8'); ?></strong>.
                     </p>
                 </template>
                 <template x-if="enrichStats.done > 0">
                     <p class="mt-1">
-                        <span x-text="enrichStats.done"></span> words enriched with
+                        <span x-text="enrichStats.done"></span>
+                        <?= __e('vocabulary.upload.freq.enriched_with') ?>
                         <span x-text="freqEnrichedModeLabel()"></span>.
                     </p>
                 </template>
@@ -269,12 +276,12 @@ echo PageLayoutHelper::buildActionCard($actions);
             <div class="field is-grouped">
                 <div class="control">
                     <button type="button" class="button is-primary" @click="resetFrequencyImport()">
-                        Import More
+                        <?= __e('vocabulary.upload.import_more') ?>
                     </button>
                 </div>
                 <div class="control">
                     <a class="button" href="/words?lang=<?php echo $langId; ?>">
-                        View Vocabulary
+                        <?= __e('vocabulary.upload.freq.view_vocabulary') ?>
                     </a>
                 </div>
             </div>
@@ -285,11 +292,14 @@ echo PageLayoutHelper::buildActionCard($actions);
     <template x-if="freqStep === 'error'">
         <div class="box">
             <div class="notification is-danger is-light">
-                <strong>Import failed:</strong> <span x-text="freqError"></span>
+                <strong><?= __e('vocabulary.upload.import_failed') ?></strong>
+                <span x-text="freqError"></span>
             </div>
             <div class="field">
                 <div class="control">
-                    <button type="button" class="button" @click="resetFrequencyImport()">Try Again</button>
+                    <button type="button" class="button" @click="resetFrequencyImport()">
+                        <?= __e('vocabulary.upload.try_again') ?>
+                    </button>
                 </div>
             </div>
         </div>
@@ -303,10 +313,7 @@ echo PageLayoutHelper::buildActionCard($actions);
      <?php echo $activeTab !== 'dictionary' ? 'style="display:none"' : ''; ?>>
     <div x-data="curatedDictBrowser">
         <div class="notification is-info is-light mb-4">
-            <strong>Offline dictionaries for lookups</strong> &mdash;
-            these are installed as reference dictionaries used when you click a word while reading.
-            They do <em>not</em> add terms to your vocabulary list.
-            To import vocabulary, use the <strong>Frequency Words</strong> or <strong>Manual Upload</strong> tabs.
+            <?= __('vocabulary.upload.dict.intro_html') ?>
         </div>
 
         <!-- Batch import results -->
@@ -324,8 +331,10 @@ echo PageLayoutHelper::buildActionCard($actions);
         <template x-if="batchImporting">
             <div class="notification is-info is-light mb-4">
                 <p class="mb-2">
-                    <strong>Importing dictionaries...</strong>
-                    <span x-text="batchCurrent"></span> of <span x-text="batchTotal"></span>
+                    <strong><?= __e('vocabulary.upload.dict.importing') ?></strong>
+                    <span x-text="batchCurrent"></span>
+                    <?= __e('vocabulary.upload.freq.words_enriched_of') ?>
+                    <span x-text="batchTotal"></span>
                 </p>
                 <progress class="progress is-info is-small" :value="batchCurrent" :max="batchTotal"></progress>
             </div>
@@ -336,7 +345,7 @@ echo PageLayoutHelper::buildActionCard($actions);
             <div class="control">
                 <div class="select">
                     <select x-model="dictLanguageFilter">
-                        <option value="">All languages</option>
+                        <option value=""><?= __e('vocabulary.upload.dict.all_languages') ?></option>
                         <template x-for="group in allGroups" :key="group.language">
                             <option :value="group.language" x-text="group.languageName"></option>
                         </template>
@@ -344,7 +353,8 @@ echo PageLayoutHelper::buildActionCard($actions);
                 </div>
             </div>
             <div class="control is-expanded">
-                <input class="input" type="search" placeholder="Search dictionaries..."
+                <input class="input" type="search"
+                       placeholder="<?= __e('vocabulary.upload.dict.search_placeholder') ?>"
                        x-model="dictSearch" />
             </div>
         </div>
@@ -352,7 +362,7 @@ echo PageLayoutHelper::buildActionCard($actions);
         <!-- Dictionary list grouped by language -->
         <template x-if="filteredGroups.length === 0">
             <div class="notification is-light">
-                No dictionaries match your search.
+                <?= __e('vocabulary.upload.dict.no_match') ?>
             </div>
         </template>
 
@@ -375,17 +385,17 @@ echo PageLayoutHelper::buildActionCard($actions);
                                     <span class="tag is-success is-light" x-text="source.license"></span>
                                     <template x-if="source.targetLanguage">
                                         <span class="tag is-warning is-light"
-                                            x-text="source.targetLanguage
-                                                + ' translations'">
+                                            x-text="source.targetLanguage + ' '
+                                                + $t('vocabulary.upload.dict.translations_suffix')">
                                         </span>
                                     </template>
                                 </div>
                                 <p class="is-size-7 has-text-grey" x-text="source.notes"></p>
                                 <p class="is-size-7 has-text-warning-dark"
                                    x-show="!source.directDownload">
-                                    Manual download required &mdash;
+                                    <?= __e('vocabulary.upload.dict.manual_download') ?>
                                     <a :href="source.url" target="_blank" rel="noopener">
-                                        visit site
+                                        <?= __e('vocabulary.upload.dict.visit_site') ?>
                                         <?php
                                         echo IconHelper::render(
                                             'external-link',
@@ -410,7 +420,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                     <span class="icon is-small">
                         <?php echo IconHelper::render('download', ['alt' => 'Import']); ?>
                     </span>
-                    <span>Import Selected</span>
+                    <span><?= __e('vocabulary.upload.dict.import_selected') ?></span>
                 </button>
             </div>
         </div>
@@ -434,7 +444,7 @@ echo PageLayoutHelper::buildActionCard($actions);
     <div class="box">
         <!-- Import Source Tabs -->
         <div class="field">
-            <label class="label">Import from</label>
+            <label class="label"><?= __e('vocabulary.upload.manual.import_from') ?></label>
             <div class="tabs is-boxed is-small mb-3">
                 <ul>
                     <li :class="{ 'is-active': manualMethod === 'dict-file' }">
@@ -442,7 +452,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('book-open', ['alt' => 'Dictionary']); ?>
                             </span>
-                            <span>Dictionary File</span>
+                            <span><?= __e('vocabulary.upload.manual.dict_file') ?></span>
                         </a>
                     </li>
                     <li :class="{ 'is-active': manualMethod === 'csv-file' }">
@@ -450,7 +460,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
                             </span>
-                            <span>CSV / TSV File</span>
+                            <span><?= __e('vocabulary.upload.manual.csv_tsv_file') ?></span>
                         </a>
                     </li>
                     <li :class="{ 'is-active': manualMethod === 'paste' }">
@@ -458,7 +468,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('clipboard-paste', ['alt' => 'Paste']); ?>
                             </span>
-                            <span>Paste Text</span>
+                            <span><?= __e('vocabulary.upload.manual.paste_text') ?></span>
                         </a>
                     </li>
                 </ul>
@@ -468,15 +478,15 @@ echo PageLayoutHelper::buildActionCard($actions);
             <div x-show="manualMethod === 'dict-file'" x-transition>
 
                 <!-- Upload section -->
-                <h5 class="title is-6 mb-3">Upload a dictionary file</h5>
+                <h5 class="title is-6 mb-3"><?= __e('vocabulary.upload.manual.upload_dict_file') ?></h5>
                 <div class="field mb-3">
-                    <label class="label is-small">File Format</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.file_format') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="dict_format" x-model="dictFormat">
-                                <option value="csv">CSV / TSV dictionary</option>
-                                <option value="json">JSON</option>
-                                <option value="stardict">StarDict (.ifo file)</option>
+                                <option value="csv"><?= __e('vocabulary.upload.manual.fmt_csv') ?></option>
+                                <option value="json"><?= __e('vocabulary.upload.manual.fmt_json') ?></option>
+                                <option value="stardict"><?= __e('vocabulary.upload.manual.fmt_stardict') ?></option>
                             </select>
                         </div>
                     </div>
@@ -489,19 +499,19 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <span class="file-icon">
                                 <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
                             </span>
-                            <span class="file-label">Choose a file...</span>
+                            <span class="file-label"><?= __e('vocabulary.upload.manual.choose_file') ?></span>
                         </span>
                         <span class="file-name" x-text="dictFileLabel"></span>
                     </label>
                 </div>
                 <p class="help" x-show="dictFormat === 'stardict'">
-                    Select the .ifo file. The .idx and .dict files must be in the same directory.
+                    <?= __e('vocabulary.upload.manual.stardict_help') ?>
                 </p>
                 <div class="field mt-3">
-                    <label class="label is-small">Dictionary Name</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.dict_name') ?></label>
                     <div class="control">
                         <input type="text" name="dict_name" class="input is-small"
-                               placeholder="Auto-generated from filename if empty">
+                               placeholder="<?= __e('vocabulary.upload.manual.dict_name_placeholder') ?>">
                     </div>
                 </div>
             </div>
@@ -515,12 +525,12 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <span class="file-icon">
                                 <?php echo IconHelper::render('upload', ['alt' => 'Upload']); ?>
                             </span>
-                            <span class="file-label">Choose a file...</span>
+                            <span class="file-label"><?= __e('vocabulary.upload.manual.choose_file') ?></span>
                         </span>
-                        <span class="file-name">No file selected</span>
+                        <span class="file-name"><?= __e('vocabulary.upload.manual.no_file_selected') ?></span>
                     </label>
                 </div>
-                <p class="help">CSV, TSV, or text file with one term per line</p>
+                <p class="help"><?= __e('vocabulary.upload.manual.csv_help') ?></p>
             </div>
 
             <!-- Paste Text -->
@@ -530,9 +540,9 @@ echo PageLayoutHelper::buildActionCard($actions);
                               data_info="Upload"
                               name="Upload"
                               rows="10"
-                              placeholder="One term per line, e.g.:&#10;Haus,house&#10;Katze,cat"></textarea>
+                              placeholder="<?= __e('vocabulary.upload.manual.paste_placeholder') ?>"></textarea>
                 </div>
-                <p class="help">One term per line, using the delimiter chosen below</p>
+                <p class="help"><?= __e('vocabulary.upload.manual.paste_help') ?></p>
             </div>
         </div>
     </div>
@@ -544,26 +554,24 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon">
                     <?php echo IconHelper::render('settings-2', ['alt' => 'Settings']); ?>
                 </span>
-                <span>Format Settings</span>
+                <span><?= __e('vocabulary.upload.manual.format_settings') ?></span>
             </span>
         </h4>
 
         <div class="notification is-light is-small mb-4">
-            Each line in your file should have fields separated by the
-            delimiter you choose below, e.g.:
-            <code>word,translation,romanization,sentence,tags</code>
+            <?= __('vocabulary.upload.manual.format_intro_html') ?>
         </div>
 
         <div class="columns">
             <div class="column is-half">
                 <div class="field">
-                    <label class="label is-small">Field Delimiter</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.field_delimiter') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="Tab" x-model="delimiter">
-                                <option value="c">Comma "," (CSV, LingQ)</option>
-                                <option value="t">Tab (TSV)</option>
-                                <option value="h">Hash "#" (direct input)</option>
+                                <option value="c"><?= __e('vocabulary.upload.manual.delim_comma') ?></option>
+                                <option value="t"><?= __e('vocabulary.upload.manual.delim_tab') ?></option>
+                                <option value="h"><?= __e('vocabulary.upload.manual.delim_hash') ?></option>
                             </select>
                         </div>
                     </div>
@@ -571,12 +579,12 @@ echo PageLayoutHelper::buildActionCard($actions);
             </div>
             <div class="column is-half">
                 <div class="field">
-                    <label class="label is-small">Ignore First Line</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.ignore_first') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="IgnFirstLine">
-                                <option value="0" selected>No</option>
-                                <option value="1">Yes (header row)</option>
+                                <option value="0" selected><?= __e('vocabulary.upload.manual.no') ?></option>
+                                <option value="1"><?= __e('vocabulary.upload.manual.yes_header') ?></option>
                             </select>
                         </div>
                     </div>
@@ -585,7 +593,7 @@ echo PageLayoutHelper::buildActionCard($actions);
         </div>
 
         <!-- Column Assignment -->
-        <h5 class="title is-6 mt-4 mb-3">Column Assignment</h5>
+        <h5 class="title is-6 mt-4 mb-3"><?= __e('vocabulary.upload.manual.column_assignment') ?></h5>
         <div class="columns is-multiline">
             <?php
             $columnDefaults = ['w', 't', 'x', 'x', 'x'];
@@ -596,7 +604,9 @@ echo PageLayoutHelper::buildActionCard($actions);
                 ?>
             <div class="column is-half-tablet">
                 <div class="field">
-                    <label class="label is-small">Column <?php echo $i; ?></label>
+                    <label class="label is-small">
+                        <?= __e('vocabulary.upload.manual.column_n', ['n' => $i]) ?>
+                    </label>
                     <div class="control">
                         <div class="select is-fullwidth is-small">
                             <select name="Col<?php echo $i; ?>"
@@ -605,7 +615,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                                 <option value="<?php echo $val; ?>"<?php
                                     echo ($val === $default) ? ' selected' : '';
                                 ?>>
-                                    <?php echo $label; ?>
+                                    <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
@@ -623,7 +633,9 @@ echo PageLayoutHelper::buildActionCard($actions);
         <div class="columns" x-show="extraCols >= <?php echo $i - 2; ?>" x-transition>
             <div class="column is-half-tablet">
                 <div class="field">
-                    <label class="label is-small">Column <?php echo $i; ?></label>
+                    <label class="label is-small">
+                        <?= __e('vocabulary.upload.manual.column_n', ['n' => $i]) ?>
+                    </label>
                     <div class="control">
                         <div class="select is-fullwidth is-small">
                             <select name="Col<?php echo $i; ?>"
@@ -632,7 +644,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                                 <option value="<?php echo $val; ?>"<?php
                                     echo ($val === 'x') ? ' selected' : '';
                                 ?>>
-                                    <?php echo $label; ?>
+                                    <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
@@ -651,7 +663,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon is-small">
                     <?php echo IconHelper::render('plus', ['alt' => 'Add']); ?>
                 </span>
-                <span>Add column</span>
+                <span><?= __e('vocabulary.upload.manual.add_column') ?></span>
             </button>
             <button type="button"
                     class="button is-small is-light"
@@ -660,13 +672,13 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon is-small">
                     <?php echo IconHelper::render('minus', ['alt' => 'Remove']); ?>
                 </span>
-                <span>Remove column</span>
+                <span><?= __e('vocabulary.upload.manual.remove_column') ?></span>
             </button>
         </div>
 
         <!-- Live Preview -->
         <div class="mt-3" x-show="hasPreview()" x-transition>
-            <h5 class="title is-6 mb-2">Preview</h5>
+            <h5 class="title is-6 mb-2"><?= __e('vocabulary.upload.manual.preview') ?></h5>
             <div class="table-container">
                 <table class="table is-bordered is-narrow is-size-7 is-fullwidth">
                     <thead>
@@ -686,7 +698,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 </table>
             </div>
             <p class="help has-text-grey">
-                Example of how your file will be parsed with the current settings.
+                <?= __e('vocabulary.upload.manual.preview_help') ?>
             </p>
         </div>
     </div>
@@ -698,20 +710,20 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon">
                     <?php echo IconHelper::render('settings-2', ['alt' => 'Settings']); ?>
                 </span>
-                <span>CSV Options</span>
+                <span><?= __e('vocabulary.upload.manual.csv_options') ?></span>
             </span>
         </h4>
 
         <div class="columns">
             <div class="column is-one-third">
                 <div class="field">
-                    <label class="label is-small">Delimiter</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.delimiter') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="dict_delimiter">
-                                <option value=",">Comma (,)</option>
-                                <option value="tab">Tab</option>
-                                <option value=";">Semicolon (;)</option>
+                                <option value=","><?= __e('vocabulary.upload.manual.delim_comma_short') ?></option>
+                                <option value="tab"><?= __e('vocabulary.upload.manual.delim_tab_short') ?></option>
+                                <option value=";"><?= __e('vocabulary.upload.manual.delim_semicolon') ?></option>
                             </select>
                         </div>
                     </div>
@@ -719,12 +731,12 @@ echo PageLayoutHelper::buildActionCard($actions);
             </div>
             <div class="column is-one-third">
                 <div class="field">
-                    <label class="label is-small">First Row</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.first_row') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="dict_has_header">
-                                <option value="yes">Header row</option>
-                                <option value="no">Data row</option>
+                                <option value="yes"><?= __e('vocabulary.upload.manual.header_row') ?></option>
+                                <option value="no"><?= __e('vocabulary.upload.manual.data_row') ?></option>
                             </select>
                         </div>
                     </div>
@@ -735,17 +747,17 @@ echo PageLayoutHelper::buildActionCard($actions);
         <div class="columns">
             <div class="column is-one-third">
                 <div class="field">
-                    <label class="label is-small">Term Column</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.term_column') ?></label>
                     <div class="control">
                         <input type="number" name="dict_term_column" class="input is-small"
                                value="0" min="0">
                     </div>
-                    <p class="help">0 = first column</p>
+                    <p class="help"><?= __e('vocabulary.upload.manual.first_col_help') ?></p>
                 </div>
             </div>
             <div class="column is-one-third">
                 <div class="field">
-                    <label class="label is-small">Definition Column</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.definition_column') ?></label>
                     <div class="control">
                         <input type="number" name="dict_definition_column" class="input is-small"
                                value="1" min="0">
@@ -762,37 +774,43 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon">
                     <?php echo IconHelper::render('package-import', ['alt' => 'Import']); ?>
                 </span>
-                <span>Import Options</span>
+                <span><?= __e('vocabulary.upload.manual.import_options') ?></span>
             </span>
         </h4>
 
         <div class="columns">
             <div class="column is-half">
                 <div class="field">
-                    <label class="label is-small">Import Mode</label>
+                    <label class="label is-small"><?= __e('vocabulary.upload.manual.import_mode') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="Over"
                                     data-action="update-import-mode"
                                     x-model="importMode"
                                     @change="updateImportMode($event)">
-                                <option value="0" title="Don't overwrite existing terms, import new terms">
-                                    Import only new terms
+                                <option value="0"
+                                        title="<?= __e('vocabulary.upload.manual.mode_only_new_title') ?>">
+                                    <?= __e('vocabulary.upload.manual.mode_only_new') ?>
                                 </option>
-                                <option value="1" title="Overwrite existing terms, import new terms">
-                                    Replace all fields
+                                <option value="1"
+                                        title="<?= __e('vocabulary.upload.manual.mode_replace_title') ?>">
+                                    <?= __e('vocabulary.upload.manual.mode_replace') ?>
                                 </option>
-                                <option value="2" title="Update only empty fields, import new terms">
-                                    Update empty fields
+                                <option value="2"
+                                        title="<?= __e('vocabulary.upload.manual.mode_update_empty_title') ?>">
+                                    <?= __e('vocabulary.upload.manual.mode_update_empty') ?>
                                 </option>
-                                <option value="3" title="Overwrite existing with new non-empty values, no new terms">
-                                    No new terms
+                                <option value="3"
+                                        title="<?= __e('vocabulary.upload.manual.mode_no_new_title') ?>">
+                                    <?= __e('vocabulary.upload.manual.mode_no_new') ?>
                                 </option>
-                                <option value="4" title="Add new translations to existing ones, import new terms">
-                                    Merge translation fields
+                                <option value="4"
+                                        title="<?= __e('vocabulary.upload.manual.mode_merge_title') ?>">
+                                    <?= __e('vocabulary.upload.manual.mode_merge') ?>
                                 </option>
-                                <option value="5" title="Add new translations to existing ones, no new terms">
-                                    Update existing translations
+                                <option value="5"
+                                        title="<?= __e('vocabulary.upload.manual.mode_update_existing_title') ?>">
+                                    <?= __e('vocabulary.upload.manual.mode_update_existing') ?>
                                 </option>
                             </select>
                         </div>
@@ -801,7 +819,9 @@ echo PageLayoutHelper::buildActionCard($actions);
 
                 <!-- Translation Delimiter (conditional) -->
                 <div class="field mt-3" x-show="showDelimiter" x-transition x-cloak>
-                    <label class="label is-small">Import Translation Delimiter</label>
+                    <label class="label is-small">
+                        <?= __e('vocabulary.upload.manual.translation_delimiter') ?>
+                    </label>
                     <div class="field has-addons">
                         <div class="control">
                             <input class="input is-small notempty"
@@ -811,7 +831,8 @@ echo PageLayoutHelper::buildActionCard($actions);
                                    value="<?php echo Settings::getWithDefault('set-term-translation-delimiters'); ?>" />
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger mt-1" title="Required">
+                            <span class="icon has-text-danger mt-1"
+                                  title="<?= __e('vocabulary.upload.manual.required') ?>">
                                 <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
@@ -821,7 +842,9 @@ echo PageLayoutHelper::buildActionCard($actions);
 
             <div class="column is-half">
                 <div class="field">
-                    <label class="label is-small">Status for All Uploaded Terms</label>
+                    <label class="label is-small">
+                        <?= __e('vocabulary.upload.manual.status_for_all') ?>
+                    </label>
                     <div class="field has-addons">
                         <div class="control is-expanded">
                             <div class="select is-fullwidth">
@@ -831,7 +854,8 @@ echo PageLayoutHelper::buildActionCard($actions);
                             </div>
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger mt-2" title="Required">
+                            <span class="icon has-text-danger mt-2"
+                                  title="<?= __e('vocabulary.upload.manual.required') ?>">
                                 <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
@@ -853,8 +877,12 @@ echo PageLayoutHelper::buildActionCard($actions);
                     </div>
                     <div class="level-item">
                         <div>
-                            <p class="has-text-weight-bold">A database backup may be advisable!</p>
-                            <p class="is-size-7">Please double-check everything before importing.</p>
+                            <p class="has-text-weight-bold">
+                                <?= __e('vocabulary.upload.manual.backup_advisable') ?>
+                            </p>
+                            <p class="is-size-7">
+                                <?= __e('vocabulary.upload.manual.double_check') ?>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -867,7 +895,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                             <span class="icon is-small">
                                 <?php echo IconHelper::render('database', ['alt' => 'Backup']); ?>
                             </span>
-                            <span>Backup</span>
+                            <span><?= __e('vocabulary.upload.manual.backup') ?></span>
                         </button>
                     </div>
                 </div>
@@ -882,7 +910,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon is-small">
                     <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                 </span>
-                <span>Import Terms</span>
+                <span><?= __e('vocabulary.upload.manual.import_terms') ?></span>
             </button>
         </div>
         <div class="control" x-show="isDictFile">
@@ -890,7 +918,7 @@ echo PageLayoutHelper::buildActionCard($actions);
                 <span class="icon is-small">
                     <?php echo IconHelper::render('upload', ['alt' => 'Import']); ?>
                 </span>
-                <span>Import Dictionary</span>
+                <span><?= __e('vocabulary.upload.manual.import_dictionary') ?></span>
             </button>
         </div>
     </div>
@@ -900,10 +928,7 @@ echo PageLayoutHelper::buildActionCard($actions);
 <article class="message is-light mt-5">
     <div class="message-body is-size-7">
         <p>
-            <strong>Note:</strong> Sentences should contain the term in curly brackets, e.g., "... {term} ...".
-            If not, such sentences can be automatically created later with the
-            "Set Term Sentences" action in the
-            <a href="/texts?query=&amp;page=1" class="has-text-link">Texts</a> screen.
+            <?= __('vocabulary.upload.manual.help_note_html') ?>
         </p>
     </div>
 </article>

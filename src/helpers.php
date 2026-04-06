@@ -55,8 +55,12 @@ if (!function_exists('__')) {
     function __(string $key, array $params = []): string
     {
         $container = Container::getInstance();
-        if ($container->has(Translator::class)) {
-            return $container->getTyped(Translator::class)->translate($key, $params);
+        try {
+            if ($container->has(Translator::class)) {
+                return $container->getTyped(Translator::class)->translate($key, $params);
+            }
+        } catch (\Throwable $e) {
+            // Translator unavailable (e.g. in unit tests with no locale path bound)
         }
         return $key;
     }

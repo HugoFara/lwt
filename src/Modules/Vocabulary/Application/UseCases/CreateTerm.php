@@ -156,7 +156,7 @@ class CreateTerm
 
             return [
                 'id' => $term->id()->toInt(),
-                'message' => 'Term saved',
+                'message' => __('vocabulary.flash.term_saved'),
                 'success' => true,
                 'textlc' => $term->textLowercase(),
                 'text' => $term->text()
@@ -164,7 +164,7 @@ class CreateTerm
         } catch (\InvalidArgumentException $e) {
             return [
                 'id' => 0,
-                'message' => 'Error: ' . $e->getMessage(),
+                'message' => __('vocabulary.flash.error_prefix', ['message' => $e->getMessage()]),
                 'success' => false,
                 'textlc' => '',
                 'text' => ''
@@ -176,7 +176,7 @@ class CreateTerm
             }
             return [
                 'id' => 0,
-                'message' => 'Error: ' . $message,
+                'message' => __('vocabulary.flash.error_prefix', ['message' => $message]),
                 'success' => false,
                 'textlc' => '',
                 'text' => ''

@@ -101,19 +101,27 @@ $configJson = json_encode([
     <div class="steps is-small mb-5">
         <div class="step-item is-completed is-success">
             <div class="step-marker">1</div>
-            <div class="step-details"><p class="step-title">Feed URL</p></div>
+            <div class="step-details">
+                <p class="step-title"><?php echo __e('feed.wizard.common.step_feed_url'); ?></p>
+            </div>
         </div>
         <div class="step-item is-completed is-success">
             <div class="step-marker">2</div>
-            <div class="step-details"><p class="step-title">Select Article</p></div>
+            <div class="step-details">
+                <p class="step-title"><?php echo __e('feed.wizard.common.step_select_article'); ?></p>
+            </div>
         </div>
         <div class="step-item is-completed is-success">
             <div class="step-marker">3</div>
-            <div class="step-details"><p class="step-title">Filter Text</p></div>
+            <div class="step-details">
+                <p class="step-title"><?php echo __e('feed.wizard.common.step_filter_text'); ?></p>
+            </div>
         </div>
         <div class="step-item is-active is-primary">
             <div class="step-marker">4</div>
-            <div class="step-details"><p class="step-title">Save</p></div>
+            <div class="step-details">
+                <p class="step-title"><?php echo __e('feed.wizard.common.step_save'); ?></p>
+            </div>
         </div>
     </div>
 
@@ -123,14 +131,14 @@ $configJson = json_encode([
             <!-- Language -->
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Language</label>
+                    <label class="label"><?php echo __e('feed.wizard.step4.language'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
                         <div class="control is-expanded">
                             <div class="select is-fullwidth">
                                 <select name="NfLgID" x-model="languageId" required class="notempty">
-                                    <option value="">[Select...]</option>
+                                    <option value=""><?php echo __e('feed.wizard.step4.select_placeholder'); ?></option>
                                     <template x-for="lang in languages" :key="lang.id">
                                         <option :value="lang.id" x-text="lang.name"></option>
                                     </template>
@@ -138,8 +146,11 @@ $configJson = json_encode([
                             </div>
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                            <span class="icon has-text-danger"
+                                  title="<?php echo __e('feed.wizard.common.field_required'); ?>">
+                                <?php
+                                echo IconHelper::render('asterisk', ['alt' => __('feed.wizard.common.required')]);
+                                ?>
                             </span>
                         </div>
                     </div>
@@ -149,7 +160,7 @@ $configJson = json_encode([
             <!-- Name -->
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Name</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.name'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -158,8 +169,11 @@ $configJson = json_encode([
                                    x-model="feedName" required />
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                            <span class="icon has-text-danger"
+                                  title="<?php echo __e('feed.wizard.common.field_required'); ?>">
+                                <?php
+                                echo IconHelper::render('asterisk', ['alt' => __('feed.wizard.common.required')]);
+                                ?>
                             </span>
                         </div>
                     </div>
@@ -169,7 +183,7 @@ $configJson = json_encode([
             <!-- Newsfeed URL -->
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Newsfeed URL</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.newsfeed_url'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -178,8 +192,11 @@ $configJson = json_encode([
                                    x-model="sourceUri" required />
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                            <span class="icon has-text-danger"
+                                  title="<?php echo __e('feed.wizard.common.field_required'); ?>">
+                                <?php
+                                echo IconHelper::render('asterisk', ['alt' => __('feed.wizard.common.required')]);
+                                ?>
                             </span>
                         </div>
                     </div>
@@ -189,7 +206,7 @@ $configJson = json_encode([
             <!-- Article Section -->
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Article Section</label>
+                    <label class="label"><?php echo __e('feed.wizard.common.article_section'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field has-addons">
@@ -198,8 +215,11 @@ $configJson = json_encode([
                                    x-model="articleSection" required />
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
-                                <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                            <span class="icon has-text-danger"
+                                  title="<?php echo __e('feed.wizard.common.field_required'); ?>">
+                                <?php
+                                echo IconHelper::render('asterisk', ['alt' => __('feed.wizard.common.required')]);
+                                ?>
                             </span>
                         </div>
                     </div>
@@ -209,7 +229,7 @@ $configJson = json_encode([
             <!-- Filter Tags -->
             <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                    <label class="label">Filter Tags</label>
+                    <label class="label"><?php echo __e('feed.wizard.step4.filter_tags'); ?></label>
                 </div>
                 <div class="field-body">
                     <div class="field">
@@ -224,7 +244,7 @@ $configJson = json_encode([
 
         <!-- Options Box -->
         <div class="box">
-            <h2 class="subtitle is-5 mb-4">Options</h2>
+            <h2 class="subtitle is-5 mb-4"><?php echo __e('feed.wizard.step4.options'); ?></h2>
 
             <div class="columns">
                 <div class="column">
@@ -232,16 +252,16 @@ $configJson = json_encode([
                     <div class="field">
                         <label class="checkbox">
                             <input type="checkbox" name="edit_text" x-model="editText" />
-                            Edit Text
+                            <?php echo __e('feed.wizard.step4.edit_text'); ?>
                         </label>
-                        <p class="help">Show edit form before saving each text</p>
+                        <p class="help"><?php echo __e('feed.wizard.step4.edit_text_help'); ?></p>
                     </div>
 
                     <!-- Max Links -->
                     <div class="field">
                         <label class="checkbox">
                             <input type="checkbox" name="c_max_links" x-model="maxLinksEnabled" />
-                            Max. Links:
+                            <?php echo __e('feed.wizard.step4.max_links'); ?>
                         </label>
                         <div class="control mt-1">
                             <input class="input is-small" type="number" name="max_links"
@@ -256,7 +276,7 @@ $configJson = json_encode([
                     <div class="field">
                         <label class="checkbox">
                             <input type="checkbox" name="c_max_texts" x-model="maxTextsEnabled" />
-                            Max. Texts:
+                            <?php echo __e('feed.wizard.step4.max_texts'); ?>
                         </label>
                         <div class="control mt-1">
                             <input class="input is-small" type="number" name="max_texts"
@@ -273,7 +293,7 @@ $configJson = json_encode([
                     <div class="field">
                         <label class="checkbox">
                             <input type="checkbox" name="c_autoupdate" x-model="autoUpdateEnabled" />
-                            Auto Update Interval:
+                            <?php echo __e('feed.wizard.step4.auto_update_interval'); ?>
                         </label>
                         <div class="field has-addons mt-1">
                             <div class="control">
@@ -287,9 +307,15 @@ $configJson = json_encode([
                                 <div class="select is-small">
                                     <select name="autoupdate_unit" x-model="autoUpdateUnit"
                                             :disabled="!autoUpdateEnabled">
-                                        <option value="h">Hour(s)</option>
-                                        <option value="d">Day(s)</option>
-                                        <option value="w">Week(s)</option>
+                                        <option value="h">
+                                            <?php echo __e('feed.wizard.step1.opt_unit_hours'); ?>
+                                        </option>
+                                        <option value="d">
+                                            <?php echo __e('feed.wizard.step1.opt_unit_days'); ?>
+                                        </option>
+                                        <option value="w">
+                                            <?php echo __e('feed.wizard.step1.opt_unit_weeks'); ?>
+                                        </option>
                                     </select>
                                 </div>
                             </div>
@@ -300,7 +326,7 @@ $configJson = json_encode([
                     <div class="field">
                         <label class="checkbox">
                             <input type="checkbox" name="c_charset" x-model="charsetEnabled" />
-                            Charset:
+                            <?php echo __e('feed.wizard.step4.charset'); ?>
                         </label>
                         <div class="control mt-1">
                             <input class="input is-small" type="text" name="charset"
@@ -315,7 +341,7 @@ $configJson = json_encode([
                     <div class="field">
                         <label class="checkbox">
                             <input type="checkbox" name="c_tag" x-model="tagEnabled" />
-                            Tag:
+                            <?php echo __e('feed.wizard.step4.tag'); ?>
                         </label>
                         <div class="control mt-1">
                             <input class="input is-small" type="text" name="tag"
@@ -341,20 +367,20 @@ $configJson = json_encode([
         <div class="field is-grouped is-grouped-right mt-5">
             <div class="control">
                 <button type="button" class="button is-danger is-outlined" @click="cancel">
-                    Cancel
+                    <?php echo __e('feed.wizard.common.cancel'); ?>
                 </button>
             </div>
             <div class="control">
                 <button type="button" class="button" @click="goBack">
                     <span class="icon is-small">
-                        <?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?>
+                        <?php echo IconHelper::render('arrow-left', ['alt' => __('feed.wizard.common.back')]); ?>
                     </span>
-                    <span>Back</span>
+                    <span><?php echo __e('feed.wizard.common.back'); ?></span>
                 </button>
             </div>
             <div class="control">
                 <button type="submit" class="button is-primary">
-                    <span x-text="submitLabel">Save</span>
+                    <span x-text="submitLabel"><?php echo __e('feed.wizard.step4.save'); ?></span>
                 </button>
             </div>
         </div>

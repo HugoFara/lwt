@@ -76,13 +76,13 @@ foreach ($texts as $text) :
                            name="feed[<?php echo $count; ?>][TxTitle]"
                            value="<?php echo htmlspecialchars($text['TxTitle'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="200"
-                           placeholder="Title"
+                           placeholder="<?php echo __e('feed.edit_text_form_title_placeholder'); ?>"
                            :disabled="!isSelected"
                            required />
                 </div>
                 <div class="control">
-                    <span class="icon has-text-danger" title="Field must not be empty">
-                        <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
+                    <span class="icon has-text-danger" title="<?php echo __e('feed.edit_text_form_field_required'); ?>">
+                        <?php echo IconHelper::render('asterisk', ['alt' => __('feed.edit_text_form_required_alt')]); ?>
                     </span>
                 </div>
             </div>
@@ -93,7 +93,7 @@ foreach ($texts as $text) :
         <!-- Language -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label">Language</label>
+                <label class="label"><?php echo __e('feed.edit_text_form_language'); ?></label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -120,7 +120,7 @@ foreach ($texts as $text) :
         <!-- Text Content -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label">Text</label>
+                <label class="label"><?php echo __e('feed.edit_text_form_text'); ?></label>
             </div>
             <div class="field-body">
                 <div class="field has-addons">
@@ -145,7 +145,7 @@ foreach ($texts as $text) :
         <!-- Source URI -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label">Source URI</label>
+                <label class="label"><?php echo __e('feed.edit_text_form_source_uri'); ?></label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -164,7 +164,7 @@ foreach ($texts as $text) :
         <!-- Tags -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label">Tags</label>
+                <label class="label"><?php echo __e('feed.edit_text_form_tags'); ?></label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -188,7 +188,7 @@ foreach ($texts as $text) :
         <!-- Audio URI -->
         <div class="field is-horizontal">
             <div class="field-label is-normal">
-                <label class="label">Audio URI</label>
+                <label class="label"><?php echo __e('feed.edit_text_form_audio_uri'); ?></label>
             </div>
             <div class="field-body">
                 <div class="field">
@@ -198,7 +198,7 @@ foreach ($texts as $text) :
                                name="feed[<?php echo $count; ?>][TxAudioURI]"
                                value="<?php echo htmlspecialchars($text['TxAudioURI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                maxlength="200"
-                               placeholder="Path to audio file or URL" />
+                               placeholder="<?php echo __e('feed.edit_text_form_audio_placeholder'); ?>" />
                     </div>
                 </div>
             </div>
@@ -208,9 +208,9 @@ foreach ($texts as $text) :
     <!-- Collapsed state indicator -->
     <div x-show="!isSelected" x-transition class="has-text-grey-light is-italic">
         <span class="icon is-small">
-            <?php echo IconHelper::render('eye-off', ['alt' => 'Hidden']); ?>
+            <?php echo IconHelper::render('eye-off', ['alt' => __('feed.edit_text_form_hidden_alt')]); ?>
         </span>
-        Text deselected - check the box to include
+        <?php echo __e('feed.edit_text_form_deselected'); ?>
     </div>
 </div>
     <?php

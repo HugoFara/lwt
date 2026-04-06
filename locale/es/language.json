@@ -7,7 +7,6 @@
     "export_template_tag": "Plantilla de exportación",
     "export_template_title": "Plantilla de exportación personalizada disponible",
     "export_template_short_title": "Plantilla de exportación",
-
     "list.all_languages": "Todos los idiomas",
     "list.col_language": "Idioma",
     "list.col_texts": "Textos",
@@ -21,18 +20,15 @@
     "list.edit": "Editar",
     "list.set_current": "Establecer como actual",
     "list.delete": "Eliminar",
-
     "delete.confirm_title": "Confirmar eliminación",
     "delete.confirm_question": "¿Seguro que quieres eliminar el idioma",
     "delete.warning": "Esta acción no se puede deshacer.",
     "delete.button": "Eliminar",
     "delete.cancel": "Cancelar",
     "delete.close": "cerrar",
-
     "wizard.l2_label": "El idioma que quieres estudiar",
     "wizard.l1_label": "Tu idioma materno",
     "wizard.choose_placeholder": "[Elegir...]",
-
     "form.new_title": "Nuevo idioma",
     "form.edit_title": "Editar idioma",
     "form.help": "Ayuda",
@@ -44,7 +40,6 @@
     "form.save_changes": "Guardar cambios",
     "form.cancel": "Cancelar",
     "form.advanced_settings": "Opciones avanzadas",
-
     "form.section_dictionaries": "Diccionarios y traducción",
     "form.local_dictionaries": "Diccionarios locales",
     "form.import": "Importar",
@@ -64,7 +59,6 @@
     "form.lookup_mode_local_first": "Local primero, en línea como respaldo",
     "form.lookup_mode_local_only": "Solo diccionarios locales",
     "form.lookup_mode_combined": "Combinado (mostrar ambos)",
-
     "form.dict1_uri": "URI del diccionario 1",
     "form.dict2_uri": "URI del diccionario 2",
     "form.required_marker_title": "Obligatorio",
@@ -76,16 +70,13 @@
     "form.translator_glosbe": "API de Glosbe",
     "form.translator_uri_placeholder": "URI del traductor",
     "form.api_key": "Clave de API",
-
     "form.source_lang_code": "Código del idioma de origen",
     "form.source_lang_code_help": "Código ISO del idioma que estás aprendiendo",
     "form.target_lang_code": "Código del idioma de destino",
     "form.target_lang_code_help": "Código ISO de tu idioma materno",
-
     "form.section_display": "Opciones de visualización",
     "form.text_size": "Tamaño del texto (%)",
     "form.text_size_example": "El texto tendrá este tamaño",
-
     "form.section_text_processing": "Procesamiento de texto",
     "form.parser_type": "Tipo de analizador",
     "form.parser_unavailable": " (no disponible)",
@@ -96,7 +87,6 @@
     "form.regexp_word_characters": "RegExp de caracteres de palabra",
     "form.regexp_alt_regexp": "Expresiones regulares (demostración)",
     "form.regexp_alt_mecab": "MeCab (recomendado)",
-
     "form.split_each_char": "Tratar cada carácter como una palabra",
     "form.split_each_char_help": "Para chino, japonés, etc.",
     "form.remove_spaces": "Eliminar espacios",
@@ -105,7 +95,6 @@
     "form.right_to_left_help": "Para árabe, hebreo, persa, urdu, etc.",
     "form.show_romanization": "Mostrar romanización",
     "form.show_romanization_help": "Recomendado para chino, japonés, etc.",
-
     "form.section_export_tts": "Exportación y texto a voz",
     "form.export_template": "Plantilla de exportación",
     "form.export_template_help": "Plantilla para exportar términos (por ejemplo, a Anki)",
@@ -117,6 +106,29 @@
     "form.test_voice_api": "¡Probar!",
     "form.check": "Comprobar",
     "form.test": "Probar",
-
-    "errors.language_not_found": "Idioma no encontrado."
+    "errors.language_not_found": "Idioma no encontrado.",
+    "errors.name_required": "El nombre del idioma es obligatorio",
+    "errors.name_too_long": "El nombre del idioma debe tener 40 caracteres o menos",
+    "errors.name_duplicate": "Ya existe un idioma con este nombre",
+    "errors.split_sentences_required": "Se requieren caracteres de separación de oraciones",
+    "errors.word_chars_required": "Se requiere el patrón de caracteres de palabra",
+    "errors.text_size_range": "El tamaño del texto debe estar entre 50 y 300",
+    "errors.tts_voice_api_invalid": "La API de voz TTS debe ser JSON válido",
+    "errors.load_failed": "Error al cargar el idioma",
+    "errors.save_failed": "Error al guardar el idioma",
+    "errors.create_failed": "Error al crear el idioma",
+    "errors.update_failed": "Error al actualizar el idioma",
+    "errors.fix_validation": "Por favor, corrige los errores de validación",
+    "errors.id_missing": "Falta el ID del idioma",
+    "list.set_current_success": "\"{name}\" es ahora el idioma actual",
+    "list.set_current_failed": "Error al establecer el idioma predeterminado",
+    "list.cannot_delete": "No se puede eliminar: el idioma tiene textos, palabras o feeds",
+    "list.delete_success": "\"{name}\" ha sido eliminado",
+    "list.delete_failed": "Error al eliminar el idioma",
+    "list.reparsing": "Reanalizando textos para \"{name}\"...",
+    "list.reparse_success": "Los textos de \"{name}\" han sido reanalizados",
+    "list.reparse_failed": "Error al reanalizar los textos",
+    "flash.updated_with_reparse": "Actualizado: 1 / Textos reanalizados: {count}",
+    "flash.updated_no_reparse": "Actualizado: 1 / No es necesario reanalizar",
+    "flash.refresh_summary": "Frases eliminadas: {sentencesDeleted} / Elementos de texto eliminados: {textItemsDeleted} / Frases añadidas: {sentencesAdded} / Elementos de texto añadidos: {textItemsAdded}"
 }

@@ -97,7 +97,7 @@ class ImportEpub
         if (!isset($uploadedFile['tmp_name']) || $uploadedFile['tmp_name'] === '') {
             return [
                 'success' => false,
-                'message' => 'No file uploaded',
+                'message' => __('book.flash.no_file_uploaded'),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -111,8 +111,7 @@ class ImportEpub
         if (!extension_loaded('zip')) {
             return [
                 'success' => false,
-                'message' => 'EPUB import requires the PHP ZIP extension. '
-                    . 'Please install php-zip to enable EPUB support.',
+                'message' => __('book.flash.zip_required'),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -124,7 +123,7 @@ class ImportEpub
         if (!$this->epubParser->isValidEpub($filePath, $originalName)) {
             return [
                 'success' => false,
-                'message' => 'Invalid EPUB file. Please ensure the file is a valid EPUB format.',
+                'message' => __('book.flash.invalid_epub'),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -137,7 +136,7 @@ class ImportEpub
         } catch (\Throwable $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to parse EPUB: ' . $e->getMessage(),
+                'message' => __('book.flash.parse_failed', ['error' => $e->getMessage()]),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -150,7 +149,7 @@ class ImportEpub
         if (empty($chapters)) {
             return [
                 'success' => false,
-                'message' => 'No readable chapters found in EPUB',
+                'message' => __('book.flash.no_chapters'),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -161,7 +160,7 @@ class ImportEpub
         if ($this->bookRepository->existsBySourceHash($metadata['sourceHash'], $userId)) {
             return [
                 'success' => false,
-                'message' => 'This book has already been imported',
+                'message' => __('book.flash.already_imported'),
                 'bookId' => null,
                 'chapterCount' => 0,
                 'textIds' => [],
@@ -212,7 +211,7 @@ class ImportEpub
 
             return [
                 'success' => true,
-                'message' => "Imported '{$book->title()}' with " . count($textIds) . " chapters",
+                'message' => __('book.flash.imported', ['title' => $book->title(), 'count' => count($textIds)]),
                 'bookId' => $bookId,
                 'chapterCount' => count($textIds),
                 'textIds' => $textIds,

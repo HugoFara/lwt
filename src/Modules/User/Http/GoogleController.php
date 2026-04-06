@@ -94,12 +94,12 @@ class GoogleController extends BaseController
 
         // Handle user cancellation or errors from Google
         if (!empty($error)) {
-            $_SESSION['auth_error'] = 'Google login was cancelled.';
+            $_SESSION['auth_error'] = __('user.flash.google_cancelled');
             $this->redirect('/login');
         }
 
         if (empty($code)) {
-            $_SESSION['auth_error'] = 'Invalid response from Google.';
+            $_SESSION['auth_error'] = __('user.flash.google_invalid_response');
             $this->redirect('/login');
         }
 
@@ -111,7 +111,7 @@ class GoogleController extends BaseController
 
         if ($result['success'] && $result['user'] !== null) {
             // Session already regenerated in service
-            $_SESSION['auth_success'] = 'Welcome! You are now logged in with Google.';
+            $_SESSION['auth_success'] = __('user.flash.google_welcome');
         }
 
         $this->redirect($result['redirect']);
@@ -187,10 +187,10 @@ class GoogleController extends BaseController
             }
             $_SESSION['LWT_USER_ID'] = $user->id()->toInt();
 
-            $_SESSION['auth_success'] = 'Google account linked successfully!';
+            $_SESSION['auth_success'] = __('user.flash.google_linked');
             $this->redirect('/');
         } catch (AuthException $e) {
-            $_SESSION['auth_error'] = 'Invalid password. Please try again.';
+            $_SESSION['auth_error'] = __('user.flash.google_invalid_password');
             $this->redirect('/google/link-confirm');
         }
     }

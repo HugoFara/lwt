@@ -94,12 +94,12 @@ class MicrosoftController extends BaseController
 
         // Handle user cancellation or errors from Microsoft
         if (!empty($error)) {
-            $_SESSION['auth_error'] = 'Microsoft login was cancelled.';
+            $_SESSION['auth_error'] = __('user.flash.microsoft_cancelled');
             $this->redirect('/login');
         }
 
         if (empty($code)) {
-            $_SESSION['auth_error'] = 'Invalid response from Microsoft.';
+            $_SESSION['auth_error'] = __('user.flash.microsoft_invalid_response');
             $this->redirect('/login');
         }
 
@@ -111,7 +111,7 @@ class MicrosoftController extends BaseController
 
         if ($result['success'] && $result['user'] !== null) {
             // Session already regenerated in service
-            $_SESSION['auth_success'] = 'Welcome! You are now logged in with Microsoft.';
+            $_SESSION['auth_success'] = __('user.flash.microsoft_welcome');
         }
 
         $this->redirect($result['redirect']);
@@ -187,10 +187,10 @@ class MicrosoftController extends BaseController
             }
             $_SESSION['LWT_USER_ID'] = $user->id()->toInt();
 
-            $_SESSION['auth_success'] = 'Microsoft account linked successfully!';
+            $_SESSION['auth_success'] = __('user.flash.microsoft_linked');
             $this->redirect('/');
         } catch (AuthException $e) {
-            $_SESSION['auth_error'] = 'Invalid password. Please try again.';
+            $_SESSION['auth_error'] = __('user.flash.microsoft_invalid_password');
             $this->redirect('/microsoft/link-confirm');
         }
     }

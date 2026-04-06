@@ -62,6 +62,8 @@
     "finished.nothing": "Nothing to review here!",
     "finished.tomorrow_one": "review",
     "finished.tomorrow_many": "reviews",
+    "finished.tomorrow_count_one": "Tomorrow you'll find here {count} review!",
+    "finished.tomorrow_count_other": "Tomorrow you'll find here {count} reviews!",
 
     "table.no_words": "No words available for table review.",
     "table.col_edit": "Edit",

@@ -207,7 +207,7 @@ class WordListApiHandler
     public function bulkAction(array $wordIds, string $action, ?string $data = null): array
     {
         if (empty($wordIds)) {
-            return ['success' => false, 'count' => 0, 'message' => 'No terms selected'];
+            return ['success' => false, 'count' => 0, 'message' => __('vocabulary.flash.no_terms_selected')];
         }
 
         $listService = $this->getListService();
@@ -215,7 +215,7 @@ class WordListApiHandler
         // Sanitize word IDs
         $wordIds = array_filter(array_map('intval', $wordIds));
         if (empty($wordIds)) {
-            return ['success' => false, 'count' => 0, 'message' => 'Invalid term IDs'];
+            return ['success' => false, 'count' => 0, 'message' => __('vocabulary.flash.invalid_term_ids')];
         }
 
         $count = count($wordIds);
@@ -262,7 +262,7 @@ class WordListApiHandler
 
             case 'addtag':
                 if ($data === null || $data === '') {
-                    return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
+                    return ['success' => false, 'count' => 0, 'message' => __('vocabulary.flash.tag_name_required')];
                 }
                 $result = TagsFacade::addTagToWords($data, $wordIds);
                 if ($result['error'] !== null) {
@@ -273,7 +273,7 @@ class WordListApiHandler
 
             case 'deltag':
                 if ($data === null || $data === '') {
-                    return ['success' => false, 'count' => 0, 'message' => 'Tag name required'];
+                    return ['success' => false, 'count' => 0, 'message' => __('vocabulary.flash.tag_name_required')];
                 }
                 $result = TagsFacade::removeTagFromWords($data, $wordIds);
                 if ($result['error'] !== null) {
@@ -283,7 +283,11 @@ class WordListApiHandler
                 break;
 
             default:
-                return ['success' => false, 'count' => 0, 'message' => 'Unknown action: ' . $action];
+                return [
+                    'success' => false,
+                    'count' => 0,
+                    'message' => __('vocabulary.flash.unknown_action', ['action' => $action]),
+                ];
         }
 
         return ['success' => true, 'count' => $count, 'message' => $message];
@@ -325,7 +329,7 @@ class WordListApiHandler
         $wordIds = $listService->getFilteredWordIds($textId, $whLang, $whStat, $whQuery, $whTag, $filterBindings);
 
         if (empty($wordIds)) {
-            return ['success' => false, 'count' => 0, 'message' => 'No terms match the filter'];
+            return ['success' => false, 'count' => 0, 'message' => __('vocabulary.flash.no_terms_match_filter')];
         }
 
         // Remove 'all' suffix from action if present

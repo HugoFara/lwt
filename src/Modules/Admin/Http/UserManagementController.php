@@ -96,7 +96,7 @@ class UserManagementController extends BaseController
             );
 
             if ($result['success']) {
-                $this->redirect('/admin/users?message=User+created+successfully')->send();
+                $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.created')))->send();
                 return;
             }
 
@@ -113,7 +113,7 @@ class UserManagementController extends BaseController
             $currentAdminId = Globals::getCurrentUserId();
 
             $this->render('Create User', true);
-            $this->message('Error: ' . implode('. ', $errors), false);
+            $this->message(__('admin.users.flash.error_prefix', ['message' => implode('. ', $errors)]), false);
             include $this->viewPath . 'form.php';
             $this->endRender();
             return;
@@ -152,7 +152,7 @@ class UserManagementController extends BaseController
             );
 
             if ($result['success']) {
-                $this->redirect('/admin/users?message=User+updated+successfully')->send();
+                $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.updated')))->send();
                 return;
             }
 
@@ -160,7 +160,9 @@ class UserManagementController extends BaseController
             $user = $this->userRepository->find($userId);
 
             if ($user === null) {
-                $this->redirect('/admin/users?message=Error:+User+not+found')->send();
+                $this->redirect(
+                    '/admin/users?message=' . urlencode(__('admin.users.flash.not_found'))
+                )->send();
                 return;
             }
 
@@ -173,7 +175,7 @@ class UserManagementController extends BaseController
             $isEdit = true;
 
             $this->render('Edit User', true);
-            $this->message('Error: ' . implode('. ', $errors), false);
+            $this->message(__('admin.users.flash.error_prefix', ['message' => implode('. ', $errors)]), false);
             include $this->viewPath . 'form.php';
             $this->endRender();
             return;
@@ -181,7 +183,7 @@ class UserManagementController extends BaseController
 
         $user = $this->userRepository->find($userId);
         if ($user === null) {
-            $this->redirect('/admin/users?message=Error:+User+not+found')->send();
+            $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.not_found')))->send();
             return;
         }
 
@@ -210,10 +212,12 @@ class UserManagementController extends BaseController
         $result = $this->deleteUser->execute($userId, $currentAdminId);
 
         if ($result['success']) {
-            $this->redirect('/admin/users?message=User+deleted+successfully')->send();
+            $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.deleted')))->send();
         } else {
-            $error = $result['error'] ?? 'Unknown error';
-            $this->redirect('/admin/users?message=Error:+' . urlencode($error))->send();
+            $error = $result['error'] ?? __('admin.users.flash.unknown_error');
+            $this->redirect(
+                '/admin/users?message=' . urlencode(__('admin.users.flash.error_prefix', ['message' => $error]))
+            )->send();
         }
     }
 

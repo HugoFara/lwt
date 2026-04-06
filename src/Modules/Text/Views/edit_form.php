@@ -127,9 +127,9 @@ if (!$isNew) {
                         @click="open = !open">
                     <h4 class="title is-6 mb-0 is-flex is-align-items-center">
                         <span class="icon mr-2">
-                            <?php echo IconHelper::render('lightbulb', ['alt' => 'Tips']); ?>
+                            <?php echo IconHelper::render('lightbulb', ['alt' => __('text.new.where_to_find')]); ?>
                         </span>
-                        Where to find texts?
+                        <?= __e('text.new.where_to_find') ?>
                     </h4>
                     <span class="icon">
                         <i
@@ -140,97 +140,43 @@ if (!$isNew) {
                 </header>
 
                 <div x-show="open" x-transition x-cloak class="mt-4 content is-small">
-                    <p>Here are free sources for reading material in many languages:</p>
+                    <p><?php echo __('text.edit.tips.intro'); ?></p>
 
-                    <h5 class="mb-2">Literature &amp; Public Domain</h5>
+                    <h5 class="mb-2"><?php echo __('text.edit.tips.literature_heading'); ?></h5>
                     <ul>
-                        <li>
-                            <a href="https://www.gutenberg.org/" target="_blank" rel="noopener">Project Gutenberg</a>
-                            &mdash; 75,000+ free e-books in 60+ languages (plain text, EPUB)
-                        </li>
-                        <li>
-                            <a href="https://wikisource.org/" target="_blank" rel="noopener">Wikisource</a>
-                            &mdash; Public domain texts in 70+ languages (novels, speeches, historical docs)
-                        </li>
+                        <li><?php echo __('text.edit.tips.gutenberg'); ?></li>
+                        <li><?php echo __('text.edit.tips.wikisource'); ?></li>
                     </ul>
 
-                    <h5 class="mb-2">Simplified News (great for learners)</h5>
+                    <h5 class="mb-2"><?php echo __('text.edit.tips.news_heading'); ?></h5>
                     <ul>
-                        <li>
-                            <a href="https://www3.nhk.or.jp/news/easy/" target="_blank" rel="noopener">
-                                NHK News Web Easy
-                            </a>
-                            &mdash; Simplified Japanese news with furigana
-                        </li>
-                        <li>
-                            <a
-                                href="https://www.dw.com/de/deutsch-lernen/nachrichten/s-8030"
-                                target="_blank"
-                                rel="noopener">DW Langsam gesprochene Nachrichten</a>
-                            &mdash; Slow German news with transcripts
-                        </li>
-                        <li>
-                            <?php
-                            $rfiUrl = 'https://savoirs.rfi.fr/fr/apprendre-enseigner/langue-francaise/'
-                                . 'journal-en-francais-facile';
-                            ?>
-                            <a href="<?php echo $rfiUrl; ?>" target="_blank" rel="noopener">
-                                RFI Journal en fran&ccedil;ais facile
-                            </a>
-                            &mdash; Simple French news with transcripts
-                        </li>
-                        <li>
-                            <a href="https://learningenglish.voanews.com/" target="_blank" rel="noopener">
-                                VOA Learning English
-                            </a>
-                            &mdash; Slow-spoken English news (also has
-                            <a href="https://learningenglish.voanews.com/rssfeeds" target="_blank" rel="noopener">
-                                RSS feeds
-                            </a>)
-                        </li>
+                        <li><?php echo __('text.edit.tips.nhk'); ?></li>
+                        <li><?php echo __('text.edit.tips.dw'); ?></li>
+                        <li><?php echo __('text.edit.tips.rfi'); ?></li>
+                        <li><?php echo __('text.edit.tips.voa'); ?></li>
                     </ul>
 
-                    <h5 class="mb-2">Subtitles &amp; Sentences</h5>
+                    <h5 class="mb-2"><?php echo __('text.edit.tips.subtitles_heading'); ?></h5>
                     <ul>
-                        <li>
-                            <a href="https://www.opensubtitles.org/" target="_blank" rel="noopener">OpenSubtitles</a>
-                            &mdash; Movie/TV subtitles in 100+ languages (SRT files can be imported directly)
-                        </li>
-                        <li>
-                            <a href="https://tatoeba.org/" target="_blank" rel="noopener">Tatoeba</a>
-                            &mdash; Community-curated sentences with translations in 400+ languages
-                        </li>
+                        <li><?php echo __('text.edit.tips.opensubtitles'); ?></li>
+                        <li><?php echo __('text.edit.tips.tatoeba'); ?></li>
                     </ul>
 
-                    <h5 class="mb-2">Other Sources</h5>
+                    <h5 class="mb-2"><?php echo __('text.edit.tips.other_heading'); ?></h5>
                     <ul>
-                        <li>
-                            <a href="https://simple.wikipedia.org/" target="_blank" rel="noopener">
-                                Simple English Wikipedia
-                            </a>
-                            &mdash; Articles in simplified English
-                        </li>
-                        <li>
-                            <strong>RSS feeds</strong> &mdash; LWT can import from newsfeeds directly via
-                            <a href="/feeds">Newsfeeds</a>. Most newspapers offer RSS feeds.
-                        </li>
-                        <li>
-                            <strong>EPUB books</strong> &mdash; Import e-books via
-                            <a href="/book/import">Import EPUB</a>
-                        </li>
+                        <li><?php echo __('text.edit.tips.simple_wiki'); ?></li>
+                        <li><?php echo __('text.edit.tips.rss'); ?></li>
+                        <li><?php echo __('text.edit.tips.epub'); ?></li>
                     </ul>
 
-                    <p class="has-text-grey mt-3">
-                        Tip: Use <strong>Import from URL &rarr; Web Page</strong> above to fetch text directly
-                        from any of these sites. Just paste the article URL and click &ldquo;Fetch Content&rdquo;.
-                    </p>
+                    <p class="has-text-grey mt-3"><?php echo __('text.edit.tips.fetch_tip'); ?></p>
                 </div>
             </div>
         </div>
 
         <!-- ═══ STEP 1: Choose Source ═══ -->
         <div x-show="step === 1" x-transition>
-            <label class="label is-medium mb-3">How do you want to add your text?</label>
+            <label class="label is-medium mb-3"><?= __e('text.new.how_to_add') ?></label>
 
             <!-- Source cards -->
             <div
@@ -242,9 +188,9 @@ if (!$isNew) {
                     @click="selectSource('paste')"
                     style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
-                        <?php echo IconHelper::render('pencil', ['alt' => 'Paste']); ?>
+                        <?php echo IconHelper::render('pencil', ['alt' => __('text.new.source.paste')]); ?>
                     </span>
-                    <p class="is-size-7 has-text-weight-medium mt-1">Paste Text</p>
+                    <p class="is-size-7 has-text-weight-medium mt-1"><?= __e('text.new.source.paste') ?></p>
                 </div>
                 <div
                     class="box has-text-centered p-3 is-clickable"
@@ -252,9 +198,9 @@ if (!$isNew) {
                     @click="selectSource('url')"
                     style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
-                        <?php echo IconHelper::render('globe', ['alt' => 'URL']); ?>
+                        <?php echo IconHelper::render('globe', ['alt' => __('text.new.source.url')]); ?>
                     </span>
-                    <p class="is-size-7 has-text-weight-medium mt-1">Web / URL</p>
+                    <p class="is-size-7 has-text-weight-medium mt-1"><?= __e('text.new.source.url') ?></p>
                 </div>
                 <div
                     class="box has-text-centered p-3 is-clickable"
@@ -262,9 +208,9 @@ if (!$isNew) {
                     @click="selectSource('file')"
                     style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
-                        <?php echo IconHelper::render('file-up', ['alt' => 'File']); ?>
+                        <?php echo IconHelper::render('file-up', ['alt' => __('text.new.source.file')]); ?>
                     </span>
-                    <p class="is-size-7 has-text-weight-medium mt-1">Upload File</p>
+                    <p class="is-size-7 has-text-weight-medium mt-1"><?= __e('text.new.source.file') ?></p>
                 </div>
                 <div
                     class="box has-text-centered p-3 is-clickable"
@@ -272,9 +218,9 @@ if (!$isNew) {
                     @click="selectSource('gutenberg')"
                     style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
-                        <?php echo IconHelper::render('book-open-text', ['alt' => 'Gutenberg']); ?>
+                        <?php echo IconHelper::render('book-open-text', ['alt' => __('text.new.source.gutenberg')]); ?>
                     </span>
-                    <p class="is-size-7 has-text-weight-medium mt-1">Gutenberg</p>
+                    <p class="is-size-7 has-text-weight-medium mt-1"><?= __e('text.new.source.gutenberg') ?></p>
                 </div>
                 <div
                     class="box has-text-centered p-3 is-clickable"
@@ -282,21 +228,21 @@ if (!$isNew) {
                     @click="selectSource('feeds')"
                     style="cursor: pointer;">
                     <span class="icon is-medium has-text-primary">
-                        <?php echo IconHelper::render('rss', ['alt' => 'Feeds']); ?>
+                        <?php echo IconHelper::render('rss', ['alt' => __('text.new.source.feeds')]); ?>
                     </span>
-                    <p class="is-size-7 has-text-weight-medium mt-1">News Feed</p>
+                    <p class="is-size-7 has-text-weight-medium mt-1"><?= __e('text.new.source.feeds') ?></p>
                 </div>
             </div>
 
         <!-- File Import Section -->
         <div x-show="source === 'file'" x-transition x-cloak class="mt-4">
             <p class="help mb-4">
-                Text files, EPUB, SRT/VTT subtitles, or audio/video for transcription
+                <?= __e('text.new.file.help') ?>
             </p>
 
             <!-- Upload file from computer -->
             <div class="field">
-                <label class="label">From your computer</label>
+                <label class="label"><?= __e('text.new.file.from_computer') ?></label>
                 <div class="file has-name is-fullwidth">
                     <label class="file-label">
                         <input class="file-input"
@@ -307,11 +253,11 @@ if (!$isNew) {
                                @change="handleFileChange($event)" />
                         <span class="file-cta">
                             <span class="file-icon">
-                                <?php echo IconHelper::render('file-up', ['alt' => 'Upload']); ?>
+                                <?php echo IconHelper::render('file-up', ['alt' => __('text.new.file.browse')]); ?>
                             </span>
-                            <span class="file-label">Browse...</span>
+                            <span class="file-label"><?= __e('text.new.file.browse') ?></span>
                         </span>
-                        <span class="file-name">No file selected</span>
+                        <span class="file-name"><?= __e('text.new.file.no_file') ?></span>
                     </label>
                 </div>
                 <p id="importFileStatus" class="help"></p>
@@ -319,15 +265,23 @@ if (!$isNew) {
 
             <!-- Or select from server media folder -->
             <div class="field mt-4">
-                <label class="label">Or from the server's media folder</label>
+                <label class="label"><?= __e('text.new.file.from_server') ?></label>
                 <div class="control" id="mediaselect">
                     <?php $mediaJson = json_encode($mediaPaths); ?>
                     <?php $mediaBase = htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-                    <p class="help mb-2">Files in "../<?php echo $mediaBase; ?>/media":</p>
+                    <p class="help mb-2">
+                        <?php echo htmlspecialchars(
+                            __('text.edit.import_file.files_in', ['path' => '../' . $mediaBase . '/media'])
+                        ); ?>
+                    </p>
                     <p id="mediaSelectErrorMessage"></p>
                     <?php echo IconHelper::render(
                         'loader-2',
-                        ['id' => 'mediaSelectLoadingImg', 'alt' => 'Loading...', 'class' => 'icon-spin']
+                        [
+                            'id' => 'mediaSelectLoadingImg',
+                            'alt' => __('text.common.loading'),
+                            'class' => 'icon-spin'
+                        ]
                     ); ?>
                     <select
                         name="Dir"
@@ -335,8 +289,11 @@ if (!$isNew) {
                         data-action="media-dir-select"
                         data-target-field="TxAudioURI"></select>
                     <span class="click" data-action="refresh-media-select">
-                        <?php echo IconHelper::render('refresh-cw', ['title' => 'Refresh', 'alt' => 'Refresh']); ?>
-                        Refresh
+                        <?php echo IconHelper::render(
+                            'refresh-cw',
+                            ['title' => __('text.common.refresh'), 'alt' => __('text.common.refresh')]
+                        ); ?>
+                        <?= __e('text.common.refresh') ?>
                     </span>
                     <script type="application/json" data-lwt-media-select-config>
                         <?php echo $mediaJson !== false ? $mediaJson : '{}'; ?>
@@ -347,30 +304,36 @@ if (!$isNew) {
             <!-- Whisper Transcription Options (shown when audio/video selected) -->
             <div id="whisperOptions" class="box mt-3" style="display: none;">
                 <h4 class="subtitle is-6 mb-3">
-                    <?php echo IconHelper::render('mic', ['alt' => 'Transcription']); ?>
-                    Transcription Options
+                    <?php echo IconHelper::render('mic', ['alt' => __('text.new.transcription_options')]); ?>
+                    <?= __e('text.new.transcription_options') ?>
                 </h4>
 
                 <div class="field">
-                    <label class="label is-small" for="whisperLanguage">Transcription Language</label>
+                    <label class="label is-small" for="whisperLanguage">
+                        <?= __e('text.new.transcription_language') ?>
+                    </label>
                     <div class="control">
                         <div class="select is-small is-fullwidth">
                             <select id="whisperLanguage" name="whisperLanguage">
-                                <option value="">Auto-detect</option>
+                                <option value=""><?= __e('text.new.transcription_auto') ?></option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 <div class="field">
-                    <label class="label is-small" for="whisperModel">Model Size</label>
+                    <label class="label is-small" for="whisperModel">
+                        <?= __e('text.new.transcription_model') ?>
+                    </label>
                     <div class="control">
                         <div class="select is-small is-fullwidth">
                             <select id="whisperModel" name="whisperModel">
-                                <option value="base">Base (fast)</option>
-                                <option value="small" selected>Small (balanced)</option>
-                                <option value="medium">Medium (better quality)</option>
-                                <option value="large">Large (best quality)</option>
+                                <option value="base"><?= __e('text.edit.whisper.model_base') ?></option>
+                                <option value="small" selected>
+                                    <?= __e('text.edit.whisper.model_small') ?>
+                                </option>
+                                <option value="medium"><?= __e('text.edit.whisper.model_medium') ?></option>
+                                <option value="large"><?= __e('text.edit.whisper.model_large') ?></option>
                             </select>
                         </div>
                     </div>
@@ -380,9 +343,12 @@ if (!$isNew) {
                     <div class="control">
                         <button type="button" class="button is-info" id="startTranscription">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('mic', ['alt' => 'Transcribe']); ?>
+                                <?php echo IconHelper::render(
+                                    'mic',
+                                    ['alt' => __('text.new.transcription_start')]
+                                ); ?>
                             </span>
-                            <span>Start Transcription</span>
+                            <span><?= __e('text.new.transcription_start') ?></span>
                         </button>
                     </div>
                 </div>
@@ -390,11 +356,13 @@ if (!$isNew) {
                 <div id="whisperProgress" class="notification is-info is-light mt-3" style="display: none;">
                     <div class="level mb-2">
                         <div class="level-left">
-                            <span id="whisperStatusText">Preparing transcription...</span>
+                            <span id="whisperStatusText">
+                                <?= __e('text.new.transcription_preparing') ?>
+                            </span>
                         </div>
                         <div class="level-right">
                             <button type="button" class="button is-small is-danger is-outlined" id="whisperCancel">
-                                Cancel
+                                <?= __e('text.common.cancel') ?>
                             </button>
                         </div>
                     </div>
@@ -405,17 +373,22 @@ if (!$isNew) {
             <div id="whisperUnavailable" class="notification is-warning is-light mt-3" style="display: none;">
                 <span class="icon-text">
                     <span class="icon">
-                        <?php echo IconHelper::render('alert-triangle', ['alt' => 'Warning']); ?>
+                        <?php echo IconHelper::render(
+                            'alert-triangle',
+                            ['alt' => __('text.edit.whisper.warning_alt')]
+                        ); ?>
                     </span>
-                    <span>Whisper transcription is not available. Please ensure the NLP service is running.</span>
+                    <span><?= __e('text.new.transcription_unavailable') ?></span>
                 </span>
             </div>
 
             <!-- Next: Review -->
             <div class="field mt-4">
                 <button type="button" class="button is-primary is-fullwidth" @click="goToReview()">
-                    <span>Next: Review</span>
-                    <span class="icon"><?php echo IconHelper::render('arrow-right', ['alt' => 'Next']); ?></span>
+                    <span><?= __e('text.new.review.next') ?></span>
+                    <span class="icon">
+                        <?php echo IconHelper::render('arrow-right', ['alt' => __('text.new.review.next')]); ?>
+                    </span>
                 </button>
             </div>
         </div>
@@ -430,17 +403,17 @@ if (!$isNew) {
                     <li :class="urlSubMode === 'webpage' ? 'is-active' : ''">
                         <a @click.prevent="urlSubMode = 'webpage'">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('globe', ['alt' => 'Web']); ?>
+                                <?php echo IconHelper::render('globe', ['alt' => __('text.new.url.web_page')]); ?>
                             </span>
-                            <span>Web Page</span>
+                            <span><?= __e('text.new.url.web_page') ?></span>
                         </a>
                     </li>
                     <li :class="urlSubMode === 'video' ? 'is-active' : ''">
                         <a @click.prevent="urlSubMode = 'video'">
                             <span class="icon is-small">
-                                <?php echo IconHelper::render('video', ['alt' => 'Video']); ?>
+                                <?php echo IconHelper::render('video', ['alt' => __('text.new.url.video')]); ?>
                             </span>
-                            <span>Video</span>
+                            <span><?= __e('text.new.url.video') ?></span>
                         </a>
                     </li>
                 </ul>
@@ -449,7 +422,7 @@ if (!$isNew) {
             <!-- Web page import -->
             <div x-show="urlSubMode === 'webpage'" x-transition>
                 <div class="field">
-                    <label class="label">Web Page URL</label>
+                    <label class="label"><?= __e('text.new.url.web_label') ?></label>
                     <div class="field has-addons mb-0">
                         <div class="control is-expanded">
                             <input type="url" class="input" id="webpageUrl"
@@ -458,13 +431,12 @@ if (!$isNew) {
                         <div class="control">
                             <button type="button" class="button is-info"
                                     data-action="fetch-webpage" id="fetchWebpageBtn">
-                                Fetch Content
+                                <?= __e('text.new.url.fetch') ?>
                             </button>
                         </div>
                     </div>
                     <p class="help">
-                        Paste any article or web page URL.
-                        The main text content will be extracted automatically.
+                        <?= __e('text.new.url.fetch_help') ?>
                     </p>
                     <p id="webpageImportStatus" class="help mt-2"></p>
                 </div>
@@ -473,7 +445,7 @@ if (!$isNew) {
             <!-- Video import -->
             <div x-show="urlSubMode === 'video'" x-transition>
                 <div class="field">
-                    <label class="label">Video URL</label>
+                    <label class="label"><?= __e('text.new.url.video_label') ?></label>
                     <div class="control">
                         <input type="url"
                                class="input"
@@ -482,25 +454,26 @@ if (!$isNew) {
                                placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
                     </div>
                     <p class="help">
-                        YouTube, Vimeo, Dailymotion, Bilibili, NicoNico, or PeerTube URL.
-                        Captions will be imported if available.
+                        <?= __e('text.new.url.video_help') ?>
                     </p>
                 </div>
 
                 <?php if ($youtubeConfigured) : ?>
                 <div class="field mt-3">
-                    <label class="label is-small">Or enter YouTube Video ID directly</label>
+                    <label class="label is-small">
+                        <?= __e('text.edit.import_url.youtube_id_label') ?>
+                    </label>
                     <div class="control">
                         <div class="field has-addons mb-0">
                             <div class="control is-expanded">
                                 <input type="text"
                                        class="input is-small"
                                        id="ytVideoId"
-                                       placeholder="e.g., dQw4w9WgXcQ" />
+                                       placeholder="<?= __e('text.edit.import_url.youtube_id_placeholder') ?>" />
                             </div>
                             <div class="control">
                                 <button type="button" class="button is-info is-small" data-action="fetch-youtube">
-                                    Fetch Captions
+                                    <?= __e('text.edit.import_url.fetch_captions') ?>
                                 </button>
                             </div>
                         </div>
@@ -515,18 +488,17 @@ if (!$isNew) {
         <div x-show="source === 'gutenberg'" x-transition x-cloak class="mt-4">
             <div x-data="gutenbergBrowser">
                 <p class="help mb-4">
-                    Browse popular books from Project Gutenberg for your selected language.
+                    <?= __e('text.edit.gutenberg.intro') ?>
                 </p>
 
                 <!-- No language selected -->
                 <div x-show="showPlaceholder()" class="notification is-warning is-light">
-                    Please select a language above to browse Gutenberg books.
+                    <?= __e('text.edit.gutenberg.no_language') ?>
                 </div>
 
                 <!-- Language selected but no books found -->
                 <div x-show="showNoResults()" class="notification is-info is-light">
-                    No Gutenberg books found for this language.
-                    Not all languages are available in the Project Gutenberg catalog.
+                    <?= __e('text.edit.gutenberg.no_results') ?>
                 </div>
 
                 <!-- Loading state -->
@@ -564,7 +536,8 @@ if (!$isNew) {
 
                                 <!-- Vocabulary stats (loaded progressively) -->
                                 <div x-show="book.statsLoading" class="mt-2">
-                                    <span class="is-size-7 has-text-grey-light">Analyzing...</span>
+                                    <span class="is-size-7 has-text-grey-light"
+                                          x-text="$t('text.edit.gutenberg.analyzing')"></span>
                                 </div>
                                 <div x-show="book.stats" class="mt-2">
                                     <p class="is-size-7 has-text-grey mb-1">
@@ -587,7 +560,7 @@ if (!$isNew) {
                                         :class="importingClass(book)"
                                         :disabled="isImporting()">
                                     <span class="icon"><i data-lucide="download"></i></span>
-                                    <span>Preview</span>
+                                    <span><?= __e('text.edit.gutenberg.preview') ?></span>
                                 </button>
                             </div>
                         </div>
@@ -601,7 +574,7 @@ if (!$isNew) {
                             :class="loadingClass()"
                             :disabled="loading">
                         <span class="icon"><i data-lucide="chevron-right"></i></span>
-                        <span>Load more</span>
+                        <span><?= __e('text.edit.gutenberg.load_more') ?></span>
                     </button>
                 </div>
             </div>
@@ -611,8 +584,7 @@ if (!$isNew) {
         <div x-show="source === 'feeds'" x-transition x-cloak class="mt-4">
             <div x-data="feedBrowser">
                 <p class="help mb-4">
-                    Browse articles from your configured newsfeeds.
-                    <a href="/feeds/new">Set up a new feed</a> if you don't have any yet.
+                    <?php echo __('text.edit.feeds.intro'); ?>
                 </p>
 
                 <!-- Loading feeds -->
@@ -631,10 +603,10 @@ if (!$isNew) {
                 <div x-show="!selectedFeed && !loadingFeeds">
                     <template x-if="showEmptyFeeds()">
                         <div class="notification is-info is-light">
-                            <p>No feeds configured yet.</p>
+                            <p><?= __e('text.edit.feeds.no_feeds') ?></p>
                             <a href="/feeds/new" class="button is-info is-small mt-2">
                                 <span class="icon"><i data-lucide="plus"></i></span>
-                                <span>Add a feed</span>
+                                <span><?= __e('text.edit.feeds.add_feed') ?></span>
                             </a>
                         </div>
                     </template>
@@ -661,7 +633,7 @@ if (!$isNew) {
                     <div class="is-flex is-align-items-center mb-3" style="gap: 0.5rem;">
                         <button type="button" class="button is-small is-light" @click="backToFeeds()">
                             <span class="icon"><i data-lucide="arrow-left"></i></span>
-                            <span>Back</span>
+                            <span><?= __e('text.common.back') ?></span>
                         </button>
                         <p class="has-text-weight-semibold is-size-6" x-text="selectedFeedName()"></p>
                     </div>
@@ -677,8 +649,7 @@ if (!$isNew) {
 
                     <template x-if="showEmptyArticles()">
                         <div class="notification is-info is-light is-size-7">
-                            No articles in this feed. Try loading new articles from the
-                            <a href="/feeds">Feeds page</a>.
+                            <?php echo __('text.edit.feeds.no_articles'); ?>
                         </div>
                     </template>
 
@@ -700,7 +671,7 @@ if (!$isNew) {
                                             class="button is-primary is-small"
                                             :disabled="isImported(article)">
                                         <span class="icon"><i data-lucide="download"></i></span>
-                                        <span>Preview</span>
+                                        <span><?= __e('text.edit.gutenberg.preview') ?></span>
                                     </button>
                                 </div>
                             </div>
@@ -717,8 +688,10 @@ if (!$isNew) {
                                 <span class="icon"><i data-lucide="chevron-left"></i></span>
                             </button>
                             <span class="is-size-7 is-flex is-align-items-center">
-                                Page <span x-text="articlePage" class="mx-1"></span>
-                                of <span x-text="articleTotalPages" class="ml-1"></span>
+                                <?= __e('text.edit.feeds.page') ?>
+                                <span x-text="articlePage" class="mx-1"></span>
+                                <?= __e('text.edit.feeds.of') ?>
+                                <span x-text="articleTotalPages" class="ml-1"></span>
                             </span>
                             <button type="button" class="button is-small"
                                     :disabled="canGoNext()"
@@ -742,22 +715,24 @@ if (!$isNew) {
                 <span class="icon is-medium">
                     <i data-lucide="loader" style="width: 24px; height: 24px; animation: spin 1s linear infinite;"></i>
                 </span>
-                <p class="mt-2 has-text-weight-medium">Fetching text from Project Gutenberg...</p>
-                <p class="is-size-7 has-text-grey">This may take a few seconds.</p>
+                <p class="mt-2 has-text-weight-medium"><?= __e('text.new.review.fetching_gutenberg') ?></p>
+                <p class="is-size-7 has-text-grey"><?= __e('text.new.review.fetching_help') ?></p>
             </div>
 
             <!-- Back button -->
             <div class="is-flex is-align-items-center mb-4" style="gap: 0.5rem;">
                 <button type="button" class="button is-small is-light" @click="goBack()">
-                    <span class="icon"><?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?></span>
-                    <span>Back</span>
+                    <span class="icon">
+                        <?php echo IconHelper::render('arrow-left', ['alt' => __('text.common.back')]); ?>
+                    </span>
+                    <span><?= __e('text.common.back') ?></span>
                 </button>
-                <h3 class="title is-5 mb-0">Review your text</h3>
+                <h3 class="title is-5 mb-0"><?= __e('text.new.review.title') ?></h3>
             </div>
 
             <!-- Title -->
             <div class="field">
-                <label class="label" for="TxTitle">Title</label>
+                <label class="label" for="TxTitle"><?= __e('text.new.review.title_input') ?></label>
                 <div class="control">
                     <input type="text"
                            class="input notempty checkoutsidebmp"
@@ -766,13 +741,13 @@ if (!$isNew) {
                            id="TxTitle"
                            value="<?php echo \htmlspecialchars($textTitle, ENT_QUOTES, 'UTF-8'); ?>"
                            maxlength="200"
-                           placeholder="Enter a title" />
+                           placeholder="<?= __e('text.new.review.title_placeholder') ?>" />
                 </div>
             </div>
 
             <!-- Text Content (hidden for file import) -->
             <div x-show="showTextArea()" class="field">
-                <label class="label" for="TxText">Text</label>
+                <label class="label" for="TxText"><?= __e('text.common.text') ?></label>
                 <div class="control">
                     <textarea <?php echo $scrdirTyped; ?>
                               name="TxText"
@@ -780,7 +755,7 @@ if (!$isNew) {
                               class="textarea notempty checkoutsidebmp"
                               data_info="Text"
                               rows="10"
-                              placeholder="Paste or edit your text here..."><?php
+                              placeholder="<?= __e('text.new.review.text_placeholder') ?>"><?php
                                   echo \htmlspecialchars($textContent, ENT_QUOTES, 'UTF-8');
                                 ?></textarea>
                 </div>
@@ -789,8 +764,13 @@ if (!$isNew) {
             <!-- File info (shown for file import) -->
             <div x-show="showFileInfo()" class="notification is-info is-light" x-cloak>
                 <span class="icon-text">
-                    <span class="icon"><?php echo IconHelper::render('file-check', ['alt' => 'File ready']); ?></span>
-                    <span>Your file is ready. Text will be extracted when you save.</span>
+                    <span class="icon">
+                        <?php echo IconHelper::render(
+                            'file-check',
+                            ['alt' => __('text.new.review.file_ready')]
+                        ); ?>
+                    </span>
+                    <span><?= __e('text.new.review.file_ready') ?></span>
                 </span>
             </div>
 
@@ -802,16 +782,19 @@ if (!$isNew) {
                             :disabled="autoImporting"
                             :class="{ 'is-loading': autoImporting }">
                         <span class="icon">
-                            <?php echo IconHelper::render('book-open', ['alt' => 'Save and Open']); ?>
+                            <?php echo IconHelper::render(
+                                'book-open',
+                                ['alt' => __('text.new.review.save_and_read')]
+                            ); ?>
                         </span>
-                        <span>Save &amp; Start Reading</span>
+                        <span><?= __e('text.new.review.save_and_read') ?></span>
                     </button>
                 </div>
             </div>
 
             <!-- Cancel link -->
             <div class="has-text-centered mt-3">
-                <a href="/" class="has-text-grey">Cancel</a>
+                <a href="/" class="has-text-grey"><?= __e('text.common.cancel') ?></a>
             </div>
         </div><!-- end step 2 -->
     </div>
@@ -823,9 +806,9 @@ if (!$isNew) {
                     @click="open = !open">
                 <h4 class="title is-6 mb-0 is-flex is-align-items-center">
                     <span class="icon mr-2">
-                        <?php echo IconHelper::render('settings', ['alt' => 'Settings']); ?>
+                        <?php echo IconHelper::render('settings', ['alt' => __('text.new.advanced')]); ?>
                     </span>
-                    Additional Options
+                    <?= __e('text.new.advanced') ?>
                 </h4>
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
@@ -835,7 +818,7 @@ if (!$isNew) {
             <div x-show="open" x-transition x-cloak class="mt-4">
                 <!-- Source URI -->
                 <div class="field">
-                    <label class="label" for="TxSourceURI">Source URI</label>
+                    <label class="label" for="TxSourceURI"><?= __e('text.common.source_uri') ?></label>
                     <div class="control">
                         <input type="url"
                                class="input checkurl checkoutsidebmp"
@@ -846,16 +829,16 @@ if (!$isNew) {
                                maxlength="1000"
                                placeholder="https://example.com/article" />
                     </div>
-                    <p class="help">Link to the original source of this text.</p>
+                    <p class="help"><?= __e('text.edit.source_help') ?></p>
                 </div>
 
                 <!-- Tags -->
                 <div class="field">
-                    <label class="label">Tags</label>
+                    <label class="label"><?= __e('text.common.tags') ?></label>
                     <div class="control">
                         <?php echo $textTagsHtml; ?>
                     </div>
-                    <p class="help">Organize texts with tags for easy filtering.</p>
+                    <p class="help"><?= __e('text.edit.tags_help') ?></p>
                 </div>
             </div>
         </div>

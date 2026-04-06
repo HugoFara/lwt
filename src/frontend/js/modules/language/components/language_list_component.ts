@@ -10,6 +10,7 @@
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
 import { url } from '@shared/utils/url';
+import { t } from '@shared/i18n/translator';
 import {
   getLanguageStore,
   type LanguageStoreState
@@ -88,12 +89,12 @@ export function languageListData(): LanguageListComponentData {
 
       if (success) {
         this.showNotification(
-          `"${lang.name}" is now the current language`,
+          t('language.list.set_current_success', { name: lang.name }),
           'success'
         );
       } else {
         this.showNotification(
-          this.store.error || 'Failed to set default language',
+          this.store.error || t('language.list.set_current_failed'),
           'error'
         );
       }
@@ -112,7 +113,7 @@ export function languageListData(): LanguageListComponentData {
       // Check if can delete
       if (!this.canDelete(lang)) {
         this.showNotification(
-          'Cannot delete: language has texts, words, or feeds',
+          t('language.list.cannot_delete'),
           'error'
         );
         this.store.hideDeleteConfirm();
@@ -122,10 +123,13 @@ export function languageListData(): LanguageListComponentData {
       const success = await this.store.deleteLanguage(id);
 
       if (success) {
-        this.showNotification(`"${lang.name}" has been deleted`, 'success');
+        this.showNotification(
+          t('language.list.delete_success', { name: lang.name }),
+          'success'
+        );
       } else {
         this.showNotification(
-          this.store.error || 'Failed to delete language',
+          this.store.error || t('language.list.delete_failed'),
           'error'
         );
       }
@@ -141,18 +145,18 @@ export function languageListData(): LanguageListComponentData {
       const lang = this.getLanguage(id);
       if (!lang) return;
 
-      this.showNotification(`Reparsing texts for "${lang.name}"...`, 'info');
+      this.showNotification(t('language.list.reparsing', { name: lang.name }), 'info');
 
       const success = await this.store.refreshLanguage(id);
 
       if (success) {
         this.showNotification(
-          `Texts for "${lang.name}" have been reparsed`,
+          t('language.list.reparse_success', { name: lang.name }),
           'success'
         );
       } else {
         this.showNotification(
-          this.store.error || 'Failed to reparse texts',
+          this.store.error || t('language.list.reparse_failed'),
           'error'
         );
       }

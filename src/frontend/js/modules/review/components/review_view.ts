@@ -194,10 +194,7 @@ function buildFinishedMessage(): string {
       <div class="notification is-success is-light">
         <p class="is-size-5 has-text-weight-bold" x-text="getFinishedTitle()"></p>
         <p class="mt-2 has-text-grey-dark" x-show="hasNoVocabulary()" x-text="getNoVocabularyHint()"></p>
-        <p class="mt-3" x-show="hasTomorrowWords()">
-          Tomorrow you'll find here <strong x-text="store.tomorrowCount"></strong>
-          <span x-text="getTomorrowLabel()"></span>!
-        </p>
+        <p class="mt-3" x-show="hasTomorrowWords()" x-text="getTomorrowMessage()"></p>
         <div class="buttons is-centered mt-5">
           <a href="/texts" class="button is-primary">${escapeHtml(t('review.back_to_texts'))}</a>
         </div>
@@ -774,6 +771,16 @@ function registerReviewAppComponent(config: ReviewConfig): void {
       return this.store.tomorrowCount === 1
         ? t('review.finished.tomorrow_one')
         : t('review.finished.tomorrow_many');
+    },
+
+    getTomorrowMessage(): string {
+      const count = this.store.tomorrowCount;
+      return t(
+        count === 1
+          ? 'review.finished.tomorrow_count_one'
+          : 'review.finished.tomorrow_count_other',
+        { count }
+      );
     },
 
     // Safe accessors (CSP-compatible - avoid ?. in templates)
