@@ -293,6 +293,39 @@ class SelectOptionsBuilder
     }
 
     /**
+     * Build interface language (app locale) options.
+     *
+     * @param string[]    $locales  Available locale codes (e.g. ["en", "es"])
+     * @param string|null $selected Currently selected locale
+     *
+     * @return string HTML options string
+     */
+    public static function forAppLanguages(array $locales, ?string $selected = null): string
+    {
+        $names = [
+            'en' => 'English',
+            'es' => 'Español',
+            'fr' => 'Français',
+            'de' => 'Deutsch',
+            'it' => 'Italiano',
+            'pt' => 'Português',
+            'zh' => '中文',
+            'ja' => '日本語',
+            'ko' => '한국어',
+            'ru' => 'Русский',
+            'ar' => 'العربية',
+        ];
+        $options = [];
+        foreach ($locales as $code) {
+            $options[$code] = $names[$code] ?? $code;
+        }
+        if ($options === []) {
+            $options['en'] = 'English';
+        }
+        return self::buildFromArray($options, $selected);
+    }
+
+    /**
      * Build options from an associative array.
      *
      * @param array<int|string, string> $options  Array of value => label pairs

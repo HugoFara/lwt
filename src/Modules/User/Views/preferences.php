@@ -111,6 +111,51 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         </div>
     </div>
 
+    <!-- Language Section -->
+    <div class="card settings-section mb-4" x-data="{ open: false }">
+        <header class="card-header is-clickable" @click="open = !open">
+            <p class="card-header-title">
+                <?php echo IconHelper::render('languages', ['alt' => 'Language']); ?>
+                <span class="ml-2">Interface Language</span>
+            </p>
+            <button type="button" class="card-header-icon" aria-label="toggle section">
+                <span class="icon">
+                    <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
+                </span>
+            </button>
+        </header>
+        <div class="card-content" x-show="open" x-transition>
+            <div class="field">
+                <label class="label" for="app_language">Application Language</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <?php
+                        $i18nContainer = \Lwt\Shared\Infrastructure\Container\Container::getInstance();
+                        $availableLocales = ['en'];
+                        if ($i18nContainer->has(\Lwt\Shared\I18n\Translator::class)) {
+                            $availableLocales = $i18nContainer
+                                ->getTyped(\Lwt\Shared\I18n\Translator::class)
+                                ->getAvailableLocales();
+                        }
+                        ?>
+                        <select name="app_language" id="app_language">
+                            <?php
+                            echo SelectOptionsBuilder::forAppLanguages(
+                                $availableLocales,
+                                $settings['app_language'] ?? 'en'
+                            );
+                            ?>
+                        </select>
+                    </div>
+                </div>
+                <p class="help">
+                    The language used for the LWT user interface.
+                    Changes apply after saving and reloading the page.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Read Text Screen Section -->
     <div class="card settings-section mb-4" x-data="{ open: false }">
         <header class="card-header is-clickable" @click="open = !open">
@@ -540,7 +585,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
             <hr class="my-4">
 
             <!-- Browser Voice Settings - Alpine.js Component -->
-            <script type="application/json" id="tts-settings-config">{"currentLanguageCode": <?php echo $currentLanguageCode; ?>}</script>
+            <script type="application/json" id="tts-settings-config">
+                {"currentLanguageCode": <?php echo $currentLanguageCode; ?>}
+            </script>
             <div x-data="ttsSettingsApp"
                  @submit.window="saveSettings()">
 
