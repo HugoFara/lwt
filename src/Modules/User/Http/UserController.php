@@ -445,7 +445,7 @@ class UserController extends BaseController
             $ttsService->getCurrentLanguageCode(LanguagePresets::getAll())
         );
 
-        $this->render('Preferences', true);
+        $this->render(__('preferences.page_title'), true);
 
         if ($success !== null && $success !== '') {
             $this->message($success, true);

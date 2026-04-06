@@ -112,10 +112,10 @@ class PageLayoutHelper
      */
     public static function buildNavbar(string $currentPage = ''): string
     {
-        $textsIcon = IconHelper::render('book-text', ['alt' => 'Texts']);
-        $termsIcon = IconHelper::render('spell-check', ['alt' => 'Terms']);
-        $languagesIcon = IconHelper::render('languages', ['alt' => 'Languages']);
-        $settingsIcon = IconHelper::render('settings', ['alt' => 'Settings']);
+        $textsIcon = IconHelper::render('book-text', ['alt' => __('navbar.texts')]);
+        $termsIcon = IconHelper::render('spell-check', ['alt' => __('navbar.vocabulary')]);
+        $languagesIcon = IconHelper::render('languages', ['alt' => __('navbar.languages')]);
+        $settingsIcon = IconHelper::render('settings', ['alt' => __('navbar.admin')]);
 
         $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
         $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
@@ -129,7 +129,7 @@ class PageLayoutHelper
         $adminActive = $isAdmin ? ' is-active' : '';
         $userActive = $isUser ? ' is-active' : '';
 
-        $plusIcon = IconHelper::render('plus', ['alt' => 'Add new', 'size' => 16]);
+        $plusIcon = IconHelper::render('plus', ['alt' => __('navbar.add_new'), 'size' => 16]);
 
         $base = UrlUtilities::getBasePath();
         $logoUrl = UrlUtilities::url('/assets/images/lwt_icon_48.png');
@@ -154,33 +154,40 @@ class PageLayoutHelper
         }
         $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/' || $themeDir === 'dist/themes/Default/');
         $toggleIcon = $themeMode === 'dark' ? 'sun' : 'moon';
-        $toggleTitle = $themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        $toggleTitle = $themeMode === 'dark'
+            ? __('navbar.switch_to_light_mode')
+            : __('navbar.switch_to_dark_mode');
         $toggleIconHtml = IconHelper::render($toggleIcon, ['alt' => $toggleTitle]);
         $escapedCounterpart = htmlspecialchars($themeCounterpart, ENT_QUOTES, 'UTF-8');
         $escapedThemeDir = htmlspecialchars($themeDir, ENT_QUOTES, 'UTF-8');
         $autoThemeAttr = $isAutoTheme ? 'true' : 'false';
 
         // User icon and profile/admin links
-        $userIcon = IconHelper::render('user', ['alt' => 'User']);
+        $userIcon = IconHelper::render('user', ['alt' => __('navbar.user')]);
         $isMultiUser = Globals::isMultiUserEnabled();
         $profileLink = $isMultiUser
-            ? '<a class="navbar-item" href="' . $base . '/profile">Profile</a>'
+            ? '<a class="navbar-item" href="' . $base . '/profile">' . __('navbar.profile') . '</a>'
             : '';
         $showAdminDropdown = !$isMultiUser || Globals::isCurrentUserAdmin();
         $adminDropdownHtml = '';
         if ($showAdminDropdown) {
+            $adminLabel = __('navbar.admin');
+            $databaseOps = __('navbar.database_operations');
+            $adminSettings = __('navbar.admin_settings');
+            $usersLabel = __('navbar.users');
+            $serverData = __('navbar.server_data');
             $adminDropdownHtml = <<<ADMIN
             <div class="navbar-item has-dropdown{$adminActive}" :class="{ 'is-active': activeDropdown === 'admin' }">
                 <a class="navbar-link" @click.prevent="toggleDropdown('admin')">
                     {$settingsIcon}
-                    <span class="ml-1">Admin</span>
+                    <span class="ml-1">{$adminLabel}</span>
                 </a>
                 <div class="navbar-dropdown is-right">
-                    <a class="navbar-item" href="{$base}/admin/backup">Database Operations</a>
-                    <a class="navbar-item" href="{$base}/admin/settings">Admin Settings</a>
-                    <a class="navbar-item" href="{$base}/admin/users">Users</a>
+                    <a class="navbar-item" href="{$base}/admin/backup">{$databaseOps}</a>
+                    <a class="navbar-item" href="{$base}/admin/settings">{$adminSettings}</a>
+                    <a class="navbar-item" href="{$base}/admin/users">{$usersLabel}</a>
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/admin/server-data">Server Data</a>
+                    <a class="navbar-item" href="{$base}/admin/server-data">{$serverData}</a>
                 </div>
             </div>
 ADMIN;
@@ -213,15 +220,28 @@ ADMIN;
 LANG;
         }
 
+        $mainNav = __('navbar.main_navigation');
+        $menuLabel = __('navbar.menu');
+        $textsLabel = __('navbar.texts');
+        $newTextTitle = __('navbar.new_text_title');
+        $vocabularyLabel = __('navbar.vocabulary');
+        $newTermTitle = __('navbar.new_term_title');
+        $languagesLabel = __('navbar.languages');
+        $newLanguageTitle = __('navbar.new_language_title');
+        $statisticsTitle = __('navbar.statistics_title');
+        $userLabel = __('navbar.user');
+        $preferencesLabel = __('navbar.preferences');
+        $helpLabel = __('navbar.help');
+
         return <<<HTML
-<nav class="navbar is-light" role="navigation" aria-label="main navigation" x-data="navbar()">
+<nav class="navbar is-light" role="navigation" aria-label="{$mainNav}" x-data="navbar()">
     <div class="navbar-brand">
         <a class="navbar-item" href="{$base}/">
             <img src="{$logoUrl}" alt="LWT" width="28" height="28">
             <span class="ml-2 has-text-weight-semibold">LWT</span>
         </a>
 
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+        <a role="button" class="navbar-burger" aria-label="{$menuLabel}" aria-expanded="false"
            :class="{ 'is-active': isOpen }" @click="toggle()">
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
@@ -236,9 +256,9 @@ LANG;
                 <div class="buttons has-addons mb-0">
                     <a class="button is-small{$textsLinkClass}" href="{$base}/texts">
                         <span class="icon is-small">{$textsIcon}</span>
-                        <span>Texts</span>
+                        <span>{$textsLabel}</span>
                     </a>
-                    <a class="button is-small" href="{$base}/texts/new" title="New Text">
+                    <a class="button is-small" href="{$base}/texts/new" title="{$newTextTitle}">
                         <span class="icon is-small">{$plusIcon}</span>
                     </a>
                 </div>
@@ -248,9 +268,9 @@ LANG;
                 <div class="buttons has-addons mb-0">
                     <a class="button is-small{$termsLinkClass}" href="{$base}/words">
                         <span class="icon is-small">{$termsIcon}</span>
-                        <span>Vocabulary</span>
+                        <span>{$vocabularyLabel}</span>
                     </a>
-                    <a class="button is-small" href="{$base}/words/new" title="New Term">
+                    <a class="button is-small" href="{$base}/words/new" title="{$newTermTitle}">
                         <span class="icon is-small">{$plusIcon}</span>
                     </a>
                 </div>
@@ -260,9 +280,9 @@ LANG;
                 <div class="buttons has-addons mb-0">
                     <a class="button is-small{$languagesLinkClass}" href="{$base}/languages">
                         <span class="icon is-small">{$languagesIcon}</span>
-                        <span>Languages</span>
+                        <span>{$languagesLabel}</span>
                     </a>
-                    <a class="button is-small" href="{$base}/languages/new" title="New Language">
+                    <a class="button is-small" href="{$base}/languages/new" title="{$newLanguageTitle}">
                         <span class="icon is-small">{$plusIcon}</span>
                     </a>
                 </div>
@@ -270,7 +290,7 @@ LANG;
 
             {$langSelectorHtml}
 
-            <a class="navbar-item" href="{$base}/admin/statistics" title="Statistics"
+            <a class="navbar-item" href="{$base}/admin/statistics" title="{$statisticsTitle}"
                x-data="navbarStreak">
                 <span class="icon has-text-warning"><i data-lucide="flame"></i></span>
                 <span class="is-size-7 has-text-weight-semibold" x-show="streak > 0" x-text="streak" x-cloak></span>
@@ -290,13 +310,13 @@ LANG;
             <div class="navbar-item has-dropdown{$userActive}" :class="{ 'is-active': activeDropdown === 'user' }">
                 <a class="navbar-link" @click.prevent="toggleDropdown('user')">
                     {$userIcon}
-                    <span class="ml-1">User</span>
+                    <span class="ml-1">{$userLabel}</span>
                 </a>
                 <div class="navbar-dropdown is-right">
-                    <a class="navbar-item" href="{$base}/profile/preferences">Preferences</a>
+                    <a class="navbar-item" href="{$base}/profile/preferences">{$preferencesLabel}</a>
                     {$profileLink}
                     <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">Help</a>
+                    <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">{$helpLabel}</a>
                 </div>
             </div>
             {$adminDropdownHtml}
@@ -619,6 +639,32 @@ HTML;
     }
 
     /**
+     * Determine additional i18n namespaces to inject for the current page.
+     *
+     * Some namespaces (like "preferences") don't have a matching JS module
+     * but still need their translations injected for client-side usage.
+     *
+     * @return string[] Extra namespace names to inject
+     */
+    private static function getExtraI18nNamespaces(): array
+    {
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $parsed = parse_url($uri, PHP_URL_PATH);
+        $path = is_string($parsed) ? $parsed : '/';
+        $basePath = UrlUtilities::getBasePath();
+        if ($basePath !== '' && str_starts_with($path, $basePath)) {
+            $path = substr($path, strlen($basePath));
+        }
+        $path = '/' . ltrim($path, '/');
+
+        if (str_starts_with($path, '/profile/preferences')) {
+            return ['preferences'];
+        }
+
+        return [];
+    }
+
+    /**
      * Render a minimal page header (kernel, no database).
      *
      * Outputs directly to browser. Sets cache control headers,
@@ -800,16 +846,19 @@ HTML;
 
         $translator = $container->getTyped(Translator::class);
 
-        // Always include "common" namespace
-        $prefixed = [];
-        foreach ($translator->getNamespaceTranslations('common') as $k => $v) {
-            $prefixed['common.' . $k] = $v;
-        }
+        // Namespaces to inject: "common" and "navbar" are always loaded,
+        // page-specific namespaces (matching JS module names) come from $modules,
+        // and any additional namespaces from getExtraI18nNamespaces().
+        $namespaces = array_unique(array_merge(
+            ['common', 'navbar'],
+            $modules,
+            self::getExtraI18nNamespaces()
+        ));
 
-        // Add module-specific namespaces
-        foreach ($modules as $mod) {
-            foreach ($translator->getNamespaceTranslations($mod) as $k => $v) {
-                $prefixed[$mod . '.' . $k] = $v;
+        $prefixed = [];
+        foreach ($namespaces as $ns) {
+            foreach ($translator->getNamespaceTranslations($ns) as $k => $v) {
+                $prefixed[$ns . '.' . $k] = $v;
             }
         }
 

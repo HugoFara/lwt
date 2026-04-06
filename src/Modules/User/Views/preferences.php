@@ -52,9 +52,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('palette', ['alt' => 'Appearance']); ?>
-                <span class="ml-2">Appearance</span>
+                <span class="ml-2"><?= __('preferences.section_appearance') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -65,7 +69,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
             <div x-data="themeSelector"
                  data-current-theme="<?php echo $currentTheme; ?>">
                 <div class="field">
-                    <label class="label" for="set-theme-dir">Theme</label>
+                    <label class="label" for="set-theme-dir"><?= __('preferences.theme_label') ?></label>
                     <div class="field has-addons">
                         <div class="control is-expanded">
                             <div class="select is-fullwidth">
@@ -82,19 +86,27 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                             </div>
                         </div>
                         <div class="control">
-                            <span class="icon has-text-danger" title="Field must not be empty">
+                            <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                                 <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                             </span>
                         </div>
                     </div>
                     <div class="box mt-3" x-show="description || highlighting || wordBreaking" x-transition>
                         <p class="mb-2" x-show="description">
-                            <strong>Description:</strong> <span x-text="description"></span>
+                            <strong><?= __('preferences.theme_description_label') ?></strong>
+                            <span x-text="description"></span>
                         </p>
                         <div class="tags">
                             <span class="tag" :class="mode === 'dark' ? 'is-dark' : 'is-light'" x-show="mode">
                                 <i data-lucide="sun" style="width:14px;height:14px;margin-right:4px"></i>
-                                <span x-text="mode === 'dark' ? 'Dark Mode' : 'Light Mode'"></span>
+                                <span x-text="
+                                    mode === 'dark'
+                                        ? $t('preferences.theme_dark_mode')
+                                        : $t('preferences.theme_light_mode')
+                                "></span>
                             </span>
                             <span class="tag is-info is-light" x-show="highlighting">
                                 <i data-lucide="palette" style="width:14px;height:14px;margin-right:4px"></i>
@@ -116,9 +128,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('languages', ['alt' => 'Language']); ?>
-                <span class="ml-2">Interface Language</span>
+                <span class="ml-2"><?= __('preferences.section_language') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -126,7 +142,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         </header>
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
-                <label class="label" for="app_language">Application Language</label>
+                <label class="label" for="app_language"><?= __('preferences.app_language_label') ?></label>
                 <div class="control">
                     <div class="select is-fullwidth">
                         <?php
@@ -148,10 +164,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </select>
                     </div>
                 </div>
-                <p class="help">
-                    The language used for the LWT user interface.
-                    Changes apply after saving and reloading the page.
-                </p>
+                <p class="help"><?= __('preferences.app_language_help') ?></p>
             </div>
         </div>
     </div>
@@ -161,9 +174,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('book-open', ['alt' => 'Read Text Screen']); ?>
-                <span class="ml-2">Read Text Screen</span>
+                <span class="ml-2"><?= __('preferences.section_read_text_screen') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -171,7 +188,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         </header>
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
-                <label class="label" for="set-words-to-do-buttons">Words To Do Buttons</label>
+                <label class="label" for="set-words-to-do-buttons">
+                    <?= __('preferences.words_to_do_buttons_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
@@ -188,19 +207,19 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </div>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">
-                    Which bulk-action buttons appear on the reading screen for unknown
-                    words: just "I Know All", or also "Ignore All".
-                </p>
+                <p class="help"><?= __('preferences.words_to_do_buttons_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-tooltip-mode">Tooltips</label>
+                <label class="label" for="set-tooltip-mode"><?= __('preferences.tooltips_label') ?></label>
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
@@ -210,18 +229,21 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </div>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">
-                    Style of the popup that appears when hovering a word while reading.
-                </p>
+                <p class="help"><?= __('preferences.tooltips_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-ggl-translation-per-page">Translations per Page</label>
+                <label class="label" for="set-ggl-translation-per-page">
+                    <?= __('preferences.translations_per_page_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control">
                         <input class="input notempty posintnumber"
@@ -242,15 +264,15 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                required />
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">
-                    How many machine-translation suggestions to fetch per page when
-                    looking up a new term.
-                </p>
+                <p class="help"><?= __('preferences.translations_per_page_help') ?></p>
             </div>
         </div>
     </div>
@@ -260,9 +282,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('graduation-cap', ['alt' => 'Review Screen']); ?>
-                <span class="ml-2">Review Screen</span>
+                <span class="ml-2"><?= __('preferences.section_review_screen') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -270,7 +296,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         </header>
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
-                <label class="label" for="set-test-main-frame-waiting-time">Display Next Review After</label>
+                <label class="label" for="set-test-main-frame-waiting-time">
+                    <?= __('preferences.display_next_review_after_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control">
                         <input class="input notempty zeroposintnumber"
@@ -291,19 +319,24 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                required />
                     </div>
                     <div class="control">
-                        <span class="button is-static">ms</span>
+                        <span class="button is-static"><?= __('preferences.milliseconds_unit') ?></span>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Waiting time after assessment to display next review</p>
+                <p class="help"><?= __('preferences.display_next_review_after_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-test-edit-frame-waiting-time">Clear Edit Frame After</label>
+                <label class="label" for="set-test-edit-frame-waiting-time">
+                    <?= __('preferences.clear_edit_frame_after_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control">
                         <input class="input notempty zeroposintnumber"
@@ -324,15 +357,18 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                required />
                     </div>
                     <div class="control">
-                        <span class="button is-static">ms</span>
+                        <span class="button is-static"><?= __('preferences.milliseconds_unit') ?></span>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Waiting time to clear the message/edit frame</p>
+                <p class="help"><?= __('preferences.clear_edit_frame_after_help') ?></p>
             </div>
         </div>
     </div>
@@ -342,9 +378,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('glasses', ['alt' => 'Reading']); ?>
-                <span class="ml-2">Reading</span>
+                <span class="ml-2"><?= __('preferences.section_reading') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -352,7 +392,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         </header>
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
-                <label class="label" for="set-text-visit-statuses-via-key">Navigate Term Statuses</label>
+                <label class="label" for="set-text-visit-statuses-via-key">
+                    <?= __('preferences.navigate_term_statuses_label') ?>
+                </label>
                 <div class="control">
                     <div class="select is-fullwidth">
                         <select name="set-text-visit-statuses-via-key" id="set-text-visit-statuses-via-key">
@@ -367,13 +409,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </select>
                     </div>
                 </div>
-                <p class="help">
-                    Visit saved terms with these statuses via keystrokes (RIGHT, SPACE, LEFT, etc.)
-                </p>
+                <p class="help"><?= __('preferences.navigate_term_statuses_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-display-text-frame-term-translation">Show Translations For</label>
+                <label class="label" for="set-display-text-frame-term-translation">
+                    <?= __('preferences.show_translations_for_label') ?>
+                </label>
                 <div class="control">
                     <div class="select is-fullwidth">
                         <select name="set-display-text-frame-term-translation"
@@ -389,11 +431,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </select>
                     </div>
                 </div>
-                <p class="help">Display translations of terms with these statuses</p>
+                <p class="help"><?= __('preferences.show_translations_for_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-text-frame-annotation-position">Translation Position</label>
+                <label class="label" for="set-text-frame-annotation-position">
+                    <?= __('preferences.translation_position_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
@@ -410,7 +454,10 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </div>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
@@ -424,9 +471,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('spell-check', ['alt' => 'Review & Terms']); ?>
-                <span class="ml-2">Review &amp; Terms</span>
+                <span class="ml-2"><?= __('preferences.section_review_terms') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -434,7 +485,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         </header>
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
-                <label class="label" for="set-test-sentence-count">Review Sentence Count</label>
+                <label class="label" for="set-test-sentence-count">
+                    <?= __('preferences.review_sentence_count_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
@@ -451,16 +504,21 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </div>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Number of sentences displayed from text during review</p>
+                <p class="help"><?= __('preferences.review_sentence_count_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-term-sentence-count">Term Sentence Count</label>
+                <label class="label" for="set-term-sentence-count">
+                    <?= __('preferences.term_sentence_count_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
@@ -477,16 +535,21 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </div>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Number of sentences generated from text for terms</p>
+                <p class="help"><?= __('preferences.term_sentence_count_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-similar-terms-count">Similar Terms Count</label>
+                <label class="label" for="set-similar-terms-count">
+                    <?= __('preferences.similar_terms_count_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control">
                         <input class="input notempty zeroposintnumber"
@@ -508,16 +571,21 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                required />
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">Similar terms displayed while adding/editing a term</p>
+                <p class="help"><?= __('preferences.similar_terms_count_help') ?></p>
             </div>
 
             <div class="field">
-                <label class="label" for="set-term-translation-delimiters">Translation Delimiters</label>
+                <label class="label" for="set-term-translation-delimiters">
+                    <?= __('preferences.translation_delimiters_label') ?>
+                </label>
                 <div class="field has-addons">
                     <div class="control">
                         <input class="input notempty"
@@ -536,14 +604,15 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                required />
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
                 </div>
-                <p class="help">
-                    Characters that delimit different translations (used in annotation selection)
-                </p>
+                <p class="help"><?= __('preferences.translation_delimiters_help') ?></p>
             </div>
         </div>
     </div>
@@ -553,9 +622,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('volume-2', ['alt' => 'Text to Speech']); ?>
-                <span class="ml-2">Text to Speech</span>
+                <span class="ml-2"><?= __('preferences.section_tts') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -563,20 +636,20 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         </header>
         <div class="card-content" x-show="open" x-transition>
             <div class="field">
-                <label class="label">Save Audio to Disk</label>
+                <label class="label"><?= __('preferences.save_audio_to_disk_label') ?></label>
                 <div class="control">
                     <label class="checkbox">
                         <input type="checkbox"
                                name="set-tts"
                                value="1"
                                <?php echo ((int)$settings['set-tts'] ? "checked" : ""); ?> />
-                        Enable saving TTS audio files to disk
+                        <?= __('preferences.save_audio_checkbox_label') ?>
                     </label>
                 </div>
             </div>
 
             <div class="field">
-                <label class="label" for="set-hts">Read Word Aloud</label>
+                <label class="label" for="set-hts"><?= __('preferences.read_word_aloud_label') ?></label>
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
@@ -586,7 +659,10 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </div>
                     </div>
                     <div class="control">
-                        <span class="icon has-text-danger" title="Field must not be empty">
+                        <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                             <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                         </span>
                     </div>
@@ -602,12 +678,12 @@ use Lwt\Shared\UI\Helpers\FormHelper;
             <div x-data="ttsSettingsApp"
                  @submit.window="saveSettings()">
 
-                <h4 class="subtitle is-6 mb-3">Browser Voice Settings</h4>
-                <p class="help mb-3">These settings are stored in your browser and apply per language.</p>
+                <h4 class="subtitle is-6 mb-3"><?= __('preferences.browser_voice_settings') ?></h4>
+                <p class="help mb-3"><?= __('preferences.browser_voice_settings_help') ?></p>
 
                 <!-- Language Code -->
                 <div class="field">
-                    <label class="label" for="get-language">Language</label>
+                    <label class="label" for="get-language"><?= __('preferences.voice_language_label') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="LgName"
@@ -622,7 +698,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 
                 <!-- Voice Selection -->
                 <div class="field">
-                    <label class="label" for="voice">Voice</label>
+                    <label class="label" for="voice"><?= __('preferences.voice_label') ?></label>
                     <div class="control">
                         <div class="select is-fullwidth">
                             <select name="LgVoice" id="voice" x-model="selectedVoice">
@@ -642,12 +718,12 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                             </select>
                         </div>
                     </div>
-                    <p class="help">Available voices depend on your web browser</p>
+                    <p class="help"><?= __('preferences.voice_help') ?></p>
                 </div>
 
                 <!-- Reading Rate -->
                 <div class="field">
-                    <label class="label" for="rate">Reading Rate</label>
+                    <label class="label" for="rate"><?= __('preferences.reading_rate_label') ?></label>
                     <div class="control">
                         <div class="columns is-vcentered is-mobile">
                             <div class="column is-narrow">
@@ -675,11 +751,11 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 
                 <!-- Pitch -->
                 <div class="field">
-                    <label class="label" for="pitch">Pitch</label>
+                    <label class="label" for="pitch"><?= __('preferences.pitch_label') ?></label>
                     <div class="control">
                         <div class="columns is-vcentered is-mobile">
                             <div class="column is-narrow">
-                                <span class="tag is-light">Low</span>
+                                <span class="tag is-light"><?= __('preferences.pitch_low') ?></span>
                             </div>
                             <div class="column">
                                 <input type="range"
@@ -692,7 +768,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        x-model.number="pitch" />
                             </div>
                             <div class="column is-narrow">
-                                <span class="tag is-light">High</span>
+                                <span class="tag is-light"><?= __('preferences.pitch_high') ?></span>
                             </div>
                             <div class="column is-narrow">
                                 <span class="tag is-info" x-text="pitch"></span>
@@ -703,7 +779,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
 
                 <!-- Demo -->
                 <div class="field">
-                    <label class="label" for="tts-demo">Test</label>
+                    <label class="label" for="tts-demo"><?= __('preferences.test_label') ?></label>
                     <div class="control">
                         <div class="columns is-vcentered">
                             <div class="column">
@@ -720,12 +796,12 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                     <span class="icon is-small">
                                         <?php echo IconHelper::render('play', ['alt' => 'Play']); ?>
                                     </span>
-                                    <span>Test</span>
+                                    <span><?= __('preferences.test_button') ?></span>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <p class="help">Voice settings are stored in your browser's local storage</p>
+                    <p class="help"><?= __('preferences.voice_storage_help') ?></p>
                 </div>
             </div>
         </div>
@@ -736,9 +812,13 @@ use Lwt\Shared\UI\Helpers\FormHelper;
         <header class="card-header is-clickable" @click="open = !open">
             <p class="card-header-title">
                 <?php echo IconHelper::render('table', ['alt' => 'Tables & Pagination']); ?>
-                <span class="ml-2">Tables &amp; Pagination</span>
+                <span class="ml-2"><?= __('preferences.section_tables') ?></span>
             </p>
-            <button type="button" class="card-header-icon" aria-label="toggle section">
+            <button
+                type="button"
+                class="card-header-icon"
+                aria-label="<?= htmlspecialchars(__('preferences.toggle_section'), ENT_QUOTES, 'UTF-8') ?>"
+            >
                 <span class="icon">
                     <i :class="open ? 'rotate-180' : ''" class="transition-transform" data-lucide="chevron-down"></i>
                 </span>
@@ -748,7 +828,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
             <div class="columns">
                 <div class="column is-half">
                     <div class="field">
-                        <label class="label" for="set-texts-per-page">Texts per Page</label>
+                        <label class="label" for="set-texts-per-page">
+                            <?= __('preferences.texts_per_page_label') ?>
+                        </label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 <input class="input notempty posintnumber"
@@ -768,18 +850,23 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        required />
                             </div>
                             <div class="control">
-                                <span class="icon has-text-danger" title="Field must not be empty">
+                                <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                                     <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                                 </span>
                             </div>
                         </div>
-                        <p class="help">Number of rows shown on the active texts list.</p>
+                        <p class="help"><?= __('preferences.texts_per_page_help') ?></p>
                     </div>
                 </div>
 
                 <div class="column is-half">
                     <div class="field">
-                        <label class="label" for="set-archived_texts-per-page">Archived Texts per Page</label>
+                        <label class="label" for="set-archived_texts-per-page">
+                            <?= __('preferences.archived_texts_per_page_label') ?>
+                        </label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 <input class="input notempty posintnumber"
@@ -799,12 +886,15 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        required />
                             </div>
                             <div class="control">
-                                <span class="icon has-text-danger" title="Field must not be empty">
+                                <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                                     <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                                 </span>
                             </div>
                         </div>
-                        <p class="help">Number of rows shown on the archived texts list.</p>
+                        <p class="help"><?= __('preferences.archived_texts_per_page_help') ?></p>
                     </div>
                 </div>
             </div>
@@ -812,7 +902,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
             <div class="columns">
                 <div class="column is-half">
                     <div class="field">
-                        <label class="label" for="set-terms-per-page">Terms per Page</label>
+                        <label class="label" for="set-terms-per-page">
+                            <?= __('preferences.terms_per_page_label') ?>
+                        </label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 <input class="input notempty posintnumber"
@@ -832,18 +924,23 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        required />
                             </div>
                             <div class="control">
-                                <span class="icon has-text-danger" title="Field must not be empty">
+                                <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                                     <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                                 </span>
                             </div>
                         </div>
-                        <p class="help">Number of vocabulary entries shown per page on the terms list.</p>
+                        <p class="help"><?= __('preferences.terms_per_page_help') ?></p>
                     </div>
                 </div>
 
                 <div class="column is-half">
                     <div class="field">
-                        <label class="label" for="set-tags-per-page">Tags per Page</label>
+                        <label class="label" for="set-tags-per-page">
+                            <?= __('preferences.tags_per_page_label') ?>
+                        </label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 <input class="input notempty posintnumber"
@@ -863,12 +960,15 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        required />
                             </div>
                             <div class="control">
-                                <span class="icon has-text-danger" title="Field must not be empty">
+                                <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                                     <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                                 </span>
                             </div>
                         </div>
-                        <p class="help">Number of tags shown per page on the tag management screens.</p>
+                        <p class="help"><?= __('preferences.tags_per_page_help') ?></p>
                     </div>
                 </div>
             </div>
@@ -876,7 +976,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
             <div class="columns">
                 <div class="column is-half">
                     <div class="field">
-                        <label class="label" for="set-articles-per-page">Feed Articles per Page</label>
+                        <label class="label" for="set-articles-per-page">
+                            <?= __('preferences.feed_articles_per_page_label') ?>
+                        </label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 <input class="input notempty posintnumber"
@@ -896,18 +998,23 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        required />
                             </div>
                             <div class="control">
-                                <span class="icon has-text-danger" title="Field must not be empty">
+                                <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                                     <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                                 </span>
                             </div>
                         </div>
-                        <p class="help">Number of articles to display when browsing a single newsfeed.</p>
+                        <p class="help"><?= __('preferences.feed_articles_per_page_help') ?></p>
                     </div>
                 </div>
 
                 <div class="column is-half">
                     <div class="field">
-                        <label class="label" for="set-feeds-per-page">Feeds per Page</label>
+                        <label class="label" for="set-feeds-per-page">
+                            <?= __('preferences.feeds_per_page_label') ?>
+                        </label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
                                 <input class="input notempty posintnumber"
@@ -927,18 +1034,21 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        required />
                             </div>
                             <div class="control">
-                                <span class="icon has-text-danger" title="Field must not be empty">
+                                <span
+                            class="icon has-text-danger"
+                            title="<?= htmlspecialchars(__('preferences.field_required'), ENT_QUOTES, 'UTF-8') ?>"
+                        >
                                     <?php echo IconHelper::render('asterisk', ['alt' => 'Required']); ?>
                                 </span>
                             </div>
                         </div>
-                        <p class="help">Number of feeds shown per page on the newsfeeds list.</p>
+                        <p class="help"><?= __('preferences.feeds_per_page_help') ?></p>
                     </div>
                 </div>
             </div>
 
             <div class="field">
-                <label class="label" for="set-regex-mode">Query Mode</label>
+                <label class="label" for="set-regex-mode"><?= __('preferences.query_mode_label') ?></label>
                 <div class="control">
                     <div class="select is-fullwidth">
                         <select name="set-regex-mode" id="set-regex-mode">
@@ -946,10 +1056,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                         </select>
                     </div>
                 </div>
-                <p class="help">
-                    How filter boxes interpret your input: plain text matching or
-                    full regular expressions.
-                </p>
+                <p class="help"><?= __('preferences.query_mode_help') ?></p>
             </div>
         </div>
     </div>
@@ -961,7 +1068,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                 <span class="icon is-small">
                     <?php echo IconHelper::render('arrow-left', ['alt' => 'Back']); ?>
                 </span>
-                <span>Back to Profile</span>
+                <span><?= __('preferences.back_to_profile') ?></span>
             </a>
         </div>
         <div class="control">
@@ -969,7 +1076,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>
-                <span>Save Preferences</span>
+                <span><?= __('preferences.save_preferences') ?></span>
             </button>
         </div>
     </div>

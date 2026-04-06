@@ -12,6 +12,7 @@
 
 import Alpine from 'alpinejs';
 import { SettingsApi } from '@modules/admin/api/settings_api';
+import { t } from '@shared/i18n/translator';
 
 interface ThemeToggleData {
   init(): void;
@@ -56,7 +57,9 @@ function themeToggleData(): ThemeToggleData {
           window.LWT_Icons.init();
         }
       }
-      el.title = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      el.title = mode === 'dark'
+        ? t('navbar.switch_to_light_mode')
+        : t('navbar.switch_to_dark_mode');
     }
   };
 }
