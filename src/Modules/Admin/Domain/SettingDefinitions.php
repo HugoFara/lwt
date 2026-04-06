@@ -161,6 +161,11 @@ final class SettingDefinitions
         // Admin settings: multi-user
         'set-allow-registration' => [
             "default" => '1', "numeric" => false, "scope" => self::SCOPE_ADMIN
+        ],
+
+        // Admin settings: updates
+        'set-check-for-updates' => [
+            "default" => '1', "numeric" => false, "scope" => self::SCOPE_ADMIN
         ]
     ];
 

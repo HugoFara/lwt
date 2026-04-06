@@ -26,6 +26,10 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Update notification**: The "new LWT version available" banner on the
+  home page is now dismissible (remembered per-version via localStorage),
+  only shown to admins, and can be disabled entirely via a new
+  `set-check-for-updates` admin setting in the settings page.
 * **Navbar**: Merged the admin dropdown into the user dropdown to save space.
 * **Cleaner setting definition keys**: `SettingDefinitions` entries now use
   `default` (string) and `numeric` (bool) instead of the cryptic `dft` (string)

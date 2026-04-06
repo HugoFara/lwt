@@ -191,6 +191,18 @@ $settings = array_map(
                     </label>
                 </div>
             </div>
+            <div class="field">
+                <label class="label">Check for Updates</label>
+                <div class="control">
+                    <label class="checkbox">
+                        <input type="checkbox"
+                               name="set-check-for-updates"
+                               value="1"
+                               <?php echo ((int)($settings['set-check-for-updates'] ?? '1') ? "checked" : ""); ?> />
+                        Notify admins on the home page when a new LWT release is available
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 

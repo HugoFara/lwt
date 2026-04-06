@@ -22,6 +22,8 @@ declare(strict_types=1);
 namespace Lwt\Modules\Home\Views;
 
 use Lwt\Shared\Infrastructure\ApplicationInfo;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * When on a WordPress server, render a logout button.
@@ -59,6 +61,12 @@ function renderWordPressLogout(bool $isWordPress, string $base): void
  */
 function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount, int $currentlang): void
 {
+    // Only admins should see the "new LWT version available" notification,
+    // and only when the admin setting is enabled.
+    $isAdmin = !Globals::isMultiUserEnabled() || Globals::isCurrentUserAdmin();
+    $checkForUpdates = $isAdmin
+        && Settings::getWithDefault('set-check-for-updates') !== '0';
+
     $config = [
         'phpVersion' => phpversion(),
         'lwtVersion' => ApplicationInfo::VERSION,
@@ -66,6 +74,7 @@ function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount, in
         'basePath' => $base,
         'textCount' => $textCount,
         'currentLanguageId' => $currentlang,
+        'checkForUpdates' => $checkForUpdates,
     ];
     ?>
 <script type="application/json" id="home-warnings-config">

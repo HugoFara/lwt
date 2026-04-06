@@ -61,6 +61,12 @@ $base = UrlUtilities::getBasePath();
     <p x-text="warnings.cookiesDisabled.message"></p>
 </div>
 <div class="notification is-info is-light" x-show="warnings.updateAvailable.visible" x-transition>
+    <button
+        type="button"
+        class="delete"
+        aria-label="<?= htmlspecialchars(__('home.dismiss') ?? 'Dismiss', ENT_QUOTES, 'UTF-8') ?>"
+        @click="dismissUpdateWarning()"
+    ></button>
     <p>
         <span x-text="warnings.updateAvailable.message"></span>
         <a :href="warnings.updateAvailable.downloadUrl" class="button is-small is-info is-outlined ml-2">

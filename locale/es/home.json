@@ -26,5 +26,6 @@
     "warning_cookies_disabled": "¡Las cookies no están habilitadas! Por favor, actívalas para que LWT funcione correctamente.",
     "warning_php_outdated": "Tu versión de PHP es {phpVersion}, pero se requiere la versión {minVersion}. Por favor, actualiza PHP.",
     "warning_update_available": "Hay una actualización de LWT disponible: {latestVersion} (tu versión: {currentVersion}).",
-    "download": "Descargar"
+    "download": "Descargar",
+    "dismiss": "Descartar"
 }

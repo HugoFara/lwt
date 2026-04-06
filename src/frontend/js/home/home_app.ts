@@ -30,6 +30,7 @@ interface HomeWarningsConfig {
   basePath: string;
   textCount: number;
   currentLanguageId: number;
+  checkForUpdates?: boolean;
 }
 
 interface Warning {
@@ -86,6 +87,7 @@ interface HomeData {
   checkCookies(): void;
   checkPHPVersion(version: string): void;
   checkLWTUpdate(currentVersion: string): void;
+  dismissUpdateWarning(): void;
   shouldUpdate(fromVersion: string, toVersion: string): boolean | null;
   getStatPercent(key: string): number;
   getStatsTitle(): string;
@@ -164,7 +166,9 @@ export function homeData(): HomeData {
         // Check all warnings
         this.checkCookies();
         this.checkPHPVersion(config.phpVersion);
-        this.checkLWTUpdate(config.lwtVersion);
+        if (config.checkForUpdates) {
+          this.checkLWTUpdate(config.lwtVersion);
+        }
       } catch (e) {
         console.error('Failed to parse home warnings config:', e);
       }
@@ -264,20 +268,43 @@ export function homeData(): HomeData {
         .then(response => response.json())
         .then((data: { tag_name: string }) => {
           const latestVersion = data.tag_name;
-          if (this.shouldUpdate(lwtVersion, latestVersion)) {
-            this.warnings.updateAvailable.currentVersion = lwtVersion;
-            this.warnings.updateAvailable.latestVersion = latestVersion;
-            this.warnings.updateAvailable.downloadUrl = `https://github.com/HugoFara/lwt/releases/tag/${latestVersion}`;
-            this.warnings.updateAvailable.message = t('home.warning_update_available', {
-              latestVersion,
-              currentVersion: lwtVersion,
-            });
-            this.warnings.updateAvailable.visible = true;
+          if (!this.shouldUpdate(lwtVersion, latestVersion)) {
+            return;
           }
+          // Respect a previously dismissed version: only re-show the banner
+          // if a newer release has appeared since the user closed it.
+          try {
+            const dismissed = localStorage.getItem('lwt_update_dismissed_version');
+            if (dismissed && !this.shouldUpdate(dismissed, latestVersion)) {
+              return;
+            }
+          } catch {
+            // localStorage unavailable — fall through and show the banner.
+          }
+          this.warnings.updateAvailable.currentVersion = lwtVersion;
+          this.warnings.updateAvailable.latestVersion = latestVersion;
+          this.warnings.updateAvailable.downloadUrl = `https://github.com/HugoFara/lwt/releases/tag/${latestVersion}`;
+          this.warnings.updateAvailable.message = t('home.warning_update_available', {
+            latestVersion,
+            currentVersion: lwtVersion,
+          });
+          this.warnings.updateAvailable.visible = true;
         })
         .catch(() => {
           // Silently fail if GitHub API is unreachable
         });
+    },
+
+    dismissUpdateWarning() {
+      this.warnings.updateAvailable.visible = false;
+      try {
+        const latest = this.warnings.updateAvailable.latestVersion;
+        if (latest) {
+          localStorage.setItem('lwt_update_dismissed_version', latest);
+        }
+      } catch {
+        // localStorage unavailable — dismissal is session-only.
+      }
     },
 
     shouldUpdate(fromVersion: string, toVersion: string): boolean | null {
