@@ -1,0 +1,6 @@
+{
+    "error_404_title": "404 - 页面未找到",
+    "error_404_body": "未找到所请求的页面 {path}。",
+    "error_500_title": "500 - 服务器内部错误",
+    "return_home": "返回首页"
+}

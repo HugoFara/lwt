@@ -7,7 +7,6 @@
     "export_template_tag": "导出模板",
     "export_template_title": "提供自定义导出模板",
     "export_template_short_title": "导出模板",
-
     "list.all_languages": "所有语言",
     "list.col_language": "语言",
     "list.col_texts": "文本",
@@ -21,18 +20,15 @@
     "list.edit": "编辑",
     "list.set_current": "设为当前",
     "list.delete": "删除",
-
     "delete.confirm_title": "确认删除",
     "delete.confirm_question": "您确定要删除该语言吗",
     "delete.warning": "此操作无法撤消。",
     "delete.button": "删除",
     "delete.cancel": "取消",
     "delete.close": "关闭",
-
     "wizard.l2_label": "您想学习的语言",
     "wizard.l1_label": "您的母语",
     "wizard.choose_placeholder": "[选择...]",
-
     "form.new_title": "新建语言",
     "form.edit_title": "编辑语言",
     "form.help": "帮助",
@@ -44,7 +40,6 @@
     "form.save_changes": "保存更改",
     "form.cancel": "取消",
     "form.advanced_settings": "高级设置",
-
     "form.section_dictionaries": "词典与翻译",
     "form.local_dictionaries": "本地词典",
     "form.import": "导入",
@@ -64,7 +59,6 @@
     "form.lookup_mode_local_first": "本地优先，在线后备",
     "form.lookup_mode_local_only": "仅本地词典",
     "form.lookup_mode_combined": "组合（同时显示）",
-
     "form.dict1_uri": "词典 1 URI",
     "form.dict2_uri": "词典 2 URI",
     "form.required_marker_title": "必填",
@@ -76,16 +70,13 @@
     "form.translator_glosbe": "Glosbe API",
     "form.translator_uri_placeholder": "翻译器 URI",
     "form.api_key": "API 密钥",
-
     "form.source_lang_code": "源语言代码",
     "form.source_lang_code_help": "您正在学习的语言的 ISO 代码",
     "form.target_lang_code": "目标语言代码",
     "form.target_lang_code_help": "您的母语的 ISO 代码",
-
     "form.section_display": "显示设置",
     "form.text_size": "文本大小 (%)",
     "form.text_size_example": "文本将以此大小显示",
-
     "form.section_text_processing": "文本处理",
     "form.parser_type": "解析器类型",
     "form.parser_unavailable": "（不可用）",
@@ -96,7 +87,6 @@
     "form.regexp_word_characters": "单词字符正则表达式",
     "form.regexp_alt_regexp": "正则表达式（演示）",
     "form.regexp_alt_mecab": "MeCab（推荐）",
-
     "form.split_each_char": "将每个字符作为一个单词",
     "form.split_each_char_help": "适用于中文、日语等。",
     "form.remove_spaces": "删除空格",
@@ -105,7 +95,6 @@
     "form.right_to_left_help": "适用于阿拉伯语、希伯来语、波斯语、乌尔都语等。",
     "form.show_romanization": "显示罗马化",
     "form.show_romanization_help": "推荐用于中文、日语等。",
-
     "form.section_export_tts": "导出与文本转语音",
     "form.export_template": "导出模板",
     "form.export_template_help": "导出词条的模板（例如到 Anki）",
@@ -117,6 +106,29 @@
     "form.test_voice_api": "测试！",
     "form.check": "检查",
     "form.test": "测试",
-
-    "errors.language_not_found": "未找到语言。"
+    "errors.language_not_found": "未找到语言。",
+    "errors.name_required": "语言名称为必填项",
+    "errors.name_too_long": "语言名称必须不超过 40 个字符",
+    "errors.name_duplicate": "已存在同名语言",
+    "errors.split_sentences_required": "句子分隔字符为必填项",
+    "errors.word_chars_required": "词字符模式为必填项",
+    "errors.text_size_range": "文本大小必须在 50 到 300 之间",
+    "errors.tts_voice_api_invalid": "TTS Voice API 必须是有效的 JSON",
+    "errors.load_failed": "加载语言失败",
+    "errors.save_failed": "保存语言失败",
+    "errors.create_failed": "创建语言失败",
+    "errors.update_failed": "更新语言失败",
+    "errors.fix_validation": "请修正校验错误",
+    "errors.id_missing": "缺少语言 ID",
+    "list.set_current_success": "“{name}”现在是当前语言",
+    "list.set_current_failed": "设置默认语言失败",
+    "list.cannot_delete": "无法删除：该语言下还存在文本、词汇或订阅源",
+    "list.delete_success": "“{name}”已被删除",
+    "list.delete_failed": "删除语言失败",
+    "list.reparsing": "正在重新解析“{name}”的文本……",
+    "list.reparse_success": "“{name}”的文本已重新解析",
+    "list.reparse_failed": "重新解析文本失败",
+    "flash.updated_with_reparse": "已更新：1 / 已重新解析的文本数：{count}",
+    "flash.updated_no_reparse": "已更新：1 / 无需重新解析",
+    "flash.refresh_summary": "已删除句子：{sentencesDeleted} / 已删除文本项：{textItemsDeleted} / 已新增句子：{sentencesAdded} / 已新增文本项：{textItemsAdded}"
 }

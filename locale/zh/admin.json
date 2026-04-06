@@ -14,7 +14,6 @@
     "dashboard_server_data_title": "服务器数据",
     "dashboard_server_data_description": "查看服务器和 PHP 配置详情。",
     "dashboard_view_server_data": "查看服务器数据",
-
     "settings_preferences_link": "寻找阅读、复习、外观或分页设置？",
     "settings_preferences_link_target": "前往偏好设置",
     "settings_section_newsfeeds": "新闻订阅",
@@ -35,7 +34,6 @@
     "settings_save": "保存",
     "settings_field_required": "字段不能为空",
     "settings_toggle_section": "切换区域",
-
     "server_data_intro": "此页面显示有助于调试和问题反馈的服务器信息。",
     "server_data_section_server": "服务器",
     "server_data_lwt_version": "LWT 版本",
@@ -53,7 +51,6 @@
     "server_data_rest_version": "REST API 版本",
     "server_data_rest_release_date": "REST API 发布日期",
     "server_data_back_to_main": "返回主菜单",
-
     "install_demo_title": "安装演示数据库",
     "install_demo_intro": "演示数据库包含多种语言的示例文本和词汇，帮助您探索 LWT 的功能。",
     "install_demo_warning_heading": "警告：此操作将替换您当前的数据",
@@ -71,7 +68,6 @@
     "install_demo_included_tags": "用于组织内容的标签",
     "install_demo_included_settings": "为学习优化的示例设置",
     "install_demo_included_audio": "用于发音练习的音频文件",
-
     "backup_intro_db": "数据库 <strong>{db}</strong> 将导出为 gzip 压缩的 SQL 文件。",
     "backup_section_backup": "备份",
     "backup_section_restore": "恢复",
@@ -104,7 +100,6 @@
     "empty_db_confirm": "您确定吗？这将删除您的所有数据！",
     "empty_db_loading": "正在清空数据库...",
     "backup_back_to_main": "返回主菜单",
-
     "wizard_title": "数据库连接向导",
     "wizard_server_label": "服务器地址",
     "wizard_server_help": "本地安装通常为 \"localhost\"",
@@ -122,7 +117,6 @@
     "wizard_btn_check": "检查",
     "wizard_btn_save": "保存更改",
     "wizard_footer": "LWT - Learning With Texts",
-
     "users_total": "用户总数",
     "users_active": "活跃",
     "users_inactive": "非活跃",
@@ -152,7 +146,6 @@
     "users_action_promote": "提升为管理员",
     "users_action_delete": "删除",
     "users_self_tag": "您",
-
     "user_form_edit_title": "编辑用户",
     "user_form_create_title": "创建新用户",
     "user_form_username": "用户名",
@@ -178,5 +171,11 @@
     "user_form_never": "从不",
     "user_form_save_changes": "保存更改",
     "user_form_create": "创建用户",
-    "user_form_cancel": "取消"
+    "user_form_cancel": "取消",
+    "users.flash.created": "用户创建成功",
+    "users.flash.updated": "用户更新成功",
+    "users.flash.deleted": "用户删除成功",
+    "users.flash.not_found": "错误：未找到用户",
+    "users.flash.error_prefix": "错误：{message}",
+    "users.flash.unknown_error": "未知错误"
 }
