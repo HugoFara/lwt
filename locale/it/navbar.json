@@ -1,0 +1,23 @@
+{
+    "main_navigation": "navigazione principale",
+    "menu": "menu",
+    "texts": "Testi",
+    "new_text_title": "Nuovo testo",
+    "vocabulary": "Vocabolario",
+    "new_term_title": "Nuovo termine",
+    "languages": "Lingue",
+    "new_language_title": "Nuova lingua",
+    "statistics_title": "Statistiche",
+    "switch_to_dark_mode": "Passa al tema scuro",
+    "switch_to_light_mode": "Passa al tema chiaro",
+    "user": "Utente",
+    "preferences": "Preferenze",
+    "profile": "Profilo",
+    "help": "Aiuto",
+    "admin": "Amministrazione",
+    "database_operations": "Operazioni sul database",
+    "admin_settings": "Impostazioni di amministrazione",
+    "users": "Utenti",
+    "server_data": "Dati del server",
+    "add_new": "Aggiungi nuovo"
+}
