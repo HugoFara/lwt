@@ -115,7 +115,6 @@ class PageLayoutHelper
         $textsIcon = IconHelper::render('book-text', ['alt' => __('navbar.texts')]);
         $termsIcon = IconHelper::render('spell-check', ['alt' => __('navbar.vocabulary')]);
         $languagesIcon = IconHelper::render('languages', ['alt' => __('navbar.languages')]);
-        $settingsIcon = IconHelper::render('settings', ['alt' => __('navbar.admin')]);
 
         $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
         $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
@@ -126,8 +125,7 @@ class PageLayoutHelper
         $textsLinkClass = $isTexts ? ' is-active' : '';
         $termsLinkClass = $isTerms ? ' is-active' : '';
         $languagesLinkClass = $isLanguages ? ' is-active' : '';
-        $adminActive = $isAdmin ? ' is-active' : '';
-        $userActive = $isUser ? ' is-active' : '';
+        $userActive = ($isUser || $isAdmin) ? ' is-active' : '';
 
         $plusIcon = IconHelper::render('plus', ['alt' => __('navbar.add_new'), 'size' => 16]);
 
@@ -168,28 +166,19 @@ class PageLayoutHelper
         $profileLink = $isMultiUser
             ? '<a class="navbar-item" href="' . $base . '/profile">' . __('navbar.profile') . '</a>'
             : '';
-        $showAdminDropdown = !$isMultiUser || Globals::isCurrentUserAdmin();
-        $adminDropdownHtml = '';
-        if ($showAdminDropdown) {
-            $adminLabel = __('navbar.admin');
+        $showAdminItems = !$isMultiUser || Globals::isCurrentUserAdmin();
+        $adminItemsHtml = '';
+        if ($showAdminItems) {
             $databaseOps = __('navbar.database_operations');
             $adminSettings = __('navbar.admin_settings');
             $usersLabel = __('navbar.users');
             $serverData = __('navbar.server_data');
-            $adminDropdownHtml = <<<ADMIN
-            <div class="navbar-item has-dropdown{$adminActive}" :class="{ 'is-active': activeDropdown === 'admin' }">
-                <a class="navbar-link" @click.prevent="toggleDropdown('admin')">
-                    {$settingsIcon}
-                    <span class="ml-1">{$adminLabel}</span>
-                </a>
-                <div class="navbar-dropdown is-right">
+            $adminItemsHtml = <<<ADMIN
+                    <hr class="navbar-divider">
                     <a class="navbar-item" href="{$base}/admin/backup">{$databaseOps}</a>
                     <a class="navbar-item" href="{$base}/admin/settings">{$adminSettings}</a>
                     <a class="navbar-item" href="{$base}/admin/users">{$usersLabel}</a>
-                    <hr class="navbar-divider">
                     <a class="navbar-item" href="{$base}/admin/server-data">{$serverData}</a>
-                </div>
-            </div>
 ADMIN;
         }
 
@@ -315,11 +304,11 @@ LANG;
                 <div class="navbar-dropdown is-right">
                     <a class="navbar-item" href="{$base}/profile/preferences">{$preferencesLabel}</a>
                     {$profileLink}
+                    {$adminItemsHtml}
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">{$helpLabel}</a>
                 </div>
             </div>
-            {$adminDropdownHtml}
         </div>
     </div>
 </nav>

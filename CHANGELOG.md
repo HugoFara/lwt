@@ -26,6 +26,7 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Navbar**: Merged the admin dropdown into the user dropdown to save space.
 * **Cleaner setting definition keys**: `SettingDefinitions` entries now use
   `default` (string) and `numeric` (bool) instead of the cryptic `dft` (string)
   and `num` (int 0/1). The legacy keys are still accepted on read for
