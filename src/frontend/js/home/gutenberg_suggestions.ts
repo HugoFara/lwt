@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { t } from '@shared/i18n/translator';
 
 interface SuggestedBook {
   id: number;
@@ -54,6 +55,7 @@ interface SuggestionsData {
   tierLabel(tier: string): string;
   tierClass(tier: string): string;
   coverageClass(label: string): string;
+  coverageLabel(data: PreviewData): string;
 }
 
 /**
@@ -206,6 +208,10 @@ export function gutenbergSuggestionsData(): SuggestionsData {
       if (label === 'easy') return 'is-success';
       if (label === 'hard') return 'is-danger';
       return 'is-warning';
+    },
+
+    coverageLabel(data: PreviewData): string {
+      return t('home.you_know_x_of_unique_words', { percent: data.coverage_percent });
     },
   };
 }

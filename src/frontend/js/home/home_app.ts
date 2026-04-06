@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { t } from '@shared/i18n/translator';
 import { setLangAsync } from '@modules/language/stores/language_settings';
 import type { LanguageChangedEvent, TextStats } from '@modules/language/stores/language_settings';
 
@@ -234,8 +235,7 @@ export function homeData(): HomeData {
         document.cookie = 'lwt_cookie_test=; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
 
         if (!enabled) {
-          this.warnings.cookiesDisabled.message =
-            'Cookies are not enabled! Please enable them for LWT to work properly.';
+          this.warnings.cookiesDisabled.message = t('home.warning_cookies_disabled');
           this.warnings.cookiesDisabled.visible = true;
         }
       } catch {
@@ -251,8 +251,10 @@ export function homeData(): HomeData {
       if (this.shouldUpdate(phpVersion, phpMinVersion)) {
         this.warnings.phpOutdated.phpVersion = phpVersion;
         this.warnings.phpOutdated.minVersion = phpMinVersion;
-        this.warnings.phpOutdated.message =
-          `Your PHP version (${phpVersion}) is outdated. Please upgrade to at least ${phpMinVersion}.`;
+        this.warnings.phpOutdated.message = t('home.warning_php_outdated', {
+          phpVersion,
+          minVersion: phpMinVersion,
+        });
         this.warnings.phpOutdated.visible = true;
       }
     },
@@ -266,8 +268,10 @@ export function homeData(): HomeData {
             this.warnings.updateAvailable.currentVersion = lwtVersion;
             this.warnings.updateAvailable.latestVersion = latestVersion;
             this.warnings.updateAvailable.downloadUrl = `https://github.com/HugoFara/lwt/releases/tag/${latestVersion}`;
-            this.warnings.updateAvailable.message =
-              `A new version (${latestVersion}) is available. You are currently using ${lwtVersion}.`;
+            this.warnings.updateAvailable.message = t('home.warning_update_available', {
+              latestVersion,
+              currentVersion: lwtVersion,
+            });
             this.warnings.updateAvailable.visible = true;
           }
         })

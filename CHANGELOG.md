@@ -15,6 +15,13 @@ ones are marked like "v1.0.0-fork".
   Translations are stored as per-namespace JSON files under `locale/`, loaded
   lazily, with automatic English fallback. A new `app_language` user setting
   controls the active locale. The HTML `lang` attribute is now dynamic.
+  The user preferences page exposes a language picker that lists every
+  available locale.
+* **Spanish translation of the home page** (#223): The home page (welcome
+  banner, language picker, current text card, library search modal,
+  Gutenberg suggestions, and system warnings) is now fully translated. The
+  Project Gutenberg search and PHP version warnings are computed in JS via
+  the `t()` helper so dynamic values fit each locale's word order.
 * **Activity tracking with streaks and calendar heatmap** (#227): New
   `activity_log` table tracks daily terms created, terms reviewed, and texts
   read. A backfill migration populates historical data from existing word

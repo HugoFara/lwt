@@ -25,174 +25,7 @@ namespace Lwt\Modules\Home\Views;
 use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 
-/**
- * When on a WordPress server, make a logout button.
- *
- * @param bool   $isWordPress Whether WordPress session is active
- * @param string $base        The application base path
- *
- * @return void
- */
-function renderWordPressLogout(bool $isWordPress, string $base): void
-{
-    if ($isWordPress) {
-        ?>
-<div class="card menu menu-logout">
-    <div class="card-content has-text-centered">
-        <a href="<?php echo $base; ?>/wordpress/stop" class="button is-danger is-outlined">
-            <span class="icon"><i data-lucide="log-out" style="width:16px;height:16px"></i></span>
-            <span><strong>LOGOUT</strong> (from WordPress and LWT)</span>
-        </a>
-    </div>
-</div>
-        <?php
-    }
-}
-
-/**
- * Load the content of warnings and initial data for visual display.
- *
- * Outputs a JSON config element that is read by home_app.ts.
- *
- * @param array|null $lastTextInfo Current text info for Alpine.js initial state
- * @param string     $base         The application base path
- * @param int        $textCount    Number of texts for current language
- * @param int        $currentlang  Current language ID
- *
- * @return void
- */
-function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount, int $currentlang): void
-{
-    $config = [
-        'phpVersion' => phpversion(),
-        'lwtVersion' => ApplicationInfo::VERSION,
-        'lastText' => $lastTextInfo,
-        'basePath' => $base,
-        'textCount' => $textCount,
-        'currentLanguageId' => $currentlang,
-    ];
-    ?>
-<script type="application/json" id="home-warnings-config">
-    <?php echo json_encode($config, JSON_UNESCAPED_SLASHES); ?>
-</script>
-    <?php
-}
-
-/**
- * Render the suggestions card grid (reused for onboarding and main page).
- *
- * Must be called inside a `gutenbergSuggestions` Alpine scope.
- *
- * @return void
- */
-function renderSuggestionsGrid(): void
-{
-    ?>
-    <!-- Loading state -->
-    <div x-show="loading && books.length === 0" class="has-text-centered py-4">
-        <span class="icon is-large has-text-grey-light">
-            <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
-        </span>
-    </div>
-
-    <!-- Error -->
-    <div x-show="error" class="notification is-danger is-light is-size-7" x-text="error"></div>
-
-    <!-- Books grid (horizontal scroll) -->
-    <div
-        :style="books.length > 0
-            ? 'display: flex; flex-wrap: nowrap; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem;'
-            : 'display: none;'"
-    >
-        <template x-for="book in books" :key="book.id">
-            <div
-                class="box p-3"
-                style="flex: 0 0 220px; width: 220px; min-width: 220px; min-height: 140px;
-                    display: flex; flex-direction: column; justify-content: space-between;"
-            >
-                <div>
-                    <div class="is-flex is-align-items-center mb-1" style="gap: 0.4rem;">
-                        <p
-                            class="has-text-weight-semibold is-size-7"
-                            x-text="book.title"
-                            style="overflow: hidden; text-overflow: ellipsis;
-                                display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
-                        ></p>
-                    </div>
-                    <span
-                        x-show="book.difficultyTier"
-                        class="tag is-rounded mb-1"
-                        style="font-size: 0.65rem;"
-                        :class="tierClass(book.difficultyTier || '')"
-                        x-text="tierLabel(book.difficultyTier || '')"
-                    ></span>
-                    <p
-                        class="has-text-grey is-size-7"
-                        x-text="formatAuthors(book.authors)"
-                        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                    ></p>
-                </div>
-                <div class="mt-2">
-                    <button
-                        @click="previewBook(book)"
-                        class="button is-info is-small is-fullwidth"
-                        :class="{ 'is-loading': previewLoading && previewBookId === book.id }"
-                        :disabled="previewLoading && previewBookId === book.id"
-                    >
-                        <span class="icon"><i data-lucide="bar-chart-2"></i></span>
-                        <span>Preview</span>
-                    </button>
-                </div>
-                <!-- Preview panel -->
-                <template x-if="previewBookId === book.id && !previewLoading">
-                    <div class="mt-2 pt-2" style="border-top: 1px solid #eee;">
-                        <template x-if="previewError">
-                            <p class="has-text-danger is-size-7" x-text="previewError"></p>
-                        </template>
-                        <template x-if="previewData && !previewError">
-                            <div>
-                                <progress
-                                    class="progress is-small mb-2"
-                                    :class="coverageClass(previewData.difficulty_label)"
-                                    :value="previewData.coverage_percent"
-                                    max="100"
-                                ></progress>
-                                <p class="is-size-7">
-                                    You know
-                                    <strong x-text="previewData.coverage_percent + '%'"></strong>
-                                    of unique words
-                                </p>
-                                <button
-                                    @click="importBook(book)"
-                                    class="button is-primary is-small is-fullwidth mt-2"
-                                    :class="{ 'is-loading': importing === book.id }"
-                                    :disabled="importing !== null"
-                                >
-                                    <span class="icon"><i data-lucide="download"></i></span>
-                                    <span>Import</span>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-            </div>
-        </template>
-    </div>
-
-    <!-- Load more -->
-    <div x-show="hasMore && books.length > 0" class="has-text-centered mt-2">
-        <button
-            @click="loadMore()"
-            class="button is-small is-light"
-            :class="{ 'is-loading': loading }"
-            :disabled="loading"
-        >
-            <span class="icon"><i data-lucide="chevron-right"></i></span>
-            <span>Load more</span>
-        </button>
-    </div>
-    <?php
-}
+require_once __DIR__ . '/helpers.php';
 
 // Validate injected variables from controller
 assert(isset($dashboardData) && is_array($dashboardData));
@@ -222,20 +55,17 @@ $base = UrlUtilities::getBasePath();
 
 <!-- System notifications -->
 <div class="notification is-danger is-light" x-show="warnings.phpOutdated.visible" x-transition>
-    <p>
-        Your PHP version is <strong x-text="warnings.phpOutdated.phpVersion"></strong>,
-        but version <strong x-text="warnings.phpOutdated.minVersion"></strong> is required.
-        Please update PHP.
-    </p>
+    <p x-text="warnings.phpOutdated.message"></p>
 </div>
 <div class="notification is-warning is-light" x-show="warnings.cookiesDisabled.visible" x-transition>
     <p x-text="warnings.cookiesDisabled.message"></p>
 </div>
 <div class="notification is-info is-light" x-show="warnings.updateAvailable.visible" x-transition>
     <p>
-        An update for LWT is available: <strong x-text="warnings.updateAvailable.latestVersion"></strong>
-        (your version: <span x-text="warnings.updateAvailable.currentVersion"></span>).
-        <a :href="warnings.updateAvailable.downloadUrl" class="button is-small is-info is-outlined ml-2">Download</a>
+        <span x-text="warnings.updateAvailable.message"></span>
+        <a :href="warnings.updateAvailable.downloadUrl" class="button is-small is-info is-outlined ml-2">
+            <?= __('home.download') ?>
+        </a>
     </p>
 </div>
 
@@ -248,7 +78,7 @@ $base = UrlUtilities::getBasePath();
 <!-- Welcome message -->
 <section class="hero is-small is-primary is-bold mb-5">
     <div class="hero-body py-4">
-        <p class="title is-4 has-text-centered">Welcome to your language learning app!</p>
+        <p class="title is-4 has-text-centered"><?= __('home.welcome_title') ?></p>
     </div>
 </section>
 
@@ -259,7 +89,7 @@ $base = UrlUtilities::getBasePath();
         <div class="has-text-centered">
             <a href="<?php echo $base; ?>/languages/new" class="button is-large is-primary">
                 <span class="icon"><i data-lucide="languages"></i></span>
-                <span>Select a language to learn</span>
+                <span><?= __('home.select_language') ?></span>
             </a>
         </div>
     </div>
@@ -320,14 +150,14 @@ $base = UrlUtilities::getBasePath();
                         <div class="buttons">
                             <a :href="basePath + '/text/' + lastText.id + '/read'" class="button is-link is-medium">
                                 <span class="icon"><i data-lucide="book-open"></i></span>
-                                <span>Read</span>
+                                <span><?= __('home.read') ?></span>
                             </a>
                             <a
                                 :href="basePath + '/review?text=' + lastText.id"
                                 class="button is-info is-light is-medium"
                             >
                                 <span class="icon"><i data-lucide="circle-help"></i></span>
-                                <span>Review</span>
+                                <span><?= __('home.review') ?></span>
                             </a>
                         </div>
                         <template x-if="lastText.annotated">
@@ -336,7 +166,7 @@ $base = UrlUtilities::getBasePath();
                                 class="button is-success is-light is-small"
                             >
                                 <span class="icon"><i data-lucide="check"></i></span>
-                                <span>Ann. Text</span>
+                                <span><?= __('home.annotated_text') ?></span>
                             </a>
                         </template>
                     </div>
@@ -348,7 +178,7 @@ $base = UrlUtilities::getBasePath();
                             <i data-lucide="book-open" style="width: 36px; height: 36px;"></i>
                         </span>
                         <p class="has-text-grey is-size-7 has-text-centered">
-                            Add a text or import a book to start reading
+                            <?= __('home.empty_text_card') ?>
                         </p>
                     </div>
                 </template>
@@ -365,7 +195,7 @@ $base = UrlUtilities::getBasePath();
                     <span class="icon is-large has-text-primary">
                         <i data-lucide="plus" style="width: 48px; height: 48px;"></i>
                     </span>
-                    <p class="mt-3 has-text-weight-semibold">New Text</p>
+                    <p class="mt-3 has-text-weight-semibold"><?= __('home.new_text') ?></p>
                 </a>
             </div>
 
@@ -381,7 +211,7 @@ $base = UrlUtilities::getBasePath();
                     <span class="icon is-large has-text-warning-dark">
                         <i data-lucide="search" style="width: 48px; height: 48px;"></i>
                     </span>
-                    <p class="mt-3 has-text-weight-semibold">Search Library</p>
+                    <p class="mt-3 has-text-weight-semibold"><?= __('home.search_library') ?></p>
                 </div>
             </div>
         </div>
@@ -393,7 +223,7 @@ $base = UrlUtilities::getBasePath();
                     <p class="is-size-6 has-text-grey mb-2">
                         <span class="icon-text">
                             <span class="icon"><i data-lucide="book-open-text"></i></span>
-                            <span>Suggested from Project Gutenberg</span>
+                            <span><?= __('home.suggested_from_gutenberg') ?></span>
                         </span>
                     </p>
                     <?php renderSuggestionsGrid(); ?>
@@ -411,7 +241,7 @@ $base = UrlUtilities::getBasePath();
 
 <!-- Version info -->
 <p class="has-text-centered has-text-grey is-size-7 mt-4">
-    LWT Version <?php echo ApplicationInfo::getVersion(); ?>
+    <?= __('home.version_label') ?> <?php echo ApplicationInfo::getVersion(); ?>
 </p>
 
 <!-- Footer - Alpine.js Component -->
@@ -437,7 +267,7 @@ $base = UrlUtilities::getBasePath();
         <div class="modal-background" @click="close()"></div>
         <div class="modal-card" style="max-width: 600px; width: 90vw;">
             <header class="modal-card-head">
-                <p class="modal-card-title">Search Project Gutenberg</p>
+                <p class="modal-card-title"><?= __('home.search_library_modal_title') ?></p>
                 <button class="delete" aria-label="close" @click="close()"></button>
             </header>
             <section class="modal-card-body">
@@ -448,7 +278,13 @@ $base = UrlUtilities::getBasePath();
                                 x-model="query"
                                 class="input"
                                 type="text"
-                                placeholder="Search by title or author..."
+                                placeholder="<?php
+                                    echo htmlspecialchars(
+                                        __('home.search_library_placeholder'),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    );
+                                    ?>"
                             />
                         </div>
                         <div class="control">
@@ -459,7 +295,7 @@ $base = UrlUtilities::getBasePath();
                                 :disabled="loading"
                             >
                                 <span class="icon"><i data-lucide="search"></i></span>
-                                <span>Search</span>
+                                <span><?= __('home.search') ?></span>
                             </button>
                         </div>
                     </div>
@@ -472,9 +308,8 @@ $base = UrlUtilities::getBasePath();
                 <p
                     x-show="searched && !error && !loading"
                     class="has-text-grey is-size-7 mb-2"
-                >
-                    <span x-text="totalCount"></span> books found
-                </p>
+                    x-text="booksFoundLabel(totalCount)"
+                ></p>
 
                 <!-- Results list -->
                 <div
@@ -502,9 +337,10 @@ $base = UrlUtilities::getBasePath();
                                         class="has-text-grey is-size-7"
                                         x-text="formatAuthors(book.authors)"
                                     ></p>
-                                    <p class="has-text-grey-light is-size-7">
-                                        <span x-text="formatDownloads(book.downloadCount)"></span> downloads
-                                    </p>
+                                    <p
+                                        class="has-text-grey-light is-size-7"
+                                        x-text="downloadsLabel(book.downloadCount)"
+                                    ></p>
                                 </div>
                                 <div class="buttons are-small ml-3" style="flex-shrink: 0;">
                                     <button
@@ -512,7 +348,13 @@ $base = UrlUtilities::getBasePath();
                                         class="button is-info is-outlined is-small"
                                         :class="{ 'is-loading': previewLoading && previewBookId === book.id }"
                                         :disabled="previewLoading && previewBookId === book.id"
-                                        title="Analyze difficulty"
+                                        title="<?php
+                                            echo htmlspecialchars(
+                                                __('home.analyze_difficulty'),
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            );
+                                            ?>"
                                     >
                                         <span class="icon"><i data-lucide="bar-chart-2"></i></span>
                                     </button>
@@ -523,7 +365,7 @@ $base = UrlUtilities::getBasePath();
                                         :disabled="importing !== null"
                                     >
                                         <span class="icon"><i data-lucide="download"></i></span>
-                                        <span>Import</span>
+                                        <span><?= __('home.import') ?></span>
                                     </button>
                                 </div>
                             </div>
@@ -541,14 +383,14 @@ $base = UrlUtilities::getBasePath();
                                                 :value="previewData.coverage_percent"
                                                 max="100"
                                             ></progress>
-                                            <p class="is-size-7">
-                                                You know
-                                                <strong x-text="previewData.coverage_percent + '%'"></strong>
-                                                of unique words
-                                                (<span x-text="previewData.known_words"></span>/<span x-text="previewData.total_unique_words"></span>)
-                                            </p>
+                                            <p
+                                                class="is-size-7"
+                                                x-text="coverageDetailedLabel(previewData)"
+                                            ></p>
                                             <div x-show="previewData.sample_unknown_words.length > 0" class="mt-2">
-                                                <p class="has-text-grey is-size-7 mb-1">Unknown words in sample:</p>
+                                                <p class="has-text-grey is-size-7 mb-1">
+                                                    <?= __('home.unknown_words_in_sample') ?>
+                                                </p>
                                                 <div class="tags">
                                                     <template x-for="w in previewData.sample_unknown_words" :key="w">
                                                         <span class="tag is-light is-small" x-text="w"></span>
@@ -571,7 +413,7 @@ $base = UrlUtilities::getBasePath();
                     :class="{ 'is-loading': loading }"
                     :disabled="loading"
                 >
-                    Load more
+                    <?= __('home.load_more') ?>
                 </button>
 
                 <!-- No results -->
@@ -579,7 +421,7 @@ $base = UrlUtilities::getBasePath();
                     x-show="searched && results.length === 0 && !loading && !error"
                     class="has-text-grey is-italic"
                 >
-                    No books found. Try a different search term.
+                    <?= __('home.no_books_found') ?>
                 </p>
             </section>
         </div>

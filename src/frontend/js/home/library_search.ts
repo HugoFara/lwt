@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { t } from '@shared/i18n/translator';
 
 interface GutenbergBook {
   id: number;
@@ -60,6 +61,10 @@ interface LibrarySearchData {
   togglePreview(book: GutenbergBook): Promise<void>;
   formatAuthors(authors: string[]): string;
   formatDownloads(count: number): string;
+  downloadsLabel(count: number): string;
+  booksFoundLabel(count: number): string;
+  coverageLabel(data: PreviewData): string;
+  coverageDetailedLabel(data: PreviewData): string;
   tierLabel(tier: string): string;
   tierClass(tier: string): string;
   coverageClass(label: string): string;
@@ -243,6 +248,26 @@ export function librarySearchData(): LibrarySearchData {
       if (label === 'easy') return 'is-success';
       if (label === 'hard') return 'is-danger';
       return 'is-warning';
+    },
+
+    downloadsLabel(count: number): string {
+      return `${this.formatDownloads(count)} ${t('home.downloads_suffix')}`;
+    },
+
+    booksFoundLabel(count: number): string {
+      return t('home.books_found', { count });
+    },
+
+    coverageLabel(data: PreviewData): string {
+      return t('home.you_know_x_of_unique_words', { percent: data.coverage_percent });
+    },
+
+    coverageDetailedLabel(data: PreviewData): string {
+      return t('home.you_know_x_of_unique_words_detailed', {
+        percent: data.coverage_percent,
+        known: data.known_words,
+        total: data.total_unique_words,
+      });
     },
 
     close() {
