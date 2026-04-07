@@ -320,5 +320,14 @@
     "starter.enriched_with": "个词已充实，使用",
     "starter.view_vocabulary": "查看词汇",
     "starter.import_failed": "导入失败：",
-    "starter.try_again": "重试"
+    "starter.try_again": "重试",
+    "flash.term_saved": "词条已保存",
+    "flash.term_updated": "词条已更新",
+    "flash.term_updated_short": "已更新",
+    "flash.error_prefix": "错误：{message}",
+    "flash.no_terms_selected": "未选择词条",
+    "flash.invalid_term_ids": "无效的词条 ID",
+    "flash.tag_name_required": "请输入标签名称",
+    "flash.unknown_action": "未知操作：{action}",
+    "flash.no_terms_match_filter": "没有词条符合筛选条件"
 }

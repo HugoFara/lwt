@@ -189,5 +189,8 @@
     "modal.lookup": "查找：",
     "modal.dict1": "词典 1",
     "modal.dict2": "词典 2",
-    "modal.translate": "翻译"
+    "modal.translate": "翻译",
+    "flash.text_too_long": "文本过长，必须小于 65000 字节",
+    "flash.error_prefix": "错误：{message}",
+    "flash.error_creating_book": "创建书籍时出错：{error}"
 }
