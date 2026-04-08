@@ -1,5 +1,5 @@
 import { defineConfig, type PluginOption, build } from 'vite';
-import purgecss from 'vite-plugin-purgecss';
+import { PurgeCSS, type UserDefinedOptions } from 'purgecss';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { copyFileSync, rmSync, existsSync } from 'fs';
@@ -26,6 +26,33 @@ function cleanViteOutput(): PluginOption {
         if (existsSync(dir)) {
           rmSync(dir, { recursive: true });
         }
+      }
+    },
+  };
+}
+
+/**
+ * Local PurgeCSS plugin — inlined to avoid the unmaintained
+ * vite-plugin-purgecss package, which pins an old vite@6.x with open
+ * dev-server advisories. Runs PurgeCSS on each emitted CSS asset at
+ * generateBundle time using the caller-supplied content globs.
+ */
+function purgeCssPlugin(options: Omit<UserDefinedOptions, 'css'>): PluginOption {
+  return {
+    name: 'lwt-purgecss',
+    enforce: 'post',
+    apply: 'build',
+    async generateBundle(_opts, bundle) {
+      for (const [key, asset] of Object.entries(bundle)) {
+        if (!key.endsWith('.css') || asset.type !== 'asset') continue;
+        const source = typeof asset.source === 'string'
+          ? asset.source
+          : Buffer.from(asset.source).toString('utf8');
+        const [purged] = await new PurgeCSS().purge({
+          ...options,
+          css: [{ raw: source }],
+        });
+        asset.source = purged.css;
       }
     },
   };
@@ -108,8 +135,7 @@ export default defineConfig({
     // Build service worker for PWA support
     buildServiceWorker(),
     // PurgeCSS to remove unused CSS (especially from Bulma)
-    // Cast needed due to vite-plugin-purgecss type issues with 'enforce' property
-    purgecss({
+    purgeCssPlugin({
       content: [
         // PHP views and templates
         resolve(__dirname, 'src/**/*.php'),
@@ -155,7 +181,7 @@ export default defineConfig({
       },
       // Skip purging these files
       rejected: true,
-    }) as PluginOption,
+    }),
   ],
 
   server: {
