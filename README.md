@@ -26,7 +26,7 @@
 Don't know where to start? LWT suggests books from [Project Gutenberg](https://www.gutenberg.org/) ranked by difficulty, plus curated news feeds in 19 languages. Already have a text you love? Paste it in and start reading. As you mark words, suggestions get smarter and new vocabulary is pre-enriched from [Wiktionary](https://www.wiktionary.org/).
 
 > [!IMPORTANT]
-> This is a **community-maintained fork** with significant improvements over the [official version](https://sourceforge.net/projects/learning-with-texts): modern PHP support (8.1-8.4), smaller database footprint, mobile support, and active development.
+> This is a **community-maintained fork** and a significant upgrade over the original LWT (first released in 2011). It brings an easy-to-use interface, text suggestions and reading statistics, modern PHP support (8.2–8.5), mobile support, and compatibility with the modern web. The original SourceForge project is no longer available; an archival snapshot of the original code is preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
 
 ## Table of Contents
 
