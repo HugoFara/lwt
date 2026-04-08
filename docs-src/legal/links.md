@@ -1,11 +1,13 @@
 # Important Links
 
-* [**Original Project Page** @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/)
+* **Original Project Page**: the original project was hosted at [sourceforge.net/projects/learning-with-texts](http://sourceforge.net/projects/learning-with-texts/) by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/), but the SourceForge page is no longer available. A snapshot of the original, unmaintained code is preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
 * **Download Page**:
   * [Latest release @ GitHub](https://github.com/HugoFara/lwt/releases/latest)
   * [Latest development version @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip)
-  * [Official version @ Sourceforge](http://sourceforge.net/projects/learning-with-texts/files/) (original, unmaintained)
+  * [Original unmaintained version](https://github.com/HugoFara/lwt/tree/official) (archived on the `official` branch of this repo)
 * [**Community Maintained Version** @ GitHub](https://github.com/HugoFara/lwt)
+
+> **A note on third-party copies:** Since the SourceForge project went offline, unofficial copies of the original LWT source have appeared on GitHub. We cannot vouch for any of them — some make strong claims about being the "only working" version. The `official` branch of this repository is our own archival copy of lang-learn-guy's original code; if you need the historical version, we recommend using that.
 * **Documentation**: try either the [local link](/) or the [online documentation](https://hugofara.github.io/lwt/).
 
 ## LWT Online Demo - *try it out:*

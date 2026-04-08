@@ -4,7 +4,7 @@
 
 ## What is LWT?
 
-[_Learning with Texts_ (LWT)](https://sourceforge.net/projects/learning-with-texts/) is a tool for Language Learning by reading texts.
+_Learning with Texts_ (LWT) is a tool for Language Learning by reading texts. It was originally published on SourceForge, but that project page is no longer available; a snapshot of the original code is preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
 It is inspired by:
 
 * [Stephen Krashen's](http://sdkrashen.com) principles in Second Language Acquisition,
@@ -31,7 +31,9 @@ To run LWT, you'll need:
 
 ## History
 
-### Original Author: [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/)
+### Original Author: lang-learn-guy
+
+LWT was originally created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and hosted on SourceForge. That project page is no longer reachable, and we have no way to contact the original author. Unofficial re-uploads of the code exist elsewhere on GitHub, but we cannot vouch for them — treat any "only working version" claims with caution. Our own archive of the original, unmaintained code lives on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
 
 * I started this software application in 2010 as a hobby project for my personal learning (reading & listening to foreign texts, saving & reviewing new words and expressions).
 * In June 2011, I decided to publish the software in the hope that it will be useful to other language learners around the world.
