@@ -303,7 +303,7 @@ class FeedCrudApiHandler
 
         return [
             'success' => true,
-            'deleted' => $result['feeds']
+            'deleted' => $result['feeds'] ?? 0
         ];
     }
 

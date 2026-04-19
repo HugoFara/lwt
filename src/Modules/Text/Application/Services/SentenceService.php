@@ -318,6 +318,12 @@ class SentenceService
      */
     private function convertZwsToSpacing(string $text, string $termchar): string
     {
+        // Without a word-character class, the regex character classes below
+        // would be empty and fail to compile.
+        if ($termchar === '') {
+            return trim(str_replace("​", "", $text));
+        }
+
         // Step 1: Add space between consecutive word characters
         $pattern1 = "/([$termchar])​(?=[$termchar])/u";
         $result = preg_replace($pattern1, "$1 ", $text) ?? $text;

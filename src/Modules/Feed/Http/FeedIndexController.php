@@ -171,9 +171,9 @@ class FeedIndexController
                 include $this->viewPath . 'edit_text_form.php';
             } elseif (is_array($texts)) {
                 $result = $this->createTextsFromFeed($texts, $row, $tagName, $maxTexts);
-                $stats['archived'] += $result['archived'];
-                $stats['sentences'] += $result['sentences'];
-                $stats['textitems'] += $result['textitems'];
+                $stats['archived'] += $result['archived'] ?? 0;
+                $stats['sentences'] += $result['sentences'] ?? 0;
+                $stats['textitems'] += $result['textitems'] ?? 0;
             }
         }
 

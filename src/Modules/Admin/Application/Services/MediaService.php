@@ -72,12 +72,16 @@ class MediaService
     public function searchMediaPaths(string $dir): array
     {
         $isWindows = str_starts_with(strtoupper(PHP_OS), "WIN");
-        $mediadir = scandir($dir);
         $paths = [
             "paths" => [$dir],
             "folders" => [$dir]
         ];
 
+        if (!is_dir($dir)) {
+            return $paths;
+        }
+
+        $mediadir = scandir($dir);
         if ($mediadir === false) {
             return $paths;
         }
@@ -175,7 +179,8 @@ class MediaService
         $media = $this->getMediaPaths();
         $mediaJson = json_encode($media);
         $r = '<p>
-            YouTube, Dailymotion, Vimeo, Bilibili, NicoNico, PeerTube, or choose a file in "../' . $media["base_path"] . '/media":
+            YouTube, Dailymotion, Vimeo, Bilibili, NicoNico, PeerTube, or choose a file in "../'
+            . $media["base_path"] . '/media":
         </p>
         <p id="mediaSelectErrorMessage"></p>
         ' .
