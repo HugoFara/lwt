@@ -35,7 +35,7 @@ class ApplicationInfo
     /**
      * Date of the latest published release of LWT.
      */
-    public const RELEASE_DATE = '2026-04-05';
+    public const RELEASE_DATE = '2026-04-21';
 
     /**
      * Get the application version for display to humans.

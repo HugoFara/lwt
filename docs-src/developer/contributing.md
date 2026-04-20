@@ -240,6 +240,32 @@ When adding new features or fixing bugs that affect user-facing functionality, c
 2. Use fixtures for test data
 3. Run tests locally before submitting PRs
 
+## Curated Feed Sources
+
+LWT ships a registry of curated RSS/Atom news feeds for language learners in `data/curated_feeds.json`. Each entry includes pre-configured extraction selectors and options matching the app's feed system.
+
+### Checking Feed Health
+
+A health-check script detects link rot, XML format changes, and stale feeds:
+
+```bash
+php bin/check-feeds.php                  # Check all feeds
+php bin/check-feeds.php --language=fr    # Check only French feeds
+php bin/check-feeds.php --json           # Machine-readable output (for CI)
+php bin/check-feeds.php --sample-article # Also test article selectors on a live page
+php bin/check-feeds.php --fix            # Update _lastVerified date on success
+```
+
+Exit codes: `0` = all healthy, `1` = issues found, `2` = registry file error.
+
+Run this script before submitting changes to `curated_feeds.json`, and periodically to catch feed URL changes early.
+
+### Adding or Updating Feeds
+
+1. Edit `data/curated_feeds.json` — each source needs `name` (max 40 chars), `url`, `articleSectionTags` (tag name for content extraction), `filterTags` (XPath selectors to remove), `options`, `category`, and `level`.
+2. Run `php bin/check-feeds.php` and verify the new feed is healthy.
+3. Prefer well-known, publicly funded broadcasters (BBC, DW, NHK, etc.) as they tend to maintain stable RSS endpoints.
+
 ## Improving Documentation
 
 To regenerate all documentation (VitePress, JSDoc, phpDoc), use ``composer doc``.

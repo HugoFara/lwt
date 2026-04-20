@@ -5,7 +5,7 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
-## [Unreleased]
+## [3.1.0-fork] - 2026-04-21
 
 ### Added
 

@@ -10,6 +10,97 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
+## [3.1.0-fork] - 2026-04-21
+
+### Added
+
+* **Internationalization (i18n)** (#223): PHP `__()` and JS `t()` /
+  Alpine `$t` helpers backed by per-namespace JSON files under `locale/`,
+  with English fallback and a per-user `app_language` setting. The
+  preferences page exposes a language picker.
+* **Spanish translation** of the home page, main navbar and user
+  preferences page (#223).
+* **Activity tracking with streaks and calendar heatmap** (#227): New
+  `activity_log` table tracks daily terms created, terms reviewed, and texts
+  read. A backfill migration populates historical data from existing word
+  timestamps. The home page now shows current streak, best streak, today's
+  activity summary, and a GitHub-style calendar heatmap of the last 12 months.
+  New API endpoints at `/api/v1/activity/{dashboard,streak,calendar,today}`.
+* **PHP 8.5 support**: All dependencies now support PHP 8.5. Added PHP 8.5 to
+  the CI test matrix.
+
+### Changed
+
+* **Update notification**: The "new LWT version available" banner on the
+  home page is now dismissible (remembered per-version via localStorage),
+  only shown to admins, and can be disabled entirely via a new
+  `set-check-for-updates` admin setting in the settings page.
+* **Navbar**: Merged the admin dropdown into the user dropdown to save space.
+* **Per-user statistics**: Moved the statistics page from `/admin/statistics` to `/profile/statistics` since it shows per-user learning data. The old URL redirects to the new one.
+* **Cleaner setting definition keys**: `SettingDefinitions` entries now use
+  `default` (string) and `numeric` (bool) instead of the cryptic `dft` (string)
+  and `num` (int 0/1). The legacy keys are still accepted on read for
+  backwards compatibility but are deprecated.
+* **Renamed `dev` branch to `develop`**: All CI workflows and documentation
+  updated to reference the new branch name.
+* **Upgraded dev tooling to latest major versions**:
+  * PHPUnit 10 → 11: migrated all test annotations (`@dataProvider`, `@covers`,
+    `@group`, `@runTestsInSeparateProcesses`) to PHP 8 attributes. Replaced the
+    duplicate integration testsuite in `phpunit.xml` with `#[Group('integration')]`.
+  * ESLint 9 → 10, TypeScript 5 → 6: removed deprecated `baseUrl` from
+    `tsconfig.json`, fixed two new `no-useless-assignment` lint errors.
+  * Vite 6 → 8 (Rolldown bundler): converted `manualChunks` from object to
+    function, removed redundant `inlineDynamicImports`.
+  * Also bumped `@eslint/css` 0.14 → 1, `@eslint/js` 9 → 10,
+    `@eslint/markdown` 7 → 8, `@types/node` 24 → 25, `jsdom` 27 → 29,
+    `globals` 16 → 17.
+* **Cleaned up all PHPCS violations in the test suite**: removed 80+ redundant
+  `require_once` / bootstrap side-effect blocks (already handled by
+  `tests/bootstrap.php`), extracted inline helper classes to separate files,
+  fixed line-length warnings. Result: 0 errors, 0 warnings across all tests.
+* **Separated build output from static assets**: Build output (Vite bundles,
+  theme CSS, base CSS) now goes to `dist/` instead of `assets/`. Static files
+  (images, sounds, manifest) stay in `assets/`. The `dist/` directory is fully
+  gitignored — cloning requires `npm run build:all`. Includes a DB migration to
+  update stored theme directory paths.
+* **Replaced legacy PNG/GIF icons with pure CSS in dark themes**: The Dark,
+  Dark_Muted, and Underline_Dark themes used a PNG sprite sheet for custom
+  checkbox/radio styling. Replaced with CSS borders and inline SVG. Also removed
+  36 unused image files (spinners, speaker icons, test result icons, etc.) that
+  had already been superseded by Lucide SVG icons.
+* **Optimized Vite build chunks**: Reduced the main entry bundle from 228 KB to
+  180 KB (gzip: 68→56 KB) by moving page-specific modules (home, media, auth,
+  tags, dictionary, sorttable, searchable-select, bulk-actions, word-form-auto)
+  to dynamic imports loaded on demand. Tree-shook chart.js (203→179 KB) by
+  registering only used components. Pruned 50 unused Lucide icons (143→97) and
+  added 5 missing ones. Added a Vite plugin to clean stale hashed bundles
+  between builds.
+
+### Fixed
+
+* **Version number not updated since 3.0.0**: `ApplicationInfo::VERSION` was
+  never bumped for the 3.0.1 and 3.0.2 releases, causing the app to display
+  "3.0.0-fork" in the UI.
+
+### Removed
+
+* **Dead route `/text/set-mode`**: This endpoint (and its view, controller
+  method, and frontend JS) was no longer reachable from any UI. The "Show All"
+  and "Learning Translations" toggles now save settings via the
+  `POST /api/v1/settings` API and reload the page.
+* **Dead route `/admin/save-setting`**: This legacy `?k=…&v=…&u=…` endpoint was
+  fully superseded by `POST /api/v1/settings`. No UI or frontend code referenced
+  it.
+
+### Deprecated
+
+* **Legacy query-parameter routes** now emit `Deprecation`, `Sunset`, and `Link`
+  HTTP headers. The routes still work but will be removed in the next major
+  version. Affected routes: `/text/read`, `/text/display`, `/text/print-plain`,
+  `/text/edit`, `/word/new`, `/word/show`, `/vocabulary/term/status`,
+  `/feeds/edit`, `/dictionaries`, `/dictionaries/import`, and the
+  `/api.php/v1/*` prefix.
+
 ## [3.0.2-fork] - 2026-04-05
 
 ### Changed
