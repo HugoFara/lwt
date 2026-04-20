@@ -42,13 +42,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-${{ matrix.php-version }}-
 
-      - name: Install dependencies (Ubuntu)
-        if: runner.os != 'Windows'
-        run: composer install --prefer-dist --no-progress
-
-      - name: Install dependencies (Windows)
-        if: runner.os == 'Windows'
-        # Remove phpdocumentor (not needed for tests) to avoid GPG verification issues
+      - name: Install dependencies
+        # Remove phpdocumentor (not needed for tests) to avoid GPG verification
+        # issues on Windows and flaky phar downloads from GitHub releases.
         run: |
           composer remove --dev phpdocumentor/shim
           composer install --prefer-dist --no-progress
