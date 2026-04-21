@@ -1,0 +1,197 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lwt\Modules\Vocabulary\Http;
+
+use Lwt\Modules\Language\Application\LanguageFacade;
+use Lwt\Modules\Vocabulary\Application\Services\Anki\ApkgExportService;
+use Lwt\Modules\Vocabulary\Application\Services\Anki\ApkgImportService;
+use Lwt\Modules\Vocabulary\Application\Services\Anki\ImportResult;
+use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
+use Lwt\Shared\UI\Helpers\FormHelper;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+use RuntimeException;
+
+/**
+ * HTTP entry points for round-trip Anki .apkg interop:
+ *
+ *   GET  /vocabulary/apkg/export?lang_id=N   stream a .apkg download
+ *   GET  /vocabulary/apkg/import             render the upload form
+ *   POST /vocabulary/apkg/import             accept upload + render summary
+ *
+ * The orchestration lives in ApkgExportService / ApkgImportService;
+ * this controller is just request parsing + response shaping.
+ */
+class ApkgController extends VocabularyBaseController
+{
+    private LanguageFacade $languageFacade;
+    private ?ApkgExportService $exportService;
+    private ?ApkgImportService $importService;
+
+    public function __construct(
+        ?LanguageFacade $languageFacade = null,
+        ?ApkgExportService $exportService = null,
+        ?ApkgImportService $importService = null,
+    ) {
+        parent::__construct();
+        $this->languageFacade = $languageFacade ?? new LanguageFacade();
+        $this->exportService = $exportService;
+        $this->importService = $importService;
+    }
+
+    /**
+     * Export terms for a language as a .apkg, streamed to the browser.
+     *
+     * @param array<string, string> $params Route params (unused; lang via query).
+     */
+    public function export(array $params): never
+    {
+        $langId = InputValidator::getPositiveInt('lang_id') ?? 0;
+        if ($langId <= 0) {
+            $current = Settings::get('currentlanguage');
+            $langId = $current !== '' ? (int) $current : 0;
+        }
+        if ($langId <= 0) {
+            throw new RuntimeException('lang_id query parameter is required');
+        }
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'lwt_apkg_dl_');
+        if ($tmpPath === false) {
+            throw new RuntimeException('Could not allocate temporary file for export');
+        }
+
+        try {
+            $result = $this->exportSvc()->exportLanguage($langId, $tmpPath);
+            $filename = sprintf(
+                'lwt-%s-%s.apkg',
+                $this->slugify($result->languageName),
+                date('Y-m-d')
+            );
+            $this->streamDownload($tmpPath, $filename);
+        } finally {
+            if (is_file($tmpPath)) {
+                unlink($tmpPath);
+            }
+        }
+    }
+
+    /**
+     * Render the import upload form (GET) or process the upload (POST).
+     *
+     * @param array<string, string> $params Route params (unused).
+     */
+    public function importForm(array $params): void
+    {
+        PageLayoutHelper::renderPageStart('Import Anki .apkg', true);
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $this->handleImportSubmit();
+        } else {
+            $this->renderImportForm(null, null);
+        }
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    private function handleImportSubmit(): void
+    {
+        $file = InputValidator::getUploadedFile('apkg');
+        if ($file === null) {
+            $this->renderImportForm('No file was uploaded.', null);
+            return;
+        }
+
+        $name = $file['name'];
+        if (!str_ends_with(strtolower($name), '.apkg')) {
+            $this->renderImportForm('Only .apkg files are accepted.', null);
+            return;
+        }
+
+        try {
+            $result = $this->importSvc()->importApkg($file['tmp_name']);
+        } catch (RuntimeException $e) {
+            $this->renderImportForm('Import failed: ' . $e->getMessage(), null);
+            return;
+        }
+
+        $this->renderImportForm(null, $result);
+    }
+
+    private function renderImportForm(?string $error, ?ImportResult $result): void
+    {
+        $csrfToken = FormHelper::csrfToken();
+
+        echo '<h1>Import Anki .apkg</h1>';
+
+        if ($error !== null) {
+            echo '<div class="notification is-danger">'
+                . htmlspecialchars($error, ENT_QUOTES, 'UTF-8')
+                . '</div>';
+        }
+
+        if ($result !== null) {
+            echo '<div class="notification is-success">'
+                . '<p><strong>Import complete.</strong></p>'
+                . '<ul>'
+                . '<li>Notes read: ' . $result->totalNotes . '</li>'
+                . '<li>Updated: ' . $result->updated . '</li>'
+                . '<li>Unchanged: ' . $result->unchanged . '</li>'
+                . '<li>Skipped (term not found): ' . $result->skippedMissing . '</li>'
+                . '<li>Skipped (no LWT id): ' . $result->skippedUnknown . '</li>'
+                . '<li>Demoted to Ignored from suspended: ' . $result->statusSetToIgnored . '</li>'
+                . '<li>Tag changes applied: ' . $result->tagsChanged . '</li>'
+                . '</ul></div>';
+        }
+
+        echo '<form method="post" enctype="multipart/form-data" action="/vocabulary/apkg/import">';
+        echo '<input type="hidden" name="csrf_token" value="'
+            . htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') . '">';
+        echo '<div class="field">'
+            . '<label class="label" for="apkg-file">Anki package (.apkg)</label>'
+            . '<div class="control">'
+            . '<input class="input" type="file" name="apkg" id="apkg-file"'
+            . ' accept=".apkg" required>'
+            . '</div></div>';
+        echo '<div class="field"><div class="control">'
+            . '<button class="button is-primary" type="submit">Import</button>'
+            . '</div></div>';
+        echo '</form>';
+
+        echo '<p class="help mt-4">'
+            . 'Notes from this file are matched to existing LWT terms by guid. '
+            . 'Translations, romanizations, notes, and tags are updated. '
+            . 'Cards suspended in Anki demote learning-status terms to <em>Ignored</em>.'
+            . '</p>';
+    }
+
+    private function streamDownload(string $path, string $filename): never
+    {
+        $size = filesize($path);
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        if ($size !== false) {
+            header('Content-Length: ' . $size);
+        }
+        readfile($path);
+        exit();
+    }
+
+    private function slugify(string $name): string
+    {
+        $ascii = preg_replace('/[^A-Za-z0-9_-]+/', '-', $name);
+        $ascii = trim((string) $ascii, '-');
+        return $ascii !== '' ? strtolower($ascii) : 'language';
+    }
+
+    private function exportSvc(): ApkgExportService
+    {
+        return $this->exportService ??= ApkgExportService::default();
+    }
+
+    private function importSvc(): ApkgImportService
+    {
+        return $this->importService ??= ApkgImportService::default();
+    }
+}
