@@ -270,6 +270,23 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
+    // Anki .apkg export / import (ApkgController)
+    $router->get(
+        '/vocabulary/apkg/export',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@export',
+        AUTH_MIDDLEWARE
+    );
+    $router->get(
+        '/vocabulary/apkg/import',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@importForm',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/vocabulary/apkg/import',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@importForm',
+        AUTH_MIDDLEWARE
+    );
+
     // Legacy PHP endpoint replacements (iframe-based status changes)
     // These render HTML responses for display in iframes during text reading
     // Status controllers (TermStatusController)
