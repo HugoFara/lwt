@@ -251,6 +251,14 @@ class UrlUtilities
 
         $host = $parsed['host'];
 
+        // parse_url leaves brackets on IPv6 literals (e.g. "[::1]"). Strip them
+        // so downstream IP-literal detection and filter_var IP checks work —
+        // without this, "[::1]" falls through to DNS and only "passes" SSRF
+        // validation because the lookup eventually times out.
+        if (strlen($host) >= 2 && $host[0] === '[' && $host[-1] === ']') {
+            $host = substr($host, 1, -1);
+        }
+
         // Block common internal hostnames
         $lowerHost = strtolower($host);
         $blockedHostnames = [

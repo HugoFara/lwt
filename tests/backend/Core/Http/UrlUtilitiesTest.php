@@ -191,9 +191,12 @@ final class UrlUtilitiesTest extends TestCase
         $result = UrlUtilities::validateUrlForFetch('http://127.1.2.3/');
         $this->assertFalse($result['valid']);
 
-        // IPv6 loopback
+        // IPv6 loopback. Must be blocked by IP-literal detection, not by DNS
+        // timeout: an earlier version stripped no brackets, fell through to
+        // dns_get_record, and only "passed" when the lookup eventually failed.
         $result = UrlUtilities::validateUrlForFetch('http://[::1]/');
         $this->assertFalse($result['valid']);
+        $this->assertSame('::1', $result['resolved_ip'] ?? null);
     }
 
     /**
