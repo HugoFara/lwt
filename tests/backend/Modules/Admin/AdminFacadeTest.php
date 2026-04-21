@@ -339,12 +339,15 @@ class AdminFacadeTest extends TestCase
         $backupRepo = $this->createMock(BackupRepositoryInterface::class);
         $facade = new AdminFacade($settingsRepo, $backupRepo);
 
-        // Test with invalid connection
+        // Test with an invalid connection. Use a non-existent socket path
+        // rather than an unresolvable hostname: mysqli_real_connect against a
+        // bad hostname blocks ~3.6s on DNS, while a missing socket fails in <1ms.
         $connection = new DatabaseConnectionDTO(
-            'invalid_host_xyz',
+            '127.0.0.1',
             'invalid_user',
             'invalid_pass',
-            'invalid_db'
+            'invalid_db',
+            '/nonexistent/lwt-test/socket'
         );
 
         $result = $facade->testConnection($connection);
