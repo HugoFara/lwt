@@ -173,6 +173,34 @@ final class ApkgServiceIntegrationTest extends TestCase
         );
     }
 
+    public function testExportTermsRespectsSubsetSelection(): void
+    {
+        $a = $this->seedTerm('apkgi_subset_a', TermStatus::LEARNING_3, 'a', '');
+        $b = $this->seedTerm('apkgi_subset_b', TermStatus::NEW, 'b', '');
+        $c = $this->seedTerm('apkgi_subset_c', TermStatus::NEW, 'c', '');
+
+        $path = tempnam(sys_get_temp_dir(), 'lwt_apkg_subset_');
+        self::assertNotFalse($path);
+        unlink($path);
+
+        try {
+            // Subset of two: a and c only
+            $result = ApkgExportService::default()
+                ->exportTerms(self::$languageId, [$a, $c], $path);
+            self::assertSame(2, $result->noteCount);
+
+            // Re-read with the standalone reader and confirm only a + c arrived
+            $notes = (new \Lwt\Modules\Vocabulary\Infrastructure\Anki\ApkgReader())->read($path);
+            $ids = array_map(static fn($n) => $n->lwtTermId, $notes);
+            sort($ids);
+            self::assertSame([$a, $c], $ids);
+        } finally {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+    }
+
     public function testImportSuspendsLearningTermBackedByApkg(): void
     {
         $term = $this->seedTerm('apkgi_suspend', TermStatus::LEARNING_3, 'tr', '');
