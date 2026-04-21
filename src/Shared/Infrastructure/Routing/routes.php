@@ -271,7 +271,13 @@ function registerRoutes(Router $router): void
     );
 
     // Anki .apkg export / import (ApkgController)
+    // Both GET (whole language) and POST (selection-aware via marked[]).
     $router->get(
+        '/vocabulary/apkg/export',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@export',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
         '/vocabulary/apkg/export',
         'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@export',
         AUTH_MIDDLEWARE

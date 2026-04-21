@@ -30,6 +30,7 @@ const STORAGE_KEY = 'lwt_word_list_filters';
 interface PageConfig {
   activeLanguageId: number;
   perPage: number;
+  csrfToken?: string;
 }
 
 /**
@@ -521,6 +522,14 @@ export function wordListData(): WordListData {
         return;
       }
 
+      // Anki .apkg export of selected terms — POSTs marked[] to the apkg
+      // endpoint, which streams the file as a download.
+      if (action === 'expapkg') {
+        this.postApkgExport(ids);
+        select.value = '';
+        return;
+      }
+
       const response = await WordsApi.bulkAction(ids, action, data);
 
       if (response.data?.success) {
@@ -537,6 +546,18 @@ export function wordListData(): WordListData {
       const select = event.target as HTMLSelectElement;
       const action = select.value;
       if (!action) return;
+
+      // Anki .apkg actions: not selection-based, not destructive, no confirm.
+      if (action === 'allexpapkg') {
+        this.postApkgExport([]);
+        select.value = '';
+        return;
+      }
+      if (action === 'allimpapkg') {
+        window.location.href = '/vocabulary/apkg/import';
+        select.value = '';
+        return;
+      }
 
       if (
         !confirm(
@@ -740,8 +761,43 @@ export function wordListData(): WordListData {
 
       document.body.appendChild(form);
       form.submit();
-    }
-  } as WordListData & { submitExportForm: (action: string, ids: number[]) => void };
+    },
+
+    // POST to the apkg export endpoint. Empty ids = whole-language export
+    // (the server treats missing/empty marked[] as "all terms"). The browser
+    // handles the download via the Content-Disposition response header.
+    postApkgExport(ids: number[]) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/vocabulary/apkg/export';
+
+      const langInput = document.createElement('input');
+      langInput.type = 'hidden';
+      langInput.name = 'lang_id';
+      langInput.value = String(config.activeLanguageId);
+      form.appendChild(langInput);
+
+      ids.forEach((id) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'marked[]';
+        input.value = String(id);
+        form.appendChild(input);
+      });
+
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = '_csrf_token';
+      csrfInput.value = config.csrfToken || '';
+      form.appendChild(csrfInput);
+
+      document.body.appendChild(form);
+      form.submit();
+    },
+  } as WordListData & {
+    submitExportForm: (action: string, ids: number[]) => void;
+    postApkgExport: (ids: number[]) => void;
+  };
 }
 
 /**

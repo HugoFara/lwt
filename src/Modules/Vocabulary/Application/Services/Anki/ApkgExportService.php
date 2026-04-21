@@ -40,18 +40,47 @@ final class ApkgExportService
         );
     }
 
+    /**
+     * Export every term in a language. Convenience wrapper around exportTerms().
+     */
     public function exportLanguage(int $languageId, string $outputPath): ExportResult
+    {
+        return $this->exportTerms($languageId, null, $outputPath);
+    }
+
+    /**
+     * Export a language's terms, optionally restricted to a specific subset.
+     *
+     * Subset semantics: any IDs not belonging to $languageId are silently
+     * skipped, so a stale browser-side selection won't leak terms across
+     * languages. Re-importing a subset .apkg only updates the terms whose
+     * guids it contains; LWT terms outside the subset are untouched, which
+     * matches what users want when they only studied a slice in Anki.
+     *
+     * @param list<int>|null $termIds Subset to include; null = whole language
+     */
+    public function exportTerms(int $languageId, ?array $termIds, string $outputPath): ExportResult
     {
         $language = $this->languages->find($languageId);
         if ($language === null) {
             throw new RuntimeException("Language {$languageId} not found");
         }
 
-        $terms = $this->terms->findByLanguage($languageId);
+        $allTerms = $this->terms->findByLanguage($languageId);
+        if ($termIds !== null && $termIds !== []) {
+            $idSet = array_flip($termIds);
+            $terms = array_values(array_filter(
+                $allTerms,
+                static fn($t) => isset($idSet[$t->id()->toInt()])
+            ));
+        } else {
+            $terms = $allTerms;
+        }
+
         if ($terms === []) {
-            throw new RuntimeException(
-                "No terms to export for language '{$language->name()}'"
-            );
+            $detail = ($termIds !== null && $termIds !== [])
+                ? "selected terms" : "language '{$language->name()}'";
+            throw new RuntimeException("No terms to export for {$detail}");
         }
 
         $deck = ApkgDeck::forLanguage($languageId, $language->name());

@@ -42,9 +42,13 @@ class ApkgController extends VocabularyBaseController
     }
 
     /**
-     * Export terms for a language as a .apkg, streamed to the browser.
+     * Export terms as a .apkg, streamed to the browser.
      *
-     * @param array<string, string> $params Route params (unused; lang via query).
+     * Accepted parameters (any source — query string for GET, body for POST):
+     *   - lang_id   int   target language; defaults to the current language
+     *   - marked[]  int[] optional subset of WoIDs; empty/missing = whole language
+     *
+     * @param array<string, string> $params Route params (unused).
      */
     public function export(array $params): never
     {
@@ -54,8 +58,11 @@ class ApkgController extends VocabularyBaseController
             $langId = $current !== '' ? (int) $current : 0;
         }
         if ($langId <= 0) {
-            throw new RuntimeException('lang_id query parameter is required');
+            throw new RuntimeException('lang_id parameter is required');
         }
+
+        $marked = InputValidator::getIntArray('marked');
+        $termIds = $marked !== [] ? $marked : null;
 
         $tmpPath = tempnam(sys_get_temp_dir(), 'lwt_apkg_dl_');
         if ($tmpPath === false) {
@@ -63,10 +70,12 @@ class ApkgController extends VocabularyBaseController
         }
 
         try {
-            $result = $this->exportSvc()->exportLanguage($langId, $tmpPath);
+            $result = $this->exportSvc()->exportTerms($langId, $termIds, $tmpPath);
+            $suffix = $termIds !== null ? '-selection' : '';
             $filename = sprintf(
-                'lwt-%s-%s.apkg',
+                'lwt-%s%s-%s.apkg',
                 $this->slugify($result->languageName),
+                $suffix,
                 date('Y-m-d')
             );
             $this->streamDownload($tmpPath, $filename);

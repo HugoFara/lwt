@@ -16,15 +16,24 @@ If you only want LWT-side spaced repetition, the built-in [Review module](/refer
 2. **Study in Anki** — Import the file into Anki (File → Import). Subsequent exports merge cleanly because each note carries a stable guid (`lwt-{TermID}`), so Anki updates the existing note instead of creating a duplicate.
 3. **Re-import to LWT** — Export the deck from Anki (File → Export → Anki Deck Package, include scheduling info). Upload it back into LWT. Translation, romanization, notes, and tag edits flow back. Cards you suspended in Anki demote learning-status terms to **Ignored** in LWT.
 
+## Where to find it
+
+On the **vocabulary list page**, both the "ALL" and "Marked Terms" action dropdowns expose the new options under their **Export** group:
+
+- *Marked Terms → Export Selection to Anki package (.apkg)* — exports only the terms you've ticked
+- *ALL → Export Language to Anki package (.apkg)* — exports every term in the current language
+- *ALL → Import Anki package (.apkg)…* — opens the upload form
+
 ## Endpoints
 
 | Endpoint | Purpose |
 |----------|---------|
-| `GET /vocabulary/apkg/export?lang_id=N` | Streams a `.apkg` for the given language |
+| `GET /vocabulary/apkg/export?lang_id=N` | Streams a whole-language `.apkg` |
+| `POST /vocabulary/apkg/export` | Same, with optional `marked[]` to restrict to a subset |
 | `GET /vocabulary/apkg/import` | Upload form |
 | `POST /vocabulary/apkg/import` | Accepts a `.apkg` upload, merges into LWT, returns a summary |
 
-`lang_id` defaults to your current language if omitted.
+`lang_id` defaults to your current language if omitted. An empty `marked[]` is treated as "every term in the language".
 
 ## Field mapping (LWT → Anki)
 
