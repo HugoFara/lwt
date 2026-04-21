@@ -49,6 +49,12 @@ Globals::initialize();
 // Load the .env configuration
 EnvLoader::load(__DIR__ . '/../.env');
 
+// Point the NLP service at a closed local port so any test that still reaches
+// the real HTTP handler (e.g. through the static LemmatizerFactory) fails fast
+// with ECONNREFUSED instead of waiting ~4s for DNS/connect to time out against
+// the default http://nlp:8000 host.
+putenv('NLP_SERVICE_URL=http://127.0.0.1:1/');
+
 // Set up test database name BEFORE any connection attempts
 // This ensures all tests use the test database, not the production one
 $config = EnvLoader::getDatabaseConfig();
