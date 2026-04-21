@@ -35,11 +35,13 @@ class NlpServiceHandler implements ApiRoutableInterface
 
     private string $baseUrl;
     private int $timeout;
+    private NlpHttpClient $httpClient;
 
-    public function __construct()
+    public function __construct(?NlpHttpClient $httpClient = null)
     {
         $this->baseUrl = EnvLoader::get('NLP_SERVICE_URL', 'http://nlp:8000') ?? 'http://nlp:8000';
         $this->timeout = 30;
+        $this->httpClient = $httpClient ?? new StreamNlpHttpClient();
     }
 
     /**
@@ -47,11 +49,8 @@ class NlpServiceHandler implements ApiRoutableInterface
      */
     public function isAvailable(): bool
     {
-        $context = stream_context_create([
-            'http' => ['method' => 'GET', 'timeout' => 5]
-        ]);
-        $response = @file_get_contents($this->baseUrl . '/health', false, $context);
-        return $response !== false;
+        $response = $this->httpClient->request($this->baseUrl . '/health', 'GET', null, 5);
+        return $response !== null;
     }
 
     /**
@@ -64,20 +63,19 @@ class NlpServiceHandler implements ApiRoutableInterface
     public function speak(string $text, string $voiceId): ?string
     {
         $payload = json_encode(['text' => $text, 'voice_id' => $voiceId]);
+        if ($payload === false) {
+            return null;
+        }
 
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $payload,
-                'timeout' => $this->timeout,
-                'ignore_errors' => true,
-            ]
-        ]);
+        $audio = $this->httpClient->request(
+            $this->baseUrl . '/tts/speak',
+            'POST',
+            $payload,
+            $this->timeout,
+            true
+        );
 
-        $audio = @file_get_contents($this->baseUrl . '/tts/speak', false, $context);
-
-        if ($audio === false) {
+        if ($audio === null) {
             return null;
         }
 
@@ -92,12 +90,8 @@ class NlpServiceHandler implements ApiRoutableInterface
      */
     public function getVoices(): array
     {
-        $context = stream_context_create([
-            'http' => ['method' => 'GET', 'timeout' => 10]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/tts/voices', false, $context);
-        if ($response === false) {
+        $response = $this->httpClient->request($this->baseUrl . '/tts/voices', 'GET', null, 10);
+        if ($response === null) {
             return [];
         }
 
@@ -113,12 +107,8 @@ class NlpServiceHandler implements ApiRoutableInterface
      */
     public function getInstalledVoices(): array
     {
-        $context = stream_context_create([
-            'http' => ['method' => 'GET', 'timeout' => 10]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/tts/voices/installed', false, $context);
-        if ($response === false) {
+        $response = $this->httpClient->request($this->baseUrl . '/tts/voices/installed', 'GET', null, 10);
+        if ($response === null) {
             return [];
         }
 
@@ -136,18 +126,18 @@ class NlpServiceHandler implements ApiRoutableInterface
     public function downloadVoice(string $voiceId): bool
     {
         $payload = json_encode(['voice_id' => $voiceId]);
+        if ($payload === false) {
+            return false;
+        }
 
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $payload,
-                'timeout' => 300, // Downloads can take time
-            ]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/tts/voices/download', false, $context);
-        return $response !== false;
+        // Downloads can take time
+        $response = $this->httpClient->request(
+            $this->baseUrl . '/tts/voices/download',
+            'POST',
+            $payload,
+            300
+        );
+        return $response !== null;
     }
 
     /**
@@ -158,19 +148,13 @@ class NlpServiceHandler implements ApiRoutableInterface
      */
     public function deleteVoice(string $voiceId): bool
     {
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'DELETE',
-                'timeout' => 10,
-            ]
-        ]);
-
-        $response = @file_get_contents(
+        $response = $this->httpClient->request(
             $this->baseUrl . '/tts/voices/' . urlencode($voiceId),
-            false,
-            $context
+            'DELETE',
+            null,
+            10
         );
-        return $response !== false;
+        return $response !== null;
     }
 
     /**
@@ -183,18 +167,17 @@ class NlpServiceHandler implements ApiRoutableInterface
     public function parse(string $text, string $parser): ?array
     {
         $payload = json_encode(['text' => $text, 'parser' => $parser]);
+        if ($payload === false) {
+            return null;
+        }
 
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $payload,
-                'timeout' => $this->timeout,
-            ]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/parse/', false, $context);
-        if ($response === false) {
+        $response = $this->httpClient->request(
+            $this->baseUrl . '/parse/',
+            'POST',
+            $payload,
+            $this->timeout
+        );
+        if ($response === null) {
             return null;
         }
 
@@ -210,12 +193,8 @@ class NlpServiceHandler implements ApiRoutableInterface
      */
     public function getAvailableParsers(): array
     {
-        $context = stream_context_create([
-            'http' => ['method' => 'GET', 'timeout' => 10]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/parse/available', false, $context);
-        if ($response === false) {
+        $response = $this->httpClient->request($this->baseUrl . '/parse/available', 'GET', null, 10);
+        if ($response === null) {
             return [];
         }
 
@@ -244,19 +223,18 @@ class NlpServiceHandler implements ApiRoutableInterface
             'language' => $languageCode,
             'lemmatizer' => $lemmatizer,
         ]);
+        if ($payload === false) {
+            return null;
+        }
 
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $payload,
-                'timeout' => $this->timeout,
-                'ignore_errors' => true,
-            ]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/lemmatize/', false, $context);
-        if ($response === false) {
+        $response = $this->httpClient->request(
+            $this->baseUrl . '/lemmatize/',
+            'POST',
+            $payload,
+            $this->timeout,
+            true
+        );
+        if ($response === null) {
             return null;
         }
 
@@ -285,19 +263,19 @@ class NlpServiceHandler implements ApiRoutableInterface
             'language' => $languageCode,
             'lemmatizer' => $lemmatizer,
         ]);
+        if ($payload === false) {
+            /** @var array<string, null> */
+            return array_fill_keys($words, null);
+        }
 
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $payload,
-                'timeout' => $this->timeout,
-                'ignore_errors' => true,
-            ]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/lemmatize/batch', false, $context);
-        if ($response === false) {
+        $response = $this->httpClient->request(
+            $this->baseUrl . '/lemmatize/batch',
+            'POST',
+            $payload,
+            $this->timeout,
+            true
+        );
+        if ($response === null) {
             /** @var array<string, null> */
             return array_fill_keys($words, null);
         }
@@ -318,12 +296,8 @@ class NlpServiceHandler implements ApiRoutableInterface
      */
     public function getAvailableLemmatizers(): array
     {
-        $context = stream_context_create([
-            'http' => ['method' => 'GET', 'timeout' => 10]
-        ]);
-
-        $response = @file_get_contents($this->baseUrl . '/lemmatize/available', false, $context);
-        if ($response === false) {
+        $response = $this->httpClient->request($this->baseUrl . '/lemmatize/available', 'GET', null, 10);
+        if ($response === null) {
             return [];
         }
 
@@ -341,17 +315,14 @@ class NlpServiceHandler implements ApiRoutableInterface
      */
     public function checkLemmatizationSupport(string $languageCode): array
     {
-        $context = stream_context_create([
-            'http' => ['method' => 'GET', 'timeout' => 10]
-        ]);
-
-        $response = @file_get_contents(
+        $response = $this->httpClient->request(
             $this->baseUrl . '/lemmatize/languages/' . urlencode($languageCode),
-            false,
-            $context
+            'GET',
+            null,
+            10
         );
 
-        if ($response === false) {
+        if ($response === null) {
             return [
                 'language' => $languageCode,
                 'spacy' => ['supported' => false, 'installed' => false, 'model' => null]

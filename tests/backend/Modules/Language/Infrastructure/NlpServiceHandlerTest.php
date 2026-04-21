@@ -7,6 +7,7 @@ namespace Tests\Backend\Modules\Language\Infrastructure;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
+use Lwt\Tests\Modules\Language\Infrastructure\FakeNlpHttpClient;
 
 /**
  * Tests for NlpServiceHandler.
@@ -16,10 +17,12 @@ use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 class NlpServiceHandlerTest extends TestCase
 {
     private NlpServiceHandler $handler;
+    private FakeNlpHttpClient $httpClient;
 
     protected function setUp(): void
     {
-        $this->handler = new NlpServiceHandler();
+        $this->httpClient = new FakeNlpHttpClient();
+        $this->handler = new NlpServiceHandler($this->httpClient);
     }
 
     // =========================================================================
@@ -48,6 +51,13 @@ class NlpServiceHandlerTest extends TestCase
         $this->assertSame(30, $timeout);
     }
 
+    public function testConstructorAcceptsNoArgumentsForBackwardCompatibility(): void
+    {
+        $handler = new NlpServiceHandler();
+
+        $this->assertInstanceOf(NlpServiceHandler::class, $handler);
+    }
+
     // =========================================================================
     // isAvailable() Tests
     // =========================================================================
@@ -61,12 +71,16 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testIsAvailableReturnsFalseWhenServiceUnavailable(): void
     {
-        // With default config pointing to nlp:8000, this should return false
-        // unless the NLP service is actually running
-        $result = $this->handler->isAvailable();
+        $this->httpClient->response = null;
 
-        // Can't assert true/false reliably, but should not throw
-        $this->assertIsBool($result);
+        $this->assertFalse($this->handler->isAvailable());
+    }
+
+    public function testIsAvailableReturnsTrueWhenHealthEndpointResponds(): void
+    {
+        $this->httpClient->response = '{"status":"ok"}';
+
+        $this->assertTrue($this->handler->isAvailable());
     }
 
     // =========================================================================
@@ -87,11 +101,18 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testSpeakReturnsNullOnFailure(): void
     {
-        // When service is unavailable, should return null
-        $result = $this->handler->speak('Test text', 'en_US-amy-medium');
+        $this->httpClient->response = null;
 
-        // Without running NLP service, this should return null
-        $this->assertNull($result);
+        $this->assertNull($this->handler->speak('Test text', 'en_US-amy-medium'));
+    }
+
+    public function testSpeakEncodesAudioAsBase64DataUrl(): void
+    {
+        $this->httpClient->response = "WAV_BYTES";
+
+        $result = $this->handler->speak('hello', 'en_US-amy-medium');
+
+        $this->assertSame('data:audio/wav;base64,' . base64_encode('WAV_BYTES'), $result);
     }
 
     // =========================================================================
@@ -107,10 +128,18 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testGetVoicesReturnsEmptyArrayOnFailure(): void
     {
-        // Without NLP service running
+        $this->httpClient->response = null;
+
+        $this->assertSame([], $this->handler->getVoices());
+    }
+
+    public function testGetVoicesReturnsVoicesFromPayload(): void
+    {
+        $this->httpClient->response = json_encode(['voices' => [['id' => 'v1'], ['id' => 'v2']]]);
+
         $result = $this->handler->getVoices();
 
-        $this->assertSame([], $result);
+        $this->assertCount(2, $result);
     }
 
     // =========================================================================
@@ -126,9 +155,9 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testGetInstalledVoicesReturnsEmptyArrayOnFailure(): void
     {
-        $result = $this->handler->getInstalledVoices();
+        $this->httpClient->response = null;
 
-        $this->assertSame([], $result);
+        $this->assertSame([], $this->handler->getInstalledVoices());
     }
 
     // =========================================================================
@@ -148,9 +177,16 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testDownloadVoiceReturnsFalseOnFailure(): void
     {
-        $result = $this->handler->downloadVoice('nonexistent-voice');
+        $this->httpClient->response = null;
 
-        $this->assertFalse($result);
+        $this->assertFalse($this->handler->downloadVoice('nonexistent-voice'));
+    }
+
+    public function testDownloadVoiceReturnsTrueOnSuccess(): void
+    {
+        $this->httpClient->response = '{"success":true}';
+
+        $this->assertTrue($this->handler->downloadVoice('en_US-amy-medium'));
     }
 
     // =========================================================================
@@ -170,9 +206,22 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testDeleteVoiceReturnsFalseOnFailure(): void
     {
-        $result = $this->handler->deleteVoice('nonexistent-voice');
+        $this->httpClient->response = null;
 
-        $this->assertFalse($result);
+        $this->assertFalse($this->handler->deleteVoice('nonexistent-voice'));
+    }
+
+    public function testDeleteVoiceUrlEncodesSpecialCharacters(): void
+    {
+        $this->httpClient->response = '{"success":true}';
+
+        $this->handler->deleteVoice('voice-with/special&chars');
+
+        $this->assertCount(1, $this->httpClient->calls);
+        $this->assertStringContainsString(
+            urlencode('voice-with/special&chars'),
+            $this->httpClient->calls[0]['url']
+        );
     }
 
     // =========================================================================
@@ -193,26 +242,35 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testParseReturnsNullOnFailure(): void
     {
-        $result = $this->handler->parse('Test text', 'mecab');
+        $this->httpClient->response = null;
 
-        $this->assertNull($result);
+        $this->assertNull($this->handler->parse('Test text', 'mecab'));
     }
 
     public function testParseAcceptsMecabParser(): void
     {
-        // Test that method accepts 'mecab' parser
-        $result = $this->handler->parse('日本語テスト', 'mecab');
+        $this->httpClient->response = null;
 
-        // Without service, returns null
-        $this->assertNull($result);
+        $this->assertNull($this->handler->parse('日本語テスト', 'mecab'));
+        $this->assertStringContainsString('"parser":"mecab"', $this->httpClient->calls[0]['body'] ?? '');
     }
 
     public function testParseAcceptsJiebaParser(): void
     {
-        // Test that method accepts 'jieba' parser
-        $result = $this->handler->parse('中文测试', 'jieba');
+        $this->httpClient->response = null;
 
-        $this->assertNull($result);
+        $this->assertNull($this->handler->parse('中文测试', 'jieba'));
+        $this->assertStringContainsString('"parser":"jieba"', $this->httpClient->calls[0]['body'] ?? '');
+    }
+
+    public function testParseReturnsDecodedResult(): void
+    {
+        $this->httpClient->response = json_encode(['sentences' => [], 'tokens' => ['a', 'b']]);
+
+        $result = $this->handler->parse('hello', 'mecab');
+
+        $this->assertIsArray($result);
+        $this->assertSame(['a', 'b'], $result['tokens']);
     }
 
     // =========================================================================
@@ -228,9 +286,9 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testGetAvailableParsersReturnsEmptyArrayOnFailure(): void
     {
-        $result = $this->handler->getAvailableParsers();
+        $this->httpClient->response = null;
 
-        $this->assertSame([], $result);
+        $this->assertSame([], $this->handler->getAvailableParsers());
     }
 
     // =========================================================================
@@ -256,23 +314,32 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testLemmatizeReturnsNullOnFailure(): void
     {
-        $result = $this->handler->lemmatize('running', 'en');
+        $this->httpClient->response = null;
 
-        $this->assertNull($result);
+        $this->assertNull($this->handler->lemmatize('running', 'en'));
+    }
+
+    public function testLemmatizeReturnsLemmaFromPayload(): void
+    {
+        $this->httpClient->response = json_encode(['lemma' => 'run']);
+
+        $this->assertSame('run', $this->handler->lemmatize('running', 'en'));
     }
 
     public function testLemmatizeWithSpacyDefault(): void
     {
-        $result = $this->handler->lemmatize('running', 'en');
+        $this->httpClient->response = null;
+        $this->handler->lemmatize('running', 'en');
 
-        $this->assertNull($result);
+        $this->assertStringContainsString('"lemmatizer":"spacy"', $this->httpClient->calls[0]['body'] ?? '');
     }
 
     public function testLemmatizeWithExplicitLemmatizer(): void
     {
-        $result = $this->handler->lemmatize('running', 'en', 'spacy');
+        $this->httpClient->response = null;
+        $this->handler->lemmatize('running', 'en', 'spacy');
 
-        $this->assertNull($result);
+        $this->assertStringContainsString('"lemmatizer":"spacy"', $this->httpClient->calls[0]['body'] ?? '');
     }
 
     // =========================================================================
@@ -297,14 +364,16 @@ class NlpServiceHandlerTest extends TestCase
         $result = $this->handler->lemmatizeBatch([], 'en');
 
         $this->assertSame([], $result);
+        $this->assertSame([], $this->httpClient->calls, 'No request should be made for an empty batch');
     }
 
     public function testLemmatizeBatchReturnsNullValuesOnFailure(): void
     {
+        $this->httpClient->response = null;
         $words = ['running', 'walked', 'better'];
+
         $result = $this->handler->lemmatizeBatch($words, 'en');
 
-        // Should return array with null values for each word
         $this->assertIsArray($result);
         $this->assertArrayHasKey('running', $result);
         $this->assertArrayHasKey('walked', $result);
@@ -312,6 +381,18 @@ class NlpServiceHandlerTest extends TestCase
         $this->assertNull($result['running']);
         $this->assertNull($result['walked']);
         $this->assertNull($result['better']);
+    }
+
+    public function testLemmatizeBatchReturnsResultsFromPayload(): void
+    {
+        $this->httpClient->response = json_encode([
+            'results' => ['running' => 'run', 'walked' => 'walk'],
+        ]);
+
+        $result = $this->handler->lemmatizeBatch(['running', 'walked'], 'en');
+
+        $this->assertSame('run', $result['running']);
+        $this->assertSame('walk', $result['walked']);
     }
 
     // =========================================================================
@@ -327,9 +408,9 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testGetAvailableLemmatizersReturnsEmptyArrayOnFailure(): void
     {
-        $result = $this->handler->getAvailableLemmatizers();
+        $this->httpClient->response = null;
 
-        $this->assertSame([], $result);
+        $this->assertSame([], $this->handler->getAvailableLemmatizers());
     }
 
     // =========================================================================
@@ -349,6 +430,8 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testCheckLemmatizationSupportReturnsArrayWithLanguage(): void
     {
+        $this->httpClient->response = null;
+
         $result = $this->handler->checkLemmatizationSupport('en');
 
         $this->assertIsArray($result);
@@ -358,6 +441,8 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testCheckLemmatizationSupportReturnsSpacyInfo(): void
     {
+        $this->httpClient->response = null;
+
         $result = $this->handler->checkLemmatizationSupport('en');
 
         $this->assertArrayHasKey('spacy', $result);
@@ -368,6 +453,8 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testCheckLemmatizationSupportWithGermanLanguage(): void
     {
+        $this->httpClient->response = null;
+
         $result = $this->handler->checkLemmatizationSupport('de');
 
         $this->assertArrayHasKey('language', $result);
@@ -376,6 +463,8 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testCheckLemmatizationSupportWithJapaneseLanguage(): void
     {
+        $this->httpClient->response = null;
+
         $result = $this->handler->checkLemmatizationSupport('ja');
 
         $this->assertArrayHasKey('language', $result);
@@ -419,35 +508,36 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testSpeakWithEmptyText(): void
     {
-        $result = $this->handler->speak('', 'en_US-amy-medium');
+        $this->httpClient->response = null;
 
-        // Should handle empty text gracefully
-        $this->assertNull($result);
+        $this->assertNull($this->handler->speak('', 'en_US-amy-medium'));
     }
 
     public function testSpeakWithUnicodeText(): void
     {
-        $result = $this->handler->speak('日本語テスト', 'ja_JP-voice');
+        $this->httpClient->response = null;
 
-        $this->assertNull($result);
+        $this->assertNull($this->handler->speak('日本語テスト', 'ja_JP-voice'));
     }
 
     public function testLemmatizeWithEmptyWord(): void
     {
-        $result = $this->handler->lemmatize('', 'en');
+        $this->httpClient->response = null;
 
-        $this->assertNull($result);
+        $this->assertNull($this->handler->lemmatize('', 'en'));
     }
 
     public function testLemmatizeWithUnicodeWord(): void
     {
-        $result = $this->handler->lemmatize('食べる', 'ja');
+        $this->httpClient->response = null;
 
-        $this->assertNull($result);
+        $this->assertNull($this->handler->lemmatize('食べる', 'ja'));
     }
 
     public function testLemmatizeBatchWithSingleWord(): void
     {
+        $this->httpClient->response = null;
+
         $result = $this->handler->lemmatizeBatch(['running'], 'en');
 
         $this->assertIsArray($result);
@@ -457,6 +547,7 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testLemmatizeBatchWithManyWords(): void
     {
+        $this->httpClient->response = null;
         $words = array_fill(0, 100, 'test');
         $words = array_unique(array_merge($words, ['running', 'walked', 'better']));
 
@@ -468,6 +559,8 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testCheckLemmatizationSupportWithInvalidLanguage(): void
     {
+        $this->httpClient->response = null;
+
         $result = $this->handler->checkLemmatizationSupport('invalid_lang_xyz');
 
         // Should still return structured array
@@ -478,9 +571,8 @@ class NlpServiceHandlerTest extends TestCase
 
     public function testDeleteVoiceWithSpecialCharacters(): void
     {
-        $result = $this->handler->deleteVoice('voice-with/special&chars');
+        $this->httpClient->response = null;
 
-        // Should handle URL encoding gracefully
-        $this->assertFalse($result);
+        $this->assertFalse($this->handler->deleteVoice('voice-with/special&chars'));
     }
 }
