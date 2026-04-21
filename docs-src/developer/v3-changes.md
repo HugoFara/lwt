@@ -1522,7 +1522,9 @@ Lemmatization groups related word forms (e.g., "runs", "running", "ran") under a
 
 - Word family queries for vocabulary review
 - Better organization of inflected forms
-- Foundation for automatic lemmatization in future versions
+- Automatic lemmatization via the NLP microservice (spaCy) or on-disk TSV dictionaries
+
+See [Lemmatization](/reference/lemmatization) for the user-facing reference.
 
 #### Database Changes
 
@@ -1557,7 +1559,8 @@ $wordFamily = $repository->findByLemma($languageId, 'run');
 
 - Lemma input field added to word edit forms
 - Users manually enter lemmas when creating or editing terms
-- Future: Automatic lemmatization via NLP service
+- Automatic lemmatization via the NLP microservice (`services/nlp/`, spaCy-based) and/or on-disk TSV dictionaries (`data/lemma-dictionaries/`)
+- Strategy is selected per language via `languages.LgLemmatizerType` (`none`, `dictionary`, `spacy`, `hybrid`)
 
 ### 20. EPUB Import with Auto-Split
 
