@@ -217,7 +217,7 @@ class FeedWizardControllerTest extends TestCase
 
         $this->wizardSession->method('getOptions')->willReturn('');
         $this->wizardSession->method('getAll')->willReturn([]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('getLanguages')->willReturn([]);
         $this->useStubViews();
 
@@ -359,7 +359,7 @@ class FeedWizardControllerTest extends TestCase
         $this->feedFacade->method('getFeedById')->willReturn($feedRow);
         $this->feedFacade->method('detectAndParseFeed')
             ->willReturn(['feed_text' => 'content', 'feed_title' => '']);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->wizardSession->expects($this->once())
             ->method('setEditFeedId')
@@ -393,7 +393,7 @@ class FeedWizardControllerTest extends TestCase
         $this->feedFacade->method('getFeedById')->willReturn($feedRow);
         $this->feedFacade->method('detectAndParseFeed')
             ->willReturn(['feed_text' => 'content']);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->wizardSession->expects($this->once())
             ->method('setRedirect')
@@ -441,7 +441,7 @@ class FeedWizardControllerTest extends TestCase
         $this->feedFacade->method('getFeedById')->willReturn($feedRow);
         $this->feedFacade->method('detectAndParseFeed')
             ->willReturn(['feed_text' => '', 0 => ['link' => 'http://a.com']]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->wizardSession->expects($this->once())
             ->method('setDetectedFeed')
@@ -476,7 +476,7 @@ class FeedWizardControllerTest extends TestCase
 
         $this->feedFacade->method('getFeedById')->willReturn($feedRow);
         $this->feedFacade->method('detectAndParseFeed')->willReturn($feedData);
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $options, string $key) {
                 if ($key === 'article_source') {
                     return 'description';
@@ -1056,7 +1056,7 @@ class FeedWizardControllerTest extends TestCase
         $this->wizardSession->method('getOptions')->willReturn('edit_text=1');
         $this->wizardSession->method('getRedirect')->willReturn('');
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn(['html' => '<div>extracted html</div>']);
 
@@ -1082,7 +1082,7 @@ class FeedWizardControllerTest extends TestCase
         $this->wizardSession->method('getOptions')->willReturn('charset:utf-8');
         $this->wizardSession->method('getRedirect')->willReturn('redirect http://x.com | ');
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $key) {
                 return $key === 'charset' ? 'utf-8' : null;
             });
@@ -1118,7 +1118,7 @@ class FeedWizardControllerTest extends TestCase
         $this->wizardSession->method('getOptions')->willReturn('');
         $this->wizardSession->method('getRedirect')->willReturn('');
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->expects($this->once())
             ->method('extractTextFromArticle')
             ->with(
@@ -1176,7 +1176,7 @@ class FeedWizardControllerTest extends TestCase
         $this->wizardSession->method('getOptions')->willReturn('');
         $this->wizardSession->method('getRedirect')->willReturn('');
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn(['html' => '<div>step3 html</div>']);
 
@@ -1202,7 +1202,7 @@ class FeedWizardControllerTest extends TestCase
         $this->wizardSession->method('getOptions')->willReturn('');
         $this->wizardSession->method('getRedirect')->willReturn('');
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([]);
 
@@ -1224,7 +1224,7 @@ class FeedWizardControllerTest extends TestCase
         // We test the filter_tags logic directly via InputValidator check.
         $this->wizardSession->method('getOptions')->willReturn('');
         $this->wizardSession->method('getAll')->willReturn([]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('getLanguages')->willReturn([]);
         $this->useStubViews();
 
@@ -1244,11 +1244,11 @@ class FeedWizardControllerTest extends TestCase
     public function wizardStep4ParsesAutoUpdateOptionWithStringValue(): void
     {
         // Test the autoupdate parsing logic in isolation
-        // getNfOption returns '24h' => autoUpdV='h', autoUpdI='24'
+        // getFeedOption returns '24h' => autoUpdateUnit='h', autoUpdateInterval='24'
         $this->wizardSession->method('getOptions')
             ->willReturn('autoupdate:24h');
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $key) {
                 if ($key === 'autoupdate') {
                     return '24h';
@@ -1256,8 +1256,8 @@ class FeedWizardControllerTest extends TestCase
                 return null;
             });
 
-        // Verify the getNfOption call works
-        $result = $this->feedFacade->getNfOption('autoupdate:24h', 'autoupdate');
+        // Verify the getFeedOption call works
+        $result = $this->feedFacade->getFeedOption('autoupdate:24h', 'autoupdate');
         $this->assertSame('24h', $result);
         $this->assertSame('h', substr((string)$result, -1));
         $this->assertSame('24', substr((string)$result, 0, -1));
@@ -1272,7 +1272,7 @@ class FeedWizardControllerTest extends TestCase
         // by testing that clear exists on the session mock.
         $this->wizardSession->method('getOptions')->willReturn('');
         $this->wizardSession->method('getAll')->willReturn([]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('getLanguages')->willReturn([]);
         $this->useStubViews();
 
@@ -1291,10 +1291,10 @@ class FeedWizardControllerTest extends TestCase
     #[Test]
     public function wizardStep4HandlesNullAutoUpdate(): void
     {
-        // When getNfOption returns null, autoUpdV and autoUpdI should be null
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        // When getFeedOption returns null, autoUpdateUnit and autoUpdateInterval should be null
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
-        $result = $this->feedFacade->getNfOption('edit_text=1', 'autoupdate');
+        $result = $this->feedFacade->getFeedOption('edit_text=1', 'autoupdate');
         $this->assertNull($result);
     }
 
@@ -1308,7 +1308,7 @@ class FeedWizardControllerTest extends TestCase
             ->method('setFilterTags');
         $this->wizardSession->method('getOptions')->willReturn('');
         $this->wizardSession->method('getAll')->willReturn([]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('getLanguages')->willReturn([]);
         $this->useStubViews();
 

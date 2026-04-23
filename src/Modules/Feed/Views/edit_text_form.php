@@ -10,7 +10,7 @@
  * - $row: array feed link and feed data (NfLgID, NfID)
  * - $count: int starting form counter (passed by reference)
  * - $tagName: string tag name for the text
- * - $nfId: int feed ID
+ * - $feedId: int feed ID
  * - $maxTexts: int maximum texts setting
  * - $languages: array of language records
  * - $scrdir: string script direction HTML attribute
@@ -36,7 +36,7 @@ assert(is_array($texts));
 assert(is_array($row) && isset($row['NfLgID']) && isset($row['NfID']));
 assert(is_int($count));
 assert(is_string($tagName));
-assert(is_int($nfId));
+assert(is_int($feedId));
 assert(is_int($maxTexts));
 assert(is_array($languages));
 assert(is_string($scrdir));
@@ -46,7 +46,7 @@ assert(is_string($scrdir));
  * @var array{NfLgID: int, NfID: int} $row
  * @var int $count
  * @var string $tagName
- * @var int $nfId
+ * @var int $feedId
  * @var int $maxTexts
  * @var array<int, array{LgID: int, LgName: string}> $languages
  * @var string $scrdir
@@ -176,7 +176,7 @@ foreach ($texts as $text) :
                         </div>
                         <input type="hidden"
                                name="feed[<?php echo $count; ?>][Nf_ID]"
-                               value="<?php echo $nfId; ?>" />
+                               value="<?php echo $feedId; ?>" />
                         <input type="hidden"
                                name="feed[<?php echo $count; ?>][Nf_Max_Texts]"
                                value="<?php echo $maxTexts; ?>" />

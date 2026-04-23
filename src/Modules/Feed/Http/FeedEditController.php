@@ -431,13 +431,13 @@ class FeedEditController
         $languages = $this->feedFacade->getLanguages();
 
         // Parse options
-        $options = $this->feedFacade->getNfOption($feed['NfOptions'], '');
+        $options = $this->feedFacade->getFeedOption($feed['NfOptions'], '');
         if (!is_array($options)) {
             $options = [];
         }
 
         // Parse auto-update interval
-        $autoUpdateRaw = $this->feedFacade->getNfOption($feed['NfOptions'], 'autoupdate');
+        $autoUpdateRaw = $this->feedFacade->getFeedOption($feed['NfOptions'], 'autoupdate');
         if ($autoUpdateRaw === null || !is_string($autoUpdateRaw)) {
             $autoUpdateInterval = null;
             $autoUpdateUnit = null;

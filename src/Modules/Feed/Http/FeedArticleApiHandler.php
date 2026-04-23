@@ -225,13 +225,15 @@ class FeedArticleApiHandler
 
         foreach ($feedLinks as $row) {
             /** @var array<string, mixed> $row */
-            $nfOptions = (string)($row['NfOptions'] ?? '');
-            $nfName = (string)($row['NfName'] ?? '');
+            $feedOptions = (string)($row['NfOptions'] ?? '');
+            $feedName = (string)($row['NfName'] ?? '');
 
-            $tagNameRaw = $this->feedFacade->getNfOption($nfOptions, 'tag');
-            $tagName = is_string($tagNameRaw) && $tagNameRaw !== '' ? $tagNameRaw : mb_substr($nfName, 0, 20, 'utf-8');
+            $tagNameRaw = $this->feedFacade->getFeedOption($feedOptions, 'tag');
+            $tagName = is_string($tagNameRaw) && $tagNameRaw !== ''
+                ? $tagNameRaw
+                : mb_substr($feedName, 0, 20, 'utf-8');
 
-            $maxTextsRaw = $this->feedFacade->getNfOption($nfOptions, 'max_texts');
+            $maxTextsRaw = $this->feedFacade->getFeedOption($feedOptions, 'max_texts');
             $maxTexts = is_string($maxTextsRaw) ? (int)$maxTextsRaw : 0;
             if (!$maxTexts) {
                 $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
@@ -246,7 +248,7 @@ class FeedArticleApiHandler
                 'text' => (string)($row['FlText'] ?? '')
             ]];
 
-            $charsetRaw = $this->feedFacade->getNfOption($nfOptions, 'charset');
+            $charsetRaw = $this->feedFacade->getFeedOption($feedOptions, 'charset');
             $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $texts = $this->feedFacade->extractTextFromArticle(
                 $doc,

@@ -238,7 +238,7 @@ class FeedIndexControllerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$feedLink]);
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $option) {
                 if ($option === 'edit_text') {
                     return '0';
@@ -301,7 +301,7 @@ class FeedIndexControllerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$feedLink]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([
@@ -348,7 +348,7 @@ class FeedIndexControllerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$feedLink]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([['TxTitle' => 'Test', 'TxText' => 'Text']]);
         $this->feedFacade->method('createTextFromFeed')->willReturn(1);
@@ -390,7 +390,7 @@ class FeedIndexControllerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$feedLink]);
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $opt) {
                 if ($opt === 'tag') {
                     return 'custom_tag';
@@ -722,8 +722,8 @@ class FeedIndexControllerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$feedLink]);
-        // getNfOption returns empty for 'tag', so fallback to first 20 chars of NfName
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        // getFeedOption returns empty for 'tag', so fallback to first 20 chars of NfName
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([['TxTitle' => 'Test', 'TxText' => 'Text']]);
@@ -767,7 +767,7 @@ class FeedIndexControllerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$feedLink]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([['TxTitle' => 'Test', 'TxText' => 'Text']]);
         $this->feedFacade->method('createTextFromFeed')->willReturn(1);

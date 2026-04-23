@@ -41,12 +41,12 @@ class FeedLoadApiHandler
     /**
      * Get the list of feeds and insert them into the database.
      *
-     * @param array<array<string, string>> $feed A feed with articles
-     * @param int                          $nfid News feed ID
+     * @param array<array<string, string>> $feed   A feed with articles
+     * @param int                          $feedId Feed ID
      *
      * @return array{0: int, 1: int} Number of imported feeds and number of duplicated feeds.
      */
-    public function getFeedsList(array $feed, int $nfid): array
+    public function getFeedsList(array $feed, int $feedId): array
     {
         if (empty($feed)) {
             return [0, 0];
@@ -69,75 +69,80 @@ class FeedLoadApiHandler
             $params[] = $data['desc'] ?? '';
             $params[] = $data['date'] ?? '';
             $params[] = $data['audio'] ?? '';
-            $params[] = $nfid;
+            $params[] = $feedId;
         }
 
         $stmt = Connection::prepare($sql);
         $stmt->bindValues($params);
         $stmt->execute();
 
-        $importedFeed = $stmt->affectedRows();
-        $nif = count($feed) - $importedFeed;
+        $importedCount = $stmt->affectedRows();
+        $duplicateCount = count($feed) - $importedCount;
 
-        return [$importedFeed, $nif];
+        return [$importedCount, $duplicateCount];
     }
 
     /**
      * Update the feeds database and return a result message.
      *
-     * @param int    $importedFeed Number of imported feeds
-     * @param int    $nif          Number of duplicated feeds
-     * @param string $nfname       News feed name
-     * @param int    $nfid         News feed ID
-     * @param string $nfoptions    News feed options
+     * @param int    $importedCount  Number of imported feeds
+     * @param int    $duplicateCount Number of duplicated feeds
+     * @param string $feedName       Feed name
+     * @param int    $feedId         Feed ID
+     * @param string $feedOptions    Feed options
      *
      * @return string Result message
      */
-    public function getFeedResult(int $importedFeed, int $nif, string $nfname, int $nfid, string $nfoptions): string
-    {
+    public function getFeedResult(
+        int $importedCount,
+        int $duplicateCount,
+        string $feedName,
+        int $feedId,
+        string $feedOptions
+    ): string {
         // Update feed timestamp using QueryBuilder
         QueryBuilder::table('news_feeds')
-            ->where('NfID', '=', $nfid)
+            ->where('NfID', '=', $feedId)
             ->updatePrepared(['NfUpdate' => time()]);
 
-        $nfMaxLinksRaw = $this->feedFacade->getNfOption($nfoptions, 'max_links');
-        if ($nfMaxLinksRaw === null || $nfMaxLinksRaw === '' || is_array($nfMaxLinksRaw)) {
-            $articleSource = $this->feedFacade->getNfOption($nfoptions, 'article_source');
+        $maxLinksRaw = $this->feedFacade->getFeedOption($feedOptions, 'max_links');
+        if ($maxLinksRaw === null || $maxLinksRaw === '' || is_array($maxLinksRaw)) {
+            $articleSource = $this->feedFacade->getFeedOption($feedOptions, 'article_source');
             if ($articleSource !== null && $articleSource !== '' && !is_array($articleSource)) {
-                $nfMaxLinksRaw = Settings::getWithDefault('set-max-articles-with-text');
+                $maxLinksRaw = Settings::getWithDefault('set-max-articles-with-text');
             } else {
-                $nfMaxLinksRaw = Settings::getWithDefault('set-max-articles-without-text');
+                $maxLinksRaw = Settings::getWithDefault('set-max-articles-without-text');
             }
         }
-        $nfMaxLinks = (int)$nfMaxLinksRaw;
+        $maxLinks = (int)$maxLinksRaw;
 
-        $msg = $nfname . ": ";
-        if (!$importedFeed) {
+        $msg = $feedName . ": ";
+        if (!$importedCount) {
             $msg .= "no";
         } else {
-            $msg .= $importedFeed;
+            $msg .= $importedCount;
         }
         $msg .= " new article";
-        if ($importedFeed > 1) {
+        if ($importedCount > 1) {
             $msg .= "s";
         }
         $msg .= " imported";
-        if ($nif > 1) {
-            $msg .= ", $nif articles are dublicates";
-        } elseif ($nif == 1) {
-            $msg .= ", $nif dublicated article";
+        if ($duplicateCount > 1) {
+            $msg .= ", $duplicateCount articles are dublicates";
+        } elseif ($duplicateCount == 1) {
+            $msg .= ", $duplicateCount dublicated article";
         }
 
         // Count total feed_links using QueryBuilder
         $row = QueryBuilder::table('feed_links')
             ->select(['COUNT(*) AS total'])
-            ->where('FlNfID', '=', $nfid)
+            ->where('FlNfID', '=', $feedId)
             ->firstPrepared();
 
-        $to = ($row !== null ? (int)$row['total'] : 0) - $nfMaxLinks;
+        $to = ($row !== null ? (int)$row['total'] : 0) - $maxLinks;
         if ($to > 0) {
             QueryBuilder::table('feed_links')
-                ->whereIn('FlNfID', [$nfid])
+                ->whereIn('FlNfID', [$feedId])
                 ->orderBy('FlDate', 'ASC')
                 ->limit($to)
                 ->deletePrepared();
@@ -149,30 +154,30 @@ class FeedLoadApiHandler
     /**
      * Load a feed and return result.
      *
-     * @param string $nfname      Newsfeed name
-     * @param int    $nfid        News feed ID
-     * @param string $nfsourceuri News feed source
-     * @param string $nfoptions   News feed options
+     * @param string $feedName      Feed name
+     * @param int    $feedId        Feed ID
+     * @param string $feedSourceUri Feed source URI
+     * @param string $feedOptions   Feed options
      *
      * @return array{success?: true, message?: string, imported?: int, duplicates?: int, error?: string}
      */
-    public function loadFeed(string $nfname, int $nfid, string $nfsourceuri, string $nfoptions): array
+    public function loadFeed(string $feedName, int $feedId, string $feedSourceUri, string $feedOptions): array
     {
-        $articleSource = $this->feedFacade->getNfOption($nfoptions, 'article_source');
-        $feed = $this->feedFacade->parseRssFeed($nfsourceuri, is_string($articleSource) ? $articleSource : '');
+        $articleSource = $this->feedFacade->getFeedOption($feedOptions, 'article_source');
+        $feed = $this->feedFacade->parseRssFeed($feedSourceUri, is_string($articleSource) ? $articleSource : '');
         if (!is_array($feed) || count($feed) === 0) {
             return [
-                "error" => 'Could not load "' . $nfname . '"'
+                "error" => 'Could not load "' . $feedName . '"'
             ];
         }
         /** @var array<array-key, array<string, string>> $feed */
-        list($importedFeed, $nif) = $this->getFeedsList($feed, $nfid);
-        $msg = $this->getFeedResult($importedFeed, $nif, $nfname, $nfid, $nfoptions);
+        list($importedCount, $duplicateCount) = $this->getFeedsList($feed, $feedId);
+        $msg = $this->getFeedResult($importedCount, $duplicateCount, $feedName, $feedId, $feedOptions);
         return [
             "success" => true,
             "message" => $msg,
-            "imported" => $importedFeed,
-            "duplicates" => $nif
+            "imported" => $importedCount,
+            "duplicates" => $duplicateCount
         ];
     }
 

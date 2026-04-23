@@ -489,7 +489,7 @@ class FeedFacade
      *
      * @return string|array|null Option value
      */
-    public function getNfOption(string $optionsStr, string $option): string|array|null
+    public function getFeedOption(string $optionsStr, string $option): string|array|null
     {
         $optionsStr = trim($optionsStr);
         if (empty($optionsStr)) {
@@ -849,22 +849,22 @@ class FeedFacade
     {
         $texts = array_reverse($texts);
         $textsArchived = $sentencesDeleted = $textItemsDeleted = $archiveCount = 0;
-        /** @var list<int|string> $NfID */
-        $NfID = [];
+        /** @var list<int|string> $feedIds */
+        $feedIds = [];
 
         foreach ($texts as $text) {
-            $NfID[] = $text['Nf_ID'];
+            $feedIds[] = $text['Nf_ID'];
         }
-        $NfID = array_unique($NfID);
+        $feedIds = array_unique($feedIds);
 
         /** @var list<string> $currentTagList */
         $currentTagList = [];
         /** @var list<int|string> $textItem */
         $textItem = [];
-        /** @var int|null $nfMaxTexts */
-        $nfMaxTexts = null;
+        /** @var int|null $feedMaxTexts */
+        $feedMaxTexts = null;
 
-        foreach ($NfID as $feedID) {
+        foreach ($feedIds as $feedID) {
             foreach ($texts as $text) {
                 if ($feedID == $text['Nf_ID']) {
                     if ($currentTagList !== $text['TagList']) {
@@ -885,7 +885,7 @@ class FeedFacade
                                 \Lwt\Shared\Infrastructure\Database\Connection::preparedExecute($sql, $bindings);
                             }
                         }
-                        $nfMaxTexts = $text['Nf_Max_Texts'];
+                        $feedMaxTexts = $text['Nf_Max_Texts'];
                     }
 
                     // Create the text
@@ -959,9 +959,9 @@ class FeedFacade
             $textCount = count($textItem);
 
             // Archive excess texts
-            if ($textCount > (int)$nfMaxTexts) {
+            if ($textCount > (int)$feedMaxTexts) {
                 sort($textItem, SORT_NUMERIC);
-                $textItem = array_slice($textItem, 0, $textCount - (int)$nfMaxTexts);
+                $textItem = array_slice($textItem, 0, $textCount - (int)$feedMaxTexts);
 
                 foreach ($textItem as $txId) {
                     $textItemsDeleted += \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('word_occurrences')

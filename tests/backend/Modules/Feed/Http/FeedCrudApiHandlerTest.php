@@ -52,7 +52,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow();
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn(['opt1' => 'val1']);
         $this->feedFacade->method('formatLastUpdate')
             ->willReturn('last update: 5 minutes ago');
@@ -77,7 +77,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow(['NfUpdate' => 0]);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         // formatLastUpdate should NOT be called when timestamp is 0
         $this->feedFacade->expects($this->never())
             ->method('formatLastUpdate');
@@ -92,7 +92,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow(['LgName' => null]);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('last update: 1 hour ago');
 
         $result = $this->handler->formatFeedRecord($row);
@@ -105,7 +105,7 @@ class FeedCrudApiHandlerTest extends TestCase
         $row = $this->makeFeedRow();
         unset($row['articleCount']);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $result = $this->handler->formatFeedRecord($row);
@@ -117,8 +117,8 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow();
 
-        // When getNfOption returns a string instead of array
-        $this->feedFacade->method('getNfOption')
+        // When getFeedOption returns a string instead of array
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('some_string');
         $this->feedFacade->method('formatLastUpdate')
             ->willReturn('up to date');
@@ -132,7 +132,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow();
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn(null);
         $this->feedFacade->method('formatLastUpdate')
             ->willReturn('up to date');
@@ -146,7 +146,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow(['NfOptions' => '']);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $result = $this->handler->formatFeedRecord($row);
@@ -160,7 +160,7 @@ class FeedCrudApiHandlerTest extends TestCase
         $row = $this->makeFeedRow(['NfOptions' => 'charset=utf8,max=10']);
 
         $this->feedFacade->expects($this->once())
-            ->method('getNfOption')
+            ->method('getFeedOption')
             ->with('charset=utf8,max=10', 'all')
             ->willReturn(['charset' => 'utf8', 'max' => '10']);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
@@ -174,7 +174,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow(['NfID' => '99']);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $result = $this->handler->formatFeedRecord($row);
@@ -187,7 +187,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow(['NfLgID' => '7']);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $result = $this->handler->formatFeedRecord($row);
@@ -200,7 +200,7 @@ class FeedCrudApiHandlerTest extends TestCase
     {
         $row = $this->makeFeedRow();
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $result = $this->handler->formatFeedRecord($row);
@@ -488,7 +488,7 @@ class FeedCrudApiHandlerTest extends TestCase
                 'NfOptions' => 'charset=utf8'
             ]);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $this->handler->updateFeed(42, ['name' => 'Updated Name']);
@@ -515,7 +515,7 @@ class FeedCrudApiHandlerTest extends TestCase
                 'NfOptions' => 'charset=utf8'
             ]);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $this->handler->updateFeed(42, []);
@@ -542,7 +542,7 @@ class FeedCrudApiHandlerTest extends TestCase
                 'NfOptions' => 'max=20'
             ]);
 
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $this->handler->updateFeed(42, [
@@ -564,7 +564,7 @@ class FeedCrudApiHandlerTest extends TestCase
         $existing = $this->makeFeedRow();
         $this->feedFacade->method('getFeedById')
             ->willReturn($existing);
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('up to date');
 
         $result = $this->handler->updateFeed(42, ['name' => 'X']);

@@ -523,7 +523,7 @@ class FeedEditControllerTest extends TestCase
             ->method('getLanguages')
             ->willReturn([]);
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn(null);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showEditForm');
@@ -556,7 +556,7 @@ class FeedEditControllerTest extends TestCase
         $this->feedFacade->method('getLanguages')->willReturn([]);
 
         // Return different values based on option param
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $options, string $option) {
                 if ($option === '') {
                     return [];
@@ -598,7 +598,7 @@ class FeedEditControllerTest extends TestCase
 
         $this->feedFacade->method('getFeedById')->willReturn($feed);
         $this->feedFacade->method('getLanguages')->willReturn([]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showEditForm');
         $method->setAccessible(true);
@@ -760,7 +760,7 @@ class FeedEditControllerTest extends TestCase
 
         $this->feedFacade->method('getFeedById')->willReturn($feed);
         $this->feedFacade->method('getLanguages')->willReturn([]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->languageFacade->expects($this->once())
             ->method('getLanguageName')

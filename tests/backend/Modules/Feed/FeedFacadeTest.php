@@ -781,19 +781,19 @@ class FeedFacadeTest extends TestCase
 
     public function testGetNfOptionReturnsValueForExistingKey(): void
     {
-        $result = $this->facade->getNfOption('tag=news,autoupdate=1h,max_texts=10', 'tag');
+        $result = $this->facade->getFeedOption('tag=news,autoupdate=1h,max_texts=10', 'tag');
         $this->assertEquals('news', $result);
     }
 
     public function testGetNfOptionReturnsNullForMissingKey(): void
     {
-        $result = $this->facade->getNfOption('tag=news,autoupdate=1h', 'charset');
+        $result = $this->facade->getFeedOption('tag=news,autoupdate=1h', 'charset');
         $this->assertNull($result);
     }
 
     public function testGetNfOptionReturnsAllAsArray(): void
     {
-        $result = $this->facade->getNfOption('tag=news,autoupdate=1h,max_texts=10', 'all');
+        $result = $this->facade->getFeedOption('tag=news,autoupdate=1h,max_texts=10', 'all');
 
         $this->assertIsArray($result);
         $this->assertEquals('news', $result['tag']);
@@ -803,14 +803,14 @@ class FeedFacadeTest extends TestCase
 
     public function testGetNfOptionReturnsEmptyArrayForEmptyString(): void
     {
-        $result = $this->facade->getNfOption('', 'all');
+        $result = $this->facade->getFeedOption('', 'all');
         $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
 
     public function testGetNfOptionReturnsNullForEmptyStringWithSpecificKey(): void
     {
-        $result = $this->facade->getNfOption('', 'tag');
+        $result = $this->facade->getFeedOption('', 'tag');
         $this->assertNull($result);
     }
 

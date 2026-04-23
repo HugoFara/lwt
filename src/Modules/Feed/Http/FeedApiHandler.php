@@ -320,45 +320,50 @@ class FeedApiHandler implements ApiRoutableInterface
     /**
      * Get the list of feeds and insert them into the database.
      *
-     * @param array<array<string, string>> $feed A feed with articles
-     * @param int                          $nfid News feed ID
+     * @param array<array<string, string>> $feed   A feed with articles
+     * @param int                          $feedId Feed ID
      *
      * @return array{0: int, 1: int} Number of imported feeds and number of duplicated feeds.
      */
-    public function getFeedsList(array $feed, int $nfid): array
+    public function getFeedsList(array $feed, int $feedId): array
     {
-        return $this->load->getFeedsList($feed, $nfid);
+        return $this->load->getFeedsList($feed, $feedId);
     }
 
     /**
      * Update the feeds database and return a result message.
      *
-     * @param int    $importedFeed Number of imported feeds
-     * @param int    $nif          Number of duplicated feeds
-     * @param string $nfname       News feed name
-     * @param int    $nfid         News feed ID
-     * @param string $nfoptions    News feed options
+     * @param int    $importedCount  Number of imported feeds
+     * @param int    $duplicateCount Number of duplicated feeds
+     * @param string $feedName       Feed name
+     * @param int    $feedId         Feed ID
+     * @param string $feedOptions    Feed options
      *
      * @return string Result message
      */
-    public function getFeedResult(int $importedFeed, int $nif, string $nfname, int $nfid, string $nfoptions): string
-    {
-        return $this->load->getFeedResult($importedFeed, $nif, $nfname, $nfid, $nfoptions);
+    public function getFeedResult(
+        int $importedCount,
+        int $duplicateCount,
+        string $feedName,
+        int $feedId,
+        string $feedOptions
+    ): string {
+        return $this->load->getFeedResult($importedCount, $duplicateCount, $feedName, $feedId, $feedOptions);
     }
 
     /**
      * Load a feed and return result.
      *
-     * @param string $nfname      Newsfeed name
-     * @param int    $nfid        News feed ID
-     * @param string $nfsourceuri News feed source
-     * @param string $nfoptions   News feed options
+     * @param string $feedName      Feed name
+     * @param int    $feedId        Feed ID
+     * @param string $feedSourceUri Feed source URI
+     * @param string $feedOptions   Feed options
      *
      * @return array{success?: true, message?: string, imported?: int, duplicates?: int, error?: string}
      */
-    public function loadFeed(string $nfname, int $nfid, string $nfsourceuri, string $nfoptions): array
+    public function loadFeed(string $feedName, int $feedId, string $feedSourceUri, string $feedOptions): array
     {
-        return $this->load->loadFeed($nfname, $nfid, $nfsourceuri, $nfoptions);
+        return $this->load->loadFeed($feedName, $feedId, $feedSourceUri, $feedOptions);
     }
 
     /**

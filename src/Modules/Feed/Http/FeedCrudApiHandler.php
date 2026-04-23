@@ -133,7 +133,7 @@ class FeedCrudApiHandler
      */
     public function formatFeedRecord(array $row): array
     {
-        $options = $this->feedFacade->getNfOption((string)$row['NfOptions'], 'all');
+        $options = $this->feedFacade->getFeedOption((string)$row['NfOptions'], 'all');
         $updateTimestamp = (int)$row['NfUpdate'];
         $lastUpdate = $updateTimestamp > 0
             ? $this->feedFacade->formatLastUpdate(time() - $updateTimestamp)
