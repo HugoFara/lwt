@@ -6,8 +6,8 @@
  * Variables expected:
  * - $wizardData: array wizard session data
  * - $languages: array of language records
- * - $autoUpdI: string|null auto update interval value
- * - $autoUpdV: string|null auto update interval unit
+ * - $autoUpdateInterval: string|null auto update interval value
+ * - $autoUpdateUnit: string|null auto update interval unit
  * - $service: FeedService instance
  *
  * PHP version 8.1
@@ -32,8 +32,8 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  *     options?: string, redirect?: string, article_section?: string,
  *     edit_feed?: int} $wizardData Wizard session data
  * @var array<int, array{LgID: int, LgName: string}> $languages Language records
- * @var string|null $autoUpdI Auto update interval value
- * @var string|null $autoUpdV Auto update interval unit
+ * @var string|null $autoUpdateInterval Auto update interval value
+ * @var string|null $autoUpdateUnit Auto update interval unit
  * @var \Lwt\Modules\Feed\Application\FeedFacade $service Feed service
  */
 
@@ -48,17 +48,17 @@ $languagesJson = array_map(
 
 // Prepare options for JSON config
 $options = $wizardData['options'] ?? '';
-$maxLinksValue = $service->getNfOption($options, 'max_links');
-$maxTextsValue = $service->getNfOption($options, 'max_texts');
-$charsetValue = $service->getNfOption($options, 'charset');
-$tagValue = $service->getNfOption($options, 'tag');
+$maxLinksValue = $service->getFeedOption($options, 'max_links');
+$maxTextsValue = $service->getFeedOption($options, 'max_texts');
+$charsetValue = $service->getFeedOption($options, 'charset');
+$tagValue = $service->getFeedOption($options, 'tag');
 
 $optionsConfig = [
-    'editText' => $service->getNfOption($options, 'edit_text') !== null,
+    'editText' => $service->getFeedOption($options, 'edit_text') !== null,
     'autoUpdate' => [
-        'enabled' => $autoUpdI !== null,
-        'interval' => $autoUpdI !== null ? (int)$autoUpdI : null,
-        'unit' => $autoUpdV ?? 'h'
+        'enabled' => $autoUpdateInterval !== null,
+        'interval' => $autoUpdateInterval !== null ? (int)$autoUpdateInterval : null,
+        'unit' => $autoUpdateUnit ?? 'h'
     ],
     'maxLinks' => [
         'enabled' => $maxLinksValue !== null,

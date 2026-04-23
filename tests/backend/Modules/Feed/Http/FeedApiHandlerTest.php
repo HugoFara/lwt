@@ -60,7 +60,7 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedReturnsErrorWhenParsingFails(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
             ->willReturn(false);
@@ -73,7 +73,7 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedReturnsErrorWhenParsingReturnsEmptyArray(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
             ->willReturn([]);
@@ -442,7 +442,7 @@ class FeedApiHandlerTest extends TestCase
 
     public function testFormatLoadFeedDelegatesToLoadFeed(): void
     {
-        $this->feedFacade->method('getNfOption')->willReturn('');
+        $this->feedFacade->method('getFeedOption')->willReturn('');
         $this->feedFacade->method('parseRssFeed')->willReturn(false);
 
         $result = $this->handler->formatLoadFeed('Test', 1, 'http://test.com', '');
@@ -572,7 +572,7 @@ class FeedApiHandlerTest extends TestCase
                 'NfOptions' => '',
                 'NfUpdate' => 0,
             ]);
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('never');
 
         $result = $this->handler->createFeed([
@@ -603,7 +603,7 @@ class FeedApiHandlerTest extends TestCase
             ]);
         $this->feedFacade->expects($this->once())
             ->method('updateFeed');
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('never');
 
         $result = $this->handler->updateFeed(1, ['name' => 'New Name']);
@@ -645,7 +645,7 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$row]);
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([
                 'error' => [
@@ -684,7 +684,7 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([$row]);
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $opt) {
                 if ($opt === 'tag') {
                     return 'custom';
@@ -717,7 +717,7 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedErrorMessageContainsFeedName(): void
     {
-        $this->feedFacade->method('getNfOption')->willReturn('');
+        $this->feedFacade->method('getFeedOption')->willReturn('');
         $this->feedFacade->method('parseRssFeed')->willReturn(false);
 
         $result = $this->handler->loadFeed('My Special Feed', 1, 'http://example.com', '');
@@ -727,7 +727,7 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedPassesArticleSourceToParser(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $option) {
                 if ($option === 'article_source') {
                     return 'full_text';
@@ -849,7 +849,7 @@ class FeedApiHandlerTest extends TestCase
     #[Test]
     public function routePostWithIdAndLoadDelegatesToLoadFeed(): void
     {
-        $this->feedFacade->method('getNfOption')->willReturn('');
+        $this->feedFacade->method('getFeedOption')->willReturn('');
         $this->feedFacade->method('parseRssFeed')->willReturn(false);
 
         $result = $this->handler->routePost(
@@ -1188,7 +1188,7 @@ class FeedApiHandlerTest extends TestCase
             'NfArticleSectionTags' => '', 'NfFilterTags' => '',
             'NfOptions' => '', 'NfUpdate' => 0,
         ]);
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('never');
 
         $this->handler->createFeed([
@@ -1227,7 +1227,7 @@ class FeedApiHandlerTest extends TestCase
                     && $data['NfOptions'] === 'tag:old'
                     && $data['NfName'] === 'Updated Name';
             }));
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('1h ago');
 
         $this->handler->updateFeed(1, ['name' => 'Updated Name']);
@@ -1285,7 +1285,7 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $this->feedFacade->method('getFeedById')->willReturn($feed);
-        $this->feedFacade->method('getNfOption')->willReturn([]);
+        $this->feedFacade->method('getFeedOption')->willReturn([]);
         $this->feedFacade->method('formatLastUpdate')->willReturn('never');
 
         $result = $this->handler->getFeed(1);
