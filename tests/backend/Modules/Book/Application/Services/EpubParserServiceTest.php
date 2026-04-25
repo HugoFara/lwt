@@ -219,6 +219,83 @@ class EpubParserServiceTest extends TestCase
     }
 
     // =========================================================================
+    // Bug reproduction: GitHub issue #232
+    // =========================================================================
+
+    #[Test]
+    public function parseDoesNotFailOnExtensionlessTempPathWhenOriginalNameProvided(): void
+    {
+        // Regression: GitHub issue #232. PHP upload temp paths look like
+        // /tmp/phpXXXXXX (no extension), and the underlying ebook library
+        // refuses to parse a file when it cannot infer the format from
+        // the path. Passing the original filename must let parse() thread
+        // the format through so that specific error never surfaces.
+        if (!extension_loaded('zip')) {
+            $this->markTestSkipped('Zip extension not available');
+        }
+
+        // Build a ZIP shaped like an EPUB at an extensionless temp path.
+        // The full EPUB internals are intentionally minimal — we only need
+        // to confirm the format-resolution step succeeds; whatever happens
+        // afterwards is downstream of the bug being fixed.
+        $tempFile = tempnam(sys_get_temp_dir(), 'php');
+        $zip = new \ZipArchive();
+        $zip->open($tempFile, \ZipArchive::OVERWRITE);
+        $zip->addFromString('mimetype', 'application/epub+zip');
+        $zip->addFromString(
+            'META-INF/container.xml',
+            '<?xml version="1.0"?>'
+            . '<container xmlns="urn:oasis:names:tc:opendocument:xmlns:container">'
+            . '<rootfiles>'
+            . '<rootfile full-path="content.opf" media-type="application/oebps-package+xml"/>'
+            . '</rootfiles>'
+            . '</container>'
+        );
+        $zip->addFromString(
+            'content.opf',
+            '<?xml version="1.0"?>'
+            . '<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">'
+            . '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">'
+            . '<dc:title>Test Book</dc:title>'
+            . '<dc:identifier id="bookid">test-id</dc:identifier>'
+            . '<dc:language>en</dc:language>'
+            . '</metadata>'
+            . '<manifest/>'
+            . '<spine/>'
+            . '</package>'
+        );
+        $zip->close();
+
+        try {
+            $messages = [];
+            try {
+                $this->service->parse($tempFile, 'book.epub');
+            } catch (\Throwable $e) {
+                for ($cur = $e; $cur !== null; $cur = $cur->getPrevious()) {
+                    $messages[] = $cur->getMessage();
+                }
+            }
+
+            // The specific extension error from kiwilan/php-ebook must
+            // not surface anywhere in the exception chain. (If parse()
+            // fully succeeds on this minimal fixture, $messages stays
+            // empty — that's an even stronger pass.)
+            $combined = implode("\n", $messages);
+            $this->assertStringNotContainsString(
+                'File has no extension',
+                $combined,
+                'parse() must not surface the "File has no extension" error '
+                . 'from the underlying ebook library when an original '
+                . 'filename is provided (GitHub issue #232).'
+            );
+        } finally {
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+        }
+    }
+
+    // =========================================================================
     // HTML cleaning tests
     // =========================================================================
 

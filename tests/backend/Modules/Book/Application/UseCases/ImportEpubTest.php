@@ -151,6 +151,30 @@ class ImportEpubTest extends TestCase
     }
 
     #[Test]
+    public function parseReceivesOriginalFilenameSoExtensionCanBeResolved(): void
+    {
+        // Regression: GitHub issue #232. PHP upload temp paths
+        // (/tmp/phpXXXXXX) have no extension, so the use case must
+        // forward the original filename to parse() so the underlying
+        // ebook library can resolve the format.
+        if (!extension_loaded('zip')) {
+            $this->markTestSkipped('ZIP extension not available - cannot test EPUB parsing');
+        }
+
+        $this->epubParser->method('isValidEpub')->willReturn(true);
+
+        $this->epubParser->expects($this->once())
+            ->method('parse')
+            ->with('/tmp/phpUPLOAD', 'book.epub')
+            ->willThrowException(new \RuntimeException('stop here'));
+
+        $this->useCase->execute(1, [
+            'tmp_name' => '/tmp/phpUPLOAD',
+            'name' => 'book.epub',
+        ]);
+    }
+
+    #[Test]
     public function returnsFailureWhenNoChaptersFound(): void
     {
         if (!extension_loaded('zip')) {
