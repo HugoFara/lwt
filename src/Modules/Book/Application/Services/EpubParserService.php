@@ -38,7 +38,10 @@ class EpubParserService
     /**
      * Parse an EPUB file and extract metadata and chapters.
      *
-     * @param string $filePath Absolute path to the EPUB file
+     * @param string $filePath     Absolute path to the EPUB file
+     * @param string $originalName Original filename (used to derive the
+     *                             format when $filePath has no extension,
+     *                             e.g. PHP upload temp paths)
      *
      * @return array{
      *     metadata: array{
@@ -54,7 +57,7 @@ class EpubParserService
      * @throws InvalidArgumentException If file doesn't exist
      * @throws RuntimeException If file cannot be parsed
      */
-    public function parse(string $filePath): array
+    public function parse(string $filePath, string $originalName = ''): array
     {
         if (!extension_loaded('zip')) {
             throw new RuntimeException(
@@ -77,7 +80,7 @@ class EpubParserService
         }
 
         try {
-            $ebook = Ebook::read($filePath);
+            $ebook = Ebook::read($filePath, $this->resolveFormat($filePath, $originalName));
             if ($ebook === null) {
                 throw new RuntimeException(
                     "Failed to read EPUB file: {$filePath}. "
@@ -386,7 +389,10 @@ class EpubParserService
     /**
      * Get just the metadata without parsing chapters.
      *
-     * @param string $filePath Path to the EPUB file
+     * @param string $filePath     Path to the EPUB file
+     * @param string $originalName Original filename (used to derive the
+     *                             format when $filePath has no extension,
+     *                             e.g. PHP upload temp paths)
      *
      * @return array{
      *     title: string,
@@ -395,7 +401,7 @@ class EpubParserService
      *     language: string|null
      * }|null Metadata or null on failure
      */
-    public function getMetadata(string $filePath): ?array
+    public function getMetadata(string $filePath, string $originalName = ''): ?array
     {
         if (!extension_loaded('zip')) {
             return null;
@@ -406,7 +412,7 @@ class EpubParserService
         }
 
         try {
-            $ebook = Ebook::read($filePath);
+            $ebook = Ebook::read($filePath, $this->resolveFormat($filePath, $originalName));
             if ($ebook === null) {
                 return null;
             }
@@ -421,5 +427,21 @@ class EpubParserService
             error_log("EpubParserService::getMetadata failed for '$filePath': " . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Resolve the format hint for the underlying ebook library.
+     *
+     * Falls back to the original filename's extension when the path itself
+     * has none (PHP upload temp paths look like /tmp/phpXXXXXX). Returns
+     * null when no extension can be determined, letting the library decide.
+     */
+    private function resolveFormat(string $filePath, string $originalName): ?string
+    {
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        if ($extension === '' && $originalName !== '') {
+            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        }
+        return $extension === '' ? null : $extension;
     }
 }

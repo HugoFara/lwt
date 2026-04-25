@@ -132,7 +132,7 @@ class ImportEpub
 
         // Parse EPUB
         try {
-            $parsed = $this->epubParser->parse($filePath);
+            $parsed = $this->epubParser->parse($filePath, $originalName);
         } catch (\Throwable $e) {
             return [
                 'success' => false,
