@@ -92,11 +92,25 @@ export function isInt(value: string): boolean {
  *
  * @returns true if all checks were successfull
  */
+function isElementHidden(el: HTMLElement): boolean {
+  let cur: HTMLElement | null = el;
+  while (cur) {
+    if (cur.style.display === 'none') return true;
+    if (cur.hasAttribute('hidden')) return true;
+    cur = cur.parentElement;
+  }
+  return false;
+}
+
 export function check(): boolean {
   let count = 0;
 
-  // Check non-empty fields
+  // Check non-empty fields. Skip elements whose ancestor chain is hidden via
+  // x-show / display:none — e.g. on /texts/new the TxText textarea is hidden
+  // when the user is importing a file, so requiring text content there is a
+  // false positive.
   document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('.notempty').forEach(el => {
+    if (isElementHidden(el)) return;
     if (el.value.trim() === '') count++;
   });
   if (count > 0) {

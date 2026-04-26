@@ -211,6 +211,29 @@ describe('form_validation.ts', () => {
         check();
         expect(alertSpy).toHaveBeenCalledWith(expect.stringContaining('3 field(s)'));
       });
+
+      it('skips notempty fields hidden under an Alpine x-show ancestor', () => {
+        // /texts/new: TxText is `notempty` but hidden via x-show when the user
+        // is importing a file. Alpine sets display:none on the wrapper.
+        document.body.innerHTML = `
+          <div style="display: none">
+            <textarea class="notempty"></textarea>
+          </div>
+          <input class="notempty" value="filled" />
+        `;
+        expect(check()).toBe(true);
+        expect(alertSpy).not.toHaveBeenCalled();
+      });
+
+      it('skips notempty fields with the hidden attribute on an ancestor', () => {
+        document.body.innerHTML = `
+          <div hidden>
+            <input class="notempty" value="" />
+          </div>
+        `;
+        expect(check()).toBe(true);
+        expect(alertSpy).not.toHaveBeenCalled();
+      });
     });
 
     describe('checkurl validation', () => {

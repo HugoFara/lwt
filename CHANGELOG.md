@@ -23,6 +23,11 @@ ones are marked like "v1.0.0-fork".
   call so it only runs on `<input>` / `<textarea>`. The EPUB form's
   language `<select class="setfocus">` was triggering
   `TypeError: e.select is not a function` after focus.
+* **Spurious "1 field(s) must not be empty" alert during EPUB import**:
+  the `.notempty` validator now walks the ancestor chain and skips fields
+  hidden via Alpine `x-show` (inline `display: none`) or the `hidden`
+  attribute, so the hidden `TxText` textarea on `/texts/new` no longer
+  trips the alert when a file is selected.
 
 ## [3.1.0-fork] - 2026-04-21
 
