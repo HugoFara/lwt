@@ -32,7 +32,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
  */
 
 $actions = [
-    ['url' => '/book/import', 'label' => __('book.import_epub'), 'icon' => 'file-up', 'class' => 'is-primary'],
+    ['url' => '/texts/new', 'label' => __('book.import_epub'), 'icon' => 'file-up', 'class' => 'is-primary'],
     ['url' => '/texts/new', 'label' => __('book.new_text'), 'icon' => 'circle-plus'],
     ['url' => '/texts', 'label' => __('book.all_texts'), 'icon' => 'book-open'],
 ];

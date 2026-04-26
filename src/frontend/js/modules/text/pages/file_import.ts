@@ -3,12 +3,20 @@
  *
  * Supports:
  * - SRT/VTT subtitles: Parse client-side and populate textarea
- * - EPUB files: Redirect to dedicated book import page
+ * - EPUB files: Submit form inline to /book/import (handled by Alpine via lwt:file-import)
  * - Audio/Video files: Use Whisper transcription (handled by whisper_import.ts)
  *
  * @license unlicense
  * @since   3.0.0
  */
+
+type FileImportType = 'epub' | 'subtitle' | 'audio' | 'other';
+
+function dispatchFileImportEvent(type: FileImportType): void {
+  document.dispatchEvent(
+    new CustomEvent('lwt:file-import', { detail: { type } })
+  );
+}
 
 import { onDomReady } from '@shared/utils/dom_ready';
 import { isAudioVideoFile, handleFileSelection as handleWhisperFileSelection, initWhisperImport } from './whisper_import';
@@ -249,21 +257,16 @@ function handleSubtitleFile(file: File): void {
 }
 
 /**
- * Handle EPUB file - redirect to book import page.
+ * Handle EPUB file - notify the Alpine wizard so the form switches its
+ * action to /book/import and the EPUB-aware UI bits become visible.
  */
 function handleEpubFile(file: File): void {
-  setImportStatus('Redirecting to EPUB importer...', false, true);
-
-  // Store file info for the book import page
-  // We'll use sessionStorage to pass the filename hint
-  sessionStorage.setItem('pendingEpubImport', JSON.stringify({
-    filename: file.name,
-    timestamp: Date.now()
-  }));
-
-  // Redirect to book import page
-  // The user will need to re-select the file there (browser security limitation)
-  window.location.href = '/book/import?from=text';
+  if (!getInputByName('TxTitle')) {
+    const titleFromFile = file.name.replace(/\.epub$/i, '');
+    setInputByName('TxTitle', titleFromFile);
+  }
+  setImportStatus('EPUB ready — submit to import as a book.', false, true);
+  dispatchFileImportEvent('epub');
 }
 
 /**
@@ -276,12 +279,15 @@ function handleFileImport(file: File): void {
     handleEpubFile(file);
   } else if (ext === 'srt' || ext === 'vtt') {
     handleSubtitleFile(file);
+    dispatchFileImportEvent('subtitle');
   } else if (isAudioVideoFile(file.name)) {
     // Audio/video files are handled by whisper_import.ts
     // The handleWhisperFileSelection will show the transcription options
     handleWhisperFileSelection(file);
+    dispatchFileImportEvent('audio');
   } else {
     setImportStatus('Unsupported file type. Use .epub, .srt, .vtt, or audio/video files.', true);
+    dispatchFileImportEvent('other');
   }
 }
 

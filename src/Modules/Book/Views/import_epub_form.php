@@ -53,6 +53,18 @@ $submitDisabled = $zipMissing ? ' disabled title="ZIP extension required"' : '';
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
+<div class="notification is-warning is-light">
+    <p class="mb-2">
+        <?php echo IconHelper::render('alert-triangle', ['alt' => '', 'class' => 'mr-2']); ?>
+        <strong><?php echo __('book.deprecated_page_title'); ?></strong>
+    </p>
+    <p class="mb-3"><?php echo __('book.deprecated_page_body'); ?></p>
+    <a href="/texts/new" class="button is-primary is-small">
+        <?php echo IconHelper::render('circle-plus', ['alt' => '']); ?>
+        <span class="ml-2"><?php echo __('book.go_to_new_text'); ?></span>
+    </a>
+</div>
+
 <?php if ($showFromTextNotice) : ?>
 <div class="notification is-info is-light">
     <p>

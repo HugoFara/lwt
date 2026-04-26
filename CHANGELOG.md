@@ -7,6 +7,21 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Changed
+
+* **EPUB import unified onto `/texts/new`**: picking an `.epub` under
+  *Source → File → From computer* now flips the form's action to
+  `/book/import` and submits inline, instead of redirecting to a separate
+  page where the user had to re-pick the file. Action-card buttons that
+  used to link to `/book/import` now point at `/texts/new`. The standalone
+  `/book/import` page stays reachable for legacy bookmarks and direct form
+  POSTs, with a deprecation banner pointing to the new flow. The POST
+  handler now accepts both legacy field names (`LgID`, `thefile`) and the
+  new-text form's names (`TxLgID`, `importFile`).
+* **Tabbed file source on `/texts/new`**: *From computer* and *From server*
+  are now Bulma tabs instead of stacked panels, hiding the unused option
+  and reducing vertical clutter.
+
 ### Fixed
 
 * **EPUB upload** (#232): forward the original filename to

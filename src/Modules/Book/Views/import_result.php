@@ -41,7 +41,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
     </a>
     <?php endif; ?>
 
-    <a href="/book/import" class="button is-info is-outlined">
+    <a href="/texts/new" class="button is-info is-outlined">
         <?php echo IconHelper::render('upload', ['alt' => __('book.import_another_epub')]); ?>
         <span class="ml-2"><?php echo __('book.import_another_epub'); ?></span>
     </a>

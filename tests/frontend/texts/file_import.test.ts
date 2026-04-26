@@ -62,15 +62,17 @@ describe('file_import.ts', () => {
   // ===========================================================================
 
   describe('EPUB file handling', () => {
-    it('redirects to book import page for EPUB', () => {
-      const originalLocation = window.location;
-      delete (window as { location?: Location }).location;
-      window.location = { href: '' } as Location;
-
+    it('dispatches lwt:file-import with type=epub instead of redirecting', () => {
       document.body.innerHTML = `
         <input type="file" id="importFile" />
+        <input type="text" name="TxTitle" />
         <span id="importFileStatus"></span>
       `;
+
+      const events: Array<{ type: string }> = [];
+      document.addEventListener('lwt:file-import', (e) => {
+        events.push((e as CustomEvent<{ type: string }>).detail);
+      });
 
       initFileImport();
 
@@ -79,18 +81,13 @@ describe('file_import.ts', () => {
       Object.defineProperty(input, 'files', { value: [epubFile] });
       input.dispatchEvent(new Event('change'));
 
-      expect(window.location.href).toBe('/book/import?from=text');
-
-      window.location = originalLocation;
+      expect(events).toEqual([{ type: 'epub' }]);
     });
 
-    it('stores EPUB info in sessionStorage', () => {
-      const originalLocation = window.location;
-      delete (window as { location?: Location }).location;
-      window.location = { href: '' } as Location;
-
+    it('prefills the title input from the EPUB filename when title is empty', () => {
       document.body.innerHTML = `
         <input type="file" id="importFile" />
+        <input type="text" name="TxTitle" />
         <span id="importFileStatus"></span>
       `;
 
@@ -101,20 +98,14 @@ describe('file_import.ts', () => {
       Object.defineProperty(input, 'files', { value: [epubFile] });
       input.dispatchEvent(new Event('change'));
 
-      const stored = JSON.parse(sessionStorage.getItem('pendingEpubImport') || '{}');
-      expect(stored.filename).toBe('my-book.epub');
-      expect(stored.timestamp).toBeDefined();
-
-      window.location = originalLocation;
+      const title = document.querySelector<HTMLInputElement>('input[name="TxTitle"]')!;
+      expect(title.value).toBe('my-book');
     });
 
-    it('shows info status for EPUB redirect', () => {
-      const originalLocation = window.location;
-      delete (window as { location?: Location }).location;
-      window.location = { href: '' } as Location;
-
+    it('shows an info status reflecting the inline import flow', () => {
       document.body.innerHTML = `
         <input type="file" id="importFile" />
+        <input type="text" name="TxTitle" />
         <span id="importFileStatus"></span>
       `;
 
@@ -127,9 +118,7 @@ describe('file_import.ts', () => {
 
       const status = document.querySelector<HTMLElement>('#importFileStatus')!;
       expect(status.classList.contains('has-text-info')).toBe(true);
-      expect(status.textContent).toContain('Redirecting');
-
-      window.location = originalLocation;
+      expect(status.textContent).toContain('EPUB ready');
     });
   });
 
@@ -334,14 +323,16 @@ describe('file_import.ts', () => {
     });
 
     it('handles mixed case epub extension', () => {
-      const originalLocation = window.location;
-      delete (window as { location?: Location }).location;
-      window.location = { href: '' } as Location;
-
       document.body.innerHTML = `
         <input type="file" id="importFile" />
+        <input type="text" name="TxTitle" />
         <span id="importFileStatus"></span>
       `;
+
+      const events: Array<{ type: string }> = [];
+      document.addEventListener('lwt:file-import', (e) => {
+        events.push((e as CustomEvent<{ type: string }>).detail);
+      });
 
       initFileImport();
 
@@ -350,9 +341,7 @@ describe('file_import.ts', () => {
       Object.defineProperty(input, 'files', { value: [epubFile] });
       input.dispatchEvent(new Event('change'));
 
-      expect(window.location.href).toBe('/book/import?from=text');
-
-      window.location = originalLocation;
+      expect(events).toEqual([{ type: 'epub' }]);
     });
   });
 

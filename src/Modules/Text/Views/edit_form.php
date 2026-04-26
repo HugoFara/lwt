@@ -76,7 +76,7 @@ if (!$isNew) {
         'icon' => 'circle-plus',
         'class' => 'is-primary'
     ];
-    $actions[] = ['url' => '/book/import', 'label' => __('text.new.import_epub'), 'icon' => 'book'];
+    $actions[] = ['url' => '/texts/new', 'label' => __('text.new.import_epub'), 'icon' => 'book'];
     $actions[] = ['url' => '/books', 'label' => __('text.new.my_books'), 'icon' => 'library'];
     $actions[] = [
         'url' => '/texts?query=&page=1',
@@ -107,6 +107,7 @@ if (!$isNew) {
       action="<?php echo $isNew ? '/texts/new' : '/texts#rec' . $textIdTyped; ?>"
       <?php if ($isNew) : ?>
       x-data="textNewForm"
+      :action="formAction()"
       @webpage-imported="goToReview()"
       <?php else : ?>
       x-data
@@ -235,69 +236,128 @@ if (!$isNew) {
             </div>
 
         <!-- File Import Section -->
+        <?php $zipMissing = !extension_loaded('zip'); ?>
         <div x-show="source === 'file'" x-transition x-cloak class="mt-4">
             <p class="help mb-4">
                 <?= __e('text.new.file.help') ?>
             </p>
 
-            <!-- Upload file from computer -->
-            <div class="field">
-                <label class="label"><?= __e('text.new.file.from_computer') ?></label>
-                <div class="file has-name is-fullwidth">
-                    <label class="file-label">
-                        <input class="file-input"
-                               type="file"
-                               name="importFile"
-                               id="importFile"
-                               accept=".srt,.vtt,.epub,.txt,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
-                               @change="handleFileChange($event)" />
-                        <span class="file-cta">
-                            <span class="file-icon">
-                                <?php echo IconHelper::render('file-up', ['alt' => __('text.new.file.browse')]); ?>
+            <div class="tabs is-boxed">
+                <ul>
+                    <li :class="fileTabActive('computer')">
+                        <a @click="selectFileTab('computer')">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render(
+                                    'upload',
+                                    ['alt' => __('text.new.file.from_computer')]
+                                ); ?>
                             </span>
-                            <span class="file-label"><?= __e('text.new.file.browse') ?></span>
-                        </span>
-                        <span class="file-name"><?= __e('text.new.file.no_file') ?></span>
-                    </label>
-                </div>
-                <p id="importFileStatus" class="help"></p>
+                            <span><?= __e('text.new.file.from_computer') ?></span>
+                        </a>
+                    </li>
+                    <li :class="fileTabActive('server')">
+                        <a @click="selectFileTab('server')">
+                            <span class="icon is-small">
+                                <?php echo IconHelper::render(
+                                    'hard-drive',
+                                    ['alt' => __('text.new.file.from_server')]
+                                ); ?>
+                            </span>
+                            <span><?= __e('text.new.file.from_server') ?></span>
+                        </a>
+                    </li>
+                </ul>
             </div>
 
-            <!-- Or select from server media folder -->
-            <div class="field mt-4">
-                <label class="label"><?= __e('text.new.file.from_server') ?></label>
-                <div class="control" id="mediaselect">
-                    <?php $mediaJson = json_encode($mediaPaths); ?>
-                    <?php $mediaBase = htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-                    <p class="help mb-2">
-                        <?php echo htmlspecialchars(
-                            __('text.edit.import_file.files_in', ['path' => '../' . $mediaBase . '/media'])
-                        ); ?>
-                    </p>
-                    <p id="mediaSelectErrorMessage"></p>
-                    <?php echo IconHelper::render(
-                        'loader-2',
-                        [
-                            'id' => 'mediaSelectLoadingImg',
-                            'alt' => __('text.common.loading'),
-                            'class' => 'icon-spin'
-                        ]
-                    ); ?>
-                    <select
-                        name="Dir"
-                        class="input"
-                        data-action="media-dir-select"
-                        data-target-field="TxAudioURI"></select>
-                    <span class="click" data-action="refresh-media-select">
+            <!-- Tab: From computer -->
+            <div x-show="fileTab === 'computer'" x-cloak>
+                <div class="field">
+                    <div class="file has-name is-fullwidth">
+                        <label class="file-label">
+                            <input class="file-input"
+                                   type="file"
+                                   name="importFile"
+                                   id="importFile"
+                                   accept=".srt,.vtt,.epub,.txt,.mp3,.mp4,.wav,.webm,.ogg,.m4a,.mkv,.flac"
+                                   @change="handleFileChange($event)" />
+                            <span class="file-cta">
+                                <span class="file-icon">
+                                    <?php echo IconHelper::render(
+                                        'file-up',
+                                        ['alt' => __('text.new.file.browse')]
+                                    ); ?>
+                                </span>
+                                <span class="file-label"><?= __e('text.new.file.browse') ?></span>
+                            </span>
+                            <span class="file-name"><?= __e('text.new.file.no_file') ?></span>
+                        </label>
+                    </div>
+                    <p id="importFileStatus" class="help"></p>
+                </div>
+
+                <!-- EPUB inline notice (visible once an .epub file is picked) -->
+                <div x-show="isEpub()" x-cloak class="notification is-info is-light mt-3">
+                    <p>
                         <?php echo IconHelper::render(
-                            'refresh-cw',
-                            ['title' => __('text.common.refresh'), 'alt' => __('text.common.refresh')]
+                            'book',
+                            ['alt' => '', 'class' => 'mr-2']
                         ); ?>
-                        <?= __e('text.common.refresh') ?>
-                    </span>
-                    <script type="application/json" data-lwt-media-select-config>
-                        <?php echo $mediaJson !== false ? $mediaJson : '{}'; ?>
-                    </script>
+                        <?= __e('text.new.file.epub_detected') ?>
+                    </p>
+                </div>
+
+                <?php if ($zipMissing) : ?>
+                <div x-show="isEpub()" x-cloak class="notification is-danger mt-3">
+                    <p>
+                        <strong>
+                            <?php echo IconHelper::render(
+                                'alert-circle',
+                                ['alt' => __('common.error'), 'class' => 'mr-2']
+                            ); ?>
+                            <?php echo __('book.zip_required_title'); ?>
+                        </strong>
+                    </p>
+                    <p><?php echo __('book.zip_required_body'); ?></p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Tab: From server -->
+            <div x-show="fileTab === 'server'" x-cloak>
+                <div class="field">
+                    <div class="control" id="mediaselect">
+                        <?php $mediaJson = json_encode($mediaPaths); ?>
+                        <?php $mediaBase = htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                        <p class="help mb-2">
+                            <?php echo htmlspecialchars(
+                                __('text.edit.import_file.files_in', ['path' => '../' . $mediaBase . '/media'])
+                            ); ?>
+                        </p>
+                        <p id="mediaSelectErrorMessage"></p>
+                        <?php echo IconHelper::render(
+                            'loader-2',
+                            [
+                                'id' => 'mediaSelectLoadingImg',
+                                'alt' => __('text.common.loading'),
+                                'class' => 'icon-spin'
+                            ]
+                        ); ?>
+                        <select
+                            name="Dir"
+                            class="input"
+                            data-action="media-dir-select"
+                            data-target-field="TxAudioURI"></select>
+                        <span class="click" data-action="refresh-media-select">
+                            <?php echo IconHelper::render(
+                                'refresh-cw',
+                                ['title' => __('text.common.refresh'), 'alt' => __('text.common.refresh')]
+                            ); ?>
+                            <?= __e('text.common.refresh') ?>
+                        </span>
+                        <script type="application/json" data-lwt-media-select-config>
+                            <?php echo $mediaJson !== false ? $mediaJson : '{}'; ?>
+                        </script>
+                    </div>
                 </div>
             </div>
 
@@ -762,7 +822,7 @@ if (!$isNew) {
             </div>
 
             <!-- File info (shown for file import) -->
-            <div x-show="showFileInfo()" class="notification is-info is-light" x-cloak>
+            <div x-show="showFileInfo() && !isEpub()" class="notification is-info is-light" x-cloak>
                 <span class="icon-text">
                     <span class="icon">
                         <?php echo IconHelper::render(
@@ -774,20 +834,42 @@ if (!$isNew) {
                 </span>
             </div>
 
-            <!-- Save Button -->
+            <!-- EPUB info (shown when an .epub is queued for import) -->
+            <div x-show="isEpub()" class="notification is-info is-light" x-cloak>
+                <span class="icon-text">
+                    <span class="icon">
+                        <?php echo IconHelper::render(
+                            'book',
+                            ['alt' => __('text.new.file.epub_detected')]
+                        ); ?>
+                    </span>
+                    <span><?= __e('text.new.file.epub_detected') ?></span>
+                </span>
+            </div>
+
+            <!-- Save / Import Button -->
             <div class="field mt-5">
                 <div class="control">
-                    <button type="submit" name="op" value="Save and Open"
+                    <button type="submit" name="op"
+                            value="Save and Open"
+                            :value="submitOp()"
                             class="button is-primary is-medium is-fullwidth"
                             :disabled="autoImporting"
                             :class="{ 'is-loading': autoImporting }">
-                        <span class="icon">
+                        <span class="icon" x-show="!isEpub()">
                             <?php echo IconHelper::render(
                                 'book-open',
                                 ['alt' => __('text.new.review.save_and_read')]
                             ); ?>
                         </span>
-                        <span><?= __e('text.new.review.save_and_read') ?></span>
+                        <span class="icon" x-show="isEpub()" x-cloak>
+                            <?php echo IconHelper::render(
+                                'upload',
+                                ['alt' => __('book.import_epub')]
+                            ); ?>
+                        </span>
+                        <span x-show="!isEpub()"><?= __e('text.new.review.save_and_read') ?></span>
+                        <span x-show="isEpub()" x-cloak><?php echo __('book.import_epub'); ?></span>
                     </button>
                 </div>
             </div>

@@ -547,6 +547,8 @@ interface TextNewFormData {
   source: string;
   showAdvanced: boolean;
   autoImporting: boolean;
+  fileTab: 'computer' | 'server';
+  fileType: '' | 'epub' | 'subtitle' | 'audio' | 'other';
 
   init(): void;
   selectSource(source: string): void;
@@ -556,6 +558,11 @@ interface TextNewFormData {
   showTextArea(): boolean;
   showFileInfo(): boolean;
   handleFileChange(event: Event): void;
+  selectFileTab(tab: 'computer' | 'server'): void;
+  fileTabActive(tab: string): string;
+  isEpub(): boolean;
+  formAction(): string;
+  submitOp(): string;
 }
 
 export function textNewFormData(): TextNewFormData {
@@ -564,6 +571,8 @@ export function textNewFormData(): TextNewFormData {
     source: '',
     showAdvanced: false,
     autoImporting: false,
+    fileTab: 'computer',
+    fileType: '',
 
     init() {
       // When arriving via import_url (Gutenberg/Feed), skip step 1 and show loading
@@ -573,12 +582,20 @@ export function textNewFormData(): TextNewFormData {
         this.step = 2;
         this.autoImporting = true;
       }
+      // file_import.ts dispatches this when a local file's type is detected.
+      document.addEventListener('lwt:file-import', (e) => {
+        const detail = (e as CustomEvent<{ type: TextNewFormData['fileType'] }>).detail;
+        this.fileType = detail?.type ?? '';
+      });
     },
 
     selectSource(source: string) {
       this.source = source;
       if (source === 'paste') {
         this.step = 2;
+      }
+      if (source !== 'file') {
+        this.fileType = '';
       }
     },
 
@@ -611,6 +628,26 @@ export function textNewFormData(): TextNewFormData {
       if (fileNameEl && input.files && input.files.length > 0) {
         fileNameEl.textContent = input.files[0].name;
       }
+    },
+
+    selectFileTab(tab: 'computer' | 'server') {
+      this.fileTab = tab;
+    },
+
+    fileTabActive(tab: string): string {
+      return this.fileTab === tab ? 'is-active' : '';
+    },
+
+    isEpub(): boolean {
+      return this.fileType === 'epub';
+    },
+
+    formAction(): string {
+      return this.isEpub() ? '/book/import' : '/texts/new';
+    },
+
+    submitOp(): string {
+      return this.isEpub() ? 'Import' : 'Save and Open';
     },
   };
 }

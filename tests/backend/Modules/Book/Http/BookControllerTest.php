@@ -433,4 +433,27 @@ class BookControllerTest extends TestCase
         $this->assertStringContainsString('is-danger', $source);
         $this->assertStringContainsString('is-success', $source);
     }
+
+    #[Test]
+    public function processImportAcceptsTxLgIdAliasFromTextsNew(): void
+    {
+        // The /texts/new form posts the language under TxLgID, not LgID. The
+        // controller has to fall back to that name so the inline EPUB flow
+        // works without renaming any client-side fields.
+        $source = file_get_contents(
+            (new \ReflectionClass(BookController::class))->getFileName()
+        );
+        $this->assertStringContainsString("InputValidator::getInt('TxLgID')", $source);
+    }
+
+    #[Test]
+    public function processImportAcceptsImportFileAliasFromTextsNew(): void
+    {
+        // /texts/new uses 'importFile' for the file input; /book/import uses
+        // 'thefile'. Controller reads either.
+        $source = file_get_contents(
+            (new \ReflectionClass(BookController::class))->getFileName()
+        );
+        $this->assertStringContainsString("InputValidator::getUploadedFile('importFile')", $source);
+    }
 }
