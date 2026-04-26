@@ -5,6 +5,21 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
+## [Unreleased]
+
+### Fixed
+
+* **EPUB upload** (#232): forward the original filename to
+  `EpubParserService::parse()` / `getMetadata()` so the underlying
+  `kiwilan/php-ebook` library can detect the format. PHP upload temp paths
+  (`/tmp/phpXXXXXX`) carry no extension, which caused parsing to bail with
+  "File has no extension".
+* **Tagify chunk under Vite 8 / Rolldown**: switched the Tagify CSS dynamic
+  import to a static one in `tagify_tags.ts`. Co-bundling CSS with the JS
+  chunk under Rolldown emitted a broken `tagify_exports` named export and
+  threw `SyntaxError: local binding for export 'tagify_exports' not found`,
+  which halted module init on pages with tag inputs (e.g. `texts/new`).
+
 ## [3.1.0-fork] - 2026-04-21
 
 ### Added

@@ -13,28 +13,23 @@
 
 import type TagifyType from '@yaireo/tagify';
 import type { TagData } from '@yaireo/tagify';
+// Static import: dynamic CSS imports get co-bundled with the JS chunk under
+// Rolldown (Vite 8) and emit a broken `tagify_exports` named export.
+import '@yaireo/tagify/dist/tagify.css';
 
 import { containsCharacterOutsideBasicMultilingualPlane } from '@shared/forms/form_validation';
 
 // Tagify module reference (loaded dynamically)
 let Tagify: typeof TagifyType | null = null;
-let tagifyCssLoaded = false;
 
 /**
- * Dynamically load Tagify and its CSS only when needed.
+ * Dynamically load Tagify only when needed.
  */
 async function loadTagify(): Promise<typeof TagifyType> {
   if (Tagify) return Tagify;
 
-  // Load Tagify and CSS in parallel
-  const [tagifyModule] = await Promise.all([
-    import('@yaireo/tagify'),
-    // Only load CSS once
-    tagifyCssLoaded ? Promise.resolve() : import('@yaireo/tagify/dist/tagify.css')
-  ]);
-
+  const tagifyModule = await import('@yaireo/tagify');
   Tagify = tagifyModule.default;
-  tagifyCssLoaded = true;
   return Tagify;
 }
 
