@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.1.1-fork] - 2026-04-26
+
 ### Changed
 
 * **EPUB import unified onto `/texts/new`**: picking an `.epub` under
@@ -59,6 +61,15 @@ ones are marked like "v1.0.0-fork".
   no-op, which felt like the click had failed. The toggle now shows a
   confirmation toast after reload, and explains when a saved theme is in
   auto-mode following the system preference.
+
+### Translations
+
+* Added missing keys for the EPUB-import deprecation banner
+  (`book.deprecated_page_title`, `book.deprecated_page_body`,
+  `book.go_to_new_text`) and the `text.new.file.epub_detected`
+  notice across all eight non-English locales. Added the new
+  `navbar.theme_saved` / `navbar.theme_saved_auto` toast strings
+  to every locale.
 
 ## [3.1.0-fork] - 2026-04-21
 
