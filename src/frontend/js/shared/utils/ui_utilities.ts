@@ -218,9 +218,11 @@ export function initHideMessages(): void {
  * Set the focus on an element with the "focus" class.
  */
 export function setTheFocus(): void {
-  const focusEl = document.querySelector<HTMLInputElement | HTMLTextAreaElement>('.setfocus');
-  if (focusEl) {
-    focusEl.focus();
+  const focusEl = document.querySelector<HTMLElement>('.setfocus');
+  if (!focusEl) return;
+  focusEl.focus();
+  // .select() exists on <input> and <textarea> but not on <select>, <button>, etc.
+  if (focusEl instanceof HTMLInputElement || focusEl instanceof HTMLTextAreaElement) {
     focusEl.select();
   }
 }

@@ -19,6 +19,10 @@ ones are marked like "v1.0.0-fork".
   chunk under Rolldown emitted a broken `tagify_exports` named export and
   threw `SyntaxError: local binding for export 'tagify_exports' not found`,
   which halted module init on pages with tag inputs (e.g. `texts/new`).
+* **`setTheFocus()` crash on non-input elements**: guard the `.select()`
+  call so it only runs on `<input>` / `<textarea>`. The EPUB form's
+  language `<select class="setfocus">` was triggering
+  `TypeError: e.select is not a function` after focus.
 
 ## [3.1.0-fork] - 2026-04-21
 
