@@ -10,6 +10,8 @@
     "statistics_title": "Statistik",
     "switch_to_dark_mode": "Zum dunklen Modus wechseln",
     "switch_to_light_mode": "Zum hellen Modus wechseln",
+    "theme_saved": "Design gespeichert: {theme}",
+    "theme_saved_auto": "Design gespeichert: {theme} (Auto — folgt der Hell-/Dunkel-Einstellung deines Systems)",
     "user": "Benutzer",
     "preferences": "Einstellungen",
     "profile": "Profil",

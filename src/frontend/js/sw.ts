@@ -18,7 +18,7 @@ export type {}; // Make this a module to avoid global scope issues
 const sw = self;
 
 // Cache version - increment to invalidate old caches
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `lwt-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `lwt-runtime-${CACHE_VERSION}`;
 
@@ -153,7 +153,16 @@ sw.addEventListener('fetch', (event: FetchEvent) => {
     return;
   }
 
-  // Stale-while-revalidate for HTML pages
+  // Network-first for HTML page navigations. Server-rendered pages depend on
+  // current settings (theme, UI language, user prefs); stale-while-revalidate
+  // would serve the previous render after a settings save + reload, hiding
+  // the change until the next navigation.
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Stale-while-revalidate for other HTML/dynamic responses
   event.respondWith(staleWhileRevalidate(request));
 });
 

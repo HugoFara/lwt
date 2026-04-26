@@ -43,6 +43,22 @@ ones are marked like "v1.0.0-fork".
   hidden via Alpine `x-show` (inline `display: none`) or the `hidden`
   attribute, so the hidden `TxText` textarea on `/texts/new` no longer
   trips the alert when a file is selected.
+* **Theme / language change appearing only after navigation**: the service
+  worker used stale-while-revalidate for HTML, so the reload after saving
+  a setting served the previous render from cache and the change only
+  surfaced on the next page load. Navigation requests now use a
+  network-first strategy; static assets stay cache-first. `CACHE_VERSION`
+  bumped to `v2` so old caches are dropped on activate.
+* **Navbar theme toggle click ignored under CSP-build Alpine**: the
+  `@alpinejs/csp` build does not bind `@click` reliably on the same
+  element as `x-data`. Moved the listener to an imperative
+  `addEventListener` inside the component's `init()` and dropped the
+  inline directive. Added a Cypress regression test.
+* **Theme save with no visible change**: when in auto mode and OS
+  preference matches the would-be light/dark target, the saved value is a
+  no-op, which felt like the click had failed. The toggle now shows a
+  confirmation toast after reload, and explains when a saved theme is in
+  auto-mode following the system preference.
 
 ## [3.1.0-fork] - 2026-04-21
 

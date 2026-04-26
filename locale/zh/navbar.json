@@ -10,6 +10,8 @@
     "statistics_title": "统计",
     "switch_to_dark_mode": "切换到深色模式",
     "switch_to_light_mode": "切换到浅色模式",
+    "theme_saved": "主题已保存：{theme}",
+    "theme_saved_auto": "主题已保存：{theme}（自动 — 跟随系统的浅色／深色偏好）",
     "user": "用户",
     "preferences": "偏好设置",
     "profile": "个人资料",

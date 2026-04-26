@@ -10,6 +10,8 @@
     "statistics_title": "Statistiche",
     "switch_to_dark_mode": "Passa al tema scuro",
     "switch_to_light_mode": "Passa al tema chiaro",
+    "theme_saved": "Tema salvato: {theme}",
+    "theme_saved_auto": "Tema salvato: {theme} (auto — segue la preferenza chiaro/scuro del sistema)",
     "user": "Utente",
     "preferences": "Preferenze",
     "profile": "Profilo",

@@ -288,7 +288,7 @@ LANG;
 
         <div class="navbar-end">
             <a class="navbar-item" href="#" title="{$toggleTitle}"
-               x-data="themeToggle" @click.prevent="switchTheme()"
+               x-data="themeToggle"
                data-theme-mode="{$themeMode}"
                data-theme-counterpart="{$escapedCounterpart}"
                data-current-theme="{$escapedThemeDir}"

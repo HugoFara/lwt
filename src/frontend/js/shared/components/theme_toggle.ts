@@ -20,6 +20,44 @@ interface ThemeToggleData {
   updateIconForMode(el: HTMLElement, mode: string): void;
 }
 
+const FLASH_KEY = 'lwt:theme-flash';
+const AUTO_THEME_VALUES = ['', 'themes/default/', 'dist/themes/Default/'];
+
+function themeDirIsAuto(themeDir: string): boolean {
+  return AUTO_THEME_VALUES.includes(themeDir);
+}
+
+function themeDisplayName(themeDir: string): string {
+  // 'dist/themes/Dark/' -> 'Dark'
+  return themeDir.split('/').filter(Boolean).pop() ?? themeDir;
+}
+
+function showThemeFlash(): void {
+  const themeDir = sessionStorage.getItem(FLASH_KEY);
+  if (themeDir === null) return;
+  sessionStorage.removeItem(FLASH_KEY);
+
+  const name = themeDisplayName(themeDir);
+  const message = themeDirIsAuto(themeDir)
+    ? t('navbar.theme_saved_auto', { theme: name })
+    : t('navbar.theme_saved', { theme: name });
+
+  const notif = document.createElement('div');
+  notif.className = 'notification is-info';
+  notif.setAttribute('role', 'status');
+
+  const close = document.createElement('button');
+  close.className = 'delete';
+  close.setAttribute('aria-label', 'close');
+  close.addEventListener('click', () => notif.remove());
+  notif.appendChild(close);
+  notif.appendChild(document.createTextNode(message));
+
+  const target = document.querySelector('main') ?? document.body;
+  target.insertBefore(notif, target.firstChild);
+  window.setTimeout(() => notif.remove(), 4000);
+}
+
 function themeToggleData(): ThemeToggleData {
   return {
     init() {
@@ -35,6 +73,18 @@ function themeToggleData(): ThemeToggleData {
           ? 'dist/themes/Default/'   // go to forced light
           : 'dist/themes/Dark/';     // go to dark
       }
+
+      // Attach click handler imperatively. The Alpine CSP build does not bind
+      // `@click` directives reliably when they share an element with `x-data`,
+      // which is the layout used by the navbar toggle. Wiring up the listener
+      // here from `init()` sidesteps the issue.
+      el.addEventListener('click', (event) => {
+        event.preventDefault();
+        this.switchTheme();
+      });
+
+      // Show a confirmation toast if the previous page set one before reloading.
+      showThemeFlash();
     },
 
     switchTheme() {
@@ -43,6 +93,7 @@ function themeToggleData(): ThemeToggleData {
       if (!counterpart) return;
 
       SettingsApi.save('set-theme-dir', counterpart).then(() => {
+        sessionStorage.setItem(FLASH_KEY, counterpart);
         window.location.reload();
       });
     },

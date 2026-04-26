@@ -10,6 +10,8 @@
     "statistics_title": "統計",
     "switch_to_dark_mode": "ダークモードに切り替え",
     "switch_to_light_mode": "ライトモードに切り替え",
+    "theme_saved": "テーマを保存しました: {theme}",
+    "theme_saved_auto": "テーマを保存しました: {theme}（自動 — システムのライト／ダーク設定に従います）",
     "user": "ユーザー",
     "preferences": "個人設定",
     "profile": "プロフィール",
