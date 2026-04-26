@@ -127,6 +127,7 @@
     "new.file.browse": "Procurar...",
     "new.file.no_file": "Nenhum arquivo selecionado",
     "new.file.from_server": "Ou da pasta de mídia do servidor",
+    "new.file.epub_detected": "EPUB detectado — será importado como livro com capítulos divididos automaticamente.",
     "new.url.web_label": "URL da Página Web",
     "new.url.fetch": "Buscar Conteúdo",
     "new.url.fetch_help": "Cole a URL de qualquer artigo ou página web. O conteúdo principal do texto será extraído automaticamente.",

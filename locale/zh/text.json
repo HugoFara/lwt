@@ -116,6 +116,7 @@
     "new.file.browse": "浏览...",
     "new.file.no_file": "未选择文件",
     "new.file.from_server": "或从服务器的媒体文件夹",
+    "new.file.epub_detected": "已检测到 EPUB — 将作为书籍导入并自动分割章节。",
     "new.url.web_label": "网页 URL",
     "new.url.fetch": "获取内容",
     "new.url.fetch_help": "粘贴任何文章或网页 URL。主要文本内容将被自动提取。",

@@ -127,6 +127,7 @@
     "new.file.browse": "Sfoglia...",
     "new.file.no_file": "Nessun file selezionato",
     "new.file.from_server": "Oppure dalla cartella media del server",
+    "new.file.epub_detected": "EPUB rilevato — verrà importato come libro con capitoli divisi automaticamente.",
     "new.url.web_label": "URL della pagina web",
     "new.url.fetch": "Recupera contenuto",
     "new.url.fetch_help": "Incolla l'URL di qualsiasi articolo o pagina web. Il contenuto principale del testo verrà estratto automaticamente.",

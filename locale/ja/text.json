@@ -127,6 +127,7 @@
     "new.file.browse": "参照...",
     "new.file.no_file": "ファイルが選択されていません",
     "new.file.from_server": "またはサーバーのメディアフォルダから",
+    "new.file.epub_detected": "EPUB を検出しました — 章を自動分割して書籍としてインポートします。",
     "new.url.web_label": "WebページURL",
     "new.url.fetch": "コンテンツを取得",
     "new.url.fetch_help": "任意の記事またはWebページのURLを貼り付けてください。本文が自動的に抽出されます。",
