@@ -106,8 +106,12 @@ class StarDictImporter implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function canImport(string $filePath): bool
+    public function canImport(string $filePath, ?string $originalName = null): bool
     {
+        // StarDict needs companion .ifo/.idx/.dict files at the same base path.
+        // The originalName argument is accepted for interface parity but unused here:
+        // a single uploaded file cannot satisfy this format — see import UI for details.
+        unset($originalName);
         $basePath = $this->getBasePath($filePath);
 
         // Check all required files exist

@@ -46,11 +46,13 @@ interface ImporterInterface
     /**
      * Validate that a file can be imported.
      *
-     * @param string $filePath Path to the file
+     * @param string      $filePath     Path to the file (may be a PHP upload tmp_name without an extension)
+     * @param string|null $originalName Original filename, used for extension-based detection
+     *                                  when $filePath has none (e.g. PHP $_FILES tmp_name)
      *
      * @return bool True if the file can be imported
      */
-    public function canImport(string $filePath): bool;
+    public function canImport(string $filePath, ?string $originalName = null): bool;
 
     /**
      * Get a preview of the first N entries.

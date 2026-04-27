@@ -289,6 +289,7 @@ class DictionaryApiHandler implements ApiRoutableInterface
      * @param int   $dictId  Dictionary ID
      * @param array $data    Import data:
      *                       - file_path: string (temporary file path)
+     *                       - original_name: string|null (original upload filename, used for extension detection)
      *                       - format: string (csv, json, stardict)
      *                       - options: array (format-specific options)
      *
@@ -302,6 +303,8 @@ class DictionaryApiHandler implements ApiRoutableInterface
         }
 
         $filePath = $data['file_path'] ?? '';
+        /** @var string|null $originalName */
+        $originalName = $data['original_name'] ?? null;
         /** @var string $format */
         $format = $data['format'] ?? 'csv';
         /** @var array<string, mixed> $options */
@@ -310,12 +313,13 @@ class DictionaryApiHandler implements ApiRoutableInterface
         if (!is_string($filePath) || $filePath === '' || !file_exists($filePath)) {
             return ['success' => false, 'error' => 'File not found'];
         }
+        $originalName = is_string($originalName) ? $originalName : null;
 
         try {
-            $importer = $this->facade->getImporter($format);
+            $importer = $this->facade->getImporter($format, $originalName ?? '');
 
             /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
-            if (!$importer->canImport($filePath)) {
+            if (!$importer->canImport($filePath, $originalName)) {
                 return ['success' => false, 'error' => 'Invalid file format'];
             }
 
@@ -337,6 +341,7 @@ class DictionaryApiHandler implements ApiRoutableInterface
      *
      * @param array $data Preview data:
      *                    - file_path: string
+     *                    - original_name: string|null (original upload filename, used for extension detection)
      *                    - format: string
      *                    - limit: int (default: 10)
      *                    - options: array
@@ -346,6 +351,8 @@ class DictionaryApiHandler implements ApiRoutableInterface
     public function previewFile(array $data): array
     {
         $filePath = $data['file_path'] ?? '';
+        /** @var string|null $originalName */
+        $originalName = $data['original_name'] ?? null;
         /** @var string $format */
         $format = $data['format'] ?? 'csv';
         $limit = (int)($data['limit'] ?? 10);
@@ -355,12 +362,13 @@ class DictionaryApiHandler implements ApiRoutableInterface
         if (!is_string($filePath) || $filePath === '' || !file_exists($filePath)) {
             return ['success' => false, 'error' => 'File not found'];
         }
+        $originalName = is_string($originalName) ? $originalName : null;
 
         try {
-            $importer = $this->facade->getImporter($format);
+            $importer = $this->facade->getImporter($format, $originalName ?? '');
 
             /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
-            if (!$importer->canImport($filePath)) {
+            if (!$importer->canImport($filePath, $originalName)) {
                 return ['success' => false, 'error' => 'Invalid file format'];
             }
 

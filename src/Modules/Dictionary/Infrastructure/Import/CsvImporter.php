@@ -107,13 +107,16 @@ class CsvImporter implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function canImport(string $filePath): bool
+    public function canImport(string $filePath, ?string $originalName = null): bool
     {
         if (!file_exists($filePath) || !is_readable($filePath)) {
             return false;
         }
 
-        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        // PHP uploads land at tmp_name (e.g. /tmp/phpXXXXXX) which has no extension —
+        // fall back to the original filename for extension detection when one is given.
+        $nameForExt = $originalName !== null && $originalName !== '' ? $originalName : $filePath;
+        $extension = strtolower(pathinfo($nameForExt, PATHINFO_EXTENSION));
         return in_array($extension, $this->getSupportedExtensions(), true);
     }
 

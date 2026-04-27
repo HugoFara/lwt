@@ -415,7 +415,7 @@ class TermImportController extends VocabularyBaseController
         try {
             $importer = $this->dictionaryFacade->getImporter($format, $uploadedFile['name']);
 
-            if (!$importer->canImport($uploadedFile['tmp_name'])) {
+            if (!$importer->canImport($uploadedFile['tmp_name'], $uploadedFile['name'])) {
                 echo '<div class="notification is-danger">' .
                     '<button class="delete" aria-label="close"></button>' .
                     'Error: Invalid file format</div>';

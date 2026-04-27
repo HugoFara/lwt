@@ -169,7 +169,7 @@ class DictionaryController extends BaseController
             $importer = $this->dictionaryFacade->getImporter($format, $originalName);
 
             /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
-            if (!$importer->canImport($filePath)) {
+            if (!$importer->canImport($filePath, $originalName)) {
                 $this->redirect("/dictionaries/import?lang=$langId&dict_id=$dictId&error=invalid_file");
             }
 
@@ -231,7 +231,7 @@ class DictionaryController extends BaseController
         try {
             $importer = $this->dictionaryFacade->getImporter($format, $originalName);
 
-            if (!$importer->canImport($filePath)) {
+            if (!$importer->canImport($filePath, $originalName)) {
                 echo json_encode(['error' => 'Invalid file format']);
                 return;
             }
