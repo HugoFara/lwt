@@ -52,7 +52,7 @@ describe('dictionary_import.ts', () => {
     it('has correct accept types for stardict format', () => {
       const component = dictionaryImportData();
 
-      expect(component.acceptTypes.stardict).toBe('.ifo');
+      expect(component.acceptTypes.stardict).toBe('.zip,.tar,.tgz,.gz,.bz2,.xz');
     });
   });
 
@@ -189,7 +189,7 @@ describe('dictionary_import.ts', () => {
       expect(component.acceptTypes[component.format]).toBe('.json');
 
       component.format = 'stardict';
-      expect(component.acceptTypes[component.format]).toBe('.ifo');
+      expect(component.acceptTypes[component.format]).toBe('.zip,.tar,.tgz,.gz,.bz2,.xz');
     });
   });
 
