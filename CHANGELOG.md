@@ -7,6 +7,24 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Added
+
+* **StarDict dictionary uploads via archives** (#233): the import form now
+  accepts `.zip`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.tgz` containing
+  the StarDict triplet (`.ifo` + `.idx` + `.dict`/`.dict.dz`). FreeDict
+  downloads import directly. Extraction is shared with the curated-import
+  flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
+  guard, automatic cleanup).
+
+### Fixed
+
+* **Dictionary import rejected every file as "Invalid file format"**
+  (#233): `CsvImporter`/`JsonImporter`'s `canImport()` checked the
+  extension of the PHP upload temp path (`/tmp/phpXXXXXX`), which has
+  none. Forward the original filename through `canImport()` so format
+  detection works for CSV, TSV, and JSON dictionary uploads (and the
+  vocabulary term importer that shares the same code path).
+
 ## [3.1.1-fork] - 2026-04-26
 
 ### Changed
