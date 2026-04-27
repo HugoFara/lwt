@@ -19,8 +19,8 @@ declare(strict_types=1);
 namespace Lwt\Modules\Dictionary\Application\Services;
 
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+use Lwt\Modules\Dictionary\Infrastructure\Import\ArchiveExtractor;
 use RuntimeException;
-use ZipArchive;
 
 /**
  * Service for importing curated dictionaries from remote URLs.
@@ -39,13 +39,12 @@ class CuratedDictImportService
     /** HTTP download timeout in seconds. */
     private const DOWNLOAD_TIMEOUT = 120;
 
-    /** Maximum files allowed in a ZIP archive. */
-    private const MAX_ZIP_FILES = 500;
-
     private DictionaryFacade $facade;
 
     /** @var string|null Override path for testing */
     private ?string $registryPath;
+
+    private ArchiveExtractor $archiveExtractor;
 
     public function __construct(
         DictionaryFacade $facade,
@@ -53,6 +52,7 @@ class CuratedDictImportService
     ) {
         $this->facade = $facade;
         $this->registryPath = $registryPath;
+        $this->archiveExtractor = new ArchiveExtractor();
     }
 
     /**
@@ -88,14 +88,9 @@ class CuratedDictImportService
 
             // Determine if extraction is needed
             $urlPath = parse_url($url, PHP_URL_PATH);
-            $ext = strtolower(pathinfo(is_string($urlPath) ? $urlPath : '', PATHINFO_EXTENSION));
-
-            if ($ext === 'zip') {
-                $extractDir = $this->extractZip($archivePath);
-                $tempFiles[] = $extractDir;
-                $importFile = $this->findImportFile($extractDir, $format);
-            } elseif ($this->isTarArchive($url)) {
-                $extractDir = $this->extractTar($archivePath);
+            $archiveName = is_string($urlPath) ? basename($urlPath) : '';
+            if (ArchiveExtractor::isArchive($archiveName)) {
+                $extractDir = $this->archiveExtractor->extract($archivePath, $archiveName);
                 $tempFiles[] = $extractDir;
                 $importFile = $this->findImportFile($extractDir, $format);
             } else {
@@ -233,134 +228,6 @@ class CuratedDictImportService
     }
 
     /**
-     * Check whether a URL points to a tar archive (.tar.xz, .tar.gz, .tar.bz2).
-     */
-    private function isTarArchive(string $url): bool
-    {
-        $urlPath = parse_url($url, PHP_URL_PATH);
-        $path = is_string($urlPath) ? strtolower($urlPath) : '';
-        return (bool) preg_match('/\.tar\.(xz|gz|bz2)$/', $path);
-    }
-
-    /**
-     * Extract a tar archive (.tar.xz, .tar.gz, .tar.bz2) to a temporary directory.
-     *
-     * Uses the system `tar` command which handles xz/gzip/bzip2 auto-detection.
-     *
-     * @return string Path to the extraction directory
-     *
-     * @throws RuntimeException On extraction failure
-     */
-    private function extractTar(string $tarPath): string
-    {
-        $extractDir = sys_get_temp_dir() . '/lwt_dict_' . bin2hex(random_bytes(8));
-        if (!mkdir($extractDir, 0700, true)) {
-            throw new RuntimeException('Failed to create extraction directory');
-        }
-
-        $command = sprintf(
-            'tar xf %s -C %s 2>&1',
-            escapeshellarg($tarPath),
-            escapeshellarg($extractDir)
-        );
-
-        $output = [];
-        $exitCode = 0;
-        exec($command, $output, $exitCode);
-
-        if ($exitCode !== 0) {
-            $this->removeDir($extractDir);
-            throw new RuntimeException(
-                'Failed to extract tar archive (exit code ' . $exitCode . '): ' .
-                implode("\n", $output)
-            );
-        }
-
-        // Safety check: verify reasonable file count
-        $fileCount = 0;
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($extractDir, \FilesystemIterator::SKIP_DOTS)
-        );
-        foreach ($iterator as $_) {
-            $fileCount++;
-            if ($fileCount > self::MAX_ZIP_FILES) {
-                $this->removeDir($extractDir);
-                throw new RuntimeException(
-                    'Archive contains too many files (>' . self::MAX_ZIP_FILES . ')'
-                );
-            }
-        }
-
-        return $extractDir;
-    }
-
-    /**
-     * Extract a ZIP archive to a temporary directory.
-     *
-     * @return string Path to the extraction directory
-     *
-     * @throws RuntimeException On extraction failure
-     */
-    private function extractZip(string $zipPath): string
-    {
-        if (!class_exists(ZipArchive::class)) {
-            throw new RuntimeException('PHP ZipArchive extension is required for ZIP import');
-        }
-
-        /**
-         * @psalm-suppress UndefinedDocblockClass, UnnecessaryVarAnnotation
-         * @var \ZipArchive $zip
-         */
-        $zip = new ZipArchive();
-        $result = $zip->open($zipPath);
-        if ($result !== true) {
-            throw new RuntimeException('Failed to open ZIP archive (error code: ' . (string) $result . ')');
-        }
-
-        // Safety check: limit file count
-        /**
-         * @psalm-suppress UndefinedDocblockClass, UnnecessaryVarAnnotation
-         * @var int $numFiles
-         */
-        $numFiles = $zip->numFiles;
-        if ($numFiles > self::MAX_ZIP_FILES) {
-            $zip->close();
-            throw new RuntimeException('ZIP archive contains too many files (' . $numFiles . ')');
-        }
-
-        // Safety check: no path traversal
-        for ($i = 0; $i < $numFiles; $i++) {
-            /**
-             * @psalm-suppress UnnecessaryVarAnnotation
-             * @var string|false $entryName
-             */
-            $entryName = $zip->getNameIndex($i);
-            if ($entryName === false) {
-                continue;
-            }
-            if (str_contains($entryName, '..')) {
-                $zip->close();
-                throw new RuntimeException('ZIP archive contains unsafe path: ' . $entryName);
-            }
-        }
-
-        $extractDir = sys_get_temp_dir() . '/lwt_dict_' . bin2hex(random_bytes(8));
-        if (!mkdir($extractDir, 0700, true)) {
-            $zip->close();
-            throw new RuntimeException('Failed to create extraction directory');
-        }
-
-        if (!$zip->extractTo($extractDir)) {
-            $zip->close();
-            $this->removeDir($extractDir);
-            throw new RuntimeException('Failed to extract ZIP archive');
-        }
-
-        $zip->close();
-        return $extractDir;
-    }
-
-    /**
      * Find the importable file within an extracted directory.
      *
      * @param string $directory Extracted directory path
@@ -379,19 +246,9 @@ class CuratedDictImportService
             default => throw new RuntimeException('Unsupported format: ' . $format),
         };
 
-        // Recursively scan for matching files
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)
-        );
-
-        /** @var \SplFileInfo $file */
-        foreach ($iterator as $file) {
-            if ($file->isFile()) {
-                $ext = strtolower($file->getExtension());
-                if (in_array($ext, $extensions, true)) {
-                    return $file->getPathname();
-                }
-            }
+        $found = $this->archiveExtractor->findByExtensions($directory, $extensions);
+        if ($found !== null) {
+            return $found;
         }
 
         throw new RuntimeException(
@@ -428,38 +285,6 @@ class CuratedDictImportService
      */
     private function cleanup(string ...$paths): void
     {
-        foreach ($paths as $path) {
-            if (!file_exists($path)) {
-                continue;
-            }
-            if (is_dir($path)) {
-                $this->removeDir($path);
-            } else {
-                @unlink($path);
-            }
-        }
-    }
-
-    /**
-     * Recursively remove a directory.
-     */
-    private function removeDir(string $dir): void
-    {
-        if (!is_dir($dir)) {
-            return;
-        }
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
-        );
-        /** @var \SplFileInfo $item */
-        foreach ($items as $item) {
-            if ($item->isDir()) {
-                @rmdir($item->getPathname());
-            } else {
-                @unlink($item->getPathname());
-            }
-        }
-        @rmdir($dir);
+        $this->archiveExtractor->cleanup(...$paths);
     }
 }

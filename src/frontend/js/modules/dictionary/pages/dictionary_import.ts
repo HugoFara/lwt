@@ -31,7 +31,9 @@ export function dictionaryImportData(): DictionaryImportData {
     acceptTypes: {
       csv: '.csv,.tsv,.txt',
       json: '.json',
-      stardict: '.ifo'
+      // StarDict needs companion .idx/.dict files alongside .ifo, so the
+      // user uploads an archive that contains all three.
+      stardict: '.zip,.tar,.tgz,.gz,.bz2,.xz'
     },
 
     fileSelected(event: Event): void {

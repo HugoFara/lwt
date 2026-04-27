@@ -255,7 +255,8 @@ echo PageLayoutHelper::buildActionCard([
                 <li><strong>.dict</strong> / <strong>.dict.dz</strong> -
                     <?php echo __('dictionary.stardict_dict'); ?></li>
             </ul>
-            <p class="has-text-info"><?php echo __('dictionary.stardict_same_dir'); ?></p>
+            <p class="has-text-info"><?php echo __('dictionary.stardict_archive_required'); ?></p>
+            <p class="help mt-2"><?php echo __('dictionary.stardict_archive_formats'); ?></p>
         </div>
 
         <!-- Submit -->
