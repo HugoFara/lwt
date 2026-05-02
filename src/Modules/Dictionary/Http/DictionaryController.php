@@ -19,7 +19,7 @@ namespace Lwt\Modules\Dictionary\Http;
 
 use Lwt\Shared\Http\BaseController;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
-use Lwt\Modules\Dictionary\Infrastructure\Import\ArchiveExtractor;
+use Lwt\Modules\Dictionary\Application\Services\DictionaryImportFileResolver;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\Infrastructure\Database\Validation;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
@@ -163,34 +163,12 @@ class DictionaryController extends BaseController
             return;
         }
 
-        $filePath = $uploadedFile['tmp_name'];
-        $originalName = $uploadedFile['name'];
-
-        $tempDirs = [];
-        $extractor = new ArchiveExtractor();
+        $resolver = new DictionaryImportFileResolver();
 
         try {
-            $importPath = $filePath;
-            $importName = $originalName;
-
-            // Multi-file formats like StarDict need their companion files (.idx, .dict)
-            // alongside the .ifo. A web upload only delivers a single file, so users
-            // upload an archive (.zip / .tar.gz / .tar.bz2 / .tar.xz / .tgz) instead;
-            // we extract it and point the importer at the file inside.
-            if (ArchiveExtractor::isArchive($originalName)) {
-                $extractDir = $extractor->extract($filePath, $originalName);
-                $tempDirs[] = $extractDir;
-
-                $extensions = $this->expectedExtensionsForFormat($format);
-                $found = $extractor->findByExtensions($extractDir, $extensions);
-                if ($found === null) {
-                    throw new RuntimeException(
-                        'Archive does not contain a .' . implode('/.', $extensions) . ' file'
-                    );
-                }
-                $importPath = $found;
-                $importName = basename($found);
-            }
+            $resolved = $resolver->resolve($uploadedFile['tmp_name'], $uploadedFile['name'], $format);
+            $importPath = $resolved['path'];
+            $importName = $resolved['name'];
 
             $importer = $this->dictionaryFacade->getImporter($format, $importName);
 
@@ -213,22 +191,8 @@ class DictionaryController extends BaseController
             $errorMsg = urlencode($e->getMessage());
             $this->redirect("/dictionaries/import?lang=$langId&dict_id=$dictId&error=$errorMsg");
         } finally {
-            $extractor->cleanup(...$tempDirs);
+            $resolver->cleanup();
         }
-    }
-
-    /**
-     * File extensions to look for inside an extracted archive for a given format.
-     *
-     * @return list<string>
-     */
-    private function expectedExtensionsForFormat(string $format): array
-    {
-        return match ($format) {
-            'stardict' => ['ifo'],
-            'json' => ['json'],
-            default => ['csv', 'tsv', 'txt'],
-        };
     }
 
     /**

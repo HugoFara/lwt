@@ -31,6 +31,24 @@ ones are marked like "v1.0.0-fork".
   a `.zip` / `.tar.gz` / `.tar.bz2` bundle was therefore still rejected
   with "Invalid file format". Mirror the archive-aware flow on the live
   route so FreeDict and WikDict downloads import directly from the form.
+* **CSV dictionary upload crashed on PHP 8.4+**: `fgetcsv()` raised
+  `ErrorException: the $escape parameter must be provided as its default
+  value will change` and rendered the dev debug page (with file paths)
+  to the end user. Pass an explicit empty `$escape` argument at the three
+  call sites in `CsvImporter` for RFC 4180 / forward-compat behavior.
+* **Bare `.ifo` upload produced a generic, unhelpful error**: uploading
+  just the `.ifo` for `format=stardict` (without its `.idx`/`.dict`
+  siblings, which a single web upload can never deliver) used to return
+  the same "Invalid file format" string as truly malformed input. It now
+  short-circuits with a specific hint that the user must upload an
+  archive containing the full bundle.
+
+### Changed
+
+* The archive-detect / extract / find-by-extension flow is now extracted
+  into `DictionaryImportFileResolver` and shared by the curated import,
+  legacy `/dictionaries/import`, and unified `/word/upload` routes. No
+  user-visible change beyond the friendlier bare-`.ifo` error above.
 
 ## [3.1.1-fork] - 2026-04-26
 
