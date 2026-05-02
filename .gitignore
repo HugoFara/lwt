@@ -4,6 +4,9 @@
 .claude/
 CLAUDE.local.md
 
+# Playwright MCP browser session output (snapshots, console logs, screenshots)
+.playwright-mcp/
+
 # Environment configuration (contains secrets)
 .env
 deploy.env
