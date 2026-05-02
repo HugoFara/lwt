@@ -65,12 +65,12 @@ class CsvImporter implements ImporterInterface
 
             // Skip header if present
             if ($hasHeader === true) {
-                fgetcsv($handle, 0, $delimiter);
+                fgetcsv($handle, 0, $delimiter, '"', '');
                 $lineNumber++;
             }
 
             while (true) {
-                $csvRow = fgetcsv($handle, 0, $delimiter);
+                $csvRow = fgetcsv($handle, 0, $delimiter, '"', '');
                 if ($csvRow === false) {
                     break;
                 }
@@ -190,7 +190,7 @@ class CsvImporter implements ImporterInterface
             return [];
         }
 
-        $headers = fgetcsv($handle, 0, $delimiter);
+        $headers = fgetcsv($handle, 0, $delimiter, '"', '');
         fclose($handle);
 
         return $headers ?: [];
