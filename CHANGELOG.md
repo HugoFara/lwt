@@ -24,6 +24,13 @@ ones are marked like "v1.0.0-fork".
   none. Forward the original filename through `canImport()` so format
   detection works for CSV, TSV, and JSON dictionary uploads (and the
   vocabulary term importer that shares the same code path).
+* **StarDict archive uploads still failed on the unified import page**
+  (#233): the archive-extract-then-import flow lived only in
+  `DictionaryController::importFile`, but the unified term/dictionary
+  import page routes through `TermImportController`. Every UI upload of
+  a `.zip` / `.tar.gz` / `.tar.bz2` bundle was therefore still rejected
+  with "Invalid file format". Mirror the archive-aware flow on the live
+  route so FreeDict and WikDict downloads import directly from the form.
 
 ## [3.1.1-fork] - 2026-04-26
 

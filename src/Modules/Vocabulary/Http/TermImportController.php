@@ -25,6 +25,7 @@ use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Vocabulary\Application\Services\FrequencyLanguageMap;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Modules\Dictionary\Application\DictionaryFacade;
+use Lwt\Modules\Dictionary\Infrastructure\Import\ArchiveExtractor;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\FormHelper;
 use RuntimeException;
@@ -412,10 +413,39 @@ class TermImportController extends VocabularyBaseController
             $dictName = pathinfo($uploadedFile['name'], PATHINFO_FILENAME) ?: 'Imported Dictionary';
         }
 
-        try {
-            $importer = $this->dictionaryFacade->getImporter($format, $uploadedFile['name']);
+        $tempDirs = [];
+        $extractor = new ArchiveExtractor();
 
-            if (!$importer->canImport($uploadedFile['tmp_name'], $uploadedFile['name'])) {
+        try {
+            $importPath = $uploadedFile['tmp_name'];
+            $importName = $uploadedFile['name'];
+
+            // Multi-file formats like StarDict need their companion files (.idx, .dict)
+            // alongside the .ifo. A web upload only delivers a single file, so users
+            // upload an archive (.zip / .tar.gz / .tar.bz2 / .tar.xz / .tgz) instead;
+            // we extract it and point the importer at the file inside.
+            if (ArchiveExtractor::isArchive($importName)) {
+                $extractDir = $extractor->extract($importPath, $importName);
+                $tempDirs[] = $extractDir;
+
+                $extensions = match ($format) {
+                    'stardict' => ['ifo'],
+                    'json' => ['json'],
+                    default => ['csv', 'tsv', 'txt'],
+                };
+                $found = $extractor->findByExtensions($extractDir, $extensions);
+                if ($found === null) {
+                    throw new RuntimeException(
+                        'Archive does not contain a .' . implode('/.', $extensions) . ' file'
+                    );
+                }
+                $importPath = $found;
+                $importName = basename($found);
+            }
+
+            $importer = $this->dictionaryFacade->getImporter($format, $importName);
+
+            if (!$importer->canImport($importPath, $importName)) {
                 echo '<div class="notification is-danger">' .
                     '<button class="delete" aria-label="close"></button>' .
                     'Error: Invalid file format</div>';
@@ -426,7 +456,7 @@ class TermImportController extends VocabularyBaseController
             $options = $this->getDictImportOptions($format);
 
             $dictId = $this->dictionaryFacade->create($langId, $dictName, $format);
-            $entries = $importer->parse($uploadedFile['tmp_name'], $options);
+            $entries = $importer->parse($importPath, $options);
             $count = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
 
             // Create vocabulary terms (status 1) from dictionary entries
@@ -448,6 +478,8 @@ class TermImportController extends VocabularyBaseController
                 '<button class="delete" aria-label="close"></button>' .
                 'Error: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</div>';
             return;
+        } finally {
+            $extractor->cleanup(...$tempDirs);
         }
 
         // Re-display the form with manual tab active (dictionary file sub-tab)
