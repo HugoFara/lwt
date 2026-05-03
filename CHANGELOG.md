@@ -41,7 +41,13 @@ ones are marked like "v1.0.0-fork".
   NULL-owner row across `languages`, `texts`, `words`, `tags`,
   `text_tags`, `news_feeds`, `books`, and `local_dictionaries` to
   their UsID. On already-migrated installs the UPDATEs match zero
-  rows and cost nothing.
+  rows and cost nothing. The mirror-image edge case (legacy data
+  attached to the seed "ghost admin" row instead of NULL — only
+  reachable on installs where the original migration's backfill
+  *did* run successfully against the ghost) is left to a one-time
+  manual SQL recipe; see the [Switching an Existing Install From
+  Single-User to Multi-User](docs-src/guide/post-installation.md#switching-to-multi-user)
+  guide for the detection query and step-by-step cleanup.
 * **Successful registration silently bounced to /login with no
   feedback**: `UserController::register` called
   `UserFacade::setCurrentUser($user)` for an "auto-login", but that
