@@ -43,6 +43,18 @@ class SubmitAnswerTest extends TestCase
         $this->sessionManager = $this->createMock(SessionStateManager::class);
     }
 
+    /**
+     * Pass the ownership pre-check in SubmitAnswer::execute() by mocking
+     * the user-scoped getWordStatus() lookup. Pass null to test the
+     * "foreign WoID" rejection path.
+     */
+    private function mockOwnershipCheck(?int $currentStatus): void
+    {
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn($currentStatus);
+    }
+
     // =========================================================================
     // Instantiation
     // =========================================================================
@@ -130,6 +142,24 @@ class SubmitAnswerTest extends TestCase
     }
 
     // =========================================================================
+    // Multi-user ownership gate
+    // =========================================================================
+
+    #[Test]
+    public function executeForeignWordIdReturnsWordNotFound(): void
+    {
+        $this->mockOwnershipCheck(null);
+        $this->repository->expects($this->never())
+            ->method('updateWordStatus');
+
+        $useCase = new SubmitAnswer($this->repository, $this->sessionManager);
+        $result = $useCase->execute(99, 3);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Word not found', $result['error']);
+    }
+
+    // =========================================================================
     // Valid status values
     // =========================================================================
 
@@ -153,6 +183,7 @@ class SubmitAnswerTest extends TestCase
     #[DataProvider('validStatusProvider')]
     public function executeWithValidStatusCallsRepository(int $status): void
     {
+        $this->mockOwnershipCheck(1);
         $this->repository->expects($this->once())
             ->method('updateWordStatus')
             ->with(42, $status)
@@ -178,6 +209,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeSuccessfulSubmissionReturnsCorrectData(): void
     {
+        $this->mockOwnershipCheck(2);
         $this->repository->expects($this->once())
             ->method('updateWordStatus')
             ->with(10, 3)
@@ -210,6 +242,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeWithStatusIncreaseReturnsPositiveChange(): void
     {
+        $this->mockOwnershipCheck(2);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 2, 'newStatus' => 3,
@@ -226,6 +259,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeWithStatusDecreaseReturnsNegativeChange(): void
     {
+        $this->mockOwnershipCheck(3);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 3, 'newStatus' => 1,
@@ -242,6 +276,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeWithSameStatusReturnsZeroChange(): void
     {
+        $this->mockOwnershipCheck(2);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 2, 'newStatus' => 2,
@@ -262,6 +297,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeUpdatesSessionProgressOnCorrectAnswer(): void
     {
+        $this->mockOwnershipCheck(1);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 1, 'newStatus' => 2,
@@ -291,6 +327,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeUpdatesSessionProgressOnWrongAnswer(): void
     {
+        $this->mockOwnershipCheck(3);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 3, 'newStatus' => 1,
@@ -315,6 +352,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeWithNoSessionReturnsEmptyProgress(): void
     {
+        $this->mockOwnershipCheck(1);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 1, 'newStatus' => 2,
@@ -506,6 +544,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeSuccessResponseContainsAllRequiredKeys(): void
     {
+        $this->mockOwnershipCheck(1);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 1, 'newStatus' => 2,
@@ -528,6 +567,7 @@ class SubmitAnswerTest extends TestCase
     #[Test]
     public function executeProgressContainsAllRequiredKeys(): void
     {
+        $this->mockOwnershipCheck(1);
         $this->repository->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 1, 'newStatus' => 2,

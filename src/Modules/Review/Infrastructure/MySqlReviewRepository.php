@@ -214,12 +214,14 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             ->valuePrepared('GREATEST(0, ROUND(WoTodayScore, 0))');
 
         // Update with score recalculation
+        $bindings = [$newStatus, $wordId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         Connection::preparedExecute(
             "UPDATE words
             SET WoStatus = ?, WoStatusChanged = NOW(), " .
             TermStatusService::makeScoreRandomInsertUpdate('u') . "
-            WHERE WoID = ?",
-            [$newStatus, $wordId]
+            WHERE WoID = ?" . $userScope,
+            $bindings
         );
 
         $this->activityRepository->incrementTermsReviewed();

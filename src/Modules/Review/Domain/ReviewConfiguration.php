@@ -206,7 +206,7 @@ final readonly class ReviewConfiguration
             ? $this->selection
             : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
         $params[] = $langId;
-        return " words WHERE WoLgID = ? ";
+        return " words WHERE WoLgID = ? " . self::appendUserScope($params) . " ";
     }
 
     /**
@@ -222,7 +222,8 @@ final readonly class ReviewConfiguration
             ? $this->selection
             : (int) (is_array($this->selection) ? ($this->selection[0] ?? 0) : $this->selection);
         $params[] = $textId;
-        return " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ? ";
+        return " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID = ? "
+            . self::appendUserScope($params) . " ";
     }
 
     /**
@@ -239,7 +240,7 @@ final readonly class ReviewConfiguration
         foreach ($ids as $id) {
             $params[] = (int) $id;
         }
-        return " words WHERE WoID IN ($placeholders) ";
+        return " words WHERE WoID IN ($placeholders) " . self::appendUserScope($params) . " ";
     }
 
     /**
@@ -256,7 +257,8 @@ final readonly class ReviewConfiguration
         foreach ($ids as $id) {
             $params[] = (int) $id;
         }
-        return " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($placeholders) ";
+        return " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($placeholders) "
+            . self::appendUserScope($params) . " ";
     }
 
     /**
@@ -324,5 +326,34 @@ final readonly class ReviewConfiguration
     private static function clampReviewType(int $reviewType): int
     {
         return max(1, min(5, $reviewType));
+    }
+
+    /**
+     * Append the words-table user scope to $params and return the SQL fragment.
+     *
+     * Bridges Psalm's typed-bindings ($params is `int|string`) and
+     * UserScopedQuery's `mixed` reference signature: we collect the
+     * appended user id locally and copy it across with a known type.
+     *
+     * @param array<int, int|string> $params Reference to params array
+     *
+     * @return string SQL scope fragment (e.g. " AND WoUsID = ?")
+     */
+    private static function appendUserScope(array &$params): string
+    {
+        // Inline the words-table user scope so Psalm preserves the
+        // `int|string` element type of $params (UserScopedQuery's
+        // by-reference signature uses `array<int, mixed>`, which would
+        // pollute the type otherwise). The appended value is always an
+        // int (the current UsID).
+        if (!\Lwt\Shared\Infrastructure\Globals::isMultiUserEnabled()) {
+            return '';
+        }
+        $userId = \Lwt\Shared\Infrastructure\Globals::getCurrentUserId();
+        if ($userId === null) {
+            return '';
+        }
+        $params[] = $userId;
+        return ' AND WoUsID = ?';
     }
 }

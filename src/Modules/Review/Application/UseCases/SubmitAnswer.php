@@ -80,6 +80,22 @@ class SubmitAnswer
             ];
         }
 
+        // Confirm the caller owns this word before updating. getWordStatus()
+        // applies user scope, so a foreign WoID returns null and we bail
+        // out before incrementing the activity counter or signalling success.
+        if ($this->repository->getWordStatus($wordId) === null) {
+            return [
+                'success' => false,
+                'oldStatus' => 0,
+                'newStatus' => 0,
+                'oldScore' => 0,
+                'newScore' => 0,
+                'statusChange' => 0,
+                'progress' => ['total' => 0, 'wrong' => 0, 'correct' => 0, 'remaining' => 0],
+                'error' => 'Word not found'
+            ];
+        }
+
         // Update word status
         $result = $this->repository->updateWordStatus($wordId, $newStatus);
 

@@ -18,6 +18,21 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Review/SRS module leaked and accepted writes across users**: the
+  `/api/v1/review/*` endpoints (`config`, `next-word`, `table-words`,
+  `tomorrow-count`, `status`) forwarded `lang=`, `text=`, `selection=`
+  and `term_id=` straight from the request to
+  `ReviewConfiguration::*Prepared`, whose SQL fragments
+  (`words WHERE WoLgID = ?`, `... WoID IN (...)`, etc.) had no
+  `WoUsID` filter. A logged-in account with no own data could read
+  any other user's words, sentences, scores and translations, and
+  could PUT `/api/v1/review/status` with a foreign `term_id` to
+  rewrite that user's `WoStatus` (e.g. mark-as-well-known). Append
+  the words-table user scope to all four projection branches
+  (`lang`, `text`, `words`, `texts`) and add an ownership pre-check
+  in `SubmitAnswer::execute` that bails out with `Word not found`
+  before touching `updateWordStatus` or the activity counter when
+  `getWordStatus` (user-scoped via QueryBuilder) returns null.
 * **`StUsID=0` "global default" leaked previous users' choices into
   fresh accounts**: `Settings::getWithDefault` for a SCOPE_USER key
   fell through to the `StUsID=0` row when the current user had no

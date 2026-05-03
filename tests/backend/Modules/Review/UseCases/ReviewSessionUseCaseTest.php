@@ -348,6 +348,9 @@ class ReviewSessionUseCaseTest extends TestCase
         $newStatus = 3;
 
         $this->repository
+            ->method('getWordStatus')
+            ->willReturn(2);
+        $this->repository
             ->method('updateWordStatus')
             ->with($wordId, $newStatus)
             ->willReturn([
@@ -383,6 +386,9 @@ class ReviewSessionUseCaseTest extends TestCase
     public function testSubmitAnswerAcceptsValidStatuses(int $status): void
     {
         $this->repository
+            ->method('getWordStatus')
+            ->willReturn(1);
+        $this->repository
             ->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 1,
@@ -412,6 +418,9 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testSubmitAnswerUpdatesSessionProgress(): void
     {
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn(2);
         $this->repository
             ->method('updateWordStatus')
             ->willReturn([
@@ -443,6 +452,9 @@ class ReviewSessionUseCaseTest extends TestCase
 
         // Test increase
         $this->repository
+            ->method('getWordStatus')
+            ->willReturn(2);
+        $this->repository
             ->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 2,
@@ -457,6 +469,9 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testSubmitAnswerDetectsStatusDecrease(): void
     {
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn(4);
         $this->repository
             ->method('updateWordStatus')
             ->willReturn([
@@ -474,6 +489,9 @@ class ReviewSessionUseCaseTest extends TestCase
 
     public function testSubmitAnswerWithNoChange(): void
     {
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn(3);
         $this->repository
             ->method('updateWordStatus')
             ->willReturn([

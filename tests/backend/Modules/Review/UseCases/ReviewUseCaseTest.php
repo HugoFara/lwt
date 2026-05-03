@@ -482,6 +482,25 @@ class ReviewUseCaseTest extends TestCase
         $this->assertSame('Invalid status value', $result['error']);
     }
 
+    public function testSubmitAnswerRejectsForeignWordId(): void
+    {
+        // Multi-user defence: getWordStatus is user-scoped via QueryBuilder,
+        // so a foreign word returns null. The use case must bail out before
+        // calling updateWordStatus or touching the activity counter.
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn(null);
+        $this->repository
+            ->expects($this->never())
+            ->method('updateWordStatus');
+
+        $useCase = new SubmitAnswer($this->repository, $this->sessionManager);
+        $result = $useCase->execute(99, 3);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Word not found', $result['error']);
+    }
+
     public function testSubmitAnswerAcceptsValidStatuses(): void
     {
         $validStatuses = [1, 2, 3, 4, 5, 98, 99];
@@ -490,6 +509,9 @@ class ReviewUseCaseTest extends TestCase
             $this->repository = $this->createMock(ReviewRepositoryInterface::class);
             $this->sessionManager = $this->createMock(SessionStateManager::class);
 
+            $this->repository
+                ->method('getWordStatus')
+                ->willReturn(2);
             $this->repository
                 ->method('updateWordStatus')
                 ->willReturn([
@@ -518,6 +540,9 @@ class ReviewUseCaseTest extends TestCase
 
     public function testSubmitAnswerUpdatesWordAndReturnsResult(): void
     {
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn(2);
         $this->repository
             ->expects($this->once())
             ->method('updateWordStatus')
@@ -552,6 +577,9 @@ class ReviewUseCaseTest extends TestCase
     public function testSubmitAnswerStatusChangeNegative(): void
     {
         $this->repository
+            ->method('getWordStatus')
+            ->willReturn(4);
+        $this->repository
             ->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 4,
@@ -576,6 +604,9 @@ class ReviewUseCaseTest extends TestCase
     public function testSubmitAnswerStatusChangeZero(): void
     {
         $this->repository
+            ->method('getWordStatus')
+            ->willReturn(3);
+        $this->repository
             ->method('updateWordStatus')
             ->willReturn([
                 'oldStatus' => 3,
@@ -599,6 +630,9 @@ class ReviewUseCaseTest extends TestCase
 
     public function testSubmitAnswerReturnsProgressFromSession(): void
     {
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn(2);
         $this->repository
             ->method('updateWordStatus')
             ->willReturn([
@@ -628,6 +662,9 @@ class ReviewUseCaseTest extends TestCase
 
     public function testSubmitAnswerReturnsZeroProgressWhenNoSession(): void
     {
+        $this->repository
+            ->method('getWordStatus')
+            ->willReturn(2);
         $this->repository
             ->method('updateWordStatus')
             ->willReturn([
