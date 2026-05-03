@@ -66,7 +66,9 @@ class WordFamilyService
      */
     public function getWordFamilies(int $languageId, int $limit = 50): array
     {
-        $bindings = [$languageId, $limit];
+        $bindings = [$languageId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        $bindings[] = $limit;
 
         $groups = Connection::preparedFetchAll(
             "SELECT WoLemma, WoLemmaLC, COUNT(*) as family_size,
@@ -74,12 +76,11 @@ class WordFamilyService
              FROM words
              WHERE WoLgID = ?
                AND WoLemmaLC IS NOT NULL
-               AND WoLemmaLC != ''
+               AND WoLemmaLC != ''{$userScope}
              GROUP BY WoLemmaLC
              HAVING family_size > 1
              ORDER BY family_size DESC, WoLemma
-             LIMIT ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
+             LIMIT ?",
             $bindings
         );
 
@@ -109,7 +110,9 @@ class WordFamilyService
     public function findPotentialLemmaGroups(int $languageId, int $limit = 20): array
     {
         // Find words without lemma that share common prefixes
-        $bindings = [$languageId, $languageId, $limit];
+        $bindings = [$languageId, $languageId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings, 'w1');
+        $bindings[] = $limit;
 
         $results = Connection::preparedFetchAll(
             "SELECT w1.WoText as base_word, w1.WoTextLC as base_lc,
@@ -125,12 +128,11 @@ class WordFamilyService
                AND w1.WoLemma IS NULL
                AND w2.WoLemma IS NULL
                AND w2.WoLgID = ?
-               AND w2.WoWordCount = 1
+               AND w2.WoWordCount = 1{$userScope}
              GROUP BY w1.WoID
              HAVING COUNT(DISTINCT w2.WoID) >= 1
              ORDER BY COUNT(DISTINCT w2.WoID) DESC
-             LIMIT ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings, 'w1'),
+             LIMIT ?",
             $bindings
         );
 
@@ -178,13 +180,13 @@ class WordFamilyService
 
         // Get all family members
         $bindings = [$languageId, $lemmaLc];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         $members = Connection::preparedFetchAll(
             "SELECT WoID, WoText, WoTextLC, WoLemma, WoTranslation, WoRomanization,
                     WoStatus, WoStatusChanged, WoWordCount
              FROM words
-             WHERE WoLgID = ? AND WoLemmaLC = ?
-             ORDER BY WoWordCount ASC, WoStatus DESC, WoText ASC"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
+             WHERE WoLgID = ? AND WoLemmaLC = ?{$userScope}
+             ORDER BY WoWordCount ASC, WoStatus DESC, WoText ASC",
             $bindings
         );
 
@@ -374,7 +376,10 @@ class WordFamilyService
         };
 
         // Get families with aggregated data
-        $bindings = [$languageId, $perPage, $offset];
+        $bindings = [$languageId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        $bindings[] = $perPage;
+        $bindings[] = $offset;
         $rows = Connection::preparedFetchAll(
             "SELECT WoLemma, WoLemmaLC,
                     COUNT(*) as family_size,
@@ -383,11 +388,10 @@ class WordFamilyService
                     SUM(CASE WHEN WoStatus BETWEEN 1 AND 4 THEN 1 ELSE 0 END) as learning_count,
                     GROUP_CONCAT(WoText ORDER BY WoWordCount, WoText SEPARATOR ', ') as forms
              FROM words
-             WHERE WoLgID = ? AND WoLemmaLC IS NOT NULL AND WoLemmaLC != ''
+             WHERE WoLgID = ? AND WoLemmaLC IS NOT NULL AND WoLemmaLC != ''{$userScope}
              GROUP BY WoLemmaLC
              ORDER BY {$sortClause}, WoLemma
-             LIMIT ? OFFSET ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
+             LIMIT ? OFFSET ?",
             $bindings
         );
 
@@ -433,11 +437,11 @@ class WordFamilyService
 
         // Find any term with this lemma
         $bindings = [$languageId, $lemmaLc];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         $term = Connection::preparedFetchOne(
             "SELECT WoID FROM words
-             WHERE WoLgID = ? AND WoLemmaLC = ?
-             LIMIT 1"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
+             WHERE WoLgID = ? AND WoLemmaLC = ?{$userScope}
+             LIMIT 1",
             $bindings
         );
 

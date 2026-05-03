@@ -154,18 +154,18 @@ class LemmaStatisticsService
     public function getLemmaAggregateStats(int $languageId): array
     {
         $bindings = [$languageId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
 
         // Get family size distribution
         $familyStats = Connection::preparedFetchAll(
             "SELECT family_size, COUNT(*) as lemma_count FROM (
                 SELECT COUNT(*) as family_size
                 FROM words
-                WHERE WoLgID = ? AND WoLemmaLC IS NOT NULL AND WoLemmaLC != ''
+                WHERE WoLgID = ? AND WoLemmaLC IS NOT NULL AND WoLemmaLC != ''{$userScope}
                 GROUP BY WoLemmaLC
              ) AS family_sizes
              GROUP BY family_size
-             ORDER BY family_size"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
+             ORDER BY family_size",
             $bindings
         );
 
@@ -190,15 +190,15 @@ class LemmaStatisticsService
 
         // Get status distribution by lemma (average status per family)
         $bindings = [$languageId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         $statusDistribution = Connection::preparedFetchAll(
             "SELECT
                 ROUND(AVG(CASE WHEN WoStatus <= 5 THEN WoStatus ELSE NULL END)) as avg_status,
                 COUNT(DISTINCT WoLemmaLC) as lemma_count
              FROM words
-             WHERE WoLgID = ? AND WoLemmaLC IS NOT NULL AND WoLemmaLC != ''
+             WHERE WoLgID = ? AND WoLemmaLC IS NOT NULL AND WoLemmaLC != ''{$userScope}
              GROUP BY WoLemmaLC
-             HAVING avg_status IS NOT NULL"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
+             HAVING avg_status IS NOT NULL",
             $bindings
         );
 

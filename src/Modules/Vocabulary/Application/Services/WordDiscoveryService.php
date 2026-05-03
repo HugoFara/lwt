@@ -61,15 +61,19 @@ class WordDiscoveryService
      */
     public function getUnknownWordsInText(int $textId): array
     {
-        // word_occurrences inherits user context via Ti2TxID -> texts FK
-        // words has WoUsID - user scope auto-applied
-        $bindings = [$textId];
+        // word_occurrences inherits user context via Ti2TxID -> texts FK.
+        // words is LEFT JOINed; the user-scope must live in the JOIN ON
+        // clause, otherwise WHERE WoID IS NULL would still match other
+        // users' words (and a flat AND in WHERE would block the IS-NULL).
+        $joinScopeBindings = [];
+        $joinScope = UserScopedQuery::forTablePrepared('words', $joinScopeBindings, 'words');
+        $bindings = array_merge($joinScopeBindings, [$textId]);
         return Connection::preparedFetchAll(
             "SELECT DISTINCT Ti2Text, LOWER(Ti2Text) AS Ti2TextLC
-             FROM (word_occurrences LEFT JOIN words ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID)
+             FROM (word_occurrences LEFT JOIN words
+                   ON LOWER(Ti2Text) = WoTextLC AND Ti2LgID = WoLgID{$joinScope})
              WHERE WoID IS NULL AND Ti2WordCount = 1 AND Ti2TxID = ?
-             ORDER BY Ti2Order"
-             . UserScopedQuery::forTablePrepared('words', $bindings, 'words'),
+             ORDER BY Ti2Order",
             $bindings
         );
     }

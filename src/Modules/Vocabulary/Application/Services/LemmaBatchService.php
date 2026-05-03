@@ -164,7 +164,10 @@ class LemmaBatchService
      */
     private function fetchTermsWithoutLemma(int $languageId, int $limit, int $offset): array
     {
-        $bindings = [$languageId, $limit, $offset];
+        $bindings = [$languageId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        $bindings[] = $limit;
+        $bindings[] = $offset;
 
         /** @var array<int, array<string, mixed>> */
         return Connection::preparedFetchAll(
@@ -172,10 +175,9 @@ class LemmaBatchService
              FROM words
              WHERE WoLgID = ?
                AND WoWordCount = 1
-               AND (WoLemma IS NULL OR WoLemma = '')
+               AND (WoLemma IS NULL OR WoLemma = ''){$userScope}
              ORDER BY WoID
-             LIMIT ? OFFSET ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
+             LIMIT ? OFFSET ?",
             $bindings
         );
     }
@@ -240,15 +242,15 @@ class LemmaBatchService
 
         // Find other terms in the same language without a lemma
         // that the lemmatizer suggests should have the same lemma
-        $bindings = [$languageId];
+        $bindings = [$languageId, $termId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         $candidates = Connection::preparedFetchAll(
             "SELECT WoID, WoTextLC FROM words
              WHERE WoLgID = ?
                AND WoWordCount = 1
                AND (WoLemma IS NULL OR WoLemma = '')
-               AND WoID != ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
-            array_merge($bindings, [$termId])
+               AND WoID != ?{$userScope}",
+            $bindings
         );
 
         $updated = 0;
@@ -377,6 +379,8 @@ class LemmaBatchService
     public function findWordIdByLemma(int $languageId, string $lemmaLc): ?int
     {
         $bindings = [$languageId, $lemmaLc, $lemmaLc];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        $bindings[] = $lemmaLc;
 
         // Prefer words where WoTextLC equals the lemma (base form),
         // otherwise any word with matching lemma
@@ -384,11 +388,10 @@ class LemmaBatchService
             "SELECT WoID FROM words
              WHERE WoLgID = ?
                AND WoWordCount = 1
-               AND (WoLemmaLC = ? OR WoTextLC = ?)
+               AND (WoLemmaLC = ? OR WoTextLC = ?){$userScope}
              ORDER BY CASE WHEN WoTextLC = ? THEN 0 ELSE 1 END, WoID
-             LIMIT 1"
-            . UserScopedQuery::forTablePrepared('words', $bindings),
-            array_merge($bindings, [$lemmaLc])
+             LIMIT 1",
+            $bindings
         );
 
         return $row !== null ? (int)$row['WoID'] : null;

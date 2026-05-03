@@ -156,6 +156,7 @@ class TextNavigationService
             $currentsort = $lsorts;
         }
 
+        $textScope = UserScopedQuery::forTablePrepared('texts', $params);
         if ($onlyAnn) {
             $sql = 'SELECT TxID
             FROM (
@@ -165,10 +166,9 @@ class TextNavigationService
                 LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
             WHERE LgID = TxLgID AND LENGTH(TxAnnotatedText) > 0 '
-            . $wh_lang . $wh_query . '
+            . $wh_lang . $wh_query . $textScope . '
             GROUP BY TxID ' . $wh_tag . '
-            ORDER BY ' . $sorts[$currentsort - 1]
-            . UserScopedQuery::forTablePrepared('texts', $params);
+            ORDER BY ' . $sorts[$currentsort - 1];
         } else {
             $sql = 'SELECT TxID
             FROM (
@@ -177,10 +177,9 @@ class TextNavigationService
                 )
                 LEFT JOIN text_tags ON T2ID = TtT2ID
             ), languages
-            WHERE LgID = TxLgID ' . $wh_lang . $wh_query . '
+            WHERE LgID = TxLgID ' . $wh_lang . $wh_query . $textScope . '
             GROUP BY TxID ' . $wh_tag . '
-            ORDER BY ' . $sorts[$currentsort - 1]
-            . UserScopedQuery::forTablePrepared('texts', $params);
+            ORDER BY ' . $sorts[$currentsort - 1];
         }
 
         $list = array(0);

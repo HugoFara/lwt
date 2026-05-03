@@ -367,13 +367,16 @@ class CompleteImportService
             $replaceParams[] = $wosep[0];
         }
 
-        // Insert existing translations
-        $params = array_merge(
+        // Insert existing translations. The user-scope clause goes inside the
+        // inner subquery's join condition so its placeholder sits between
+        // `WoLgID = ?` and the trailing CHAR_LENGTH `?`.
+        $bindings = array_merge(
             $replaceParams,
-            [$wosep[0], $wosep[0], $langId, $wosep[0]]
+            [$wosep[0], $wosep[0], $langId]
         );
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        $bindings[] = $wosep[0];
 
-        $bindings = $params;
         $sql = "INSERT IGNORE INTO merge_words(MText,MTranslation)
             SELECT b.WoTextLC,
             trim(
@@ -389,14 +392,13 @@ class CompleteImportService
                 LEFT JOIN words
                 ON words.WoTextLC = temp_words.WoTextLC
                     AND words.WoTranslation != '*'
-                    AND words.WoLgID = ?
+                    AND words.WoLgID = ?{$userScope}
             ) b
             ON CHAR_LENGTH(b.WoTranslation)-CHAR_LENGTH(REPLACE(b.WoTranslation, ?, ''))>= numbers.n-1
-            ORDER BY b.WoTextLC, n"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+            ORDER BY b.WoTextLC, n";
 
         $stmt = Connection::prepare($sql);
-        $stmt->bindValues($params);
+        $stmt->bindValues($bindings);
         $stmt->execute();
 
         // Handle import delimiter

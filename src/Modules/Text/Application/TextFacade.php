@@ -583,21 +583,27 @@ class TextFacade
         );
         $totalPages = (int) ceil($total / $perPage);
 
-        $bindings2 = [$langId, $offset, $perPage];
+        // text_tags scope must live in the LEFT JOIN ON clause so untagged
+        // texts survive the join; its binding is at the head of the list.
+        $tagJoinBindings = [];
+        $tagJoinScope = UserScopedQuery::forTablePrepared('text_tags', $tagJoinBindings);
+
+        $bindings2 = array_merge($tagJoinBindings, [$langId]);
+        $textScope = UserScopedQuery::forTablePrepared('texts', $bindings2);
+        $bindings2[] = $offset;
+        $bindings2[] = $perPage;
         $records = Connection::preparedFetchAll(
             "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
             LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 (texts LEFT JOIN text_tag_map ON TxID = TtTxID)
-                LEFT JOIN text_tags ON T2ID = TtT2ID
+                LEFT JOIN text_tags ON T2ID = TtT2ID{$tagJoinScope}
             )
-            WHERE TxLgID = ?
+            WHERE TxLgID = ?{$textScope}
             GROUP BY TxID
             ORDER BY {$sortColumn}
-            LIMIT ?, ?"
-            . UserScopedQuery::forTablePrepared('texts', $bindings2)
-            . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
+            LIMIT ?, ?",
             $bindings2
         );
 
@@ -655,21 +661,26 @@ class TextFacade
         );
         $totalPages = (int) ceil($total / $perPage);
 
-        $bindings2 = [$langId, $offset, $perPage];
+        // See getTextsForLanguage for the binding-order rationale.
+        $tagJoinBindings = [];
+        $tagJoinScope = UserScopedQuery::forTablePrepared('text_tags', $tagJoinBindings);
+
+        $bindings2 = array_merge($tagJoinBindings, [$langId]);
+        $textScope = UserScopedQuery::forTablePrepared('texts', $bindings2);
+        $bindings2[] = $offset;
+        $bindings2[] = $perPage;
         $records = Connection::preparedFetchAll(
             "SELECT TxID, TxTitle, TxAudioURI, TxSourceURI,
             LENGTH(TxAnnotatedText) AS annotlen,
             IFNULL(GROUP_CONCAT(DISTINCT T2Text ORDER BY T2Text SEPARATOR ','), '') AS taglist
             FROM (
                 (texts LEFT JOIN text_tag_map ON TxID = TtTxID)
-                LEFT JOIN text_tags ON T2ID = TtT2ID
+                LEFT JOIN text_tags ON T2ID = TtT2ID{$tagJoinScope}
             )
-            WHERE TxLgID = ? AND TxArchivedAt IS NOT NULL
+            WHERE TxLgID = ? AND TxArchivedAt IS NOT NULL{$textScope}
             GROUP BY TxID
             ORDER BY {$sortColumn}
-            LIMIT ?, ?"
-            . UserScopedQuery::forTablePrepared('texts', $bindings2)
-            . UserScopedQuery::forTablePrepared('text_tags', $bindings2),
+            LIMIT ?, ?",
             $bindings2
         );
 
@@ -760,15 +771,15 @@ class TextFacade
             ? " AND WoStatus != 98 AND WoStatus != 99"
             : "";
 
+        $wordScope = UserScopedQuery::forTablePrepared('words', $ids);
+        $occScope = UserScopedQuery::forTablePrepared('word_occurrences', $ids, '', 'texts');
         $sql = "SELECT WoID, WoTextLC, MIN(Ti2SeID) AS SeID
             FROM words, word_occurrences
             WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ({$placeholders})
             {$statusFilter}
-            AND IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%')
+            AND IFNULL(WoSentence,'') NOT LIKE CONCAT('%{',WoText,'}%'){$wordScope}{$occScope}
             GROUP BY WoID
-            ORDER BY WoID, MIN(Ti2SeID)"
-            . UserScopedQuery::forTablePrepared('words', $ids)
-            . UserScopedQuery::forTablePrepared('word_occurrences', $ids, '', 'texts');
+            ORDER BY WoID, MIN(Ti2SeID)";
 
         $records = Connection::preparedFetchAll($sql, $ids);
         $sentenceCount = (int) Settings::getWithDefault('set-term-sentence-count');

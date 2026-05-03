@@ -314,7 +314,11 @@ class ImportUtilities
      */
     public function getImportedTerms(string $lastUpdate, int $offset, int $limit): array
     {
-        $bindings = [$lastUpdate, $offset, $limit];
+        $bindings = [$lastUpdate];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings, 'w');
+        $bindings[] = $offset;
+        $bindings[] = $limit;
+
         $sql = "SELECT w.WoID, w.WoText, w.WoTextLC, w.WoTranslation,
                 w.WoRomanization, w.WoSentence, w.WoStatus,
                 GROUP_CONCAT(t.TgText ORDER BY t.TgText SEPARATOR ', ') as taglist,
@@ -323,13 +327,12 @@ class ImportUtilities
             FROM words w
             LEFT JOIN word_tag_map wt ON w.WoID = wt.WtWoID
             LEFT JOIN tags t ON wt.WtTgID = t.TgID
-            WHERE w.WoStatusChanged > ?
+            WHERE w.WoStatusChanged > ?{$userScope}
             GROUP BY w.WoID
             ORDER BY w.WoText
-            LIMIT ?, ?"
-            . UserScopedQuery::forTablePrepared('words', $bindings, 'w');
+            LIMIT ?, ?";
 
-        return Connection::preparedFetchAll($sql, [$lastUpdate, $offset, $limit]);
+        return Connection::preparedFetchAll($sql, $bindings);
     }
 
     /**
