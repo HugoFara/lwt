@@ -43,6 +43,7 @@ use Lwt\Modules\Admin\Application\UseCases\Wizard\AutocompleteConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\LoadConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\SaveConnection;
 use Lwt\Modules\Admin\Application\UseCases\Wizard\TestConnection;
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Bootstrap\SessionBootstrap;
 use Lwt\Shared\Infrastructure\Exception\ExceptionHandler;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
@@ -104,6 +105,11 @@ class Application
      */
     public function bootstrap(): void
     {
+        // Load .env before isDebugMode() reads MULTI_USER_ENABLED — otherwise
+        // we always fell back to single-user defaults (which enable debug),
+        // leaking stack traces on production multi-user installs.
+        EnvLoader::load($this->basePath . '/.env');
+
         // Determine if we're in debug mode (development)
         $debug = $this->isDebugMode();
 

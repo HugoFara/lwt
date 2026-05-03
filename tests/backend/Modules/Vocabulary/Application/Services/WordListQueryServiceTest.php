@@ -230,8 +230,13 @@ class WordListQueryServiceTest extends TestCase
         $method = new ReflectionMethod(WordListQueryService::class, 'getWordsListWithWordCount');
         $source = $this->getMethodSource($method);
 
-        // UNION needs params duplicated for both halves
-        $this->assertStringContainsString('array_merge($filterParams, $filterParams)', $source);
+        // UNION needs filterParams threaded through both halves: a fresh copy
+        // for the first half, then a merge to append the second half's copy.
+        $this->assertStringContainsString(
+            'array_merge($bindings, $filterParams)',
+            $source,
+            'expected the UNION second half to merge a second copy of $filterParams into $bindings'
+        );
     }
 
     #[Test]

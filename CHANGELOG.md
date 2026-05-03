@@ -18,6 +18,14 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Production debug page leaked stack traces, file paths, and SQL on
+  multi-user installs**: `Application::isDebugMode()` defaulted to *on*
+  in single-user mode and *off* in multi-user, but it was called
+  before `EnvLoader::load()`, so `getenv('MULTI_USER_ENABLED')` always
+  read empty, the single-user branch was always taken, and every 500
+  rendered the debug HTML in production. Move `EnvLoader::load()` to
+  the very top of `bootstrap()` so the env values are visible by the
+  time we decide.
 * **Two users could not coexist if either had picked the same name first**
   (multi-user only): `languages.LgName`, `tags.TgText`, and
   `text_tags.T2Text` each carried a *global* UNIQUE constraint, so
