@@ -18,6 +18,14 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Two users could not coexist if either had picked the same name first**
+  (multi-user only): `languages.LgName`, `tags.TgText`, and
+  `text_tags.T2Text` each carried a *global* UNIQUE constraint, so
+  the second user's attempt to create e.g. their own "Spanish"
+  language, "easy" term tag, or "fiction" text tag died with a
+  duplicate-key 500. New migration replaces each constraint with a
+  composite UNIQUE on `(user_id, name)`. NULL-owner legacy rows
+  remain coexistent (NULLs distinct in MariaDB unique indexes).
 * **Multi-user `/texts` and other paginated screens 500'd with invalid SQL**:
   every paginated query in `Modules/Text` and `Modules/Vocabulary` was
   concatenating `UserScopedQuery::forTablePrepared(...)` *after* `LIMIT
