@@ -18,6 +18,38 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Feed module leaked every user's feeds and let any user wipe any
+  other user's articles**: three independent bugs landed together
+  here. (1) `FeedCrudApiHandler::getFeedList` built raw
+  `SELECT … FROM news_feeds WHERE 1=1 …` SQL with no `NfUsID`
+  filter, so `GET /api/v1/feeds/list` rendered every user's feeds
+  side by side (including their language and per-feed article
+  counts). (2) `feed_links` carries no `UsID` column of its own,
+  so `MySqlArticleRepository::find/findByIds/delete/deleteByIds/
+  deleteByFeed/deleteByFeeds/getCountPerFeed` happily operated on
+  any FlID/FlNfID the caller supplied — meaning `DELETE
+  /api/v1/feeds/{operatorFeedId}` cascaded into
+  `articleRepository->deleteByFeeds([operatorFeedId])`, wiping
+  every article in the operator's feed even though the parent
+  `news_feeds.deleteMultiple` is auto-scoped and matched zero
+  rows. (3) `FeedArticleApiHandler::deleteArticles` ran a raw
+  `QueryBuilder::table('feed_links')->whereIn('FlID', $ids)
+  ->whereIn('FlNfID', [$feedId])->delete()` with no ownership
+  check, letting any logged-in user delete any other user's
+  articles by guessing IDs. Three corresponding fixes: append
+  `UserScopedQuery::forTablePrepared('news_feeds', $params)` to
+  the feed-list COUNT and SELECT raw SQL; add a
+  `feedOwnerScope($bindings)` helper that splices an
+  `AND FlNfID IN (SELECT NfID FROM news_feeds WHERE NfUsID = ?)`
+  subquery into every by-id article method; gate
+  `deleteArticles` upstream on `feedFacade->getFeedById()`
+  (user-scoped via QueryBuilder, returns null for foreign feeds).
+  Confirmed end-to-end with a 2-user live database — pre-fix:
+  intruder's feed list contained both feeds and a single
+  `DELETE /api/v1/feeds/articles/1` deleted both of operator's
+  articles; post-fix: list shows only intruder's feed and both
+  delete attempts return `{"success":false, "error":"Feed not
+  found"}` with operator's articles intact.
 * **Term-tag and text-tag list pages leaked every other user's tags**:
   `MySqlTermTagRepository::paginate`/`count`/`deleteAll` and the
   matching three methods on `MySqlTextTagRepository` built raw

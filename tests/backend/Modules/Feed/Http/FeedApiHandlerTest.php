@@ -479,6 +479,10 @@ class FeedApiHandlerTest extends TestCase
 
     public function testDeleteArticlesCallsFacadeWhenArticleIdsEmpty(): void
     {
+        // Multi-user defence runs getFeedById first; make it succeed so
+        // we still reach the underlying facade call.
+        $this->feedFacade->method('getFeedById')
+            ->willReturn(['NfID' => 5, 'NfUsID' => 1, 'NfName' => 'Test']);
         $this->feedFacade->expects($this->once())
             ->method('deleteArticles')
             ->with('5')
@@ -536,6 +540,11 @@ class FeedApiHandlerTest extends TestCase
 
     public function testFormatDeleteArticlesDelegatesToDeleteArticles(): void
     {
+        // The DELETE path now goes through a feed-ownership pre-check
+        // (FeedArticleApiHandler::deleteArticles); make the lookup
+        // succeed so we can still reach the delegated facade call.
+        $this->feedFacade->method('getFeedById')
+            ->willReturn(['NfID' => 1, 'NfUsID' => 1, 'NfName' => 'TestFeed']);
         $this->feedFacade->method('deleteArticles')->willReturn(0);
 
         $result = $this->handler->formatDeleteArticles(1, []);

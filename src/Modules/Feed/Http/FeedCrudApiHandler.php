@@ -21,6 +21,7 @@ namespace Lwt\Modules\Feed\Http;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Feed\Application\FeedFacade;
 
 /**
@@ -59,6 +60,7 @@ class FeedCrudApiHandler
 
         // Build WHERE clause with parameters
         $whereConditions = ['1=1'];
+        /** @var array<int, mixed> $queryParams */
         $queryParams = [];
 
         if ($langId !== null && $langId > 0) {
@@ -68,6 +70,16 @@ class FeedCrudApiHandler
         if (is_string($query) && $query !== '') {
             $whereConditions[] = "NfName LIKE ?";
             $queryParams[] = '%' . str_replace('*', '%', $query) . '%';
+        }
+
+        // Scope to current user when multi-user mode is on. UserScopedQuery
+        // returns "" in single-user mode, so legacy behaviour is preserved.
+        // forTablePrepared yields " AND NfUsID = ?"; we need just
+        // "NfUsID = ?" to fit the implode(' AND ', …) below, so strip the
+        // five-char " AND " prefix.
+        $userScope = UserScopedQuery::forTablePrepared('news_feeds', $queryParams);
+        if ($userScope !== '') {
+            $whereConditions[] = substr($userScope, 5);
         }
 
         $where = implode(' AND ', $whereConditions);
@@ -90,7 +102,8 @@ class FeedCrudApiHandler
         $sorts = ['NfName ASC', 'NfUpdate DESC', 'NfUpdate ASC'];
         $orderBy = $sorts[$sort - 1] ?? 'NfUpdate DESC';
 
-        // Get feeds with language names and article counts
+        // Get feeds with language names and article counts. The same
+        // $where covers the user-scope filter we appended above.
         $sql = "SELECT nf.*, lg.LgName,
                        (SELECT COUNT(*) FROM feed_links WHERE FlNfID = NfID) AS articleCount
                 FROM news_feeds nf

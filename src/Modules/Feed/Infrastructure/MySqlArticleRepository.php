@@ -21,6 +21,7 @@ use Lwt\Shared\Infrastructure\Repository\AbstractRepository;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Feed\Domain\Article;
 use Lwt\Modules\Feed\Domain\ArticleRepositoryInterface;
 
@@ -117,18 +118,49 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
     }
 
     /**
+     * Append a `FlNfID IN (SELECT NfID FROM news_feeds WHERE NfUsID = ?)`
+     * fragment to $bindings when multi-user mode is on with an
+     * authenticated user.
+     *
+     * `feed_links` doesn't carry its own `UsID` column, so QueryBuilder's
+     * auto-scoping doesn't fire. Every code path that takes a
+     * caller-supplied FlID/FlNfID must run through this scope or
+     * accept the full multi-tenant blast radius (read-foreign-articles,
+     * delete-foreign-articles, etc.). The fragment is empty in
+     * single-user installs so legacy tests stay green.
+     *
+     * @param array<int, mixed> &$bindings Reference to the bindings array
+     *
+     * @return string SQL fragment ready to splice after WHERE / AND, or ''
+     */
+    private function feedOwnerScope(array &$bindings): string
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return '';
+        }
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return '';
+        }
+        $bindings[] = $userId;
+        return ' AND FlNfID IN (SELECT NfID FROM news_feeds WHERE NfUsID = ?)';
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function find(int $id): ?Article
     {
-        $row = $this->query()
-            ->where($this->primaryKey, '=', $id)
-            ->firstPrepared();
-
+        /** @var array<int, mixed> $bindings */
+        $bindings = [$id];
+        $scope = $this->feedOwnerScope($bindings);
+        $row = Connection::preparedFetchOne(
+            'SELECT * FROM feed_links WHERE FlID = ?' . $scope . ' LIMIT 1',
+            $bindings
+        );
         if ($row === null) {
             return null;
         }
-
         return $this->mapToEntity($row);
     }
 
@@ -164,10 +196,14 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             return [];
         }
 
-        $rows = $this->query()
-            ->whereIn($this->primaryKey, $ids)
-            ->getPrepared();
-
+        /** @var array<int, mixed> $bindings */
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause(array_map('intval', $ids), $bindings);
+        $scope = $this->feedOwnerScope($bindings);
+        $rows = Connection::preparedFetchAll(
+            'SELECT * FROM feed_links WHERE FlID IN ' . $inClause . $scope,
+            $bindings
+        );
         return array_map(
             fn(array $row) => $this->mapToEntity($row),
             $rows
@@ -380,10 +416,13 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
     {
         /** @var Article|int $entityOrId */
         $id = is_int($entityOrId) ? $entityOrId : $this->getEntityId($entityOrId);
-        $deleted = $this->query()
-            ->where($this->primaryKey, '=', $id)
-            ->delete();
-
+        /** @var array<int, mixed> $bindings */
+        $bindings = [$id];
+        $scope = $this->feedOwnerScope($bindings);
+        $deleted = Connection::preparedExecute(
+            'DELETE FROM feed_links WHERE FlID = ?' . $scope,
+            $bindings
+        );
         return $deleted > 0;
     }
 
@@ -392,9 +431,13 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
      */
     public function deleteByFeed(int $feedId): int
     {
-        return $this->query()
-            ->where('FlNfID', '=', $feedId)
-            ->delete();
+        /** @var array<int, mixed> $bindings */
+        $bindings = [$feedId];
+        $scope = $this->feedOwnerScope($bindings);
+        return Connection::preparedExecute(
+            'DELETE FROM feed_links WHERE FlNfID = ?' . $scope,
+            $bindings
+        );
     }
 
     /**
@@ -405,10 +448,14 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
         if (empty($feedIds)) {
             return 0;
         }
-
-        return $this->query()
-            ->whereIn('FlNfID', $feedIds)
-            ->delete();
+        /** @var array<int, mixed> $bindings */
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause(array_map('intval', $feedIds), $bindings);
+        $scope = $this->feedOwnerScope($bindings);
+        return Connection::preparedExecute(
+            'DELETE FROM feed_links WHERE FlNfID IN ' . $inClause . $scope,
+            $bindings
+        );
     }
 
     /**
@@ -419,10 +466,14 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
         if (empty($ids)) {
             return 0;
         }
-
-        return $this->query()
-            ->whereIn($this->primaryKey, $ids)
-            ->delete();
+        /** @var array<int, mixed> $bindings */
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause(array_map('intval', $ids), $bindings);
+        $scope = $this->feedOwnerScope($bindings);
+        return Connection::preparedExecute(
+            'DELETE FROM feed_links WHERE FlID IN ' . $inClause . $scope,
+            $bindings
+        );
     }
 
     /**
@@ -472,12 +523,23 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
      */
     public function getCountPerFeed(array $feedIds = []): array
     {
+        /** @var array<int, mixed> $bindings */
         $bindings = [];
         $sql = "SELECT FlNfID, COUNT(*) as cnt FROM feed_links";
 
         if (!empty($feedIds)) {
             $feedInClause = Connection::buildPreparedInClause($feedIds, $bindings);
-            $sql .= " WHERE FlNfID IN {$feedInClause}";
+            $scope = $this->feedOwnerScope($bindings);
+            $sql .= " WHERE FlNfID IN {$feedInClause}" . $scope;
+        } else {
+            // Empty feedIds means "give me counts for every feed". In
+            // multi-user mode, restrict that to the caller's feeds.
+            $scope = $this->feedOwnerScope($bindings);
+            if ($scope !== '') {
+                // feedOwnerScope yields ` AND FlNfID IN (...)`; drop the
+                // leading ` AND ` (5 chars) so it can start a fresh WHERE.
+                $sql .= ' WHERE ' . substr($scope, 5);
+            }
         }
 
         $sql .= " GROUP BY FlNfID";

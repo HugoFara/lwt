@@ -422,8 +422,21 @@ class FeedArticleApiHandlerTest extends TestCase
     // deleteArticles tests
     // =========================================================================
 
+    /**
+     * Stub the feed-ownership gate that runs before any delete path.
+     * In multi-user mode `deleteArticles` calls `getFeedById` first so it
+     * can bail out on a foreign FlNfID; tests that exercise the
+     * happy-path delete need to make that lookup succeed.
+     */
+    private function mockFeedOwnedByCaller(): void
+    {
+        $this->feedFacade->method('getFeedById')
+            ->willReturn(['NfID' => 1, 'NfUsID' => 1, 'NfName' => 'TestFeed']);
+    }
+
     public function testDeleteArticlesEmptyArrayDeletesAll(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->expects($this->once())
             ->method('deleteArticles')
             ->with('7')
@@ -437,6 +450,7 @@ class FeedArticleApiHandlerTest extends TestCase
 
     public function testDeleteArticlesDefaultParamDeletesAll(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->expects($this->once())
             ->method('deleteArticles')
             ->with('3')
@@ -450,6 +464,7 @@ class FeedArticleApiHandlerTest extends TestCase
 
     public function testDeleteArticlesWithIdsDoesNotCallFacadeDeleteAll(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->expects($this->never())
             ->method('deleteArticles');
 
@@ -464,6 +479,7 @@ class FeedArticleApiHandlerTest extends TestCase
 
     public function testDeleteArticlesReturnsSuccessTrue(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->method('deleteArticles')->willReturn(0);
         $result = $this->handler->deleteArticles(1);
         $this->assertTrue($result['success']);
@@ -471,6 +487,7 @@ class FeedArticleApiHandlerTest extends TestCase
 
     public function testDeleteArticlesReturnsDeletedCount(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->method('deleteArticles')->willReturn(42);
         $result = $this->handler->deleteArticles(1);
         $this->assertSame(42, $result['deleted']);
@@ -478,10 +495,28 @@ class FeedArticleApiHandlerTest extends TestCase
 
     public function testDeleteArticlesZeroDeleted(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->method('deleteArticles')->willReturn(0);
         $result = $this->handler->deleteArticles(999);
         $this->assertSame(0, $result['deleted']);
         $this->assertTrue($result['success']);
+    }
+
+    public function testDeleteArticlesForeignFeedIsRejected(): void
+    {
+        // Multi-user defence: getFeedById is user-scoped via QueryBuilder,
+        // so a foreign feedId returns null. The handler must bail out
+        // before touching feed_links — feed_links has no UsID column,
+        // so without this gate any logged-in user could wipe any other
+        // user's articles by guessing their NfID.
+        $this->feedFacade->method('getFeedById')->willReturn(null);
+        $this->feedFacade->expects($this->never())->method('deleteArticles');
+
+        $result = $this->handler->deleteArticles(99, []);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame(0, $result['deleted']);
+        $this->assertSame('Feed not found', $result['error']);
     }
 
     // =========================================================================
@@ -811,6 +846,7 @@ class FeedArticleApiHandlerTest extends TestCase
 
     public function testFormatDeleteArticlesDelegatesToDeleteArticles(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->method('deleteArticles')->willReturn(5);
         $result = $this->handler->formatDeleteArticles(1);
         $this->assertTrue($result['success']);
@@ -965,6 +1001,7 @@ class FeedArticleApiHandlerTest extends TestCase
 
     public function testDeleteArticlesFeedIdCastToString(): void
     {
+        $this->mockFeedOwnedByCaller();
         $this->feedFacade->expects($this->once())
             ->method('deleteArticles')
             ->with('123')
