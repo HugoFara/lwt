@@ -84,8 +84,12 @@ class Settings
     /**
      * Get the settings value for a specific key. Return a default value when possible.
      *
-     * In multi-user mode, user-scoped settings are checked for the current user first,
-     * falling back to the global value (StUsID=0), then to the default.
+     * In multi-user mode, user-scoped settings are checked for the current user
+     * first, then fall through to the hardcoded default — never to the global
+     * `StUsID=0` row, since that would leak the prior user's choice into a fresh
+     * account. Admin-scoped settings still fall back to `StUsID=0` (that row is
+     * how admins set system-wide values), and single-user mode (no current
+     * user) keeps the original `StUsID=0` → hardcoded-default chain.
      *
      * @param string $key Settings key
      *
@@ -97,9 +101,11 @@ class Settings
             return '';
         }
 
-        // For user-scoped settings in multi-user mode, try user-specific row first
         $userId = Globals::getCurrentUserId();
-        if ($userId !== null && SettingDefinitions::getScope($key) === SettingDefinitions::SCOPE_USER) {
+        $isUserScope = SettingDefinitions::getScope($key) === SettingDefinitions::SCOPE_USER;
+
+        // For user-scoped settings in multi-user mode, try user-specific row first
+        if ($userId !== null && $isUserScope) {
             try {
                 $val = (string) Connection::preparedFetchValue(
                     "SELECT StValue FROM settings WHERE StKey = ? AND StUsID = ?",
@@ -111,6 +117,11 @@ class Settings
             } catch (\RuntimeException $e) {
                 // DB not available — fall through
             }
+
+            // Skip the StUsID=0 fallback for SCOPE_USER keys when a user is
+            // logged in: that row is the previous user's saved value, not a
+            // legitimate default for this account.
+            return SettingDefinitions::getDefault($key) ?? '';
         }
 
         // Fall back to global row (StUsID=0)

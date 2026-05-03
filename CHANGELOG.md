@@ -18,6 +18,30 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **`StUsID=0` "global default" leaked previous users' choices into
+  fresh accounts**: `Settings::getWithDefault` for a SCOPE_USER key
+  fell through to the `StUsID=0` row when the current user had no
+  per-user value. That row is just whoever-saved-the-setting-first's
+  value — typically the original single-user admin's, or a previous
+  test account's — so `set-texts-per-page`, `currentwordsort`, etc.
+  silently inherited across the multi-user boundary. For SCOPE_USER
+  keys with a logged-in user, skip the StUsID=0 hop and go straight
+  to the hardcoded default. SCOPE_ADMIN keys keep the fallback
+  (admins legitimately set those system-wide), and single-user mode
+  (no current user) is unchanged.
+* **Flipping `MULTI_USER_ENABLED=false → true` orphaned every legacy
+  row and looked like data loss**: the
+  `add_user_id_columns.sql` migration's backfill is gated on a
+  pre-existing `users.UsUsername='admin'` row, which doesn't exist
+  on a fresh `users` table — so the UPDATE is a no-op and every
+  `LgUsID/TxUsID/WoUsID` stays NULL. Once user-scope filters kick in
+  the operator sees empty lists everywhere. Self-heal during the
+  first-admin bootstrap in `Register::execute`: when the new user is
+  promoted to admin (because no admins exist), reassign every
+  NULL-owner row across `languages`, `texts`, `words`, `tags`,
+  `text_tags`, `news_feeds`, `books`, and `local_dictionaries` to
+  their UsID. On already-migrated installs the UPDATEs match zero
+  rows and cost nothing.
 * **Successful registration silently bounced to /login with no
   feedback**: `UserController::register` called
   `UserFacade::setCurrentUser($user)` for an "auto-login", but that

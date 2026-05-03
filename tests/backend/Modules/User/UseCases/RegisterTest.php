@@ -6,6 +6,7 @@ namespace Lwt\Tests\Modules\User\UseCases;
 
 use Lwt\Modules\User\Domain\User;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
+use Lwt\Modules\User\Application\UseCases\ClaimOrphanRows;
 use Lwt\Modules\User\Application\UseCases\Register;
 use Lwt\Modules\User\Domain\UserRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -22,6 +23,9 @@ class RegisterTest extends TestCase
     /** @var PasswordHasher&MockObject */
     private PasswordHasher $passwordHasher;
 
+    /** @var ClaimOrphanRows&MockObject */
+    private ClaimOrphanRows $claimOrphanRows;
+
     private Register $useCase;
 
     protected function setUp(): void
@@ -29,7 +33,12 @@ class RegisterTest extends TestCase
         parent::setUp();
         $this->repository = $this->createMock(UserRepositoryInterface::class);
         $this->passwordHasher = $this->createMock(PasswordHasher::class);
-        $this->useCase = new Register($this->repository, $this->passwordHasher);
+        $this->claimOrphanRows = $this->createMock(ClaimOrphanRows::class);
+        $this->useCase = new Register(
+            $this->repository,
+            $this->passwordHasher,
+            $this->claimOrphanRows
+        );
     }
 
     // =========================================================================
@@ -285,5 +294,37 @@ class RegisterTest extends TestCase
         $result = $this->useCase->execute('seconduser', 'second@example.com', 'ValidPass123!');
 
         $this->assertFalse($result->isAdmin());
+    }
+
+    public function testExecuteClaimsOrphanRowsForFirstAdmin(): void
+    {
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+        $this->repository->method('findByUsername')->willReturn(null);
+        $this->repository->method('findByEmail')->willReturn(null);
+        $this->passwordHasher->method('hash')->willReturn('hashed');
+        $this->repository->method('countAdmins')->willReturn(0);
+        $this->repository->method('save');
+
+        $this->claimOrphanRows->expects($this->once())
+            ->method('execute')
+            ->with($this->isType('int'));
+
+        $this->useCase->execute('firstuser', 'first@example.com', 'ValidPass123!');
+    }
+
+    public function testExecuteSkipsOrphanClaimWhenAdminsExist(): void
+    {
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+        $this->repository->method('findByUsername')->willReturn(null);
+        $this->repository->method('findByEmail')->willReturn(null);
+        $this->passwordHasher->method('hash')->willReturn('hashed');
+        $this->repository->method('countAdmins')->willReturn(1);
+        $this->repository->method('save');
+
+        $this->claimOrphanRows->expects($this->never())->method('execute');
+
+        $this->useCase->execute('seconduser', 'second@example.com', 'ValidPass123!');
     }
 }

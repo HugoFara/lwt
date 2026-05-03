@@ -45,17 +45,25 @@ class Register
     private PasswordHasher $passwordHasher;
 
     /**
+     * Orphan-row claim use case (run during first-admin bootstrap).
+     */
+    private ClaimOrphanRows $claimOrphanRows;
+
+    /**
      * Create a new Register use case.
      *
-     * @param UserRepositoryInterface $repository     User repository
-     * @param PasswordHasher|null     $passwordHasher Password hasher
+     * @param UserRepositoryInterface $repository      User repository
+     * @param PasswordHasher|null     $passwordHasher  Password hasher
+     * @param ClaimOrphanRows|null    $claimOrphanRows Orphan-claim helper
      */
     public function __construct(
         UserRepositoryInterface $repository,
-        ?PasswordHasher $passwordHasher = null
+        ?PasswordHasher $passwordHasher = null,
+        ?ClaimOrphanRows $claimOrphanRows = null
     ) {
         $this->repository = $repository;
         $this->passwordHasher = $passwordHasher ?? new PasswordHasher();
+        $this->claimOrphanRows = $claimOrphanRows ?? new ClaimOrphanRows();
     }
 
     /**
@@ -95,12 +103,24 @@ class Register
         $user = User::create($username, $email, $passwordHash);
 
         // First-admin bootstrap: promote if no real admins exist
-        if ($this->repository->countAdmins() === 0) {
+        $isFirstAdmin = $this->repository->countAdmins() === 0;
+        if ($isFirstAdmin) {
             $user->promoteToAdmin();
         }
 
         // Persist to database
         $this->repository->save($user);
+
+        // Self-heal the false→true MULTI_USER_ENABLED flip: the
+        // add_user_id_columns migration's backfill is a no-op when no
+        // admin exists at migration time, so legacy single-user data is
+        // left at NULL UsIDs and becomes invisible once user-scope kicks
+        // in. The first user to register is the new operator — claim
+        // every orphan row for them. On already-migrated installs the
+        // UPDATEs match zero rows and cost nothing.
+        if ($isFirstAdmin) {
+            $this->claimOrphanRows->execute($user->id()->toInt());
+        }
 
         return $user;
     }
