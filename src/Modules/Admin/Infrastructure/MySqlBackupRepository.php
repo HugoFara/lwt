@@ -21,6 +21,7 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\Restore;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Admin\Domain\BackupRepositoryInterface;
 
 /**
@@ -76,7 +77,6 @@ class MySqlBackupRepository implements BackupRepositoryInterface
         $out = "";
 
         foreach (self::BACKUP_TABLES as $table) {
-            $result = Connection::querySelect('SELECT * FROM ' . $table);
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
             $row2 = mysqli_fetch_row(
                 Connection::querySelect("SHOW CREATE TABLE " . $table)
@@ -85,19 +85,72 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                 $out .= str_replace("\n", " ", (string) $row2[1]) . ";\n";
             }
 
-            if ($table !== 'sentences' && $table !== 'word_occurrences') {
-                while ($row = mysqli_fetch_row($result)) {
-                    $values = [];
-                    foreach ($row as $cell) {
-                        $values[] = Escaping::formatValueForSqlOutput($cell);
-                    }
-                    $out .= 'INSERT INTO ' . $table
-                        . ' VALUES(' . implode(',', $values) . ");\n";
+            // Sentences and word_occurrences are regenerated from texts on
+            // restore (Migrations::reparseAllTexts), so we don't dump rows.
+            if ($table === 'sentences' || $table === 'word_occurrences') {
+                continue;
+            }
+
+            $result = Connection::querySelect($this->buildScopedSelectAll($table));
+            while ($row = mysqli_fetch_row($result)) {
+                $values = [];
+                foreach ($row as $cell) {
+                    $values[] = Escaping::formatValueForSqlOutput($cell);
                 }
+                $out .= 'INSERT INTO ' . $table
+                    . ' VALUES(' . implode(',', $values) . ");\n";
             }
         }
 
         return $out;
+    }
+
+    /**
+     * Build a `SELECT * FROM <table>` filtered to the current user's data.
+     *
+     * In single-user mode (or when no user is authenticated) the SELECT is
+     * unfiltered, matching legacy behaviour. In multi-user mode it returns
+     * only rows owned by the caller — directly via the table's UsID column
+     * for user-scoped tables, or via a subquery on the parent table for
+     * link/map tables that don't carry their own owner column.
+     *
+     * @param string $table Table name from BACKUP_TABLES.
+     *
+     * @return string SQL string ready for Connection::querySelect.
+     */
+    private function buildScopedSelectAll(string $table): string
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return 'SELECT * FROM ' . $table;
+        }
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return 'SELECT * FROM ' . $table;
+        }
+
+        // Direct user-scoped tables: filter by their UsID column.
+        if (UserScopedQuery::isUserScopedTable($table)) {
+            $column = UserScopedQuery::getUserIdColumn($table);
+            return 'SELECT * FROM ' . $table . ' WHERE ' . $column . ' = ' . $userId;
+        }
+
+        // Link/map tables: filter by ownership of the parent row.
+        switch ($table) {
+            case 'text_tag_map':
+                return 'SELECT * FROM text_tag_map WHERE TtTxID IN ('
+                    . 'SELECT TxID FROM texts WHERE TxUsID = ' . $userId . ')';
+            case 'word_tag_map':
+                return 'SELECT * FROM word_tag_map WHERE WtWoID IN ('
+                    . 'SELECT WoID FROM words WHERE WoUsID = ' . $userId . ')';
+            case 'feed_links':
+                return 'SELECT * FROM feed_links WHERE FlNfID IN ('
+                    . 'SELECT NfID FROM news_feeds WHERE NfUsID = ' . $userId . ')';
+        }
+
+        // Unknown table: leave unfiltered. Should never be hit with the
+        // current BACKUP_TABLES list; guarded so a future addition that
+        // forgets to add a case falls back to the legacy behaviour.
+        return 'SELECT * FROM ' . $table;
     }
 
     /**
@@ -106,6 +159,7 @@ class MySqlBackupRepository implements BackupRepositoryInterface
     public function generateOfficialBackupSql(): string
     {
         $out = "";
+        $scope = $this->officialBackupUserScope();
 
         foreach (self::OFFICIAL_BACKUP_TABLES as $table) {
             $result = null;
@@ -113,13 +167,13 @@ class MySqlBackupRepository implements BackupRepositoryInterface
             if ($table == 'texts') {
                 $result = Connection::querySelect(
                     'SELECT TxID, TxLgID, TxTitle, TxText, TxAnnotatedText, TxAudioURI,
-                    TxSourceURI FROM ' . $table
+                    TxSourceURI FROM ' . $table . $scope['texts']
                 );
             } elseif ($table == 'words') {
                 $result = Connection::querySelect(
                     'SELECT WoID, WoLgID, WoText, WoTextLC, WoStatus, WoTranslation,
                     WoRomanization, WoSentence, WoCreated, WoStatusChanged, WoTodayScore,
-                    WoTomorrowScore, WoRandom FROM ' . $table
+                    WoTomorrowScore, WoRandom FROM ' . $table . $scope['words']
                 );
             } elseif ($table == 'languages') {
                 $result = Connection::querySelect(
@@ -130,13 +184,13 @@ class MySqlBackupRepository implements BackupRepositoryInterface
                     LgExportTemplate, LgTextSize, LgCharacterSubstitutions,
                     LgRegexpSplitSentences, LgExceptionsSplitSentences,
                     LgRegexpWordCharacters, LgRemoveSpaces, LgSplitEachChar,
-                    LgRightToLeft FROM ' . $table . ' WHERE LgName<>""'
+                    LgRightToLeft FROM ' . $table . ' WHERE LgName<>""' . $scope['languages']
                 );
             } elseif (
                 $table !== 'sentences' && $table !== 'word_occurrences' &&
                 $table !== 'settings'
             ) {
-                $result = Connection::querySelect('SELECT * FROM ' . $table);
+                $result = Connection::querySelect('SELECT * FROM ' . $table . $scope[$table]);
             }
 
             $out .= "\nDROP TABLE IF EXISTS " . $table . ";\n";
@@ -158,6 +212,43 @@ class MySqlBackupRepository implements BackupRepositoryInterface
         }
 
         return $out;
+    }
+
+    /**
+     * Build the per-table WHERE-clause suffix for the official backup.
+     *
+     * Single-user (or unauthenticated) installs get empty suffixes,
+     * preserving legacy behaviour. Multi-user installs get an `AND … = ?`
+     * fragment for the languages SELECT (which already has a base WHERE)
+     * and a fresh ` WHERE …` fragment for everything else, indirect link
+     * tables included.
+     *
+     * @return array<string, string> Per-table SQL suffix keyed by
+     *                               OFFICIAL_BACKUP_TABLES name.
+     */
+    private function officialBackupUserScope(): array
+    {
+        $empty = [];
+        foreach (self::OFFICIAL_BACKUP_TABLES as $name) {
+            $empty[$name] = '';
+        }
+        if (!Globals::isMultiUserEnabled()) {
+            return $empty;
+        }
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return $empty;
+        }
+
+        $scope = $empty;
+        $scope['languages']    = ' AND LgUsID = ' . $userId;
+        $scope['texts']        = ' WHERE TxUsID = ' . $userId;
+        $scope['words']        = ' WHERE WoUsID = ' . $userId;
+        $scope['tags']         = ' WHERE TgUsID = ' . $userId;
+        $scope['text_tags']    = ' WHERE T2UsID = ' . $userId;
+        $scope['text_tag_map'] = ' WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxUsID = ' . $userId . ')';
+        $scope['word_tag_map'] = ' WHERE WtWoID IN (SELECT WoID FROM words WHERE WoUsID = ' . $userId . ')';
+        return $scope;
     }
 
     /**

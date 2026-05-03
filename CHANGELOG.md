@@ -18,6 +18,24 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Admin "Backup the database" exposed every user's data, not just
+  the caller's**: `MySqlBackupRepository::generateBackupSql` and
+  `generateOfficialBackupSql` ran `SELECT * FROM languages/texts/
+  words/tags/text_tags/news_feeds/...` with no `WHERE …UsID = ?`
+  filter. The route is admin-gated, but in a multi-admin install
+  (school, family, club) any admin downloading a backup walked off
+  with every other user's vocabulary, texts, scores, sentences,
+  reading history and feeds — a silent privacy leak with no
+  destructive click required. Scope every dump SELECT to the
+  current user: directly via the table's UsID column for
+  `languages`, `texts`, `words`, `tags`, `text_tags`, `news_feeds`,
+  `settings`; via parent-row subqueries for `text_tag_map`,
+  `word_tag_map`, `feed_links`. Single-user installs and
+  unauthenticated paths keep their full-dump behaviour. The
+  loud, opt-in destructive paths (`Empty database` truncate,
+  cross-user wipe on restore, foreign-UsID drift on
+  cross-install restore) are tracked separately and not changed
+  in this fix.
 * **Review/SRS module leaked and accepted writes across users**: the
   `/api/v1/review/*` endpoints (`config`, `next-word`, `table-words`,
   `tomorrow-count`, `status`) forwarded `lang=`, `text=`, `selection=`
