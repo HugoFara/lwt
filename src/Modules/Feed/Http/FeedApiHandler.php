@@ -233,7 +233,7 @@ class FeedApiHandler implements ApiRoutableInterface
      * @param int   $feedId     Feed ID
      * @param array $articleIds Article IDs to delete (empty = all)
      *
-     * @return array{success: bool, deleted: int}
+     * @return array{success: bool, deleted: int, error?: string}
      */
     public function deleteArticles(int $feedId, array $articleIds = []): array
     {

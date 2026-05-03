@@ -544,12 +544,13 @@ class WordFamilyService
         }
 
         $placeholders = implode(',', array_fill(0, count($termIds), '?'));
-        /** @var array<int, int> $bindings */
+        /** @var array<int, int|string> $bindings */
         $bindings = array_merge([$status], $termIds);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
 
         return Connection::preparedExecute(
             "UPDATE words SET WoStatus = ?, WoStatusChanged = NOW()
-             WHERE WoID IN ({$placeholders})",
+             WHERE WoID IN ({$placeholders}){$userScope}",
             $bindings
         );
     }

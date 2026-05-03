@@ -272,10 +272,12 @@ class TextTagService
             return ['count' => 0, 'error' => null];
         }
 
+        $tagBindings = [$tagText];
+        $tagScope = UserScopedQuery::forTablePrepared('text_tags', $tagBindings);
         /** @var int|string|null $tagIdRaw */
         $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-            [$tagText],
+            'SELECT T2ID FROM text_tags WHERE T2Text = ?' . $tagScope,
+            $tagBindings,
             'T2ID'
         );
 
@@ -357,10 +359,12 @@ class TextTagService
             return ['count' => 0, 'error' => null];
         }
 
+        $tagBindings = [$tagText];
+        $tagScope = UserScopedQuery::forTablePrepared('text_tags', $tagBindings);
         /** @var int|string|null $tagIdRaw */
         $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-            [$tagText],
+            'SELECT T2ID FROM text_tags WHERE T2Text = ?' . $tagScope,
+            $tagBindings,
             'T2ID'
         );
 
@@ -572,19 +576,26 @@ class TextTagService
      */
     public static function getOrCreateTextTag(string $tagText): ?int
     {
+        // Look up by user scope so we never reuse another user's T2ID — that
+        // would attach foreign tags to the caller's texts and pollute the
+        // foreign user's tag-to-text membership.
+        $bindings = [$tagText];
+        $userScope = UserScopedQuery::forTablePrepared('text_tags', $bindings);
         /** @var int|string|null $tagIdRaw */
         $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-            [$tagText],
+            'SELECT T2ID FROM text_tags WHERE T2Text = ?' . $userScope,
+            $bindings,
             'T2ID'
         );
 
         if ($tagIdRaw === null) {
             QueryBuilder::table('text_tags')->insertPrepared(['T2Text' => $tagText]);
+            $bindings = [$tagText];
+            $userScope = UserScopedQuery::forTablePrepared('text_tags', $bindings);
             /** @var int|string|null $tagIdRaw */
             $tagIdRaw = Connection::preparedFetchValue(
-                'SELECT T2ID FROM text_tags WHERE T2Text = ?',
-                [$tagText],
+                'SELECT T2ID FROM text_tags WHERE T2Text = ?' . $userScope,
+                $bindings,
                 'T2ID'
             );
         }

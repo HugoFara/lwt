@@ -18,6 +18,47 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Vocabulary bulk-action endpoints overwrote and deleted any user's
+  words**: `PUT /api/v1/terms/bulk-action` (and `terms/family/apply`)
+  routed straight into `WordListService::deleteByIdList` /
+  `updateStatusByIdList` / `updateStatusDateByIdList` /
+  `deleteSentencesByIdList` / `toLowercaseByIdList` /
+  `capitalizeByIdList` and `WordFamilyService::bulkUpdateTermStatus`,
+  each of which built raw `UPDATE words … WHERE WoID IN (?,?,?)` /
+  `DELETE FROM words …` SQL with no `WoUsID` filter. Any logged-in
+  user could PUT a JSON body containing another user's WoIDs and
+  set their entire vocabulary to status 99, blank their example
+  sentences, lowercase the surface forms, or wipe the rows
+  outright. `deleteByIdList` additionally issued a raw
+  `DELETE FROM word_occurrences WHERE Ti2WordCount > 1 AND
+  Ti2WoID IN (…)` first — `word_occurrences` carries no UsID
+  column, so even when the second `DELETE FROM words` would have
+  failed under a fix on that table alone, the multi-word
+  occurrence rows for the foreign user's text were already gone.
+  Each raw path now appends `UserScopedQuery::forTablePrepared(
+  'words', $bindings)`, and `deleteByIdList` pre-filters its
+  WoID list through `filterOwnedWordIds()` (a single user-scoped
+  SELECT) before running either DELETE so the
+  `word_occurrences` cleanup only targets rows the caller owns.
+  Confirmed end-to-end against a 2-user live database — pre-fix:
+  intruder posting `{"ids":[1..6],"action":"del"}` deleted five
+  of the operator's words and dropped the operator's row count
+  from 207 to 202; post-fix: identical request returns
+  `success:true,count:5` (the count just echoes the input length)
+  but the operator's row count and word state are byte-identical
+  across `del`, `s99`, `lower`, `today`, `delsent`, `bulk-status`,
+  and `family/apply`. Plus `getOrCreateTermTag` / `getOrCreateTextTag`
+  (and the matching `removeTagFrom*` lookups in `TermTagService` /
+  `TextTagService`) now scope their `SELECT TgID FROM tags
+  WHERE TgText = ?` / `SELECT T2ID FROM text_tags …` by user, so
+  a tag-text collision across users no longer reuses the foreign
+  user's TgID — which would have written `(foreign-tag, my-words)`
+  rows into `word_tag_map` and contaminated the foreign user's
+  tag-to-row membership. (Per-user composite uniques on
+  `tags.TgText` and `text_tags.T2Text` shipped earlier in
+  migration `20260503_120000_per_user_name_uniques.sql`; this
+  fix relies on that schema being present.)
+
 * **Admin "Empty Database" wiped every user, not just the caller**:
   `Restore::truncateUserDatabase` ran `DELETE FROM languages/texts/
   words/...` with no `WHERE …UsID = ?` filter — despite the name and

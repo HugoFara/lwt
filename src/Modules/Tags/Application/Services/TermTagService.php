@@ -299,10 +299,12 @@ class TermTagService
             return ['count' => 0, 'error' => null];
         }
 
+        $bindings = [$tagText];
+        $userScope = UserScopedQuery::forTablePrepared('tags', $bindings);
         /** @var int|string|null $tagIdRaw */
         $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT TgID FROM tags WHERE TgText = ?',
-            [$tagText],
+            'SELECT TgID FROM tags WHERE TgText = ?' . $userScope,
+            $bindings,
             'TgID'
         );
 
@@ -401,19 +403,26 @@ class TermTagService
      */
     public static function getOrCreateTermTag(string $tagText): ?int
     {
+        // Look up by user scope so we never reuse another user's TgID — that
+        // would attach foreign tags to the caller's words and pollute the
+        // foreign user's tag-to-word membership.
+        $bindings = [$tagText];
+        $userScope = UserScopedQuery::forTablePrepared('tags', $bindings);
         /** @var int|string|null $tagIdRaw */
         $tagIdRaw = Connection::preparedFetchValue(
-            'SELECT TgID FROM tags WHERE TgText = ?',
-            [$tagText],
+            'SELECT TgID FROM tags WHERE TgText = ?' . $userScope,
+            $bindings,
             'TgID'
         );
 
         if ($tagIdRaw === null) {
             QueryBuilder::table('tags')->insertPrepared(['TgText' => $tagText]);
+            $bindings = [$tagText];
+            $userScope = UserScopedQuery::forTablePrepared('tags', $bindings);
             /** @var int|string|null $tagIdRaw */
             $tagIdRaw = Connection::preparedFetchValue(
-                'SELECT TgID FROM tags WHERE TgText = ?',
-                [$tagText],
+                'SELECT TgID FROM tags WHERE TgText = ?' . $userScope,
+                $bindings,
                 'TgID'
             );
         }

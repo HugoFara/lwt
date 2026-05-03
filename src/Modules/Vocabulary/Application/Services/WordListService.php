@@ -270,7 +270,15 @@ class WordListService
         string $whTag,
         array $filterParams = []
     ): array {
-        return $this->exportBuilder->getFlexibleExportSql($ids, $textId, $whLang, $whStat, $whQuery, $whTag, $filterParams);
+        return $this->exportBuilder->getFlexibleExportSql(
+            $ids,
+            $textId,
+            $whLang,
+            $whStat,
+            $whQuery,
+            $whTag,
+            $filterParams
+        );
     }
 
     /**
@@ -309,12 +317,19 @@ class WordListService
      */
     public function deleteByIdList(array $ids): string
     {
-        $bindings = [];
-        $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        // Restrict to IDs the current user actually owns. Without this gate
+        // an intruder can pass another user's WoIDs and wipe their words and
+        // multi-word occurrences (word_occurrences has no UsID column).
+        $ownedIds = $this->filterOwnedWordIds($ids);
+        if (empty($ownedIds)) {
+            return "Deleted";
+        }
 
         DB::beginTransaction();
         try {
             // Delete multi-word text items first (before word deletion triggers FK SET NULL)
+            $bindings = [];
+            $inClause = Connection::buildPreparedInClause($ownedIds, $bindings);
             Connection::preparedExecute(
                 'DELETE FROM word_occurrences
                 WHERE Ti2WordCount > 1 AND Ti2WoID in ' . $inClause,
@@ -325,7 +340,7 @@ class WordListService
             // - Single-word word_occurrences.Ti2WoID set to NULL (ON DELETE SET NULL)
             // - word_tag_map deleted (ON DELETE CASCADE)
             $bindings2 = [];
-            $inClause2 = Connection::buildPreparedInClause($ids, $bindings2);
+            $inClause2 = Connection::buildPreparedInClause($ownedIds, $bindings2);
             Connection::preparedExecute(
                 'DELETE FROM words WHERE WoID in ' . $inClause2,
                 $bindings2
@@ -340,6 +355,41 @@ class WordListService
         }
 
         return "Deleted";
+    }
+
+    /**
+     * Pre-filter a list of WoIDs to those owned by the current user.
+     *
+     * In single-user mode the input list is returned unchanged. In multi-user
+     * mode this issues a single SELECT scoped via {@see UserScopedQuery} and
+     * keeps only the matching rows; foreign IDs are silently dropped so
+     * downstream bulk SQL can run without a separate WHERE clause for the
+     * UsID column (the IN clause shape stays simple).
+     *
+     * @param int[] $ids Word IDs from the request
+     *
+     * @return int[] Owned IDs (subset of $ids)
+     */
+    private function filterOwnedWordIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        if ($userScope === '') {
+            return array_values(array_map('intval', $ids));
+        }
+        $rows = Connection::preparedFetchAll(
+            'SELECT WoID FROM words WHERE WoID in ' . $inClause . $userScope,
+            $bindings
+        );
+        $owned = [];
+        foreach ($rows as $row) {
+            $owned[] = (int) $row['WoID'];
+        }
+        return $owned;
     }
 
     /**
@@ -360,10 +410,11 @@ class WordListService
             // Status +1
             $bindings = [];
             $inClause = Connection::buildPreparedInClause($ids, $bindings);
+            $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
             Connection::preparedExecute(
                 'update words
                 set WoStatus=WoStatus+1, WoStatusChanged = NOW(),' . $scoreUpdate . '
-                where WoStatus in (1,2,3,4) and WoID in ' . $inClause,
+                where WoStatus in (1,2,3,4) and WoID in ' . $inClause . $userScope,
                 $bindings
             );
             return "Updated Status (+1)";
@@ -371,10 +422,11 @@ class WordListService
             // Status -1
             $bindings = [];
             $inClause = Connection::buildPreparedInClause($ids, $bindings);
+            $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
             Connection::preparedExecute(
                 'update words
                 set WoStatus=WoStatus-1, WoStatusChanged = NOW(),' . $scoreUpdate . '
-                where WoStatus in (2,3,4,5) and WoID in ' . $inClause,
+                where WoStatus in (2,3,4,5) and WoID in ' . $inClause . $userScope,
                 $bindings
             );
             return "Updated Status (-1)";
@@ -383,10 +435,11 @@ class WordListService
         // Absolute status
         $bindings = [$newStatus];
         $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         Connection::preparedExecute(
             'update words
             set WoStatus=?, WoStatusChanged = NOW(),' . $scoreUpdate . '
-            where WoID in ' . $inClause,
+            where WoID in ' . $inClause . $userScope,
             $bindings
         );
         return "Updated Status (=" . $newStatus . ")";
@@ -403,11 +456,12 @@ class WordListService
     {
         $bindings = [];
         $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
 
         Connection::preparedExecute(
             'update words
             set WoStatusChanged = NOW(),' . TermStatusService::makeScoreRandomInsertUpdate('u') . '
-            where WoID in ' . $inClause,
+            where WoID in ' . $inClause . $userScope,
             $bindings
         );
         return "Updated Status Date (= Now)";
@@ -424,11 +478,12 @@ class WordListService
     {
         $bindings = [];
         $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
 
         Connection::preparedExecute(
             'update words
             set WoSentence = NULL
-            where WoID in ' . $inClause,
+            where WoID in ' . $inClause . $userScope,
             $bindings
         );
         return "Term Sentence(s) deleted";
@@ -445,11 +500,12 @@ class WordListService
     {
         $bindings = [];
         $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
 
         Connection::preparedExecute(
             'update words
             set WoText = WoTextLC
-            where WoID in ' . $inClause,
+            where WoID in ' . $inClause . $userScope,
             $bindings
         );
         return "Term(s) set to lowercase";
@@ -466,13 +522,14 @@ class WordListService
     {
         $bindings = [];
         $inClause = Connection::buildPreparedInClause($ids, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
 
         Connection::preparedExecute(
             'update words
             set WoText = CONCAT(
                 UPPER(LEFT(WoTextLC,1)),SUBSTRING(WoTextLC,2)
             )
-            where WoID in ' . $inClause,
+            where WoID in ' . $inClause . $userScope,
             $bindings
         );
         return "Term(s) capitalized";
