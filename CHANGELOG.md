@@ -18,6 +18,26 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Multi-user `/texts` and other paginated screens 500'd with invalid SQL**:
+  every paginated query in `Modules/Text` and `Modules/Vocabulary` was
+  concatenating `UserScopedQuery::forTablePrepared(...)` *after* `LIMIT
+  ?, ?` (or `ORDER BY ...`), producing a syntax error
+  (`... LIMIT ?, ? AND TxUsID = ?`) on every request from a logged-in
+  user. With `MULTI_USER_ENABLED=true` this rendered `/texts`,
+  `/api/v1/texts/by-language/{id}`, the lemma family and statistics
+  endpoints, and the curated-import translation merge step entirely
+  unusable. Inline the user-scope clauses in each query's `WHERE`
+  (or LEFT-JOIN `ON` for the `text_tags`/`words` join cases) and
+  push their bindings before the `LIMIT` bindings.
+* **Vocabulary list (`/words`) leaked every user's terms across the
+  multi-user boundary**: `WordListQueryService::countWords`,
+  `getWordsList`, `getWordsListWithWordCount`, and
+  `getFilteredWordIds` had no `UserScopedQuery` calls at all. A fresh
+  user with no data would see every other user's terms (and tag and
+  language filters did nothing to stop it). Add `words` and
+  `languages` user-scope to all four entry points, including both
+  halves of the no-text-filter UNION query in
+  `getWordsListWithWordCount`.
 * **Dictionary import rejected every file as "Invalid file format"**
   (#233): `CsvImporter`/`JsonImporter`'s `canImport()` checked the
   extension of the PHP upload temp path (`/tmp/phpXXXXXX`), which has

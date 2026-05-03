@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
 /**
  * Executes word list queries with filtering and pagination.
@@ -55,21 +56,24 @@ class WordListQueryService
     ): int {
         if ($textId == '') {
             $bindings = $params;
+            $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
             $sql = 'select count(*) as value from (select WoID from (' .
                 'words left JOIN word_tag_map' .
                 ' ON WoID = WtWoID) where (1=1) ' .
-                $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag . ') as dummy';
+                $whLang . $whStat . $whQuery . $wordScope .
+                ' group by WoID ' . $whTag . ') as dummy';
         } else {
             $bindings = [];
             $textIds = array_map('intval', explode(',', $textId));
             $inClause = Connection::buildPreparedInClause($textIds, $bindings);
             /** @var array<int, mixed> $bindings */
             $bindings = array_values(array_merge($bindings, $params));
+            $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
             $sql = 'select count(*) as value from (select WoID from (' .
                 'words left JOIN word_tag_map' .
                 ' ON WoID = WtWoID), word_occurrences' .
                 ' where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in ' .
-                $inClause . $whLang . $whStat . $whQuery .
+                $inClause . $whLang . $whStat . $whQuery . $wordScope .
                 ' group by WoID ' . $whTag . ') as dummy';
         }
         return (int) Connection::preparedFetchValue($sql, $bindings);
@@ -123,6 +127,8 @@ class WordListQueryService
         if ($textId == '') {
             if ($whTag == '') {
                 $bindings = $filterParams;
+                $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
+                $langScope = UserScopedQuery::forTablePrepared('languages', $bindings);
                 $bindings[] = $offset;
                 $bindings[] = $perPage;
                 $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
@@ -136,7 +142,7 @@ class WordListQueryService
                         DATEDIFF( NOW( ) , WoStatusChanged ) AS Days, WoTodayScore,
                         WoTomorrowScore
                         from words, languages
-                        where WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
+                        where WoLgID = LgID ' . $whLang . $whStat . $whQuery . $wordScope . $langScope . '
                         group by WoID
                         order by ' . $sorts[$sort - 1] . ' LIMIT ?, ?) AS AA
                         left JOIN word_tag_map ON WoID = WtWoID
@@ -145,6 +151,8 @@ class WordListQueryService
                         order by ' . $sorts[$sort - 1];
             } else {
                 $bindings = $filterParams;
+                $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
+                $langScope = UserScopedQuery::forTablePrepared('languages', $bindings);
                 $bindings[] = $offset;
                 $bindings[] = $perPage;
                 $sql = 'select WoID, WoText, WoTranslation, WoRomanization, WoSentence,
@@ -156,7 +164,7 @@ class WordListQueryService
                         from ((words left JOIN word_tag_map
                         ON WoID = WtWoID) left join tags
                         on TgID = WtTgID), languages
-                        where WoLgID = LgID ' . $whLang . $whStat . $whQuery .
+                        where WoLgID = LgID ' . $whLang . $whStat . $whQuery . $wordScope . $langScope .
                         ' group by WoID ' . $whTag . ' order by ' . $sorts[$sort - 1] . ' LIMIT ?, ?';
             }
         } else {
@@ -165,6 +173,8 @@ class WordListQueryService
             $inClause = Connection::buildPreparedInClause($textIds, $bindings);
             /** @var array<int, mixed> $bindings */
             $bindings = array_values(array_merge($bindings, $filterParams));
+            $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
+            $langScope = UserScopedQuery::forTablePrepared('languages', $bindings);
             $bindings[] = $offset;
             $bindings[] = $perPage;
             $sql = 'select distinct WoID, WoText, WoTranslation, WoRomanization,
@@ -178,7 +188,7 @@ class WordListQueryService
                     left join tags on TgID = WtTgID),
                     languages, word_occurrences
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and Ti2TxID in ' .
-                    $inClause . ' and WoLgID = LgID ' . $whLang . $whStat . $whQuery . '
+                    $inClause . ' and WoLgID = LgID ' . $whLang . $whStat . $whQuery . $wordScope . $langScope . '
                     group by WoID ' . $whTag . '
                     order by ' . $sorts[$sort - 1] . ' LIMIT ?, ?';
         }
@@ -210,6 +220,8 @@ class WordListQueryService
             $inClause = Connection::buildPreparedInClause($textIds, $bindings);
             /** @var array<int, mixed> $bindings */
             $bindings = array_values(array_merge($bindings, $filterParams));
+            $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
+            $langScope = UserScopedQuery::forTablePrepared('languages', $bindings);
             $sql = 'select WoID, count(WoID) AS textswordcount, WoText, WoTranslation,
                     WoRomanization, WoSentence,
                     ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
@@ -224,12 +236,19 @@ class WordListQueryService
                     languages, word_occurrences
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID
                     and Ti2TxID in ' . $inClause . ' ' .
-                    $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
+                    $whLang . $whStat . $whQuery . $wordScope . $langScope .
+                    ' group by WoID ' . $whTag .
                     ' order by ' . $sortExpr;
         } else {
-            // UNION query: first part = words NOT in any text, second = words with occurrences
-            // Both parts share the same filter params, so we need to duplicate them
-            $bindings = array_merge($filterParams, $filterParams);
+            // UNION query: first part = words NOT in any text, second = words with occurrences.
+            // Both halves share the same filter params and the same user scope, so we duplicate
+            // each set of bindings via two forTablePrepared calls.
+            $bindings = $filterParams;
+            $wordScope1 = UserScopedQuery::forTablePrepared('words', $bindings);
+            $langScope1 = UserScopedQuery::forTablePrepared('languages', $bindings);
+            $bindings = array_merge($bindings, $filterParams);
+            $wordScope2 = UserScopedQuery::forTablePrepared('words', $bindings);
+            $langScope2 = UserScopedQuery::forTablePrepared('languages', $bindings);
             $sql = 'select WoID, 0 AS textswordcount, WoText, WoTranslation,
                     WoRomanization, WoSentence,
                     ifnull(WoSentence,\'\') like concat(\'%{\',WoText,\'}%\') as SentOK,
@@ -244,7 +263,7 @@ class WordListQueryService
                     languages
                     where WoLgID = LgID and WoID NOT IN (SELECT DISTINCT Ti2WoID
                     from word_occurrences where Ti2LgID = LgID) ' .
-                    $whLang . $whStat . $whQuery . '
+                    $whLang . $whStat . $whQuery . $wordScope1 . $langScope1 . '
                     group by WoID ' . $whTag . '
                     UNION
                     select WoID, count(WoID) AS textswordcount, WoText, WoTranslation,
@@ -260,7 +279,8 @@ class WordListQueryService
                     left join tags on TgID = WtTgID),
                     languages, word_occurrences
                     where Ti2LgID = WoLgID and Ti2WoID = WoID and WoLgID = LgID ' .
-                    $whLang . $whStat . $whQuery . ' group by WoID ' . $whTag .
+                    $whLang . $whStat . $whQuery . $wordScope2 . $langScope2 .
+                    ' group by WoID ' . $whTag .
                     ' order by ' . $sortExpr;
         }
 
@@ -289,11 +309,12 @@ class WordListQueryService
     ): array {
         if ($textId == '') {
             $bindings = $params;
+            $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
             $sql = 'select distinct WoID from (
                 words
                 left JOIN word_tag_map
                 ON WoID = WtWoID
-            ) where (1=1) ' . $whLang . $whStat . $whQuery . '
+            ) where (1=1) ' . $whLang . $whStat . $whQuery . $wordScope . '
             group by WoID ' . $whTag;
         } else {
             $bindings = [];
@@ -301,13 +322,14 @@ class WordListQueryService
             $inClause = Connection::buildPreparedInClause($textIds, $bindings);
             /** @var array<int, mixed> $bindings */
             $bindings = array_values(array_merge($bindings, $params));
+            $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
             $sql = 'select distinct WoID
             from (
                 words
                 left JOIN word_tag_map ON WoID = WtWoID
             ), word_occurrences
             where Ti2LgID = WoLgID and Ti2WoID = WoID and
-            Ti2TxID in ' . $inClause . $whLang . $whStat . $whQuery .
+            Ti2TxID in ' . $inClause . $whLang . $whStat . $whQuery . $wordScope .
             ' group by WoID ' . $whTag;
         }
 
