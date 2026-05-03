@@ -46,6 +46,9 @@ class GetAvailableThemes
     public function execute(): array
     {
         $themes = [];
+        // Psalm's glob() stub does not enumerate GLOB_ONLYDIR (1<<30) among
+        // its accepted flag bitmask, so the call is suppressed here.
+        /** @psalm-suppress InvalidArgument */
         $globResult = glob('dist/themes/*', GLOB_ONLYDIR);
         $themeDirs = $globResult === false ? [] : $globResult;
 

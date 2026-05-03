@@ -231,11 +231,19 @@ class WordListQueryServiceTest extends TestCase
         $source = $this->getMethodSource($method);
 
         // UNION needs filterParams threaded through both halves: a fresh copy
-        // for the first half, then a merge to append the second half's copy.
+        // for the first half, then re-append a second copy for the UNION's
+        // second half. The append uses a foreach instead of array_merge so
+        // Psalm preserves the `array<int, mixed>` shape that
+        // UserScopedQuery::forTablePrepared() requires.
         $this->assertStringContainsString(
-            'array_merge($bindings, $filterParams)',
+            'foreach ($filterParams as $param)',
             $source,
-            'expected the UNION second half to merge a second copy of $filterParams into $bindings'
+            'expected the UNION second half to iterate $filterParams to append a second copy'
+        );
+        $this->assertStringContainsString(
+            '$bindings[] = $param',
+            $source,
+            'expected each iteration to push $param onto $bindings'
         );
     }
 

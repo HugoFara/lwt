@@ -138,7 +138,8 @@ class ReviewService
                 /** @var array<int, int> $params */
                 $params = array_values(array_map('intval', $ids));
                 return [
-                    'sql' => " words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID AND Ti2TxID IN ($placeholders) ",
+                    'sql' => ' words, word_occurrences WHERE Ti2LgID = WoLgID AND Ti2WoID = WoID'
+                        . " AND Ti2TxID IN ($placeholders) ",
                     'params' => $params
                 ];
             case 'lang':
@@ -619,7 +620,8 @@ class ReviewService
      * @param int|null    $langId       Language ID
      * @param int|null    $textId       Text ID
      *
-     * @return array{title: string, property: string, reviewsql: string, reviewParams: array<int, int>, counts: array{due: int, total: int}}|null
+     * @return array{title: string, property: string, reviewsql: string, reviewParams: array<int, int>,
+     *     counts: array{due: int, total: int}}|null
      */
     public function getReviewDataFromParams(
         ?int $selection,

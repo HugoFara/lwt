@@ -200,7 +200,7 @@ class WordListQueryService
      * Get words list with word count (for sort option 7).
      *
      * @param array{whLang?: string, whStat?: string, whQuery?: string,
-     *               whTag?: string, textId?: string, params?: array} $filters Filter parameters
+     *               whTag?: string, textId?: string, params?: array<int, int|string>} $filters Filter parameters
      * @param string $sortExpr Sort expression
      *
      * @return array Array of word records
@@ -215,11 +215,13 @@ class WordListQueryService
         $filterParams = $filters['params'] ?? [];
 
         if ($textId != '') {
+            /** @var array<int, mixed> $bindings */
             $bindings = [];
             $textIds = array_map('intval', explode(',', $textId));
             $inClause = Connection::buildPreparedInClause($textIds, $bindings);
-            /** @var array<int, mixed> $bindings */
-            $bindings = array_values(array_merge($bindings, $filterParams));
+            foreach ($filterParams as $param) {
+                $bindings[] = $param;
+            }
             $wordScope = UserScopedQuery::forTablePrepared('words', $bindings);
             $langScope = UserScopedQuery::forTablePrepared('languages', $bindings);
             $sql = 'select WoID, count(WoID) AS textswordcount, WoText, WoTranslation,
@@ -246,7 +248,13 @@ class WordListQueryService
             $bindings = $filterParams;
             $wordScope1 = UserScopedQuery::forTablePrepared('words', $bindings);
             $langScope1 = UserScopedQuery::forTablePrepared('languages', $bindings);
-            $bindings = array_merge($bindings, $filterParams);
+            // Re-append the filter params for the UNION's second half. Use
+            // a foreach instead of array_merge so Psalm preserves the
+            // `array<int, mixed>` shape required by forTablePrepared's
+            // by-reference signature.
+            foreach ($filterParams as $param) {
+                $bindings[] = $param;
+            }
             $wordScope2 = UserScopedQuery::forTablePrepared('words', $bindings);
             $langScope2 = UserScopedQuery::forTablePrepared('languages', $bindings);
             $sql = 'select WoID, 0 AS textswordcount, WoText, WoTranslation,
