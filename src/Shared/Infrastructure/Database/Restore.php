@@ -90,6 +90,19 @@ class Restore
      */
     public static function restoreFile($handle, string $title, bool $validateSql = true): string
     {
+        // Multi-user safety guard: the rest of this function drops every
+        // LWT table and replaces it with the dump's contents, which would
+        // wipe every other user's data. Refuse the restore when more
+        // than one active user exists. The admin must take the multi-
+        // user mode down first if they really mean it (or use the
+        // per-user "Empty Database" + manual backup/restore recipe in
+        // docs).
+        $contextError = self::validateMultiUserRestoreContext();
+        if ($contextError !== null) {
+            fclose($handle);
+            return $contextError;
+        }
+
         $message = "";
         $hasErrors = false;
         $install_status = [
@@ -236,6 +249,11 @@ class Restore
                 Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
             }
             Migrations::reparseAllTexts();
+            // Cross-install or legacy backups may carry UsID column values
+            // that don't match the local users table — without this step
+            // the restored rows would be invisible to every account on
+            // the new install.
+            self::rewriteRestoredUsIdsToCurrentUser();
             Maintenance::optimizeDatabase();
             TagsFacade::getAllTermTags(true);
             TagsFacade::getAllTextTags(true);
@@ -258,19 +276,39 @@ class Restore
     }
 
     /**
-     * Truncate the database, remove all data belonging by the current user.
+     * Truncate the database, remove all data belonging to the current user.
      *
-     * Keep settings.
+     * In multi-user mode with an authenticated user, only that user's rows
+     * are deleted (across the 11 content tables, plus the per-user
+     * `currenttext` setting). Single-user installs keep the legacy
+     * "wipe everything" behaviour. Settings are kept.
      *
      * @return void
      */
     public static function truncateUserDatabase(): void
     {
-        // Delete from tables in correct order to respect foreign key constraints.
-        // Child tables (with FKs) must be deleted from before parent tables.
-        // Use DELETE instead of TRUNCATE because TRUNCATE fails when FK constraints
-        // exist on a table, even if those constraints would allow the operation.
+        $userId = Globals::isMultiUserEnabled() ? Globals::getCurrentUserId() : null;
+        if ($userId !== null) {
+            self::truncateForUser($userId);
+            self::truncateUserPostHook($userId);
+            return;
+        }
+        self::truncateAllUsersData();
+        self::truncateUserPostHook(null);
+    }
 
+    /**
+     * Delete every row across the eleven content tables.
+     *
+     * Order matters: child tables with FKs to multiple parents go first,
+     * then the parent tables. Used in single-user mode and as the
+     * destructive base step of `restoreFile()` (which then loads a new
+     * dump on top of the empty schema).
+     *
+     * @return void
+     */
+    private static function truncateAllUsersData(): void
+    {
         // Level 1: Tables with FKs to multiple parents
         Connection::execute('DELETE FROM ' . Globals::table('text_tag_map'));
         Connection::execute('DELETE FROM ' . Globals::table('word_tag_map'));
@@ -291,8 +329,169 @@ class Restore
         QueryBuilder::table('settings')
             ->where('StKey', '=', 'currenttext')
             ->delete();
+    }
+
+    /**
+     * Delete every content row owned by `$userId`.
+     *
+     * The link/map/derived tables don't carry a UsID column of their own,
+     * so they're scoped via a subquery on the parent table (texts /
+     * words / news_feeds). FK CASCADE would handle most of these
+     * implicitly — explicit deletes guarantee the same result on
+     * schemas where the cascade is missing or disabled.
+     *
+     * @param int $userId Owner UsID
+     *
+     * @return void
+     */
+    private static function truncateForUser(int $userId): void
+    {
+        // Level 1: Link/map and derived tables, scoped via parent ownership.
+        Connection::preparedExecute(
+            'DELETE FROM text_tag_map WHERE TtTxID IN (SELECT TxID FROM texts WHERE TxUsID = ?)',
+            [$userId]
+        );
+        Connection::preparedExecute(
+            'DELETE FROM word_tag_map WHERE WtWoID IN (SELECT WoID FROM words WHERE WoUsID = ?)',
+            [$userId]
+        );
+        Connection::preparedExecute(
+            'DELETE FROM word_occurrences WHERE Ti2TxID IN (SELECT TxID FROM texts WHERE TxUsID = ?)',
+            [$userId]
+        );
+        Connection::preparedExecute(
+            'DELETE FROM feed_links WHERE FlNfID IN (SELECT NfID FROM news_feeds WHERE NfUsID = ?)',
+            [$userId]
+        );
+        Connection::preparedExecute(
+            'DELETE FROM sentences WHERE SeTxID IN (SELECT TxID FROM texts WHERE TxUsID = ?)',
+            [$userId]
+        );
+
+        // Level 2: Direct user-scoped tables.
+        Connection::preparedExecute('DELETE FROM news_feeds WHERE NfUsID = ?', [$userId]);
+        Connection::preparedExecute('DELETE FROM texts WHERE TxUsID = ?', [$userId]);
+        Connection::preparedExecute('DELETE FROM words WHERE WoUsID = ?', [$userId]);
+        Connection::preparedExecute('DELETE FROM tags WHERE TgUsID = ?', [$userId]);
+        Connection::preparedExecute('DELETE FROM text_tags WHERE T2UsID = ?', [$userId]);
+        Connection::preparedExecute('DELETE FROM languages WHERE LgUsID = ?', [$userId]);
+
+        // Level 3: Per-user settings entry (keep admin/global settings).
+        Connection::preparedExecute(
+            'DELETE FROM settings WHERE StKey = ? AND StUsID = ?',
+            ['currenttext', $userId]
+        );
+    }
+
+    /**
+     * Common cleanup after a truncate (whether scoped to a user or not).
+     *
+     * Optimises tables and clears the in-process tag caches so the next
+     * page load doesn't return ghost tag names.
+     *
+     * @param int|null $_userId Reserved for future per-user cache busting
+     *
+     * @return void
+     */
+    private static function truncateUserPostHook(?int $_userId): void
+    {
         Maintenance::optimizeDatabase();
         TagsFacade::getAllTermTags(true);
         TagsFacade::getAllTextTags(true);
+    }
+
+    /**
+     * Refuse the restore when more than one user lives on this install.
+     *
+     * Returning a non-null string aborts `restoreFile` early. Single-user
+     * installs always pass. The check looks at the `users` table because
+     * `BACKUP_RESTORE_ENABLED=true` may have been set by an admin who
+     * understood the single-user case but didn't realise the dump+drop
+     * step nukes every account.
+     *
+     * @return string|null Error message to surface, or null when safe
+     */
+    private static function validateMultiUserRestoreContext(): ?string
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return null;
+        }
+
+        try {
+            $count = (int) Connection::preparedFetchValue(
+                'SELECT COUNT(*) AS cnt FROM users',
+                [],
+                'cnt'
+            );
+        } catch (\RuntimeException $e) {
+            // No users table yet (fresh install). Nothing to protect.
+            return null;
+        }
+
+        if ($count <= 1) {
+            return null;
+        }
+
+        return "Error: Restore is not supported in multi-user mode when more"
+            . " than one user account exists ($count found). The restore"
+            . " process drops every LWT table — including data belonging"
+            . " to other users — before loading the dump. To proceed,"
+            . " either (a) take the install down, set"
+            . " MULTI_USER_ENABLED=false, restore, then re-enable"
+            . " multi-user, or (b) follow the manual per-user migration"
+            . " recipe in docs/guide/post-installation.md.";
+    }
+
+    /**
+     * Reassign all restored content to the current admin in multi-user mode.
+     *
+     * `restoreFile` runs after the multi-user guard above, so when this
+     * fires we know the install has at most one real account. Rewrite
+     * every UsID column on the user-scoped tables to that account so
+     * the freshly-loaded rows are visible — backups from a different
+     * install or made before multi-user mode existed otherwise carry
+     * UsIDs that don't correspond to any local user. Safe to no-op
+     * when no current user is set (single-user mode reaches the same
+     * behaviour by skipping the rewrite entirely).
+     *
+     * @return void
+     */
+    private static function rewriteRestoredUsIdsToCurrentUser(): void
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return;
+        }
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return;
+        }
+
+        // Only the directly-scoped tables carry UsID columns. Link/map
+        // and derived tables inherit ownership through their parent
+        // (TtTxID → texts, WtWoID → words, etc.) and don't need rewriting.
+        foreach (
+            [
+                'languages'          => 'LgUsID',
+                'texts'              => 'TxUsID',
+                'words'              => 'WoUsID',
+                'tags'                => 'TgUsID',
+                'text_tags'          => 'T2UsID',
+                'news_feeds'         => 'NfUsID',
+                'settings'           => 'StUsID',
+                'local_dictionaries' => 'LdUsID',
+            ] as $table => $column
+        ) {
+            try {
+                Connection::preparedExecute(
+                    "UPDATE `{$table}` SET `{$column}` = ? WHERE `{$column}` IS NULL OR `{$column}` <> ?",
+                    [$userId, $userId]
+                );
+            } catch (\RuntimeException $e) {
+                // Older schemas may not have every table/column yet;
+                // skip silently — the restored data still loaded, just
+                // without the UsID rewrite for this one table.
+                continue;
+            }
+        }
     }
 }

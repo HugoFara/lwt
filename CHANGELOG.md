@@ -18,6 +18,50 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Admin "Empty Database" wiped every user, not just the caller**:
+  `Restore::truncateUserDatabase` ran `DELETE FROM languages/texts/
+  words/...` with no `WHERE …UsID = ?` filter — despite the name and
+  docblock claiming it removes "all data belonging to the current
+  user". Triggered by the admin "Empty Database" button, an admin
+  who clicked through the confirmation in a multi-admin install
+  destroyed every other user's content. Scope each DELETE to the
+  current user via the table's `UsID` column for direct-scoped
+  tables (`languages`, `texts`, `words`, `tags`, `text_tags`,
+  `news_feeds`); via parent-row subqueries for the link/map and
+  derived tables (`text_tag_map`, `word_tag_map`, `feed_links`,
+  `word_occurrences`, `sentences`); and via `(StKey, StUsID)` for
+  the per-user `currenttext` setting. Single-user mode keeps the
+  legacy "wipe everything" behaviour (no user filter to apply).
+  Confirmed end-to-end against a 2-admin live database — pre-fix:
+  intruder hitting "Empty Database" deleted operator's `hola`,
+  `parents`, `parented` words plus the Spanish language and tags;
+  post-fix: only intruder's own rows are removed, operator's data
+  is fully preserved.
+
+* **Restore in multi-user mode silently destroyed every user's
+  data and orphaned cross-install dumps**: `Restore::restoreFile`
+  called `dropAllLwtTables()` before loading the dump, wiping
+  every account's content even though the admin only intended to
+  restore their own backup. Restored rows also kept their original
+  `UsID` columns from the source install — on a different host
+  those IDs typically reference users that don't exist locally,
+  leaving every imported row attached to a phantom owner. Two
+  guards: (1) refuse the restore when more than one active user
+  account exists, returning a clear error pointing at the manual
+  multi-user migration recipe in the post-installation docs;
+  (2) on safe single-admin installs, run a post-restore UPDATE
+  that rewrites every `UsID` column on user-scoped tables
+  (`languages`, `texts`, `words`, `tags`, `text_tags`,
+  `news_feeds`, `settings`, `local_dictionaries`) to the current
+  admin's UsID, so dumps from other installs become visible.
+  Single-user mode is unchanged. The error message is now
+  surfaced through `RestoreFromUpload::execute()`, which
+  previously discarded the message string from
+  `restoreFromHandle()` and unconditionally reported success.
+  Note: restore is already disabled by default in multi-user
+  mode (`BACKUP_RESTORE_ENABLED` defaults to `false`); these
+  guards harden the path for installs that explicitly opt in.
+
 * **Feed module leaked every user's feeds and let any user wipe any
   other user's articles**: three independent bugs landed together
   here. (1) `FeedCrudApiHandler::getFeedList` built raw

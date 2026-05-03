@@ -322,7 +322,8 @@ class AdminUseCaseTest extends TestCase
             ->with(
                 $this->isType('resource'),
                 $this->equalTo('Database')
-            );
+            )
+            ->willReturn('Success: Database restored');
 
         $useCase = new RestoreFromUpload($repo);
         $result = $useCase->execute([
@@ -335,6 +336,40 @@ class AdminUseCaseTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertNull($result['error']);
+
+        @unlink($tmpFile);
+        Globals::setBackupRestoreEnabled(null);
+    }
+
+    public function testRestoreFromUploadSurfacesErrorPrefixedMessageAsFailure(): void
+    {
+        // Multi-user defence: when Restore::restoreFile refuses (e.g.
+        // because >1 user accounts exist), it returns a message that
+        // starts with "Error:". The use case must propagate that to
+        // the controller as success=false instead of silently claiming
+        // a successful restore.
+        Globals::setBackupRestoreEnabled(true);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'lwt_test_');
+        $gz = gzopen($tmpFile, 'w');
+        gzwrite($gz, "-- lwt-backup-\n");
+        gzclose($gz);
+
+        $repo = $this->createMock(BackupRepositoryInterface::class);
+        $repo->method('restoreFromHandle')
+            ->willReturn('Error: Restore is not supported in multi-user mode (3 users found).');
+
+        $useCase = new RestoreFromUpload($repo);
+        $result = $useCase->execute([
+            'name' => 'backup.sql.gz',
+            'type' => 'application/gzip',
+            'tmp_name' => $tmpFile,
+            'error' => 0,
+            'size' => filesize($tmpFile),
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('not supported in multi-user mode', $result['error']);
 
         @unlink($tmpFile);
         Globals::setBackupRestoreEnabled(null);

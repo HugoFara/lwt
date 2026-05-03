@@ -66,7 +66,15 @@ class RestoreFromUpload
             return ['success' => false, 'error' => "Restore file could not be opened"];
         }
 
-        $this->repository->restoreFromHandle($handle, "Database");
+        $message = $this->repository->restoreFromHandle($handle, "Database");
+        // Restore::restoreFile reports outcome via a prose string. Treat
+        // any "Error:" prefix as failure so the controller surfaces it
+        // to the admin instead of claiming a successful restore — the
+        // multi-user safety guard relies on this to refuse a wipe of
+        // every account.
+        if (str_starts_with($message, 'Error:')) {
+            return ['success' => false, 'error' => $message];
+        }
         return ['success' => true, 'error' => null];
     }
 }
