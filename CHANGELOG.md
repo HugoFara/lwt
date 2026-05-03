@@ -18,6 +18,22 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Term-tag and text-tag list pages leaked every other user's tags**:
+  `MySqlTermTagRepository::paginate`/`count`/`deleteAll` and the
+  matching three methods on `MySqlTextTagRepository` built raw
+  `SELECT … FROM tags WHERE (1=1) …` / `… FROM text_tags WHERE
+  (1=1) …` SQL with no `WHERE TgUsID = ?` / `WHERE T2UsID = ?`
+  filter. The list-with-empty-query path ALWAYS used the unscoped
+  raw SQL (the empty-query QueryBuilder fast path only covered
+  `count('')`), so every visit to `/tags` and `/tags/text`
+  rendered every user's tags side by side, and a bulk-delete-all
+  with a search filter would have wiped every user's matching
+  tags. Append `UserScopedQuery::forTablePrepared(self::TABLE_NAME, …)`
+  to all six paths so the listing, count and bulk-delete only
+  ever see / touch the caller's rows. Confirmed end-to-end against
+  a 2-user install before the fix (intruder saw operator's
+  `operator-only` and `py-thon` tags) and after (intruder sees
+  only their own `intruder-only` and `py-pi`).
 * **Admin "Backup the database" exposed every user's data, not just
   the caller's**: `MySqlBackupRepository::generateBackupSql` and
   `generateOfficialBackupSql` ran `SELECT * FROM languages/texts/

@@ -22,6 +22,7 @@ namespace Lwt\Modules\Tags\Infrastructure;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Tags\Domain\Tag;
 use Lwt\Modules\Tags\Domain\TagRepositoryInterface;
 use Lwt\Modules\Tags\Domain\TagType;
@@ -182,9 +183,13 @@ class MySqlTermTagRepository implements TagRepositoryInterface
             $affected = $this->query()->deletePrepared();
         } else {
             $whereData = $this->buildWhereClause($query);
+            /** @var array<int, mixed> $bindings */
+            $bindings = $whereData['params'];
+            $userScope = UserScopedQuery::forTablePrepared(self::TABLE_NAME, $bindings);
             $affected = Connection::preparedExecute(
-                'DELETE FROM ' . self::TABLE_NAME . ' WHERE (1=1) ' . $whereData['clause'],
-                $whereData['params']
+                'DELETE FROM ' . self::TABLE_NAME . ' WHERE (1=1) '
+                    . $whereData['clause'] . $userScope,
+                $bindings
             );
         }
 
@@ -250,13 +255,18 @@ class MySqlTermTagRepository implements TagRepositoryInterface
         // Get total count
         $totalCount = $this->count($query);
 
-        // Get paginated rows
+        // Get paginated rows. The base WHERE (1=1) anchor lets us safely
+        // append both the optional search clause and the user-scope clause
+        // without worrying about whether either is empty.
+        /** @var array<int, mixed> $bindings */
+        $bindings = $whereData['params'];
+        $userScope = UserScopedQuery::forTablePrepared(self::TABLE_NAME, $bindings);
         $sql = 'SELECT TgID, TgText, TgComment FROM ' . self::TABLE_NAME .
-               ' WHERE (1=1) ' . $whereData['clause'] .
+               ' WHERE (1=1) ' . $whereData['clause'] . $userScope .
                ' ORDER BY ' . $column .
                ' LIMIT ' . $offset . ',' . $perPage;
 
-        $rows = Connection::preparedFetchAll($sql, $whereData['params']);
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $tags = [];
         $usageCounts = [];
@@ -284,10 +294,13 @@ class MySqlTermTagRepository implements TagRepositoryInterface
         }
 
         $whereData = $this->buildWhereClause($query);
+        /** @var array<int, mixed> $bindings */
+        $bindings = $whereData['params'];
+        $userScope = UserScopedQuery::forTablePrepared(self::TABLE_NAME, $bindings);
         return (int) Connection::preparedFetchValue(
             'SELECT COUNT(TgID) AS cnt FROM ' . self::TABLE_NAME .
-            ' WHERE (1=1) ' . $whereData['clause'],
-            $whereData['params'],
+            ' WHERE (1=1) ' . $whereData['clause'] . $userScope,
+            $bindings,
             'cnt'
         );
     }
