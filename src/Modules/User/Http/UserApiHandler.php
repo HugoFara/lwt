@@ -32,11 +32,11 @@ use Lwt\Api\V1\Response;
  * Handles authentication endpoints via REST API.
  *
  * Provides endpoints for:
- * - POST /api/v1/user/login - Authenticate and get token
- * - POST /api/v1/user/register - Create account and get token
- * - POST /api/v1/user/refresh - Refresh API token
- * - POST /api/v1/user/logout - Invalidate token
- * - GET /api/v1/user/me - Get current user info
+ * - POST /api/v1/auth/login - Authenticate and get token
+ * - POST /api/v1/auth/register - Create account and get token
+ * - POST /api/v1/auth/refresh - Refresh API token
+ * - POST /api/v1/auth/logout - Invalidate token
+ * - GET /api/v1/auth/me - Get current user info
  *
  * @since 3.0.0
  */

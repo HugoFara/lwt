@@ -18,6 +18,22 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Successful registration silently bounced to /login with no
+  feedback**: `UserController::register` called
+  `UserFacade::setCurrentUser($user)` for an "auto-login", but that
+  method only updates the in-process `Globals` — it never writes
+  `$_SESSION`. The auth middleware therefore re-redirected to /login
+  on the very next request, dropping the FlashMessageService success
+  flash on the floor (the login view doesn't read it). Land the
+  user on /login deliberately, prefill the username, and surface
+  the success notice via `$_SESSION['auth_success']` (already
+  rendered by the login view for the password-reset flow).
+* **`UserApiHandler` docblock advertised `/api/v1/user/...`
+  endpoints that don't exist**: the handler is registered under
+  `auth`, not `user`, so every advertised path was a 404. Fix the
+  docblock to say `/api/v1/auth/login`, `/api/v1/auth/register`,
+  `/api/v1/auth/refresh`, `/api/v1/auth/logout`, and
+  `/api/v1/auth/me` — matching the registered routes.
 * **Production debug page leaked stack traces, file paths, and SQL on
   multi-user installs**: `Application::isDebugMode()` defaulted to *on*
   in single-user mode and *off* in multi-user, but it was called

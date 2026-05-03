@@ -237,14 +237,14 @@ class UserController extends BaseController
             // Send verification email (non-blocking)
             $this->userFacade->sendVerificationEmail($user);
 
-            // Auto-login after registration
-            $this->userFacade->setCurrentUser($user);
-
-            // Clear stored form data
-            $this->formData->clearUsername();
+            // Note: setCurrentUser() only updates the in-process Globals; it
+            // does NOT persist a session, so the next request would still see
+            // an unauthenticated user and the auth middleware would bounce
+            // them back to /login anyway. Surface the outcome by sending the
+            // user straight to /login with a success message and prefilled
+            // username — the login view renders $_SESSION['auth_success'].
             $this->formData->clearEmail();
 
-            // Redirect to home with success message
             $message = __('user.flash.register_success');
             if ($user->isAdmin()) {
                 $message .= ' ' . __('user.flash.register_admin_granted');
@@ -252,8 +252,11 @@ class UserController extends BaseController
             if (!$user->isEmailVerified()) {
                 $message .= ' ' . __('user.flash.register_verify_email');
             }
-            $this->flash->success($message);
-            return $this->redirect('/');
+            if (session_status() === PHP_SESSION_NONE) {
+                @session_start();
+            }
+            $_SESSION['auth_success'] = $message;
+            return $this->redirect('/login');
         } catch (\InvalidArgumentException $e) {
             $this->flash->error($e->getMessage());
             return $this->redirect('/register');

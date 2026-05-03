@@ -250,6 +250,7 @@ class UserControllerTest extends TestCase
         $_POST['email'] = 'new@example.com';
         $_POST['password'] = 'password123';
         $_POST['password_confirm'] = 'password123';
+        unset($_SESSION['auth_success']);
 
         $user = $this->createMockUser(1, 'newuser', 'new@example.com');
         $user->method('isAdmin')->willReturn(false);
@@ -264,14 +265,17 @@ class UserControllerTest extends TestCase
             ->method('sendVerificationEmail')
             ->with($user);
 
-        $this->facade->expects($this->once())
-            ->method('setCurrentUser')
-            ->with($user);
-
-        $this->formData->expects($this->once())->method('clearUsername');
+        // The post-registration redirect goes to /login; the username is kept
+        // pre-filled so the user only retypes their password. setCurrentUser
+        // is intentionally NOT called because it would only update Globals
+        // for the current request without actually persisting a session.
+        $this->facade->expects($this->never())->method('setCurrentUser');
+        $this->formData->expects($this->never())->method('clearUsername');
         $this->formData->expects($this->once())->method('clearEmail');
 
         $this->controller->register();
+
+        $this->assertArrayHasKey('auth_success', $_SESSION);
     }
 
     public function testRegisterShowsAdminMessageForFirstUser(): void
@@ -281,6 +285,7 @@ class UserControllerTest extends TestCase
         $_POST['email'] = 'admin@example.com';
         $_POST['password'] = 'password123';
         $_POST['password_confirm'] = 'password123';
+        unset($_SESSION['auth_success']);
 
         $user = $this->createMockUser(1, 'admin', 'admin@example.com');
         $user->method('isAdmin')->willReturn(true);
@@ -288,11 +293,10 @@ class UserControllerTest extends TestCase
 
         $this->facade->method('register')->willReturn($user);
 
-        $this->flash->expects($this->once())
-            ->method('success')
-            ->with($this->stringContains('admin privileges'));
-
         $this->controller->register();
+
+        $this->assertArrayHasKey('auth_success', $_SESSION);
+        $this->assertStringContainsString('admin privileges', (string) $_SESSION['auth_success']);
     }
 
     public function testRegisterShowsVerificationMessageForUnverifiedEmail(): void
@@ -302,6 +306,7 @@ class UserControllerTest extends TestCase
         $_POST['email'] = 'new@example.com';
         $_POST['password'] = 'password123';
         $_POST['password_confirm'] = 'password123';
+        unset($_SESSION['auth_success']);
 
         $user = $this->createMockUser(1, 'newuser', 'new@example.com');
         $user->method('isAdmin')->willReturn(false);
@@ -309,11 +314,10 @@ class UserControllerTest extends TestCase
 
         $this->facade->method('register')->willReturn($user);
 
-        $this->flash->expects($this->once())
-            ->method('success')
-            ->with($this->stringContains('verify your account'));
-
         $this->controller->register();
+
+        $this->assertArrayHasKey('auth_success', $_SESSION);
+        $this->assertStringContainsString('verify your account', (string) $_SESSION['auth_success']);
     }
 
     public function testRegisterHandlesInvalidArgumentException(): void
