@@ -162,7 +162,15 @@ class CompleteImportService
         string $fileName,
         bool $ignoreFirst
     ): void {
-        $sql = "LOAD DATA LOCAL INFILE ?
+        // MariaDB / MySQL do not accept `?` placeholders for the filename
+        // in LOAD DATA INFILE — the filename is parsed at execution time,
+        // not at prepare. Inline the path with proper escaping. The path
+        // is server-controlled (either the PHP-generated `tmp_name` of an
+        // upload, or the `createTempFile()` output for pasted text), so
+        // there is no user input in this string.
+        $escapedFileName = Connection::escape($fileName);
+
+        $sql = "LOAD DATA LOCAL INFILE '$escapedFileName'
             INTO TABLE temp_words
             FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
             ($ignoreFirst ? "IGNORE 1 LINES " : "") .
@@ -175,9 +183,7 @@ class CompleteImportService
             $sql .= ', WoTaglist = REPLACE(@taglist, " ", ",")';
         }
 
-        $stmt = Connection::prepare($sql);
-        $stmt->bind('s', $fileName);
-        $stmt->execute();
+        Connection::execute($sql);
     }
 
     /**
@@ -483,13 +489,20 @@ class CompleteImportService
     private function executeMainImportQuery(int $langId, array $fields, int $status, int $overwrite): void
     {
         if ($overwrite != 3 && $overwrite != 5) {
+            // Stamp WoUsID on every imported row. Without this, multi-user
+            // installs silently lost imports: rows landed with WoUsID NULL
+            // and then never showed up in the caller's vocab list (the
+            // QueryBuilder filter `WoUsID = currentUserId` excluded them).
+            $userScopeCol = UserScopedQuery::insertColumn('words');
+            $userScopeVal = UserScopedQuery::insertValue('words');
+
             $sql = "INSERT " . ($overwrite != 0 ? '' : 'IGNORE ') .
                 " INTO words (
                     WoTextLC, WoText, WoTranslation, WoRomanization, WoSentence,
-                    WoStatus, WoStatusChanged, WoLgID,
+                    WoStatus, WoStatusChanged, WoLgID{$userScopeCol},
                     " . TermStatusService::makeScoreRandomInsertUpdate('iv') . "
                 )
-                SELECT *, $langId as LgID, " . TermStatusService::makeScoreRandomInsertUpdate('id') . "
+                SELECT *, $langId as LgID{$userScopeVal}, " . TermStatusService::makeScoreRandomInsertUpdate('id') . "
                 FROM (
                     SELECT WoTextLC, WoText, WoTranslation, WoRomanization,
                     WoSentence, $status AS WoStatus,
@@ -526,35 +539,43 @@ class CompleteImportService
                         ELSE words.WoStatusChanged
                     END";
             }
-        } else {
-            // Overwrite modes 3 and 5: only update existing, don't insert new
-            $bindings = [];
-            $sql = "UPDATE words AS a
-                JOIN temp_words AS b
-                ON a.WoTextLC = b.WoTextLC SET
-                a.WoTranslation = CASE
-                    WHEN b.WoTranslation = '' OR b.WoTranslation = '*' THEN a.WoTranslation
-                    ELSE b.WoTranslation
-                END,
-                a.WoRomanization = CASE
-                    WHEN b.WoRomanization IS NULL OR b.WoRomanization = '' THEN a.WoRomanization
-                    ELSE b.WoRomanization
-                END,
-                a.WoSentence = CASE
-                    WHEN b.WoSentence IS NULL OR b.WoSentence = '' THEN a.WoSentence
-                    ELSE b.WoSentence
-                END,
-                a.WoStatusChanged = CASE
-                    WHEN (b.WoTranslation = '' OR b.WoTranslation = '*')
-                        AND (b.WoRomanization IS NULL OR b.WoRomanization = '')
-                        AND (b.WoSentence IS NULL OR b.WoSentence = '')
-                    THEN a.WoStatusChanged
-                    ELSE NOW()
-                END"
-                . UserScopedQuery::forTablePrepared('words', $bindings, 'a');
+
+            Connection::execute($sql);
+            return;
         }
 
-        Connection::execute($sql);
+        // Overwrite modes 3 and 5: only update existing, don't insert new.
+        // forTablePrepared appends ` AND a.WoUsID = ?` and pushes the
+        // current user id into $bindings; switching the call from
+        // `Connection::execute` to `preparedExecute` is what binds it.
+        // Pre-fix the `?` was unbound and the statement either failed
+        // outright or (in single-user mode) silently ran without scope.
+        $bindings = [];
+        $sql = "UPDATE words AS a
+            JOIN temp_words AS b
+            ON a.WoTextLC = b.WoTextLC SET
+            a.WoTranslation = CASE
+                WHEN b.WoTranslation = '' OR b.WoTranslation = '*' THEN a.WoTranslation
+                ELSE b.WoTranslation
+            END,
+            a.WoRomanization = CASE
+                WHEN b.WoRomanization IS NULL OR b.WoRomanization = '' THEN a.WoRomanization
+                ELSE b.WoRomanization
+            END,
+            a.WoSentence = CASE
+                WHEN b.WoSentence IS NULL OR b.WoSentence = '' THEN a.WoSentence
+                ELSE b.WoSentence
+            END,
+            a.WoStatusChanged = CASE
+                WHEN (b.WoTranslation = '' OR b.WoTranslation = '*')
+                    AND (b.WoRomanization IS NULL OR b.WoRomanization = '')
+                    AND (b.WoSentence IS NULL OR b.WoSentence = '')
+                THEN a.WoStatusChanged
+                ELSE NOW()
+            END"
+            . UserScopedQuery::forTablePrepared('words', $bindings, 'a');
+
+        Connection::preparedExecute($sql, $bindings);
     }
 
     /**
@@ -566,10 +587,17 @@ class CompleteImportService
      */
     private function handleTagsImport(int $langId): void
     {
-        // Insert new tags
+        // Insert new tags. Stamp TgUsID so the new rows belong to the
+        // caller — pre-fix they landed with TgUsID NULL and were
+        // invisible to every user (and to the per-user composite
+        // unique on (TgUsID, TgText) introduced in
+        // 20260503_120000_per_user_name_uniques.sql, NULL is treated
+        // as distinct, so duplicates accumulated silently).
+        $tagInsertCol = UserScopedQuery::insertColumn('tags');
+        $tagInsertVal = UserScopedQuery::insertValue('tags');
         Connection::execute(
-            "INSERT IGNORE INTO tags (TgText)
-            SELECT name FROM (
+            "INSERT IGNORE INTO tags (TgText{$tagInsertCol})
+            SELECT name{$tagInsertVal} FROM (
                 SELECT temp_words.WoTextLC,
                 SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
@@ -582,8 +610,15 @@ class CompleteImportService
                 ORDER BY WoTextLC, n) A"
         );
 
-        // Link words to tags
+        // Link words to tags. Scope BOTH `words` and `tags` to the
+        // caller — without the tags filter the join `name = TgText`
+        // could match a foreign user's tag with the same text and
+        // attach it to the caller's words, polluting the foreign
+        // user's tag-to-word membership (the same shape as F13's
+        // getOrCreateTermTag fix).
         $bindings = [$langId];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings)
+            . UserScopedQuery::forTablePrepared('tags', $bindings);
         $sql = "INSERT IGNORE INTO word_tag_map
             SELECT WoID, TgID
             FROM (
@@ -597,9 +632,9 @@ class CompleteImportService
                 ORDER BY WoTextLC, n
             ) A, tags, words
             WHERE name=TgText AND A.WoTextLC=words.WoTextLC AND WoLgID=?"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+            . $userScope;
 
-        Connection::preparedExecute($sql, [$langId]);
+        Connection::preparedExecute($sql, $bindings);
 
         TagsFacade::getAllTermTags(true);
     }
@@ -637,15 +672,17 @@ class CompleteImportService
         $delimiter = ' ' . $this->utilities->getSqlDelimiter($tabType);
 
         if ($this->utilities->isLocalInfileEnabled()) {
-            $sql = "LOAD DATA LOCAL INFILE ?
+            // See loadDataToTempTable() — `?` is not accepted for LOAD
+            // DATA's filename, inline with proper escaping. The path is
+            // server-controlled.
+            $escapedFileName = Connection::escape($fileName);
+            $sql = "LOAD DATA LOCAL INFILE '$escapedFileName'
                 IGNORE INTO TABLE temp_words
                 FIELDS TERMINATED BY '$delimiter' ENCLOSED BY '\"' LINES TERMINATED BY '\\n' " .
                 ($ignoreFirst ? "IGNORE 1 LINES " : "") .
                 "$columns
                 SET WoTextLC = REPLACE(@taglist, ' ', ',')";
-            $stmt = Connection::prepare($sql);
-            $stmt->bind('s', $fileName);
-            $stmt->execute();
+            Connection::execute($sql);
         } else {
             $handle = fopen($fileName, 'r');
             if ($handle === false) {
@@ -708,8 +745,14 @@ class CompleteImportService
         Connection::execute("INSERT IGNORE INTO numbers(n) VALUES ('1'),('2'),('3'),
             ('4'),('5'),('6'),('7'),('8'),('9')");
 
-        Connection::execute("INSERT IGNORE INTO tags (TgText)
-            SELECT NAME FROM (
+        // Stamp TgUsID so the imported tags are owned by the caller —
+        // see handleTagsImport() for context. Without this the rows
+        // land with TgUsID NULL and never appear on the user's tag
+        // page.
+        $tagInsertCol = UserScopedQuery::insertColumn('tags');
+        $tagInsertVal = UserScopedQuery::insertValue('tags');
+        Connection::execute("INSERT IGNORE INTO tags (TgText{$tagInsertCol})
+            SELECT NAME{$tagInsertVal} FROM (
                 SELECT SUBSTRING_INDEX(
                     SUBSTRING_INDEX(
                         temp_words.WoTextLC, ',', numbers.n

@@ -18,6 +18,68 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Term import was broken on every supported MariaDB and silently
+  dropped imported rows in multi-user mode** (the "complete" import
+  path that handles tags / overwrite modes / pasted text). Three
+  bugs landed in one place:
+
+  (1) `LOAD DATA LOCAL INFILE ?` is rejected by MariaDB — the
+  filename is parsed at execute time, not at prepare, so the `?`
+  placeholder is never substituted. Every server with both
+  `local_infile` enabled in MySQL and `mysqli.allow_local_infile`
+  enabled in PHP hit `Failed to prepare statement: …syntax error
+  near '?'…`. Inline the filename with `Connection::escape()` —
+  the path is server-controlled (PHP's `tmp_name` for uploads or
+  `WordUploadService::createTempFile()` for pasted text).
+
+  (2) `executeMainImportQuery`'s INSERT branch built an
+  `INSERT INTO words (… WoLgID …) SELECT *, $langId AS LgID, …
+  FROM temp_words` with no `WoUsID` column or value. In
+  multi-user mode that meant every imported row landed with
+  `WoUsID = NULL` and was filtered out by the QueryBuilder's
+  `WoUsID = currentUserId` clause everywhere the user later
+  looked. Wire `UserScopedQuery::insertColumn('words')` into the
+  column list and `UserScopedQuery::insertValue('words')` into
+  the SELECT projection.
+
+  (3) The same method's UPDATE branch (overwrite modes 3 and 5)
+  appended `UserScopedQuery::forTablePrepared('words', $bindings,
+  'a')` to its SQL — that helper pushes the user id into
+  `$bindings` and adds a `?` to the query — and then called
+  `Connection::execute($sql)` with no bindings. The `?` was
+  unbound and the statement either errored or, in single-user
+  mode, ran without the scope filter (latent — the helper returns
+  empty there). Switch to `Connection::preparedExecute($sql,
+  $bindings)`.
+
+  (4) `handleTagsImport` had two related issues. The
+  `INSERT IGNORE INTO tags (TgText) SELECT name …` had no `TgUsID`
+  column, so the new tags landed with NULL owner and never
+  appeared on the user's tag page. And the `INSERT IGNORE INTO
+  word_tag_map SELECT WoID, TgID …` joined `tags` without a
+  user filter, so a foreign user's tag with the same text could
+  be reused (writing `(my_WoID, foreign_TgID)` rows into
+  `word_tag_map` and polluting the foreign user's
+  tag-to-word membership — same shape as F13). Stamp `TgUsID`
+  on the tags INSERT, scope BOTH `words` and `tags` in the
+  word-tag-map join, and pass the merged `$bindings` to
+  `preparedExecute` (pre-fix the call ignored the helper-pushed
+  bindings and re-passed `[$langId]`, leaving the user-scope
+  `?` unbound). `importTagsOnly` (the tags-only LOAD-DATA path)
+  gets the same `TgUsID` stamp.
+
+  Verified end-to-end against a 2-user database with
+  `local_infile = ON` and the broken LOAD DATA path active:
+  pre-fix, intruder pasting `foo\tbar\timported\nhello\tworld\t
+  imported\ntestterm\texample\timported` and clicking Import got
+  a 500 from the `LOAD DATA …INFILE ?` syntax error and zero
+  rows landed; post-fix the same payload returns
+  `¡Importación correcta!`, three rows appear with
+  `WoUsID = 2`, the `imported` tag is created with `TgUsID = 2`
+  (operator's matching tag at `TgUsID = 1` is untouched), and
+  three `word_tag_map` rows link the intruder's words to the
+  intruder's tag. Operator's 207 words are unchanged.
+
 * **Books module ignored multi-user scoping**: the `books` table was
   the only feature module not registered in `USER_SCOPED_TABLES`, so
   `MySqlBookRepository`'s `findById`, `delete`, `updateChapterCount`,
