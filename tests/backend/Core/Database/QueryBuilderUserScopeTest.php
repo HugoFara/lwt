@@ -229,6 +229,18 @@ class QueryBuilderUserScopeTest extends TestCase
         $this->assertEquals('StUsID', UserScopedQuery::getUserIdColumn('settings'));
     }
 
+    public function testUserScopeAppliedToBooksTable(): void
+    {
+        $this->assertTrue(UserScopedQuery::isUserScopedTable('books'));
+        $this->assertEquals('BkUsID', UserScopedQuery::getUserIdColumn('books'));
+    }
+
+    public function testUserScopeAppliedToLocalDictionariesTable(): void
+    {
+        $this->assertTrue(UserScopedQuery::isUserScopedTable('local_dictionaries'));
+        $this->assertEquals('LdUsID', UserScopedQuery::getUserIdColumn('local_dictionaries'));
+    }
+
     // =========================================================================
     // UserScopedQuery helper tests
     // =========================================================================

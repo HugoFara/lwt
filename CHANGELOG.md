@@ -18,6 +18,51 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Books module ignored multi-user scoping**: the `books` table was
+  the only feature module not registered in `USER_SCOPED_TABLES`, so
+  `MySqlBookRepository`'s `findById`, `delete`, `updateChapterCount`,
+  `updateCurrentChapter`, `findBySourceHash`, `existsBySourceHash`
+  and `getBookContextForText` ran without a `BkUsID` filter — and
+  `findAll` / `count` only filtered when the caller remembered to
+  pass `$userId`. Concrete impact: `GET /api/v1/books/{id}`
+  returned any user's book details (title, author, chapter count),
+  and the chapter dropdown rendered on a foreign text via
+  `getBookContextForText` would happily display the foreign book's
+  metadata. Add `'books' => 'BkUsID'` to both
+  `QueryBuilder::USER_SCOPED_TABLES` and
+  `UserScopedQuery::USER_SCOPED_TABLES` so every `query()` call
+  through the books repository auto-injects the current-user filter
+  on SELECT/UPDATE/DELETE and stamps `BkUsID` on INSERT. Verified
+  end-to-end against a 2-user database — intruder hitting
+  `/api/v1/books/4` (operator's book) gets `Book not found`
+  instead of the title; intruder's `/api/v1/books` list shows
+  zero results while operator's row count is unchanged.
+
+* **`sentences-with-term` API leaked another user's sentences**:
+  `SentenceService::findSentencesFromWord` queried
+  `FROM sentences, word_occurrences WHERE … AND SeLgID = ?` with
+  no parent-row filter — `sentences` carries no `UsID` column, so
+  any logged-in user calling `GET /api/v1/sentences-with-term?
+  language_id={operator_lang}&term_lc=…` (or the same endpoint
+  pinned to a foreign WoID via the path segment, e.g.
+  `/sentences-with-term/{operator_word_id}`) received the
+  operator's sentence text directly. `formatSentence` had the
+  same shape: it joined `word_occurrences` and `languages` to
+  fetch the rendered sentence content for any SeID, with no
+  ownership gate. Add a private `parentTextUserScope()` helper
+  that produces ` AND SeTxID IN (SELECT TxID FROM texts WHERE
+  TxUsID = ?)`, applied to both raw-SQL branches of
+  `findSentencesFromWord`. Add a private `ownsSentence()` guard
+  at the top of `formatSentence` that short-circuits with the
+  empty-sentence fallback when the SeID's parent text isn't
+  owned by the caller — defense in depth, since `find*` now
+  filters the SeIDs it returns but `formatSentence` is reachable
+  from other paths too. Verified end-to-end: pre-fix, intruder
+  hitting `/api/v1/sentences-with-term/2?language_id=1&term_lc=
+  bonjour` got `[["<b>Bonjour</b>.","{Bonjour}."], ["<b>Bonjour
+  </b> Manon.","{Bonjour} Manon."]]`; post-fix the same request
+  returns `[]`.
+
 * **Vocabulary bulk-action endpoints overwrote and deleted any user's
   words**: `PUT /api/v1/terms/bulk-action` (and `terms/family/apply`)
   routed straight into `WordListService::deleteByIdList` /

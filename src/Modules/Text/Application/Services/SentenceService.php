@@ -25,6 +25,7 @@ use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Modules\Language\Application\Services\TextParsingService;
 
@@ -50,6 +51,64 @@ class SentenceService
     public function __construct(?TextParsingService $textParsingService = null)
     {
         $this->textParsingService = $textParsingService ?? new TextParsingService();
+    }
+
+    /**
+     * Build a parent-row user-scope clause for queries that touch the
+     * `sentences` table. The `sentences` table has no UsID column of its
+     * own — ownership is derived from the parent `texts` row via SeTxID.
+     *
+     * Returns an SQL fragment like
+     * ` AND SeTxID IN (SELECT TxID FROM texts WHERE TxUsID = ?)` and
+     * pushes the current user ID onto $bindings, or an empty string
+     * when multi-user mode is off / no user is authenticated. Without
+     * this gate, raw `FROM sentences …` queries leak rows from every
+     * user's texts as long as the language ID matches.
+     *
+     * @param array<int, mixed> $bindings Reference to bindings array
+     *
+     * @return string SQL fragment (with leading space) or empty string
+     */
+    private function parentTextUserScope(array &$bindings): string
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return '';
+        }
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return '';
+        }
+        $bindings[] = $userId;
+        return ' AND SeTxID IN (SELECT TxID FROM texts WHERE TxUsID = ?)';
+    }
+
+    /**
+     * Check whether the parent text of a sentence is owned by the
+     * current user. In single-user mode this is always true. Used as
+     * a guard before {@see formatSentence} runs its content-fetching
+     * SQL — that SQL joins `word_occurrences` and `languages` with no
+     * UsID column to filter on, so an arbitrary SeID would otherwise
+     * return another user's sentence text.
+     */
+    private function ownsSentence(int $seid): bool
+    {
+        if (!Globals::isMultiUserEnabled()) {
+            return true;
+        }
+        $userId = Globals::getCurrentUserId();
+        if ($userId === null) {
+            return true;
+        }
+        /** @var int|string|null $hit */
+        $hit = Connection::preparedFetchValue(
+            "SELECT 1 AS owned
+             FROM sentences, texts
+             WHERE SeID = ? AND SeTxID = TxID AND TxUsID = ?
+             LIMIT 1",
+            [$seid, $userId],
+            'owned'
+        );
+        return $hit !== null;
     }
 
     /**
@@ -155,21 +214,23 @@ class SentenceService
     public function findSentencesFromWord(?int $wid, string $wordlc, int $lid, int $limit = -1): array
     {
         if ($wid === null) {
+            $params = [$wordlc, $lid];
+            $userScope = $this->parentTextUserScope($params);
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM sentences, word_occurrences
                 WHERE LOWER(Ti2Text) = ?
-                AND Ti2WoID IS NULL AND SeID = Ti2SeID AND SeLgID = ?
+                AND Ti2WoID IS NULL AND SeID = Ti2SeID AND SeLgID = ?{$userScope}
                 ORDER BY CHAR_LENGTH(SeText), SeText";
-            $params = [$wordlc, $lid];
         } elseif ($wid == -1) {
             // For complex search, build the query dynamically
             return $this->executeSentencesContainingWordQuery($wordlc, $lid, $limit);
         } else {
+            $params = [$wid, $lid];
+            $userScope = $this->parentTextUserScope($params);
             $sql = "SELECT DISTINCT SeID, SeText
                 FROM sentences, word_occurrences
-                WHERE Ti2WoID = ? AND SeID = Ti2SeID AND SeLgID = ?
+                WHERE Ti2WoID = ? AND SeID = Ti2SeID AND SeLgID = ?{$userScope}
                 ORDER BY CHAR_LENGTH(SeText), SeText";
-            $params = [$wid, $lid];
         }
         if ($limit > 0) {
             $sql .= " LIMIT ?";
@@ -194,6 +255,16 @@ class SentenceService
      */
     public function formatSentence(int $seid, string $wordlc, int $mode): array
     {
+        // Verify the caller owns the parent text before pulling sentence
+        // content. The main query below joins word_occurrences and
+        // languages without a UsID column on either, so without this
+        // gate a foreign SeID returns the foreign user's sentence text
+        // verbatim. Defense in depth — find* paths now scope the SeIDs
+        // they return, but formatSentence is also reachable directly.
+        if (!$this->ownsSentence($seid)) {
+            return [$mode > 1 ? '' : $wordlc, $wordlc];
+        }
+
         $record = Connection::preparedFetchOne(
             "SELECT
             CONCAT(
