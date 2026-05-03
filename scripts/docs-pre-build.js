@@ -84,6 +84,16 @@ for (const { src, dest, frontmatter } of filesToCopy) {
       return `&#123;&#123;${inner}&#125;&#125;`
     })
 
+    // Rewrite repo-root-relative links into docs-src/* so they resolve
+    // inside VitePress. CHANGELOG.md uses paths like
+    // `docs-src/guide/foo.md` which work on GitHub (where CHANGELOG sits
+    // at the repo root) but become `docs-src/docs-src/...` when the file
+    // is copied into docs-src/. Strip the prefix for the copied form.
+    content = content.replace(
+      /\]\(docs-src\/([^)]+)\)/g,
+      (_match, target) => `](./${target})`
+    )
+
     // Write to destination
     writeFileSync(destPath, content, 'utf-8')
     console.log(`✓ Copied ${src} -> docs-src/${dest}`)

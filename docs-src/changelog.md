@@ -10,6 +10,470 @@ other versions come from the canonical LWT ("official" branch on Git).
 For git tags, official releases are marked like "v1.0.0", while unofficial
 ones are marked like "v1.0.0-fork".
 
+## [Unreleased]
+
+### Added
+
+* **StarDict dictionary uploads via archives** (#233): the import form now
+  accepts `.zip`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.tgz` containing
+  the StarDict triplet (`.ifo` + `.idx` + `.dict`/`.dict.dz`). FreeDict
+  downloads import directly. Extraction is shared with the curated-import
+  flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
+  guard, automatic cleanup).
+
+### Fixed
+
+* **Term import was broken on every supported MariaDB and silently
+  dropped imported rows in multi-user mode** (the "complete" import
+  path that handles tags / overwrite modes / pasted text). Three
+  bugs landed in one place:
+
+  (1) `LOAD DATA LOCAL INFILE ?` is rejected by MariaDB — the
+  filename is parsed at execute time, not at prepare, so the `?`
+  placeholder is never substituted. Every server with both
+  `local_infile` enabled in MySQL and `mysqli.allow_local_infile`
+  enabled in PHP hit `Failed to prepare statement: …syntax error
+  near '?'…`. Inline the filename with `Connection::escape()` —
+  the path is server-controlled (PHP's `tmp_name` for uploads or
+  `WordUploadService::createTempFile()` for pasted text).
+
+  (2) `executeMainImportQuery`'s INSERT branch built an
+  `INSERT INTO words (… WoLgID …) SELECT *, $langId AS LgID, …
+  FROM temp_words` with no `WoUsID` column or value. In
+  multi-user mode that meant every imported row landed with
+  `WoUsID = NULL` and was filtered out by the QueryBuilder's
+  `WoUsID = currentUserId` clause everywhere the user later
+  looked. Wire `UserScopedQuery::insertColumn('words')` into the
+  column list and `UserScopedQuery::insertValue('words')` into
+  the SELECT projection.
+
+  (3) The same method's UPDATE branch (overwrite modes 3 and 5)
+  appended `UserScopedQuery::forTablePrepared('words', $bindings,
+  'a')` to its SQL — that helper pushes the user id into
+  `$bindings` and adds a `?` to the query — and then called
+  `Connection::execute($sql)` with no bindings. The `?` was
+  unbound and the statement either errored or, in single-user
+  mode, ran without the scope filter (latent — the helper returns
+  empty there). Switch to `Connection::preparedExecute($sql,
+  $bindings)`.
+
+  (4) `handleTagsImport` had two related issues. The
+  `INSERT IGNORE INTO tags (TgText) SELECT name …` had no `TgUsID`
+  column, so the new tags landed with NULL owner and never
+  appeared on the user's tag page. And the `INSERT IGNORE INTO
+  word_tag_map SELECT WoID, TgID …` joined `tags` without a
+  user filter, so a foreign user's tag with the same text could
+  be reused (writing `(my_WoID, foreign_TgID)` rows into
+  `word_tag_map` and polluting the foreign user's
+  tag-to-word membership — same shape as F13). Stamp `TgUsID`
+  on the tags INSERT, scope BOTH `words` and `tags` in the
+  word-tag-map join, and pass the merged `$bindings` to
+  `preparedExecute` (pre-fix the call ignored the helper-pushed
+  bindings and re-passed `[$langId]`, leaving the user-scope
+  `?` unbound). `importTagsOnly` (the tags-only LOAD-DATA path)
+  gets the same `TgUsID` stamp.
+
+  Verified end-to-end against a 2-user database with
+  `local_infile = ON` and the broken LOAD DATA path active:
+  pre-fix, intruder pasting `foo\tbar\timported\nhello\tworld\t
+  imported\ntestterm\texample\timported` and clicking Import got
+  a 500 from the `LOAD DATA …INFILE ?` syntax error and zero
+  rows landed; post-fix the same payload returns
+  `¡Importación correcta!`, three rows appear with
+  `WoUsID = 2`, the `imported` tag is created with `TgUsID = 2`
+  (operator's matching tag at `TgUsID = 1` is untouched), and
+  three `word_tag_map` rows link the intruder's words to the
+  intruder's tag. Operator's 207 words are unchanged.
+
+* **Books module ignored multi-user scoping**: the `books` table was
+  the only feature module not registered in `USER_SCOPED_TABLES`, so
+  `MySqlBookRepository`'s `findById`, `delete`, `updateChapterCount`,
+  `updateCurrentChapter`, `findBySourceHash`, `existsBySourceHash`
+  and `getBookContextForText` ran without a `BkUsID` filter — and
+  `findAll` / `count` only filtered when the caller remembered to
+  pass `$userId`. Concrete impact: `GET /api/v1/books/{id}`
+  returned any user's book details (title, author, chapter count),
+  and the chapter dropdown rendered on a foreign text via
+  `getBookContextForText` would happily display the foreign book's
+  metadata. Add `'books' => 'BkUsID'` to both
+  `QueryBuilder::USER_SCOPED_TABLES` and
+  `UserScopedQuery::USER_SCOPED_TABLES` so every `query()` call
+  through the books repository auto-injects the current-user filter
+  on SELECT/UPDATE/DELETE and stamps `BkUsID` on INSERT. Verified
+  end-to-end against a 2-user database — intruder hitting
+  `/api/v1/books/4` (operator's book) gets `Book not found`
+  instead of the title; intruder's `/api/v1/books` list shows
+  zero results while operator's row count is unchanged.
+
+* **`sentences-with-term` API leaked another user's sentences**:
+  `SentenceService::findSentencesFromWord` queried
+  `FROM sentences, word_occurrences WHERE … AND SeLgID = ?` with
+  no parent-row filter — `sentences` carries no `UsID` column, so
+  any logged-in user calling `GET /api/v1/sentences-with-term?
+  language_id={operator_lang}&term_lc=…` (or the same endpoint
+  pinned to a foreign WoID via the path segment, e.g.
+  `/sentences-with-term/{operator_word_id}`) received the
+  operator's sentence text directly. `formatSentence` had the
+  same shape: it joined `word_occurrences` and `languages` to
+  fetch the rendered sentence content for any SeID, with no
+  ownership gate. Add a private `parentTextUserScope()` helper
+  that produces ` AND SeTxID IN (SELECT TxID FROM texts WHERE
+  TxUsID = ?)`, applied to both raw-SQL branches of
+  `findSentencesFromWord`. Add a private `ownsSentence()` guard
+  at the top of `formatSentence` that short-circuits with the
+  empty-sentence fallback when the SeID's parent text isn't
+  owned by the caller — defense in depth, since `find*` now
+  filters the SeIDs it returns but `formatSentence` is reachable
+  from other paths too. Verified end-to-end: pre-fix, intruder
+  hitting `/api/v1/sentences-with-term/2?language_id=1&term_lc=
+  bonjour` got `[["<b>Bonjour</b>.","{Bonjour}."], ["<b>Bonjour
+  </b> Manon.","{Bonjour} Manon."]]`; post-fix the same request
+  returns `[]`.
+
+* **Vocabulary bulk-action endpoints overwrote and deleted any user's
+  words**: `PUT /api/v1/terms/bulk-action` (and `terms/family/apply`)
+  routed straight into `WordListService::deleteByIdList` /
+  `updateStatusByIdList` / `updateStatusDateByIdList` /
+  `deleteSentencesByIdList` / `toLowercaseByIdList` /
+  `capitalizeByIdList` and `WordFamilyService::bulkUpdateTermStatus`,
+  each of which built raw `UPDATE words … WHERE WoID IN (?,?,?)` /
+  `DELETE FROM words …` SQL with no `WoUsID` filter. Any logged-in
+  user could PUT a JSON body containing another user's WoIDs and
+  set their entire vocabulary to status 99, blank their example
+  sentences, lowercase the surface forms, or wipe the rows
+  outright. `deleteByIdList` additionally issued a raw
+  `DELETE FROM word_occurrences WHERE Ti2WordCount > 1 AND
+  Ti2WoID IN (…)` first — `word_occurrences` carries no UsID
+  column, so even when the second `DELETE FROM words` would have
+  failed under a fix on that table alone, the multi-word
+  occurrence rows for the foreign user's text were already gone.
+  Each raw path now appends `UserScopedQuery::forTablePrepared(
+  'words', $bindings)`, and `deleteByIdList` pre-filters its
+  WoID list through `filterOwnedWordIds()` (a single user-scoped
+  SELECT) before running either DELETE so the
+  `word_occurrences` cleanup only targets rows the caller owns.
+  Confirmed end-to-end against a 2-user live database — pre-fix:
+  intruder posting `{"ids":[1..6],"action":"del"}` deleted five
+  of the operator's words and dropped the operator's row count
+  from 207 to 202; post-fix: identical request returns
+  `success:true,count:5` (the count just echoes the input length)
+  but the operator's row count and word state are byte-identical
+  across `del`, `s99`, `lower`, `today`, `delsent`, `bulk-status`,
+  and `family/apply`. Plus `getOrCreateTermTag` / `getOrCreateTextTag`
+  (and the matching `removeTagFrom*` lookups in `TermTagService` /
+  `TextTagService`) now scope their `SELECT TgID FROM tags
+  WHERE TgText = ?` / `SELECT T2ID FROM text_tags …` by user, so
+  a tag-text collision across users no longer reuses the foreign
+  user's TgID — which would have written `(foreign-tag, my-words)`
+  rows into `word_tag_map` and contaminated the foreign user's
+  tag-to-row membership. (Per-user composite uniques on
+  `tags.TgText` and `text_tags.T2Text` shipped earlier in
+  migration `20260503_120000_per_user_name_uniques.sql`; this
+  fix relies on that schema being present.)
+
+* **Admin "Empty Database" wiped every user, not just the caller**:
+  `Restore::truncateUserDatabase` ran `DELETE FROM languages/texts/
+  words/...` with no `WHERE …UsID = ?` filter — despite the name and
+  docblock claiming it removes "all data belonging to the current
+  user". Triggered by the admin "Empty Database" button, an admin
+  who clicked through the confirmation in a multi-admin install
+  destroyed every other user's content. Scope each DELETE to the
+  current user via the table's `UsID` column for direct-scoped
+  tables (`languages`, `texts`, `words`, `tags`, `text_tags`,
+  `news_feeds`); via parent-row subqueries for the link/map and
+  derived tables (`text_tag_map`, `word_tag_map`, `feed_links`,
+  `word_occurrences`, `sentences`); and via `(StKey, StUsID)` for
+  the per-user `currenttext` setting. Single-user mode keeps the
+  legacy "wipe everything" behaviour (no user filter to apply).
+  Confirmed end-to-end against a 2-admin live database — pre-fix:
+  intruder hitting "Empty Database" deleted operator's `hola`,
+  `parents`, `parented` words plus the Spanish language and tags;
+  post-fix: only intruder's own rows are removed, operator's data
+  is fully preserved.
+
+* **Restore in multi-user mode silently destroyed every user's
+  data and orphaned cross-install dumps**: `Restore::restoreFile`
+  called `dropAllLwtTables()` before loading the dump, wiping
+  every account's content even though the admin only intended to
+  restore their own backup. Restored rows also kept their original
+  `UsID` columns from the source install — on a different host
+  those IDs typically reference users that don't exist locally,
+  leaving every imported row attached to a phantom owner. Two
+  guards: (1) refuse the restore when more than one active user
+  account exists, returning a clear error pointing at the manual
+  multi-user migration recipe in the post-installation docs;
+  (2) on safe single-admin installs, run a post-restore UPDATE
+  that rewrites every `UsID` column on user-scoped tables
+  (`languages`, `texts`, `words`, `tags`, `text_tags`,
+  `news_feeds`, `settings`, `local_dictionaries`) to the current
+  admin's UsID, so dumps from other installs become visible.
+  Single-user mode is unchanged. The error message is now
+  surfaced through `RestoreFromUpload::execute()`, which
+  previously discarded the message string from
+  `restoreFromHandle()` and unconditionally reported success.
+  Note: restore is already disabled by default in multi-user
+  mode (`BACKUP_RESTORE_ENABLED` defaults to `false`); these
+  guards harden the path for installs that explicitly opt in.
+
+* **Feed module leaked every user's feeds and let any user wipe any
+  other user's articles**: three independent bugs landed together
+  here. (1) `FeedCrudApiHandler::getFeedList` built raw
+  `SELECT … FROM news_feeds WHERE 1=1 …` SQL with no `NfUsID`
+  filter, so `GET /api/v1/feeds/list` rendered every user's feeds
+  side by side (including their language and per-feed article
+  counts). (2) `feed_links` carries no `UsID` column of its own,
+  so `MySqlArticleRepository::find/findByIds/delete/deleteByIds/
+  deleteByFeed/deleteByFeeds/getCountPerFeed` happily operated on
+  any FlID/FlNfID the caller supplied — meaning `DELETE
+  /api/v1/feeds/{operatorFeedId}` cascaded into
+  `articleRepository->deleteByFeeds([operatorFeedId])`, wiping
+  every article in the operator's feed even though the parent
+  `news_feeds.deleteMultiple` is auto-scoped and matched zero
+  rows. (3) `FeedArticleApiHandler::deleteArticles` ran a raw
+  `QueryBuilder::table('feed_links')->whereIn('FlID', $ids)
+  ->whereIn('FlNfID', [$feedId])->delete()` with no ownership
+  check, letting any logged-in user delete any other user's
+  articles by guessing IDs. Three corresponding fixes: append
+  `UserScopedQuery::forTablePrepared('news_feeds', $params)` to
+  the feed-list COUNT and SELECT raw SQL; add a
+  `feedOwnerScope($bindings)` helper that splices an
+  `AND FlNfID IN (SELECT NfID FROM news_feeds WHERE NfUsID = ?)`
+  subquery into every by-id article method; gate
+  `deleteArticles` upstream on `feedFacade->getFeedById()`
+  (user-scoped via QueryBuilder, returns null for foreign feeds).
+  Confirmed end-to-end with a 2-user live database — pre-fix:
+  intruder's feed list contained both feeds and a single
+  `DELETE /api/v1/feeds/articles/1` deleted both of operator's
+  articles; post-fix: list shows only intruder's feed and both
+  delete attempts return `{"success":false, "error":"Feed not
+  found"}` with operator's articles intact.
+* **Term-tag and text-tag list pages leaked every other user's tags**:
+  `MySqlTermTagRepository::paginate`/`count`/`deleteAll` and the
+  matching three methods on `MySqlTextTagRepository` built raw
+  `SELECT … FROM tags WHERE (1=1) …` / `… FROM text_tags WHERE
+  (1=1) …` SQL with no `WHERE TgUsID = ?` / `WHERE T2UsID = ?`
+  filter. The list-with-empty-query path ALWAYS used the unscoped
+  raw SQL (the empty-query QueryBuilder fast path only covered
+  `count('')`), so every visit to `/tags` and `/tags/text`
+  rendered every user's tags side by side, and a bulk-delete-all
+  with a search filter would have wiped every user's matching
+  tags. Append `UserScopedQuery::forTablePrepared(self::TABLE_NAME, …)`
+  to all six paths so the listing, count and bulk-delete only
+  ever see / touch the caller's rows. Confirmed end-to-end against
+  a 2-user install before the fix (intruder saw operator's
+  `operator-only` and `py-thon` tags) and after (intruder sees
+  only their own `intruder-only` and `py-pi`).
+* **Admin "Backup the database" exposed every user's data, not just
+  the caller's**: `MySqlBackupRepository::generateBackupSql` and
+  `generateOfficialBackupSql` ran `SELECT * FROM languages/texts/
+  words/tags/text_tags/news_feeds/...` with no `WHERE …UsID = ?`
+  filter. The route is admin-gated, but in a multi-admin install
+  (school, family, club) any admin downloading a backup walked off
+  with every other user's vocabulary, texts, scores, sentences,
+  reading history and feeds — a silent privacy leak with no
+  destructive click required. Scope every dump SELECT to the
+  current user: directly via the table's UsID column for
+  `languages`, `texts`, `words`, `tags`, `text_tags`, `news_feeds`,
+  `settings`; via parent-row subqueries for `text_tag_map`,
+  `word_tag_map`, `feed_links`. Single-user installs and
+  unauthenticated paths keep their full-dump behaviour. The
+  loud, opt-in destructive paths (`Empty database` truncate,
+  cross-user wipe on restore, foreign-UsID drift on
+  cross-install restore) are tracked separately and not changed
+  in this fix.
+* **Review/SRS module leaked and accepted writes across users**: the
+  `/api/v1/review/*` endpoints (`config`, `next-word`, `table-words`,
+  `tomorrow-count`, `status`) forwarded `lang=`, `text=`, `selection=`
+  and `term_id=` straight from the request to
+  `ReviewConfiguration::*Prepared`, whose SQL fragments
+  (`words WHERE WoLgID = ?`, `... WoID IN (...)`, etc.) had no
+  `WoUsID` filter. A logged-in account with no own data could read
+  any other user's words, sentences, scores and translations, and
+  could PUT `/api/v1/review/status` with a foreign `term_id` to
+  rewrite that user's `WoStatus` (e.g. mark-as-well-known). Append
+  the words-table user scope to all four projection branches
+  (`lang`, `text`, `words`, `texts`) and add an ownership pre-check
+  in `SubmitAnswer::execute` that bails out with `Word not found`
+  before touching `updateWordStatus` or the activity counter when
+  `getWordStatus` (user-scoped via QueryBuilder) returns null.
+* **`StUsID=0` "global default" leaked previous users' choices into
+  fresh accounts**: `Settings::getWithDefault` for a SCOPE_USER key
+  fell through to the `StUsID=0` row when the current user had no
+  per-user value. That row is just whoever-saved-the-setting-first's
+  value — typically the original single-user admin's, or a previous
+  test account's — so `set-texts-per-page`, `currentwordsort`, etc.
+  silently inherited across the multi-user boundary. For SCOPE_USER
+  keys with a logged-in user, skip the StUsID=0 hop and go straight
+  to the hardcoded default. SCOPE_ADMIN keys keep the fallback
+  (admins legitimately set those system-wide), and single-user mode
+  (no current user) is unchanged.
+* **Flipping `MULTI_USER_ENABLED=false → true` orphaned every legacy
+  row and looked like data loss**: the
+  `add_user_id_columns.sql` migration's backfill is gated on a
+  pre-existing `users.UsUsername='admin'` row, which doesn't exist
+  on a fresh `users` table — so the UPDATE is a no-op and every
+  `LgUsID/TxUsID/WoUsID` stays NULL. Once user-scope filters kick in
+  the operator sees empty lists everywhere. Self-heal during the
+  first-admin bootstrap in `Register::execute`: when the new user is
+  promoted to admin (because no admins exist), reassign every
+  NULL-owner row across `languages`, `texts`, `words`, `tags`,
+  `text_tags`, `news_feeds`, `books`, and `local_dictionaries` to
+  their UsID. On already-migrated installs the UPDATEs match zero
+  rows and cost nothing. The mirror-image edge case (legacy data
+  attached to the seed "ghost admin" row instead of NULL — only
+  reachable on installs where the original migration's backfill
+  *did* run successfully against the ghost) is left to a one-time
+  manual SQL recipe; see the [Switching an Existing Install From
+  Single-User to Multi-User](./guide/post-installation.md#switching-to-multi-user)
+  guide for the detection query and step-by-step cleanup.
+* **Successful registration silently bounced to /login with no
+  feedback**: `UserController::register` called
+  `UserFacade::setCurrentUser($user)` for an "auto-login", but that
+  method only updates the in-process `Globals` — it never writes
+  `$_SESSION`. The auth middleware therefore re-redirected to /login
+  on the very next request, dropping the FlashMessageService success
+  flash on the floor (the login view doesn't read it). Land the
+  user on /login deliberately, prefill the username, and surface
+  the success notice via `$_SESSION['auth_success']` (already
+  rendered by the login view for the password-reset flow).
+* **`UserApiHandler` docblock advertised `/api/v1/user/...`
+  endpoints that don't exist**: the handler is registered under
+  `auth`, not `user`, so every advertised path was a 404. Fix the
+  docblock to say `/api/v1/auth/login`, `/api/v1/auth/register`,
+  `/api/v1/auth/refresh`, `/api/v1/auth/logout`, and
+  `/api/v1/auth/me` — matching the registered routes.
+* **Production debug page leaked stack traces, file paths, and SQL on
+  multi-user installs**: `Application::isDebugMode()` defaulted to *on*
+  in single-user mode and *off* in multi-user, but it was called
+  before `EnvLoader::load()`, so `getenv('MULTI_USER_ENABLED')` always
+  read empty, the single-user branch was always taken, and every 500
+  rendered the debug HTML in production. Move `EnvLoader::load()` to
+  the very top of `bootstrap()` so the env values are visible by the
+  time we decide.
+* **Two users could not coexist if either had picked the same name first**
+  (multi-user only): `languages.LgName`, `tags.TgText`, and
+  `text_tags.T2Text` each carried a *global* UNIQUE constraint, so
+  the second user's attempt to create e.g. their own "Spanish"
+  language, "easy" term tag, or "fiction" text tag died with a
+  duplicate-key 500. New migration replaces each constraint with a
+  composite UNIQUE on `(user_id, name)`. NULL-owner legacy rows
+  remain coexistent (NULLs distinct in MariaDB unique indexes).
+* **Multi-user `/texts` and other paginated screens 500'd with invalid SQL**:
+  every paginated query in `Modules/Text` and `Modules/Vocabulary` was
+  concatenating `UserScopedQuery::forTablePrepared(...)` *after* `LIMIT
+  ?, ?` (or `ORDER BY ...`), producing a syntax error
+  (`... LIMIT ?, ? AND TxUsID = ?`) on every request from a logged-in
+  user. With `MULTI_USER_ENABLED=true` this rendered `/texts`,
+  `/api/v1/texts/by-language/{id}`, the lemma family and statistics
+  endpoints, and the curated-import translation merge step entirely
+  unusable. Inline the user-scope clauses in each query's `WHERE`
+  (or LEFT-JOIN `ON` for the `text_tags`/`words` join cases) and
+  push their bindings before the `LIMIT` bindings.
+* **Vocabulary list (`/words`) leaked every user's terms across the
+  multi-user boundary**: `WordListQueryService::countWords`,
+  `getWordsList`, `getWordsListWithWordCount`, and
+  `getFilteredWordIds` had no `UserScopedQuery` calls at all. A fresh
+  user with no data would see every other user's terms (and tag and
+  language filters did nothing to stop it). Add `words` and
+  `languages` user-scope to all four entry points, including both
+  halves of the no-text-filter UNION query in
+  `getWordsListWithWordCount`.
+* **Dictionary import rejected every file as "Invalid file format"**
+  (#233): `CsvImporter`/`JsonImporter`'s `canImport()` checked the
+  extension of the PHP upload temp path (`/tmp/phpXXXXXX`), which has
+  none. Forward the original filename through `canImport()` so format
+  detection works for CSV, TSV, and JSON dictionary uploads (and the
+  vocabulary term importer that shares the same code path).
+* **StarDict archive uploads still failed on the unified import page**
+  (#233): the archive-extract-then-import flow lived only in
+  `DictionaryController::importFile`, but the unified term/dictionary
+  import page routes through `TermImportController`. Every UI upload of
+  a `.zip` / `.tar.gz` / `.tar.bz2` bundle was therefore still rejected
+  with "Invalid file format". Mirror the archive-aware flow on the live
+  route so FreeDict and WikDict downloads import directly from the form.
+* **CSV dictionary upload crashed on PHP 8.4+**: `fgetcsv()` raised
+  `ErrorException: the $escape parameter must be provided as its default
+  value will change` and rendered the dev debug page (with file paths)
+  to the end user. Pass an explicit empty `$escape` argument at the three
+  call sites in `CsvImporter` for RFC 4180 / forward-compat behavior.
+* **Bare `.ifo` upload produced a generic, unhelpful error**: uploading
+  just the `.ifo` for `format=stardict` (without its `.idx`/`.dict`
+  siblings, which a single web upload can never deliver) used to return
+  the same "Invalid file format" string as truly malformed input. It now
+  short-circuits with a specific hint that the user must upload an
+  archive containing the full bundle.
+
+### Changed
+
+* The archive-detect / extract / find-by-extension flow is now extracted
+  into `DictionaryImportFileResolver` and shared by the curated import,
+  legacy `/dictionaries/import`, and unified `/word/upload` routes. No
+  user-visible change beyond the friendlier bare-`.ifo` error above.
+
+## [3.1.1-fork] - 2026-04-26
+
+### Changed
+
+* **EPUB import unified onto `/texts/new`**: picking an `.epub` under
+  *Source → File → From computer* now flips the form's action to
+  `/book/import` and submits inline, instead of redirecting to a separate
+  page where the user had to re-pick the file. Action-card buttons that
+  used to link to `/book/import` now point at `/texts/new`. The standalone
+  `/book/import` page stays reachable for legacy bookmarks and direct form
+  POSTs, with a deprecation banner pointing to the new flow. The POST
+  handler now accepts both legacy field names (`LgID`, `thefile`) and the
+  new-text form's names (`TxLgID`, `importFile`).
+* **Tabbed file source on `/texts/new`**: *From computer* and *From server*
+  are now Bulma tabs instead of stacked panels, hiding the unused option
+  and reducing vertical clutter.
+
+### Fixed
+
+* **EPUB upload** (#232): forward the original filename to
+  `EpubParserService::parse()` / `getMetadata()` so the underlying
+  `kiwilan/php-ebook` library can detect the format. PHP upload temp paths
+  (`/tmp/phpXXXXXX`) carry no extension, which caused parsing to bail with
+  "File has no extension".
+* **Tagify chunk under Vite 8 / Rolldown**: switched the Tagify CSS dynamic
+  import to a static one in `tagify_tags.ts`. Co-bundling CSS with the JS
+  chunk under Rolldown emitted a broken `tagify_exports` named export and
+  threw `SyntaxError: local binding for export 'tagify_exports' not found`,
+  which halted module init on pages with tag inputs (e.g. `texts/new`).
+* **`setTheFocus()` crash on non-input elements**: guard the `.select()`
+  call so it only runs on `<input>` / `<textarea>`. The EPUB form's
+  language `<select class="setfocus">` was triggering
+  `TypeError: e.select is not a function` after focus.
+* **Spurious "1 field(s) must not be empty" alert during EPUB import**:
+  the `.notempty` validator now walks the ancestor chain and skips fields
+  hidden via Alpine `x-show` (inline `display: none`) or the `hidden`
+  attribute, so the hidden `TxText` textarea on `/texts/new` no longer
+  trips the alert when a file is selected.
+* **Theme / language change appearing only after navigation**: the service
+  worker used stale-while-revalidate for HTML, so the reload after saving
+  a setting served the previous render from cache and the change only
+  surfaced on the next page load. Navigation requests now use a
+  network-first strategy; static assets stay cache-first. `CACHE_VERSION`
+  bumped to `v2` so old caches are dropped on activate.
+* **Navbar theme toggle click ignored under CSP-build Alpine**: the
+  `@alpinejs/csp` build does not bind `@click` reliably on the same
+  element as `x-data`. Moved the listener to an imperative
+  `addEventListener` inside the component's `init()` and dropped the
+  inline directive. Added a Cypress regression test.
+* **Theme save with no visible change**: when in auto mode and OS
+  preference matches the would-be light/dark target, the saved value is a
+  no-op, which felt like the click had failed. The toggle now shows a
+  confirmation toast after reload, and explains when a saved theme is in
+  auto-mode following the system preference.
+
+### Translations
+
+* Added missing keys for the EPUB-import deprecation banner
+  (`book.deprecated_page_title`, `book.deprecated_page_body`,
+  `book.go_to_new_text`) and the `text.new.file.epub_detected`
+  notice across all eight non-English locales. Added the new
+  `navbar.theme_saved` / `navbar.theme_saved_auto` toast strings
+  to every locale.
+
 ## [3.1.0-fork] - 2026-04-21
 
 ### Added
