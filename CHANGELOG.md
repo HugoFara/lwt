@@ -18,6 +18,26 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **HTTPS detection broken behind a TLS-terminating reverse proxy**
+  (#234): when LWT runs behind Traefik / Caddy / nginx with TLS
+  offloading, the connection from the proxy to LWT is plain HTTP and
+  `$_SERVER['HTTPS']` stays unset. The cookie-secure and HSTS code
+  paths already handled this via `X-Forwarded-Proto`, but
+  `UrlUtilities::getAppOrigin()` and `UrlUtilities::urlBase()` did
+  not — so the admin "Server Location" panel and any code building
+  absolute URLs from the request showed `http://` even when the
+  browser was on HTTPS. Consolidated all four scheme-detection sites
+  into a single `UrlUtilities::isSecureRequest()` helper that honours
+  `X-Forwarded-Proto`, `X-Forwarded-Ssl`, `SERVER_PORT == 443`, and
+  the legacy `HTTPS` variable. Added `UrlUtilities::getRequestHost()`
+  that prefers `X-Forwarded-Host` over `HTTP_HOST` (with the same
+  Host-Header-Injection regex validation as before). Both gated by a
+  new `TRUST_PROXY` env var, defaulting to `true` for backwards
+  compatibility — operators running LWT directly on the public
+  internet without a shielding proxy should set `TRUST_PROXY=false`
+  to prevent header-spoofing attacks. Setting `APP_URL` continues to
+  short-circuit detection entirely.
+
 * **Term import was broken on every supported MariaDB and silently
   dropped imported rows in multi-user mode** (the "complete" import
   path that handles tags / overwrite modes / pasted text). Three

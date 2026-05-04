@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Bootstrap;
 
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 
 /**
@@ -68,25 +69,15 @@ class SessionBootstrap
     /**
      * Detect if the current request is over HTTPS.
      *
-     * Checks multiple indicators to handle proxies and load balancers.
+     * Delegates to `UrlUtilities::isSecureRequest()` so direct-HTTPS,
+     * port-443, and `X-Forwarded-Proto` (when the proxy is trusted)
+     * are handled identically across the codebase.
      *
      * @return bool True if the connection is secure
      */
     public static function isSecureConnection(): bool
     {
-        // Direct HTTPS
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-            return true;
-        }
-        // Behind a proxy/load balancer that terminates SSL
-        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-            return true;
-        }
-        // Standard HTTPS port
-        if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
-            return true;
-        }
-        return false;
+        return UrlUtilities::isSecureRequest();
     }
 
     /**

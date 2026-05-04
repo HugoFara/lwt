@@ -267,26 +267,15 @@ class SecurityHeaders
     /**
      * Check if the current connection is secure (HTTPS).
      *
+     * Delegates to `UrlUtilities::isSecureRequest()`; that helper is the
+     * single source of truth for HTTPS detection in LWT and handles the
+     * `TRUST_PROXY` opt-out for `X-Forwarded-Proto`.
+     *
      * @return bool True if connection is over HTTPS
      */
     public static function isSecureConnection(): bool
     {
-        // Direct HTTPS
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-            return true;
-        }
-        // Behind a proxy/load balancer
-        if (
-            isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-            && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
-        ) {
-            return true;
-        }
-        // Standard HTTPS port
-        if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
-            return true;
-        }
-        return false;
+        return UrlUtilities::isSecureRequest();
     }
 
     /**

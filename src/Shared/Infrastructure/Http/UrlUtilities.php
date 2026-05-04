@@ -49,6 +49,13 @@ class UrlUtilities
     private static string|null|false $appUrl = null;
 
     /**
+     * Cached `TRUST_PROXY` resolution. null = not yet resolved.
+     *
+     * @var bool|null
+     */
+    private static ?bool $trustProxy = null;
+
+    /**
      * Get the configured application base path.
      *
      * Returns the APP_BASE_PATH environment variable value, normalized
@@ -106,9 +113,12 @@ class UrlUtilities
     /**
      * Get the application origin (scheme + host), preferring APP_URL env var.
      *
-     * Falls back to detecting from $_SERVER if APP_URL is not configured,
-     * but validates the host against allowed characters to mitigate
-     * Host Header Injection.
+     * Falls back to detecting from $_SERVER if APP_URL is not configured.
+     * The fallback honors `X-Forwarded-Proto` and `X-Forwarded-Host` so
+     * the app generates correct https URLs when deployed behind a TLS-
+     * terminating reverse proxy (Traefik, Caddy, nginx, Cloudflare, ...).
+     * Set `TRUST_PROXY=false` to suppress this for direct-internet-facing
+     * deployments that aren't shielded by a trusted proxy.
      *
      * @return string The application origin (e.g., 'https://example.com')
      */
@@ -119,19 +129,105 @@ class UrlUtilities
             return $appUrl;
         }
 
-        // Fallback: detect from request headers with validation
-        $isHttps = isset($_SERVER['HTTPS'])
+        $protocol = self::isSecureRequest() ? 'https' : 'http';
+        return "{$protocol}://" . self::getRequestHost();
+    }
+
+    /**
+     * Whether the current request reached LWT over a secure transport.
+     *
+     * Recognises four signals: direct HTTPS (`$_SERVER['HTTPS']` set and
+     * not 'off'), the standard HTTPS port, and — when the proxy is
+     * trusted — `X-Forwarded-Proto: https` or `X-Forwarded-Ssl: on`.
+     * The X-Forwarded-* headers can be spoofed by anyone able to talk
+     * directly to LWT, so the install must opt out via `TRUST_PROXY=false`
+     * if it isn't shielded by a proxy that strips them.
+     *
+     * @return bool True if the request is HTTPS (directly or via a
+     *              trusted proxy that terminated TLS).
+     */
+    public static function isSecureRequest(): bool
+    {
+        if (
+            isset($_SERVER['HTTPS'])
             && $_SERVER['HTTPS'] !== ''
-            && $_SERVER['HTTPS'] !== 'off';
-        $protocol = $isHttps ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-
-        // Validate host: only allow alphanumeric, dots, hyphens, colons (port), brackets (IPv6)
-        if (!preg_match('/^[a-zA-Z0-9.\-:\[\]]+$/', $host)) {
-            $host = 'localhost';
+            && $_SERVER['HTTPS'] !== 'off'
+        ) {
+            return true;
         }
+        if (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443) {
+            return true;
+        }
+        if (self::trustsProxy()) {
+            $proto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
+            if ($proto !== '') {
+                $parts = explode(',', $proto);
+                if (strtolower(trim($parts[0])) === 'https') {
+                    return true;
+                }
+            }
+            $ssl = $_SERVER['HTTP_X_FORWARDED_SSL'] ?? '';
+            if (strtolower($ssl) === 'on') {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        return "{$protocol}://{$host}";
+    /**
+     * Get the host of the current request, honouring `X-Forwarded-Host`
+     * when the proxy is trusted.
+     *
+     * Validates against alphanumeric / dot / hyphen / colon / bracket
+     * to mitigate Host-Header-Injection; falls back to `localhost` on
+     * unparseable input.
+     *
+     * @return string The validated host (may include `:port`)
+     */
+    public static function getRequestHost(): string
+    {
+        if (self::trustsProxy()) {
+            $fwdHost = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? '';
+            if ($fwdHost !== '') {
+                $parts = explode(',', $fwdHost);
+                $host = trim($parts[0]);
+                if ($host !== '' && preg_match('/^[a-zA-Z0-9.\-:\[\]]+$/', $host)) {
+                    return $host;
+                }
+            }
+        }
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        if (!preg_match('/^[a-zA-Z0-9.\-:\[\]]+$/', $host)) {
+            return 'localhost';
+        }
+        return $host;
+    }
+
+    /**
+     * Whether to honour `X-Forwarded-*` headers from the front-end proxy.
+     *
+     * Default: true (matches the historical behaviour of LWT's cookie
+     * and HSTS code, which has always trusted `X-Forwarded-Proto`).
+     * Operators running LWT directly on the public internet should set
+     * `TRUST_PROXY=false` to prevent header-spoofing attacks.
+     *
+     * @return bool True to trust forwarded headers, false to ignore them
+     */
+    public static function trustsProxy(): bool
+    {
+        if (self::$trustProxy === null) {
+            $env = $_ENV['TRUST_PROXY'] ?? null;
+            if ($env === null) {
+                $env = getenv('TRUST_PROXY');
+            }
+            if (is_string($env) && $env !== '') {
+                $parsed = filter_var($env, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+                self::$trustProxy = $parsed === null ? true : $parsed;
+            } else {
+                self::$trustProxy = true;
+            }
+        }
+        return self::$trustProxy;
     }
 
     /**
@@ -208,6 +304,7 @@ class UrlUtilities
     {
         self::$basePath = null;
         self::$appUrl = null;
+        self::$trustProxy = null;
     }
 
     /**
@@ -397,17 +494,17 @@ class UrlUtilities
     /**
      * Get the base URL of the application
      *
+     * Honours `X-Forwarded-Proto` / `X-Forwarded-Host` when the proxy
+     * is trusted (see `isSecureRequest()` / `getRequestHost()`).
+     *
      * @return string base URL
      */
     public static function urlBase(): string
     {
-        // Detect if using HTTPS
-        $scheme = 'http';
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-            $scheme = 'https';
-        }
+        $scheme = self::isSecureRequest() ? 'https' : 'http';
+        $host = self::getRequestHost();
 
-        $url = parse_url("$scheme://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($_SERVER['REQUEST_URI'] ?? '/'));
+        $url = parse_url("$scheme://" . $host . ($_SERVER['REQUEST_URI'] ?? '/'));
         $r = ($url["scheme"] ?? $scheme) . "://" . ($url["host"] ?? 'localhost');
         if (isset($url["port"])) {
             $r .= ":" . $url["port"];
