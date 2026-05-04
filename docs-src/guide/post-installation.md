@@ -206,6 +206,95 @@ is reliably idempotent across every install and lets you verify the
 counts before pulling the trigger.
 :::
 
+## Behind a Reverse Proxy (TLS Offloading) {#reverse-proxy}
+
+If you run LWT behind a reverse proxy that terminates TLS for you
+(Traefik, Caddy, nginx, HAProxy, Apache `mod_proxy`, Cloudflare
+Tunnel, …), the connection from the proxy to the LWT container is
+plain HTTP. PHP only sees the inner hop, so without configuration
+LWT thinks the request was HTTP and generates `http://` URLs in
+emails, OAuth callbacks, and the admin "Server Location" panel.
+The page loads fine over HTTPS, but anything that builds an absolute
+URL is wrong.
+
+### Quick fix
+
+Set both of these in your `.env` and restart the container:
+
+```dotenv
+APP_URL=https://your-domain.example
+TRUST_PROXY=true
+```
+
+* **`APP_URL`** — the public origin (scheme + host) of your LWT
+  install. When set, LWT uses it verbatim for every absolute URL it
+  generates, ignoring whatever the request looked like. This is the
+  most reliable knob; set it whenever you have a stable public URL.
+* **`TRUST_PROXY`** — whether LWT should honour `X-Forwarded-Proto`,
+  `X-Forwarded-Host`, and `X-Forwarded-Ssl` from the proxy. **Default
+  is `true`**, so most installs Just Work without setting it. Set it
+  to `false` only if LWT is reachable directly on the public internet
+  without a proxy in front (see security note below).
+
+### Sample reverse-proxy config
+
+::: code-group
+```yaml [Traefik labels]
+labels:
+  - "traefik.http.routers.lwt.rule=Host(`your-domain.example`)"
+  - "traefik.http.routers.lwt.entrypoints=websecure"
+  - "traefik.http.routers.lwt.tls=true"
+  - "traefik.http.services.lwt.loadbalancer.server.port=80"
+```
+
+```caddy [Caddyfile]
+your-domain.example {
+    reverse_proxy lwt:80
+}
+```
+
+```nginx [nginx]
+server {
+    listen 443 ssl http2;
+    server_name your-domain.example;
+
+    ssl_certificate     /path/to/fullchain.pem;
+    ssl_certificate_key /path/to/privkey.pem;
+
+    location / {
+        proxy_pass http://lwt:80;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    }
+}
+```
+:::
+
+Caddy and Traefik set the `X-Forwarded-*` headers automatically; with
+nginx you set them explicitly as shown.
+
+### Security note: when to disable `TRUST_PROXY`
+
+`X-Forwarded-Proto` and `X-Forwarded-Host` are just regular HTTP
+headers — anyone who can reach LWT can send them. If your install is
+exposed directly on the public internet **without** a proxy in front
+that overwrites those headers, an attacker can spoof
+`X-Forwarded-Proto: https` to coax LWT into thinking unencrypted
+requests are secure (weakening the cookie `Secure` flag among other
+things).
+
+Set `TRUST_PROXY=false` in that scenario:
+
+```dotenv
+TRUST_PROXY=false
+```
+
+LWT then ignores the forwarded headers and falls back to the inner
+connection's `HTTPS` / `SERVER_PORT` signals only. Setting `APP_URL`
+alongside is still recommended for outbound URL generation.
+
 ## YouTube Import
 
 LWT can import captions from YouTube videos. To enable this feature:
