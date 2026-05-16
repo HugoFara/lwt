@@ -14,6 +14,12 @@ import { renderText, updateWordStatusInDOM, type RenderSettings } from '../pages
 import { setupMultiWordSelection } from '../pages/reading/text_multiword_selection';
 import { TextsApi } from '@modules/text/api/texts_api';
 import { SettingsApi } from '@modules/admin/api/settings_api';
+import { scrollTo } from '@shared/utils/hover_intent';
+import { openDictionaryPopup, createTheDictUrl } from '@modules/vocabulary/services/dictionary';
+import { speechDispatcher } from '@shared/utils/user_interactions';
+import { lwt_audio_controller } from '@/media/html5_audio_player';
+import { getWordFormStore } from '@modules/vocabulary/stores/word_form_store';
+import { getPositionFromId } from '@shared/utils/ajax_utilities';
 
 /**
  * Text reader Alpine.js component interface.
@@ -25,6 +31,7 @@ export interface TextReaderData {
   showTranslations: boolean;
   error: string | null;
   statusMessage: string | null;
+  markedPosition: number;
 
   // Computed properties
   readonly store: WordStoreState;
@@ -93,6 +100,7 @@ export function textReaderData(): TextReaderData {
     showTranslations: true,
     error: null,
     statusMessage: null,
+    markedPosition: -1,
     readerWidth: 100,
     readerTextSize: 0,
 
@@ -221,15 +229,205 @@ export function textReaderData(): TextReaderData {
       // Select the word (opens popover near the clicked element)
       this.store.selectWord(hex, position, wordEl);
 
-      // NOTE: TTS integration disabled - requires speechDispatcher import and TTS settings check
-      // speechDispatcher(wordEl.textContent || '', this.store.langId);
     },
 
-    handleKeydown(): void {
-      // Only handle if popover/modal is not open
-      if (this.store.isPopoverOpen || this.store.isEditModalOpen) return;
+    handleKeydown(e: KeyboardEvent): void {
+      // Skip if the user is typing in an interactive element
+      const target = e.target as HTMLElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      // Let the edit modal handle its own keys
+      if (this.store.isEditModalOpen) return;
 
-      // NOTE: Keyboard navigation planned - arrow keys for word navigation, number keys for quick status
+      const keyCode = e.keyCode || e.which;
+
+      const clearMarked = (): void => {
+        document.querySelectorAll('.kwordmarked, .uwordmarked').forEach(
+          el => el.classList.remove('kwordmarked', 'uwordmarked')
+        );
+      };
+
+      const knownWords = (): HTMLElement[] => Array.from(
+        document.querySelectorAll<HTMLElement>(
+          'span.word:not(.hide):not(.status0), span.mword:not(.hide)'
+        )
+      );
+
+      // ESC: reset all marks and close popover
+      if (keyCode === 27) {
+        clearMarked();
+        this.markedPosition = -1;
+        this.store.closePopover();
+        e.preventDefault();
+        return;
+      }
+
+      // RETURN: jump to next unknown word
+      if (keyCode === 13) {
+        document.querySelectorAll('.uwordmarked').forEach(el => el.classList.remove('uwordmarked'));
+        const unknown = document.querySelector<HTMLElement>('span.status0.word:not(.hide)');
+        if (unknown) {
+          scrollTo(unknown, { offset: -150 });
+          unknown.classList.add('uwordmarked');
+          unknown.click();
+          this.store.closePopover();
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // Navigation: HOME / END / LEFT / RIGHT / SPACE
+      const words = knownWords();
+      if (words.length === 0) return;
+
+      if (keyCode === 36) { // HOME: first known word
+        clearMarked();
+        this.markedPosition = 0;
+        words[0].classList.add('kwordmarked');
+        scrollTo(words[0], { offset: -150 });
+        words[0].click();
+        e.preventDefault();
+        return;
+      }
+
+      if (keyCode === 35) { // END: last known word
+        clearMarked();
+        this.markedPosition = words.length - 1;
+        words[this.markedPosition].classList.add('kwordmarked');
+        scrollTo(words[this.markedPosition], { offset: -150 });
+        words[this.markedPosition].click();
+        e.preventDefault();
+        return;
+      }
+
+      if (keyCode === 37) { // LEFT: previous known word
+        const marked = document.querySelector<HTMLElement>('.kwordmarked');
+        const currid = marked ? getPositionFromId(marked.id) : Number.MAX_SAFE_INTEGER;
+        clearMarked();
+        let newPos = words.length - 1;
+        for (let i = words.length - 1; i >= 0; i--) {
+          if (getPositionFromId(words[i].id) < currid) { newPos = i; break; }
+        }
+        this.markedPosition = newPos;
+        words[newPos].classList.add('kwordmarked');
+        scrollTo(words[newPos], { offset: -150 });
+        words[newPos].click();
+        e.preventDefault();
+        return;
+      }
+
+      if (keyCode === 39 || keyCode === 32) { // RIGHT / SPACE: next known word
+        const marked = document.querySelector<HTMLElement>('.kwordmarked');
+        const currid = marked ? getPositionFromId(marked.id) : -1;
+        clearMarked();
+        let newPos = 0;
+        for (let i = 0; i < words.length; i++) {
+          if (getPositionFromId(words[i].id) > currid) { newPos = i; break; }
+        }
+        this.markedPosition = newPos;
+        words[newPos].classList.add('kwordmarked');
+        scrollTo(words[newPos], { offset: -150 });
+        words[newPos].click();
+        e.preventDefault();
+        return;
+      }
+
+      // All remaining shortcuts operate on the currently marked or hovered word
+      const markedEl = document.querySelector<HTMLElement>('.kwordmarked, .uwordmarked');
+      const curr = markedEl ?? document.querySelector<HTMLElement>('.hword:hover');
+      if (!curr) return;
+
+      const hex = curr.getAttribute('data_hex') ?? curr.className.match(/TERM([0-9A-Fa-f]+)/)?.[1] ?? '';
+      const position = parseInt(curr.getAttribute('data_order') ?? curr.getAttribute('data_pos') ?? '0', 10);
+      const widAttr = curr.getAttribute('data_wid');
+      const wordId = widAttr ? parseInt(widAttr, 10) : null;
+      const status = parseInt(curr.getAttribute('data_status') ?? '0', 10);
+      const text = curr.classList.contains('mwsty')
+        ? (curr.getAttribute('data_text') ?? curr.textContent ?? '')
+        : (curr.textContent ?? '');
+
+      // 1-5: set status (or open edit form for new words)
+      for (let i = 1; i <= 5; i++) {
+        if (keyCode === 48 + i || keyCode === 96 + i) {
+          if (status === 0) {
+            this._openEditForm(position);
+          } else {
+            void this.store.setStatus(hex, i);
+          }
+          e.preventDefault();
+          return;
+        }
+      }
+
+      // I: ignored (98)
+      if (keyCode === 73) {
+        if (status === 0) {
+          void this.store.createQuickWord(hex, position, 98);
+        } else {
+          void this.store.setStatus(hex, 98);
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // W: well-known (99)
+      if (keyCode === 87) {
+        if (status === 0) {
+          void this.store.createQuickWord(hex, position, 99);
+        } else {
+          void this.store.setStatus(hex, 99);
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // P: pronounce with TTS
+      if (keyCode === 80) {
+        speechDispatcher(text, this.store.langId);
+        e.preventDefault();
+        return;
+      }
+
+      // T: open translator popup with current word
+      if (keyCode === 84) {
+        const link = this.store.dictLinks.translator?.replace(/^\*/, '');
+        if (link) openDictionaryPopup(createTheDictUrl(link, text));
+        e.preventDefault();
+        return;
+      }
+
+      // A: seek audio to current word's position
+      if (keyCode === 65) {
+        const pos = parseInt(curr.getAttribute('data_pos') ?? '0', 10);
+        const totalEl = document.getElementById('totalcharcount');
+        const total = parseInt(totalEl?.textContent ?? '0', 10);
+        if (total > 0) {
+          lwt_audio_controller.newPosition(Math.max(0, 100 * (pos - 5) / total));
+        }
+        e.preventDefault();
+        return;
+      }
+
+      // G: open translator then fall through to open edit form
+      if (keyCode === 71) {
+        const link = this.store.dictLinks.translator?.replace(/^\*/, '');
+        if (link) setTimeout(() => openDictionaryPopup(createTheDictUrl(link, text)), 10);
+      }
+
+      // E / G: open edit form for current word
+      if (keyCode === 69 || keyCode === 71) {
+        this._openEditForm(position, wordId ?? undefined);
+        e.preventDefault();
+      }
+    },
+
+    _openEditForm(position: number, wordId?: number): void {
+      try {
+        const formStore = getWordFormStore();
+        void formStore.loadForEdit(this.store.textId, position, wordId);
+        this.store.openEditModal();
+      } catch {
+        // word_form_store not available on this page
+      }
     },
 
     toggleShowAll(): void {
