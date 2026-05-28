@@ -247,8 +247,14 @@ async function startTranscription(): Promise<void> {
     if (language) formData.append('language', language);
     formData.append('model', model);
 
+    const headers: Record<string, string> = {};
+    const csrf = getCsrfToken();
+    if (csrf) {
+      headers['X-CSRF-TOKEN'] = csrf;
+    }
     const response = await fetch('/api/v1/whisper/transcribe', {
       method: 'POST',
+      headers,
       body: formData,
     });
 
