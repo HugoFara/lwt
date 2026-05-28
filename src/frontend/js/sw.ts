@@ -45,6 +45,15 @@ const NEVER_CACHE_PATTERNS: RegExp[] = [
   /\.php\?/,           // PHP with query strings (dynamic)
 ];
 
+// URL patterns that should purge the runtime cache when fetched. Login and
+// logout are identity transitions — without purging, the next user in the
+// same browser would briefly see the previous user's navbar (language list
+// etc.) served from the runtime cache before the page hydrates.
+const IDENTITY_TRANSITION_PATTERNS: RegExp[] = [
+  /\/login(\?|$)/,
+  /\/logout(\?|$)/,
+];
+
 /**
  * Check if a URL should use network-first strategy
  */
@@ -57,6 +66,13 @@ function shouldNetworkFirst(url: string): boolean {
  */
 function shouldNeverCache(url: string): boolean {
   return NEVER_CACHE_PATTERNS.some(pattern => pattern.test(url));
+}
+
+/**
+ * Check if a URL marks a user-identity transition (login or logout).
+ */
+function isIdentityTransition(url: string): boolean {
+  return IDENTITY_TRANSITION_PATTERNS.some(pattern => pattern.test(url));
 }
 
 /**
@@ -158,6 +174,14 @@ sw.addEventListener('fetch', (event: FetchEvent) => {
   // would serve the previous render after a settings save + reload, hiding
   // the change until the next navigation.
   if (request.mode === 'navigate') {
+    // On login/logout, purge the runtime cache to prevent the next session
+    // from being served the previous user's cached chrome.
+    if (isIdentityTransition(url)) {
+      event.respondWith(
+        caches.delete(RUNTIME_CACHE).then(() => networkFirst(request))
+      );
+      return;
+    }
     event.respondWith(networkFirst(request));
     return;
   }
