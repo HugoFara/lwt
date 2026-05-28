@@ -709,6 +709,8 @@ HTML;
         echo file_get_contents("LICENSE");
         echo '-->';
         echo '<meta name="viewport" content="width=device-width, initial-scale=1" />';
+        echo '<meta name="csrf-token" content="'
+            . htmlspecialchars(FormHelper::csrfToken(), ENT_QUOTES, 'UTF-8') . '" />';
         echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
         echo '<link rel="apple-touch-icon" href="' . $icon180 . '" />';
         echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
@@ -766,6 +768,8 @@ HTML;
         echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
         $basePath = htmlspecialchars(UrlUtilities::getBasePath(), ENT_QUOTES, 'UTF-8');
         echo '<meta name="lwt-base-path" content="' . $basePath . '" />';
+        echo '<meta name="csrf-token" content="'
+            . htmlspecialchars(FormHelper::csrfToken(), ENT_QUOTES, 'UTF-8') . '" />';
         echo '<link rel="shortcut icon" href="' . $favicon . '" type="image/x-icon"/>';
         echo '<link rel="apple-touch-icon" href="' . $icon180 . '" />';
         echo '<link rel="manifest" href="' . UrlUtilities::url('/assets/manifest.json') . '" />';
