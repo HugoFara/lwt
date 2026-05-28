@@ -75,17 +75,18 @@ class ReviewController extends BaseController
      *
      * @param array $params Route parameters
      *
-     * @return void
+     * @return \Lwt\Shared\Infrastructure\Http\RedirectResponse|null Redirect when no review context, null when the page rendered
      */
-    public function index(array $params): void
+    public function index(array $params): ?\Lwt\Shared\Infrastructure\Http\RedirectResponse
     {
         $property = $this->getReviewProperty();
 
         if ($property === '') {
-            $this->redirect('/text/edit');
+            return $this->redirect('/text/edit');
         }
 
         $this->renderReviewPage();
+        return null;
     }
 
     /**
