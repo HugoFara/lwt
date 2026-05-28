@@ -361,6 +361,15 @@ class Router
         $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
         $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+        // RFC 7231 §4.3.2: a HEAD response MUST be identical to GET except
+        // for the absence of a body. Apache strips the body automatically,
+        // but we have to route HEAD to the GET handler ourselves — otherwise
+        // every GET-only route 404s on HEAD probes (health checks, link
+        // checkers, search crawlers).
+        if ($requestMethod === 'HEAD') {
+            $requestMethod = 'GET';
+        }
+
         // Parse URL to extract path and query string
         $parsedUrl = parse_url($requestUri);
         $path = $parsedUrl['path'] ?? '/';
