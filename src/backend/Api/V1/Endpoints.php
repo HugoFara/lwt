@@ -108,6 +108,16 @@ class Endpoints
         'tts/voices/installed' => ['GET'],
         'tts/voices/download' => ['POST'],
         'tts/speak' => ['POST'],
+
+        // Whisper transcription endpoints (Whisper via NLP microservice).
+        // First-segment fallback in getMethodsForEndpoint resolves dynamic
+        // subpaths like whisper/status/{job_id}, whisper/result/{job_id},
+        // and whisper/job/{job_id} against this entry.
+        'whisper' => ['GET', 'POST', 'DELETE'],
+        'whisper/available' => ['GET'],
+        'whisper/languages' => ['GET'],
+        'whisper/models' => ['GET'],
+        'whisper/transcribe' => ['POST'],
     ];
 
     /**

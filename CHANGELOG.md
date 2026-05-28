@@ -18,6 +18,17 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Whisper transcription unreachable — endpoints unregistered**:
+  `ApiV1::HANDLER_MAP` mapped `'whisper' → WhisperApiHandler::class`
+  and the handler implemented `routeGet` / `routePost` / `routeDelete`,
+  but `Endpoints::ROUTES` had no `'whisper'` entry. `/api/v1/whisper/*`
+  always 404'd before reaching the handler, so the audio-import flow
+  on the text-edit form never even started its availability check.
+  Added the whisper paths to the routes registry (GET for available /
+  languages / models / status / result, POST for transcribe, DELETE
+  for job/{id}; first-segment fallback resolves the dynamic
+  `{job_id}` subpaths).
+
 * **fetch-based DELETE/PUT/POST silently 403'd from CSRF**: the
   shared API client (`apiPost`, `apiPut`, `apiDelete`) and the
   local `handleRestDelete` callers (texts grouped app, archived
