@@ -18,6 +18,14 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Whisper transcription failed: ffmpeg missing in NLP container**:
+  Once the registration + shape + CSRF fixes let a transcribe job
+  actually reach the Python service, `whisper.transcribe` died with
+  `[Errno 2] No such file or directory: 'ffmpeg'`. openai-whisper
+  shells out to ffmpeg for audio decoding; the lwt_nlp Dockerfile
+  installed mecab + curl but not ffmpeg. Added ffmpeg to the apt
+  install.
+
 * **Whisper response shape mismatch — frontend always saw
   "unavailable"**: every fetch in `whisper_import.ts` read
   `data.data?.field`, but `Response::success()` sends payloads

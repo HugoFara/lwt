@@ -1,8 +1,12 @@
 FROM python:3.11-slim-bookworm
 
-# Install system dependencies for MeCab and Piper
+# Install system dependencies for MeCab, Piper and Whisper.
+# openai-whisper shells out to ffmpeg for audio decoding; without it
+# every transcribe job dies with "[Errno 2] No such file or directory:
+# 'ffmpeg'" no matter how healthy the model load looks.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     mecab mecab-ipadic-utf8 libmecab-dev \
+    ffmpeg \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
