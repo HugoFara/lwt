@@ -18,6 +18,25 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Saving a new text in a language with multi-word expressions threw 500**
+  in multi-user mode: `TextParsingPersistence::registerSentencesTextItems`
+  (and its twin in `ParsingCoordinator`) built the multi-word
+  `INSERT INTO word_occurrences ... UNION ALL ...` with six positional
+  bindings, then concatenated two `UserScopedQuery::forTablePrepared()`
+  calls into the SQL — each of which injects ` AND WoUsID = ?` AND
+  appends `$userId` to the **end** of the bindings array. The two new
+  `?` placeholders land at SQL positions 3 and 8, but the corresponding
+  user IDs go to bindings 7 and 8, shifting every value after position
+  2 by one slot. The result swapped `Ti2LgID`/`Ti2TxID` in the UNION
+  branch and triggered an FK violation on `word_occurrences`,
+  surfacing as "A database error occurred" after the text row had
+  already been inserted (so the text appeared in /texts with zero
+  sentences). Rebuilt the SQL/bindings in lockstep so each
+  `forTablePrepared()` runs at the exact position its injected `?`
+  occupies, keeping placeholders and values aligned. Single-word
+  language paths (no multi-word expressions yet) were unaffected and
+  worked by accident — only one trailing injection, correct order.
+
 * **Saving 2+ tags on a term/text threw "An unexpected error occurred"**:
   Tagify in the term and text edit forms serializes every selected tag
   into a single comma-joined string posted under one

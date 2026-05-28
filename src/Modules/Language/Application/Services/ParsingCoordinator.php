@@ -290,25 +290,34 @@ class ParsingCoordinator
 
         // Insert text items
         if ($hasmultiword) {
-            $bindings = [$lid, $tid, $lid, $lid, $tid, $lid];
-            $stmt = Connection::prepare(
-                "INSERT INTO word_occurrences (
-                    Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
-                ) SELECT WoID, ?, ?, sent, TiOrder - (2*(n-1)) TiOrder,
-                n TiWordCount, word
-                FROM tempexprs
-                JOIN words
-                ON WoTextLC = lword AND WoWordCount = n"
+            // Build SQL and bindings in lockstep so that the two user-scope
+            // injections inside the UNION land in left-to-right placeholder
+            // order. Pre-bundling all six values up-front and appending the
+            // two $userIds at the end mismatches positions 3-7 and swaps
+            // Ti2LgID/Ti2TxID, triggering an FK violation on word_occurrences.
+            $bindings = [$lid, $tid];
+            $sql = "INSERT INTO word_occurrences (
+                Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text
+            ) SELECT WoID, ?, ?, sent, TiOrder - (2*(n-1)) TiOrder,
+            n TiWordCount, word
+            FROM tempexprs
+            JOIN words
+            ON WoTextLC = lword AND WoWordCount = n"
                 . UserScopedQuery::forTablePrepared('words', $bindings, '')
-                . " WHERE lword IS NOT NULL AND WoLgID = ?
-                UNION ALL
-                SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
-                FROM temp_word_occurrences
-                LEFT JOIN words
-                ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?"
-                . UserScopedQuery::forTablePrepared('words', $bindings, '')
-                . " ORDER BY TiOrder, TiWordCount"
-            );
+                . " WHERE lword IS NOT NULL AND WoLgID = ?";
+            $bindings[] = $lid;
+            $bindings[] = $lid;
+            $bindings[] = $tid;
+            $sql .= " UNION ALL
+            SELECT WoID, ?, ?, TiSeID, TiOrder, TiWordCount, TiText
+            FROM temp_word_occurrences
+            LEFT JOIN words
+            ON LOWER(TiText) = WoTextLC AND TiWordCount=1 AND WoLgID = ?";
+            $bindings[] = $lid;
+            $sql .= UserScopedQuery::forTablePrepared('words', $bindings, '')
+                . " ORDER BY TiOrder, TiWordCount";
+
+            $stmt = Connection::prepare($sql);
             $stmt->bindValues($bindings);
             $stmt->execute();
         } else {
