@@ -56,7 +56,7 @@ echo PageLayoutHelper::buildActionCard(
 ?>
 
 <!-- Alpine.js container for grouped archived texts -->
-<div x-data="archivedTextsGroupedApp()" x-init="init()" x-cloak>
+<div x-data="archivedTextsGroupedApp" x-init="init()" x-cloak>
 
     <!-- Loading state -->
     <div x-show="loading" class="has-text-centered py-6">
@@ -73,9 +73,7 @@ echo PageLayoutHelper::buildActionCard(
                 <div class="level-item">
                     <span
                         class="has-text-weight-semibold"
-                        x-text="languages.reduce((sum, lang) => sum + lang.text_count, 0)
-                            + ' archived texts in ' + languages.length + ' language'
-                            + (languages.length === 1 ? '' : 's')"></span>
+                        x-text="totalArchivedSummary()"></span>
                 </div>
             </div>
             <div class="level-right">
@@ -108,18 +106,15 @@ echo PageLayoutHelper::buildActionCard(
                     <span x-text="lang.name"></span>
                     <span
                         class="tag is-warning ml-2"
-                        x-text="lang.text_count + ' archived text'
-                            + (lang.text_count === 1 ? '' : 's')"></span>
+                        x-text="archivedCountLabel(lang.text_count)"></span>
                 </p>
                 <button
                     class="card-header-icon"
                     type="button"
-                    :aria-label="isCollapsed(lang.id)
-                        ? 'Expand ' + lang.name + ' texts'
-                        : 'Collapse ' + lang.name + ' texts'"
+                    :aria-label="collapseAriaLabel(lang.id, lang.name)"
                     :aria-expanded="!isCollapsed(lang.id)">
                     <span class="icon">
-                        <i :data-lucide="isCollapsed(lang.id) ? 'chevron-right' : 'chevron-down'"></i>
+                        <i :data-lucide="chevronIcon(lang.id)"></i>
                     </span>
                 </button>
             </header>
@@ -247,9 +242,7 @@ echo PageLayoutHelper::buildActionCard(
                                     </a>
                                     <a
                                         class="card-footer-item has-text-danger"
-                                        @click.prevent="handleRestDelete(
-                                            $event, '/text/archived/' + text.id
-                                        )">
+                                        @click.prevent="handleRestDelete($event, '/text/archived/' + text.id)">
                                         <?php echo IconHelper::render('trash-2', ['size' => 16]); ?>
                                         <span><?= __e('text.common.delete') ?></span>
                                     </a>

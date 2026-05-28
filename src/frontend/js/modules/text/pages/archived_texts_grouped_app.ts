@@ -133,6 +133,14 @@ export interface ArchivedTextsGroupedData {
 
   // Utility
   parseTags(tagList: string): string[];
+
+  // CSP-friendly view helpers — Alpine's CSP build can't eval arrow
+  // functions or chained array methods, so any complex inline
+  // expression has to live on the component instead.
+  totalArchivedSummary(): string;
+  archivedCountLabel(text_count: number): string;
+  collapseAriaLabel(langId: number, langName: string): string;
+  chevronIcon(langId: number): string;
 }
 
 /**
@@ -464,6 +472,27 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
         return [];
       }
       return tagList.split(',').map(t => t.trim()).filter(t => t !== '');
+    },
+
+    // CSP-friendly helpers used by the template (see interface).
+    totalArchivedSummary(): string {
+      let total = 0;
+      for (const lang of this.languages) {
+        total += lang.text_count;
+      }
+      const plural = this.languages.length === 1 ? '' : 's';
+      return `${total} archived texts in ${this.languages.length} language${plural}`;
+    },
+    archivedCountLabel(text_count: number): string {
+      return text_count + ' archived text' + (text_count === 1 ? '' : 's');
+    },
+    collapseAriaLabel(langId: number, langName: string): string {
+      return this.isCollapsed(langId)
+        ? 'Expand ' + langName + ' texts'
+        : 'Collapse ' + langName + ' texts';
+    },
+    chevronIcon(langId: number): string {
+      return this.isCollapsed(langId) ? 'chevron-right' : 'chevron-down';
     }
   };
 }

@@ -18,6 +18,15 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **CSP parser errors on archived-texts page**: Alpine's CSP build
+  rejected `x-data="archivedTextsGroupedApp()"` (function-call
+  syntax forbidden when component is registered via `Alpine.data`)
+  and choked on inline `x-text="languages.reduce((sum, lang) => …)"`
+  (arrow function with comma between params). Switched to
+  `x-data="archivedTextsGroupedApp"` and moved the three complex
+  expressions (`totalArchivedSummary`, `archivedCountLabel`,
+  `collapseAriaLabel` / `chevronIcon`) into component methods.
+
 * **User-scoped settings silently dropped in multi-user mode**: every
   per-user preference POST (theme, current language, reader text
   size, app language, …) appeared to succeed but never persisted.
