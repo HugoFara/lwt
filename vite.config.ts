@@ -102,6 +102,14 @@ export default defineConfig({
   root: resolve(__dirname, 'src/frontend'),
   publicDir: false,
 
+  // Built assets are served from /dist/ via index.php + .htaccess. Vite's
+  // runtime preload helper prepends this base to chunk URLs in
+  // <link rel="modulepreload">, so without it the helper emits /js/... and
+  // we'd have to redirect — which breaks under TLS-terminating proxies
+  // because mod_alias-style redirects emit the request scheme (http) for
+  // the Location header.
+  base: '/dist/',
+
   esbuild: {
     drop: ['console', 'debugger'],
   },
