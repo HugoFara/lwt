@@ -15,13 +15,17 @@
         Require all denied
     </FilesMatch>
 
-    # Legacy asset redirects (for backward compatibility, can remove in future)
-    RedirectMatch 301 ^/icn/(.*)$ /assets/icons/$1
-    RedirectMatch 301 ^/img/(.*)$ /assets/images/$1
-    RedirectMatch 301 ^/css/(.*)$ /dist/css/$1
-    RedirectMatch 301 ^/js/(.*)$ /dist/js/$1
-    RedirectMatch 301 ^/themes/(.*)$ /dist/themes/$1
-    RedirectMatch 301 ^/sounds/(.*)$ /assets/sounds/$1
+    # Legacy asset paths: internal rewrites (no client-visible redirect).
+    # Using RewriteRule instead of RedirectMatch avoids a 301 Location header
+    # that mod_alias would emit with the request scheme. Behind a TLS-terminating
+    # proxy that forwards plain HTTP, that Location ends up as http://... and the
+    # browser blocks it as mixed content for module imports from an https page.
+    RewriteRule ^icn/(.*)$    /assets/icons/$1  [L]
+    RewriteRule ^img/(.*)$    /assets/images/$1 [L]
+    RewriteRule ^css/(.*)$    /dist/css/$1      [L]
+    RewriteRule ^js/(.*)$     /dist/js/$1       [L]
+    RewriteRule ^themes/(.*)$ /dist/themes/$1   [L]
+    RewriteRule ^sounds/(.*)$ /assets/sounds/$1 [L]
 
     # Allow direct access to assets (CSS, JS, images, fonts)
     RewriteCond %{REQUEST_FILENAME} -f
