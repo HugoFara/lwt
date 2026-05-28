@@ -104,23 +104,14 @@ class Settings
         $userId = Globals::getCurrentUserId();
         $isUserScope = SettingDefinitions::getScope($key) === SettingDefinitions::SCOPE_USER;
 
-
-
         // For user-scoped settings in multi-user mode, try user-specific row first
         if ($userId !== null && $isUserScope) {
             try {
                 $val = (string) Connection::preparedFetchValue(
                     "SELECT StValue FROM settings WHERE StKey = ? AND StUsID = ?",
-                    [$key, $userId]
+                    [$key, $userId],
+                    'StValue'
                 );
-                if ($key === 'set-theme-dir') {
-                    error_log(sprintf(
-                        'LWT_DEBUG getWithDefault user-row k=%s userId=%d val=%s',
-                        $key,
-                        $userId,
-                        var_export($val, true)
-                    ));
-                }
                 if ($val !== '') {
                     return trim($val);
                 }
@@ -212,30 +203,11 @@ class Settings
                 $v = $default;
             }
         }
-        $rows = Connection::preparedExecute(
+        Connection::preparedExecute(
             "INSERT INTO settings (StKey, StUsID, StValue) VALUES (?, ?, ?)
              ON DUPLICATE KEY UPDATE StValue = ?",
             [$k, $userId, (string)$v, (string)$v]
         );
-        // TEMP DEBUG
-        error_log(sprintf(
-            'LWT_DEBUG saveForUser k=%s userId=%d value=%s affectedRows=%d',
-            $k,
-            $userId,
-            (string)$v,
-            $rows
-        ));
-        // Read back immediately to detect any transactional weirdness
-        $back = Connection::preparedFetchValue(
-            "SELECT StValue FROM settings WHERE StKey = ? AND StUsID = ?",
-            [$k, $userId]
-        );
-        error_log(sprintf(
-            'LWT_DEBUG saveForUser readback k=%s userId=%d val=%s',
-            $k,
-            $userId,
-            var_export($back, true)
-        ));
     }
 
     /**
