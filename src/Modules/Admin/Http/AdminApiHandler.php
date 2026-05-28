@@ -20,6 +20,8 @@ namespace Lwt\Modules\Admin\Http;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
+use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Modules\Admin\Domain\SettingDefinitions;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
@@ -82,7 +84,17 @@ class AdminApiHandler implements ApiRoutableInterface
     public function saveSetting(string $key, string $value): array
     {
         try {
-            Settings::save($key, $value);
+            // USER-scoped settings must persist under the current user's
+            // StUsID so Settings::getWithDefault() can read them back —
+            // it deliberately skips the StUsID=0 row for USER keys to
+            // avoid leaking another user's choice into a fresh session.
+            $userId = Globals::getCurrentUserId();
+            $isUserScope = SettingDefinitions::getScope($key) === SettingDefinitions::SCOPE_USER;
+            if ($userId !== null && $isUserScope) {
+                Settings::saveForUser($key, $value, $userId);
+            } else {
+                Settings::save($key, $value);
+            }
             $result = ["message" => "Setting saved"];
 
             // For language changes, include the text count and last text info for that language
