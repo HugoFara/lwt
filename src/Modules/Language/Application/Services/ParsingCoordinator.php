@@ -166,7 +166,7 @@ class ParsingCoordinator
         if ($nextSeID <= 0) {
             $bindings = [];
             $nextSeID = (int) Connection::preparedFetchValue(
-                "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
+                "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences WHERE 1=1"
                 . UserScopedQuery::forTablePrepared('sentences', $bindings),
                 $bindings
             );

@@ -281,12 +281,13 @@ class ImportUtilities
     public function linkWordsToTextItems(): void
     {
         $bindings = [];
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         $sql = "UPDATE words
             JOIN word_occurrences
-            ON WoWordCount=1 AND Ti2WoID IS NULL AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID
-            SET Ti2WoID=WoID"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
-        Connection::execute($sql);
+            ON WoWordCount=1 AND Ti2WoID IS NULL AND lower(Ti2Text)=WoTextLC AND Ti2LgID = WoLgID"
+            . $userScope
+            . " SET Ti2WoID=WoID";
+        Connection::preparedExecute($sql, $bindings);
     }
 
     /**

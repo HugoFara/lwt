@@ -226,7 +226,7 @@ class WordBulkService
         $bindings = [];
         /** @var int $max */
         $max = (int) Connection::preparedFetchValue(
-            "SELECT COALESCE(MAX(WoID), 0) AS max_id FROM words"
+            "SELECT COALESCE(MAX(WoID), 0) AS max_id FROM words WHERE 1=1"
             . UserScopedQuery::forTablePrepared('words', $bindings),
             $bindings,
             'max_id'
