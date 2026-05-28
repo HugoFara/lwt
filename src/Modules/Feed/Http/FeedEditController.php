@@ -380,6 +380,15 @@ class FeedEditController
         $languages = $this->languageFacade->getLanguagesForSelect();
         $curatedFeeds = $this->loadCuratedFeeds();
         $currentLanguageId = (int) Settings::get('currentlanguage');
+        // A user who just created their first language hasn't toggled the
+        // navbar dropdown, so 'currentlanguage' is unset. Fall back to the
+        // first language in their list — without this, the curated-feed
+        // wizard posts NfLgID=0 and the server rejects with 500.
+        if ($currentLanguageId === 0 && !empty($languages)) {
+            /** @var array{LgID: int|string} $first */
+            $first = $languages[0];
+            $currentLanguageId = (int) $first['LgID'];
+        }
         $currentLanguageName = $this->languageFacade->getLanguageName($currentLanguageId);
 
         include $this->viewPath . 'wizard_step1.php';
