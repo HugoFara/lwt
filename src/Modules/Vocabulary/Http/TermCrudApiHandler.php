@@ -667,32 +667,30 @@ class TermCrudApiHandler
         $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
-        // Use raw SQL for complex INSERT with dynamic columns
+        // Use raw SQL for complex INSERT with dynamic columns.
+        // INSERT cannot use forTablePrepared (which appends " AND … = ?",
+        // syntactically nonsensical after VALUES). Inject the user-scope
+        // column + value into the column/value lists instead.
         $bindings = [
             $langId, $textLc, $wordText, $lemma, $lemmaLc,
             $status, $translation, $sentence, $notes, $romanization
         ];
+        $userScopeColumn = '';
+        $userScopeValue = '';
+        $userIdForInsert = UserScopedQuery::getUserIdForInsert('words');
+        if ($userIdForInsert !== null) {
+            $userScopeColumn = ', WoUsID';
+            $userScopeValue = ', ?';
+            $bindings[] = $userIdForInsert;
+        }
         $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoLemma, WoLemmaLC, WoStatus, WoTranslation,
                 WoSentence, WoNotes, WoRomanization, WoStatusChanged,
-                {$scoreColumns}
-            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues})"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+                {$scoreColumns}{$userScopeColumn}
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), {$scoreValues}{$userScopeValue})";
 
         $stmt = Connection::prepare($sql);
-        $stmt->bind(
-            'issssissss',
-            $langId,
-            $textLc,
-            $wordText,
-            $lemma,
-            $lemmaLc,
-            $status,
-            $translation,
-            $sentence,
-            $notes,
-            $romanization
-        );
+        $stmt->bindValues($bindings);
         $affected = $stmt->execute();
 
         if ($affected != 1) {

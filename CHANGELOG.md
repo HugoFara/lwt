@@ -18,6 +18,17 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Saving a new term via the word popup's full edit form 500'd in
+  multi-user mode**: `TermCrudApiHandler::createTermFull` appended
+  `UserScopedQuery::forTablePrepared('words', …)` (which yields
+  `" AND WoUsID = ?"`) to an `INSERT INTO words … VALUES (…)` —
+  that fragment is meaningless after `VALUES` and MariaDB rejects
+  it. INSERT user-scoping has its own helper:
+  `UserScopedQuery::getUserIdForInsert('words')` returns the
+  user ID to add to the column/value lists. Switched to that and
+  also moved off the legacy `bind('issssissss', …)` type-string
+  call (the dynamic-binding count made it brittle).
+
 * **Feed article-import error messages were unreadable HTML**: when
   the article-section selector found no text in an upstream page,
   `ArticleExtractor::formatErrorMessage` emitted a string with `<a>`
