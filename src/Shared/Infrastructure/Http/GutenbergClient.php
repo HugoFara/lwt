@@ -30,12 +30,19 @@ class GutenbergClient
     /**
      * Gutendex API base URL.
      */
-    private const API_BASE = 'https://gutendex.com/books';
+    // Trailing slash matters: hitting /books without it produces a 301 to
+    // /books/ which doubles the round-trip and pushes the upstream past our
+    // TIMEOUT on production. Request the canonical URL directly.
+    private const API_BASE = 'https://gutendex.com/books/';
 
     /**
      * HTTP fetch timeout in seconds.
      */
-    private const TIMEOUT = 10;
+    // Gutendex can take 30+ s to respond from some networks (notably small
+    // VPSes). The result is cached per-language, so a slow first request is
+    // acceptable; what's not acceptable is timing out before reaching the
+    // cache-fill path and leaving the suggestions panel permanently empty.
+    private const TIMEOUT = 60;
 
     /**
      * Common language name to ISO 639-1 code mapping.
