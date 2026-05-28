@@ -18,6 +18,27 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Saving 2+ tags on a term/text threw "An unexpected error occurred"**:
+  Tagify in the term and text edit forms serializes every selected tag
+  into a single comma-joined string posted under one
+  `TermTags[TagList][]` / `TextTags[TagList][]` field. The
+  `saveWordTagsFromForm` / `saveTextTagsFromForm` /
+  `saveArchivedTextTagsFromForm` services treated each array entry as a
+  single tag name and passed it straight to `Tag::create`, which
+  enforces a 20-char limit and then threw `InvalidArgumentException`
+  whenever two tags' combined stripped length exceeded the cap. Split
+  each entry on commas in the service layer so individual tags are
+  created and linked correctly regardless of how Tagify serializes.
+
+* **Multi-word term selection captured inline translation hints**:
+  selecting "petit" (translated as "small") in the reader pre-filled
+  the new-expression modal with `petitsmall` because
+  `text_multiword_selection.ts`/`getSelectedText` walked `el.textContent`
+  on `.word` spans — which include a child `<span class="word-ann">`
+  that renders the translation hint. Extract the surface form via the
+  `data_hex` attribute (fallback: first text node) so the modal
+  pre-fills with the clean term text.
+
 * **Archive / Unarchive from the texts cards 403'd on CSRF**:
   `handlePostAction` in `texts_grouped_app.ts` and
   `archived_texts_grouped_app.ts` built an empty form and submitted

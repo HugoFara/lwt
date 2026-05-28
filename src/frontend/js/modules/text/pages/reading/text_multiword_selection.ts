@@ -72,6 +72,25 @@ function getSelectedWords(container: HTMLElement): HTMLElement[] {
 }
 
 /**
+ * Get the surface text of a single word span, ignoring any inline annotation
+ * children (e.g. <span class="word-ann"> that renders the translation hint).
+ *
+ * Prefers data_hex (canonical surface form set server-side); falls back to
+ * the first text-node child when missing.
+ */
+function getWordSurface(el: HTMLElement): string {
+  const hex = el.getAttribute('data_hex');
+  if (hex !== null && hex !== '') return hex;
+  for (const node of Array.from(el.childNodes)) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const t = node.textContent;
+      if (t && t.trim() !== '') return t;
+    }
+  }
+  return el.textContent || '';
+}
+
+/**
  * Get the combined text from selected word elements.
  * Extends partial selections to complete words and includes spaces/punctuation between.
  *
@@ -80,7 +99,7 @@ function getSelectedWords(container: HTMLElement): HTMLElement[] {
  */
 function getSelectedText(words: HTMLElement[], container: HTMLElement): string {
   if (words.length === 0) return '';
-  if (words.length === 1) return words[0].textContent || '';
+  if (words.length === 1) return getWordSurface(words[0]);
 
   const firstWord = words[0];
   const lastWord = words[words.length - 1];
@@ -117,8 +136,8 @@ function getSelectedText(words: HTMLElement[], container: HTMLElement): string {
     }
 
     if (collecting) {
-      const elContent = el.textContent || '';
       const isWord = el.classList.contains('wsty');
+      const elContent = isWord ? getWordSurface(el as HTMLElement) : (el.textContent || '');
 
       // Add a space before this word if the previous element was also a word
       // (meaning there's no punctuation/space element between them)

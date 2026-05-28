@@ -156,7 +156,19 @@ class TermTagService
 
         /** @var array<int|string, scalar> $tagList */
         $tagList = $termTags['TagList'];
-        $tagNames = array_map('strval', $tagList);
+        // Tagify serializes multiple tags into a single comma-joined string
+        // posted under one TermTags[TagList][] field. Split on commas so each
+        // tag is created/linked individually; otherwise two tags whose
+        // combined length exceeds MAX_TEXT_LENGTH (20) throw on validation.
+        $tagNames = [];
+        foreach ($tagList as $entry) {
+            foreach (explode(',', (string) $entry) as $part) {
+                $part = trim($part);
+                if ($part !== '') {
+                    $tagNames[] = $part;
+                }
+            }
+        }
         self::saveWordTags($wordId, $tagNames);
     }
 

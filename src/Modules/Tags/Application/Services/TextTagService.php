@@ -139,7 +139,7 @@ class TextTagService
 
         /** @var array<int|string, scalar> $tagList */
         $tagList = $textTags['TagList'];
-        $tagNames = array_map('strval', $tagList);
+        $tagNames = self::flattenTagList($tagList);
         self::saveTextTags($textId, $tagNames);
     }
 
@@ -165,8 +165,34 @@ class TextTagService
 
         /** @var array<int|string, scalar> $tagList */
         $tagList = $textTags['TagList'];
-        $tagNames = array_map('strval', $tagList);
+        $tagNames = self::flattenTagList($tagList);
         self::saveArchivedTextTags($textId, $tagNames);
+    }
+
+    /**
+     * Flatten Tagify-style form input into individual tag names.
+     *
+     * Tagify serializes multiple tags into a single comma-joined string
+     * posted under one TextTags[TagList][] field. Split on commas so each
+     * tag is created/linked individually; otherwise two tags whose
+     * combined length exceeds MAX_TEXT_LENGTH throw on validation.
+     *
+     * @param array<int|string, scalar> $tagList
+     *
+     * @return list<string>
+     */
+    private static function flattenTagList(array $tagList): array
+    {
+        $tagNames = [];
+        foreach ($tagList as $entry) {
+            foreach (explode(',', (string) $entry) as $part) {
+                $part = trim($part);
+                if ($part !== '') {
+                    $tagNames[] = $part;
+                }
+            }
+        }
+        return $tagNames;
     }
 
     // =====================
