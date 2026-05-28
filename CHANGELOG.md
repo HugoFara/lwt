@@ -18,6 +18,102 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **User-scoped settings silently dropped in multi-user mode**: every
+  per-user preference POST (theme, current language, reader text
+  size, app language, …) appeared to succeed but never persisted.
+  Two bugs cancelled out: `AdminApiHandler::saveSetting` always
+  wrote to `StUsID=0`, and `Settings::getWithDefault` for SCOPE_USER
+  keys read `Connection::preparedFetchValue("SELECT StValue …")`
+  with no column-name argument — `preparedFetchValue` defaults to
+  column key `'value'`, so `$row['value']` missed the actual
+  `StValue` and returned NULL. Route writes through
+  `Settings::saveForUser` and pass `'StValue'` as the explicit
+  column name on the read.
+
+* **Asset chunks broken on every HTTPS install behind a TLS proxy**:
+  Vite's runtime preload helper emitted `/js/vite/chunks/X.js`
+  links that the .htaccess shim 301-redirected to `/dist/js/…`. The
+  redirect inherited the request's scheme (HTTP from inside Apache)
+  so `<link rel="modulepreload">` resolved to `http://…/dist/X.js`
+  and Chrome blocked it as mixed content before the proxy's
+  HTTPS-upgrade could fire. Set Vite's `base: '/dist/'` so preload
+  URLs match the served path directly, and convert the legacy
+  asset paths in .htaccess from `RedirectMatch 301` to internal
+  `RewriteRule [L]` (no client-visible redirect).
+
+* **`POST /tags/new` and `POST /tags/text/new` returned 404**: only
+  the GET routes were registered, but the controllers' `new()`
+  methods handle both GET (show form) and POST (save). Creating a
+  term tag or text tag from the UI hit 404 instead of saving.
+
+* **Multi-user SQL queries broken when `MULTI_USER_ENABLED=true`**:
+  `UserScopedQuery::forTablePrepared()` returns `" AND ColUsID = ?"`,
+  but four `SELECT … FROM …` queries (GetTextForEdit,
+  GetTextForReading, ParsingCoordinator, WordBulkService) and one
+  `UPDATE … SET` in ImportUtilities had no WHERE clause for the
+  fragment to attach to. Visiting `/texts/new`, parsing some texts,
+  saving terms in bulk, and linking imported words to text items
+  all produced syntax-error 500s. Added a base `WHERE 1=1` on the
+  SELECTs and moved the user-scope predicate into the JOIN ON of
+  the UPDATE.
+
+* **Review page `/review` rendered a blank 200**:
+  `ReviewController::index()` was typed `: void` and discarded
+  the `RedirectResponse` returned by `$this->redirect('/text/edit')`.
+  Execution fell through to `renderReviewPage()` which emitted
+  nothing when `$property === ''`. Changed the signature to
+  `?RedirectResponse` and `return $this->redirect(...)`.
+
+* **Logout link was missing from the navbar dropdown**: the
+  `/logout` route existed but only Preferences, Profile, Admin,
+  and Help showed in the user dropdown — multi-user installs left
+  users unable to sign out from the UI. Added a Logout entry
+  (translated for all nine supported locales), gated on multi-user
+  mode.
+
+* **Service worker leaked previous user's chrome across sessions**:
+  the SW keyed cached HTML by URL with no awareness of user
+  identity, so when User A logged out and User B logged in in the
+  same browser, B briefly saw A's navbar (language list, streak
+  badge) until each page re-fetched. Purge the runtime cache on
+  navigations to `/login` and `/logout`; app-shell assets stay
+  cached.
+
+* **`HEAD` requests returned 404 on every GET-only route**: route
+  resolution looked up the literal request method, so HEAD on
+  `/login`, `/register`, `/password/forgot`, … all 404'd. RFC 7231
+  §4.3.2 says HEAD MUST mirror GET (minus the body) — Apache strips
+  the body automatically, so the router now treats HEAD as GET
+  during resolution.
+
+* **Glosbe dictionary links used `http://`**: three references
+  (`buildGlosbeUrl()` and two user-facing `<a>` tags in the
+  translation popup) emitted `http://glosbe.com/…` URLs that CSP's
+  `script-src-elem` blocked on HTTPS installs. Switched to
+  `https://glosbe.com/`. Also dropped the `de.` subdomain from the
+  language-wizard's default Dict 1 URL so non-German users don't
+  get the German UI by default.
+
+* **RSS feed wizard 500'd for users with one language**: a freshly
+  created user has no `currentlanguage` setting saved (the navbar
+  shows the only option by default), so the curated-feed wizard
+  posted `NfLgID=0` and `Feed::create()` rejected with "Language ID
+  must be positive". `FeedEditController::showNewForm()` now falls
+  back to the user's first language when `currentlanguage` is unset.
+
+* **Feed `ArticleExtractor` downgraded HTTPS feeds to HTTP**: when
+  an article href started with `..`, the absolute-URL reconstruction
+  hardcoded `'http://' . $feedHost['host']`. `parse_url()` had
+  already extracted the scheme two lines above — just read it.
+
+* **Gutenberg suggestions endpoint returned 502 on prod**: two
+  cumulative issues. `https://gutendex.com/books` 301-redirects to
+  `/books/` (trailing slash), doubling the round-trip; and the
+  10 s timeout was tight for the upstream's 20-60 s response time
+  from small VPSes. Hit the canonical URL with the trailing slash,
+  bump the timeout to 60 s. Results are cached per language+page
+  so the slow first request only happens once.
+
 * **HTTPS detection broken behind a TLS-terminating reverse proxy**
   (#234): when LWT runs behind Traefik / Caddy / nginx with TLS
   offloading, the connection from the proxy to LWT is plain HTTP and
