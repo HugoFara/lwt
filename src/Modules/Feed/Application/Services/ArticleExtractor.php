@@ -74,6 +74,9 @@ class ArticleExtractor
                     $data['error']['message'] = '';
                 }
                 $errorMsg = $this->formatErrorMessage($item);
+                if ($data['error']['message'] !== '') {
+                    $data['error']['message'] .= "\n";
+                }
                 $data['error']['message'] .= $errorMsg;
                 $data['error']['link'][] = $item['link'];
             } else {
@@ -659,15 +662,18 @@ class ArticleExtractor
     /**
      * Format error message for failed extraction.
      *
+     * Returns plain text suitable for JSON API responses and toast
+     * notifications. (Older code paths emitted HTML anchor markup
+     * here; nothing consumes the HTML form any more — modern UIs
+     * render this via Alpine's `x-text` which would otherwise show
+     * the tags as literal characters.)
+     *
      * @param array{link: string, title: string, audio?: string, text?: string} $item Feed item
      *
-     * @return string Error message HTML
+     * @return string Plain-text error message
      */
     private function formatErrorMessage(array $item): string
     {
-        return '"<a href="' . htmlspecialchars($item['link'], ENT_QUOTES, 'UTF-8') .
-            '" data-action="open-window" data-window-name="child">' .
-            htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') .
-            '</a>" has no text section!<br />';
+        return '"' . $item['title'] . '" has no text section (' . $item['link'] . ')';
     }
 }

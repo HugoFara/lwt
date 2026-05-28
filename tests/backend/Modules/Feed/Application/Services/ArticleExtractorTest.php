@@ -367,7 +367,7 @@ class ArticleExtractorTest extends TestCase
     // Private Method Tests via Reflection - formatErrorMessage()
     // =========================================================================
 
-    public function testFormatErrorMessageContainsLink(): void
+    public function testFormatErrorMessageContainsLinkAndTitle(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'formatErrorMessage');
         $method->setAccessible(true);
@@ -379,30 +379,17 @@ class ArticleExtractorTest extends TestCase
 
         $result = $method->invoke($this->extractor, $item);
 
-        $this->assertStringContainsString('href="https://example.com/article"', $result);
+        $this->assertStringContainsString('https://example.com/article', $result);
         $this->assertStringContainsString('Test Article', $result);
-        $this->assertStringContainsString('has no text section!', $result);
+        $this->assertStringContainsString('has no text section', $result);
     }
 
-    public function testFormatErrorMessageEscapesHtml(): void
+    public function testFormatErrorMessageReturnsPlainText(): void
     {
-        $method = new \ReflectionMethod(ArticleExtractor::class, 'formatErrorMessage');
-        $method->setAccessible(true);
-
-        $item = [
-            'link' => 'https://example.com/article?a=1&b=2',
-            'title' => '<script>alert(1)</script>',
-        ];
-
-        $result = $method->invoke($this->extractor, $item);
-
-        $this->assertStringContainsString('&amp;', $result);
-        $this->assertStringContainsString('&lt;script&gt;', $result);
-        $this->assertStringNotContainsString('<script>alert', $result);
-    }
-
-    public function testFormatErrorMessageIncludesDataAttributes(): void
-    {
+        // The error message is consumed as JSON and rendered via
+        // Alpine's x-text (textContent). It must not contain HTML
+        // markup — older callers rendered raw HTML; nothing does
+        // any more.
         $method = new \ReflectionMethod(ArticleExtractor::class, 'formatErrorMessage');
         $method->setAccessible(true);
 
@@ -410,8 +397,9 @@ class ArticleExtractorTest extends TestCase
 
         $result = $method->invoke($this->extractor, $item);
 
-        $this->assertStringContainsString('data-action="open-window"', $result);
-        $this->assertStringContainsString('data-window-name="child"', $result);
+        $this->assertStringNotContainsString('<a ', $result);
+        $this->assertStringNotContainsString('<br', $result);
+        $this->assertStringNotContainsString('data-action', $result);
     }
 
     // =========================================================================

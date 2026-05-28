@@ -18,6 +18,15 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Feed article-import error messages were unreadable HTML**: when
+  the article-section selector found no text in an upstream page,
+  `ArticleExtractor::formatErrorMessage` emitted a string with `<a>`
+  and `<br />` markup intended for legacy HTML rendering. Modern
+  toasts use Alpine's `x-text` which renders the tags as literal
+  characters. Switched to plain text (`"Title" has no text section
+  (URL)`) and added a newline separator when multiple errors
+  accumulate per feed.
+
 * **CSP parser errors on archived-texts page**: Alpine's CSP build
   rejected `x-data="archivedTextsGroupedApp()"` (function-call
   syntax forbidden when component is registered via `Alpine.data`)
