@@ -192,17 +192,26 @@ class TermTranslationApiHandler
         $scoreColumns = TermStatusService::makeScoreRandomInsertUpdate('iv');
         $scoreValues = TermStatusService::makeScoreRandomInsertUpdate('id');
 
-        // Use raw SQL for complex INSERT with dynamic columns
+        // Use raw SQL for complex INSERT with dynamic columns.
+        // INSERTs can't use forTablePrepared; inject WoUsID into the
+        // column/value list via getUserIdForInsert instead.
         $bindings = [$lang, $textlc, $text, $data, '', ''];
+        $userScopeColumn = '';
+        $userScopeValue = '';
+        $userIdForInsert = UserScopedQuery::getUserIdForInsert('words');
+        if ($userIdForInsert !== null) {
+            $userScopeColumn = ', WoUsID';
+            $userScopeValue = ', ?';
+            $bindings[] = $userIdForInsert;
+        }
         $sql = "INSERT INTO words (
                 WoLgID, WoTextLC, WoText, WoStatus, WoTranslation,
                 WoSentence, WoRomanization, WoStatusChanged,
-                {$scoreColumns}
-            ) VALUES(?, ?, ?, 1, ?, ?, ?, NOW(), {$scoreValues})"
-            . UserScopedQuery::forTablePrepared('words', $bindings);
+                {$scoreColumns}{$userScopeColumn}
+            ) VALUES(?, ?, ?, 1, ?, ?, ?, NOW(), {$scoreValues}{$userScopeValue})";
 
         $stmt = Connection::prepare($sql);
-        $stmt->bind('isssss', $lang, $textlc, $text, $data, '', '');
+        $stmt->bindValues($bindings);
         $affected = $stmt->execute();
 
         if ($affected != 1) {

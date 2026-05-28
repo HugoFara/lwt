@@ -18,6 +18,13 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Quick translation insert 500'd in multi-user mode**: third site
+  of the INSERT-misuse-of-forTablePrepared pattern.
+  `TermTranslationApiHandler::addNewTermTranslation` now uses
+  `getUserIdForInsert` to add `WoUsID` to the column/value list
+  instead of appending the meaningless `AND WoUsID = ?` fragment
+  to `VALUES(...)`.
+
 * **`INSERT IGNORE INTO text_tags` 500'd when importing a feed
   article in multi-user mode**: same INSERT-misuse-of-forTablePrepared
   pattern as the term-create bug. `TextCreationAdapter::createText`
