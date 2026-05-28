@@ -14,6 +14,7 @@
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
 import { t } from '@shared/i18n/translator';
+import { getCsrfToken } from '@shared/api/client';
 import {
   WordsApi,
   type WordItem,
@@ -721,6 +722,18 @@ export function wordListData(): WordListData {
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = '/words';
+
+      // CsrfMiddleware rejects POST/PUT/DELETE/PATCH without an
+      // _csrf_token field or X-CSRF-TOKEN header. Inject the token
+      // from the meta tag added in PageLayoutHelper.
+      const csrf = getCsrfToken();
+      if (csrf) {
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = '_csrf_token';
+        csrfField.value = csrf;
+        form.appendChild(csrfField);
+      }
 
       // Add marked IDs
       ids.forEach((id) => {

@@ -385,6 +385,17 @@ export function archivedTextsGroupedData(): ArchivedTextsGroupedData {
       form.method = 'POST';
       form.action = '/text/archived';
 
+      // CsrfMiddleware rejects POST/PUT/DELETE/PATCH without an
+      // _csrf_token field or X-CSRF-TOKEN header.
+      const csrf = getCsrfToken();
+      if (csrf) {
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = '_csrf_token';
+        csrfField.value = csrf;
+        form.appendChild(csrfField);
+      }
+
       // Add marked text IDs
       markedIds.forEach((id) => {
         const input = document.createElement('input');

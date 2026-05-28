@@ -18,6 +18,16 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Bulk vocabulary actions and texts/archived-texts bulk-action 403'd
+  on CSRF**: `submitExportForm` in `word_list_app.ts` and
+  `handleMultiAction` in `texts_grouped_app.ts` /
+  `archived_texts_grouped_app.ts` built dynamic POST forms (for Anki/TSV
+  export, multi-select status change, etc.) and submitted them without
+  a `_csrf_token` field. `CsrfMiddleware` rejected the requests. Inject
+  the token from the meta tag (same fix pattern as `handlePostAction`
+  in commit 8c1fc9b60). The feed wizards (step 1/2/3) and other static
+  forms were unaffected — they get `FormHelper::csrfField()` server-side.
+
 * **Saving a new text in a language with multi-word expressions threw 500**
   in multi-user mode: `TextParsingPersistence::registerSentencesTextItems`
   (and its twin in `ParsingCoordinator`) built the multi-word
