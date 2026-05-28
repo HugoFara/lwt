@@ -18,6 +18,19 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **fetch-based DELETE/PUT/POST silently 403'd from CSRF**: the
+  shared API client (`apiPost`, `apiPut`, `apiDelete`) and the
+  local `handleRestDelete` callers (texts grouped app, archived
+  texts grouped app, feed index, whisper, text-print annotation,
+  mark-all-wellknown/ignored) all sent the mutating fetch without
+  an `X-CSRF-TOKEN` header, so CsrfMiddleware rejected them.
+  Form-based POSTs were fine because the hidden `_csrf_token`
+  field was already part of the form. Added a CSRF meta tag
+  (`<meta name="csrf-token">`) to the page head and a `getCsrfToken()`
+  helper exported from the shared API client; the client and all
+  direct fetch callers now attach `X-CSRF-TOKEN` on state-changing
+  requests.
+
 * **Quick translation insert 500'd in multi-user mode**: third site
   of the INSERT-misuse-of-forTablePrepared pattern.
   `TermTranslationApiHandler::addNewTermTranslation` now uses

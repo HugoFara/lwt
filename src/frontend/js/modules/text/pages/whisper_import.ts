@@ -7,6 +7,8 @@
  * @since   3.0.0
  */
 
+import { getCsrfToken } from '@shared/api/client';
+
 /**
  * Transcription job status from the API.
  */
@@ -403,7 +405,12 @@ async function cancelTranscription(): Promise<void> {
   if (!currentJobId) return;
 
   try {
-    await fetch(`/api/v1/whisper/job/${currentJobId}`, { method: 'DELETE' });
+    const headers: Record<string, string> = {};
+    const csrf = getCsrfToken();
+    if (csrf) {
+      headers['X-CSRF-TOKEN'] = csrf;
+    }
+    await fetch(`/api/v1/whisper/job/${currentJobId}`, { method: 'DELETE', headers });
   } catch (e) {
     console.error('Failed to cancel job:', e);
   }

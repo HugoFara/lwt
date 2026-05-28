@@ -14,7 +14,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
-import { apiPost } from '@shared/api/client';
+import { apiPost, getCsrfToken } from '@shared/api/client';
 import {
   TextsApi,
   type PrintItem,
@@ -520,12 +520,14 @@ export function textPrintAppData(): TextPrintAppData {
 
     confirmDeleteAnnotation(textId: number, message: string) {
       if (confirm(message)) {
-        fetch(`/text/${textId}/annotation`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        };
+        const csrf = getCsrfToken();
+        if (csrf) {
+          headers['X-CSRF-TOKEN'] = csrf;
+        }
+        fetch(`/text/${textId}/annotation`, { method: 'DELETE', headers })
           .then((response) => {
             if (response.redirected) {
               window.location.href = response.url;

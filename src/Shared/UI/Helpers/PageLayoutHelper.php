@@ -480,11 +480,17 @@ HTML;
         $favicon = UrlUtilities::url('/favicon.ico');
         $icon180 = UrlUtilities::url('/assets/images/lwt_icon_180.png');
         $manifest = UrlUtilities::url('/assets/manifest.json');
+        $csrfToken = htmlspecialchars(
+            \Lwt\Shared\UI\Helpers\FormHelper::csrfToken(),
+            ENT_QUOTES,
+            'UTF-8'
+        );
 
         return <<<HTML
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="lwt-base-path" content="{$basePath}" />
+<meta name="csrf-token" content="{$csrfToken}" />
 <meta name="theme-color" content="#3273dc" />
 <link rel="shortcut icon" href="{$favicon}" type="image/x-icon"/>
 <link rel="apple-touch-icon" href="{$icon180}" />

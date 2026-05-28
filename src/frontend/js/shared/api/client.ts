@@ -33,6 +33,26 @@ function getBasePath(): string {
 }
 
 /**
+ * Read the CSRF token from `<meta name="csrf-token">`. Exported so
+ * non-API-client callers (handleRestDelete in texts_grouped_app, etc.)
+ * can attach the same `X-CSRF-TOKEN` header that CsrfMiddleware checks
+ * on POST/PUT/DELETE/PATCH.
+ */
+export function getCsrfToken(): string {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  return meta ? meta.getAttribute('content') || '' : '';
+}
+
+/**
+ * Build headers that include CSRF for state-changing requests.
+ */
+function withCsrf(headers: Record<string, string>): Record<string, string> {
+  const token = getCsrfToken();
+  if (!token) return headers;
+  return { ...headers, 'X-CSRF-TOKEN': token };
+}
+
+/**
  * Get the default API configuration.
  * Lazily reads base path from meta tag.
  */
@@ -159,7 +179,7 @@ export async function apiPost<T>(
   try {
     const response = await fetch(defaultConfig.baseUrl + endpoint, {
       method: 'POST',
-      headers: defaultConfig.defaultHeaders,
+      headers: withCsrf(defaultConfig.defaultHeaders ?? {}),
       body: JSON.stringify(body)
     });
 
@@ -196,7 +216,7 @@ export async function apiPut<T>(
   try {
     const response = await fetch(defaultConfig.baseUrl + endpoint, {
       method: 'PUT',
-      headers: defaultConfig.defaultHeaders,
+      headers: withCsrf(defaultConfig.defaultHeaders ?? {}),
       body: JSON.stringify(body)
     });
 
@@ -232,7 +252,7 @@ export async function apiDelete<T>(
   try {
     const options: RequestInit = {
       method: 'DELETE',
-      headers: defaultConfig.defaultHeaders
+      headers: withCsrf(defaultConfig.defaultHeaders ?? {})
     };
     if (body) {
       options.body = JSON.stringify(body);

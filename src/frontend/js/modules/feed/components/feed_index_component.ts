@@ -11,6 +11,7 @@
 import Alpine from 'alpinejs';
 import { setLang, resetAll } from '@modules/language/stores/language_settings';
 import { selectToggle, multiActionGo } from '@shared/forms/bulk_actions';
+import { getCsrfToken } from '@shared/api/client';
 
 /**
  * Configuration for the feed index component.
@@ -167,12 +168,14 @@ export function feedIndexData(config: FeedIndexConfig = {}): FeedIndexData {
     confirmDelete(feedId: string): void {
       if (confirm('Are you sure?')) {
         // Use fetch with DELETE method for RESTful deletion
-        fetch(`/feeds/${feedId}`, {
-          method: 'DELETE',
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        }).then(() => {
+        const headers: Record<string, string> = {
+          'X-Requested-With': 'XMLHttpRequest'
+        };
+        const csrf = getCsrfToken();
+        if (csrf) {
+          headers['X-CSRF-TOKEN'] = csrf;
+        }
+        fetch(`/feeds/${feedId}`, { method: 'DELETE', headers }).then(() => {
           location.href = '/feeds/manage';
         }).catch(() => {
           location.href = '/feeds/manage';

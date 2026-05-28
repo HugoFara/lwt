@@ -14,6 +14,7 @@
  */
 
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
+import { getCsrfToken } from '@shared/api/client';
 import { showAllwordsClick } from './ui_utilities';
 import { quickMenuRedirection } from './user_interactions';
 import { deleteTranslation, addTranslation } from '@modules/vocabulary/services/translation_api';
@@ -38,9 +39,14 @@ interface MarkAllWordsResponse {
  * @returns The API response with count and word data
  */
 async function markAllWellKnown(textId: string): Promise<MarkAllWordsResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const csrf = getCsrfToken();
+  if (csrf) {
+    headers['X-CSRF-TOKEN'] = csrf;
+  }
   const response = await fetch(`/api/v1/texts/${textId}/mark-all-wellknown`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' }
+    headers
   });
   if (!response.ok) {
     throw new Error(`Failed to mark words: ${response.statusText}`);
@@ -55,9 +61,14 @@ async function markAllWellKnown(textId: string): Promise<MarkAllWordsResponse> {
  * @returns The API response with count and word data
  */
 async function markAllIgnored(textId: string): Promise<MarkAllWordsResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const csrf = getCsrfToken();
+  if (csrf) {
+    headers['X-CSRF-TOKEN'] = csrf;
+  }
   const response = await fetch(`/api/v1/texts/${textId}/mark-all-ignored`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' }
+    headers
   });
   if (!response.ok) {
     throw new Error(`Failed to mark words: ${response.statusText}`);

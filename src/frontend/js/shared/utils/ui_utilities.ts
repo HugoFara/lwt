@@ -7,6 +7,7 @@
  */
 
 import { check } from '@shared/forms/form_validation';
+import { getCsrfToken } from '@shared/api/client';
 import { changeImprAnnText, changeImprAnnRadio, showSimilarTerms } from '@modules/vocabulary/services/term_operations';
 import { readRawTextAloud } from './user_interactions';
 import { initInlineEdit } from '@shared/components/inline_edit';
@@ -67,7 +68,12 @@ async function handleConfirmDelete(event: Event): Promise<void> {
   if (method?.toLowerCase() === 'delete' && href) {
     event.preventDefault();
     try {
-      const response = await fetch(href, { method: 'DELETE' });
+      const headers: Record<string, string> = {};
+      const csrf = getCsrfToken();
+      if (csrf) {
+        headers['X-CSRF-TOKEN'] = csrf;
+      }
+      const response = await fetch(href, { method: 'DELETE', headers });
       if (response.redirected) {
         window.location.href = response.url;
       } else if (response.ok) {

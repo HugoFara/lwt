@@ -13,7 +13,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
-import { apiGet } from '@shared/api/client';
+import { apiGet, getCsrfToken } from '@shared/api/client';
 import { TextsApi } from '@modules/text/api/texts_api';
 import { confirmDelete } from '@shared/utils/ui_utilities';
 
@@ -284,12 +284,14 @@ export function textsGroupedData(): TextsGroupedData {
     handleRestDelete(event: Event, url: string) {
       event.preventDefault();
       if (confirmDelete()) {
-        fetch(url, {
-          method: 'DELETE',
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-        }).then(() => {
+        const headers: Record<string, string> = {
+          'X-Requested-With': 'XMLHttpRequest',
+        };
+        const csrf = getCsrfToken();
+        if (csrf) {
+          headers['X-CSRF-TOKEN'] = csrf;
+        }
+        fetch(url, { method: 'DELETE', headers }).then(() => {
           window.location.reload();
         }).catch((error) => {
           console.error('Delete failed:', error);
