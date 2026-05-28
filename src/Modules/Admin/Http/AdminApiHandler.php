@@ -90,6 +90,15 @@ class AdminApiHandler implements ApiRoutableInterface
             // avoid leaking another user's choice into a fresh session.
             $userId = Globals::getCurrentUserId();
             $isUserScope = SettingDefinitions::getScope($key) === SettingDefinitions::SCOPE_USER;
+            // TEMP DEBUG: trace which write path is taken so we can tell whether
+            // the user context is correctly attached to API setting writes.
+            error_log(sprintf(
+                'LWT_DEBUG saveSetting key=%s isUserScope=%s userId=%s multiUser=%s',
+                $key,
+                $isUserScope ? 'true' : 'false',
+                $userId === null ? 'null' : (string) $userId,
+                Globals::isMultiUserEnabled() ? 'true' : 'false'
+            ));
             if ($userId !== null && $isUserScope) {
                 Settings::saveForUser($key, $value, $userId);
             } else {
