@@ -367,7 +367,9 @@ function registerRoutes(Router $router): void
     // ==================== TAG ROUTES (PROTECTED) ====================
 
     // Term tags (Tags module)
+    // The controller's new() handles both GET (show form) and POST (save).
     $router->get('/tags/new', 'Lwt\\Modules\\Tags\\Http\\TermTagController@new', AUTH_MIDDLEWARE);
+    $router->post('/tags/new', 'Lwt\\Modules\\Tags\\Http\\TermTagController@new', AUTH_MIDDLEWARE);
 
     // Edit term tag (RESTful route): GET/POST /tags/123/edit
     $router->get('/tags/{id:int}/edit', 'Lwt\\Modules\\Tags\\Http\\TermTagController@edit', AUTH_MIDDLEWARE);
@@ -379,7 +381,9 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware('/tags', 'Lwt\\Modules\\Tags\\Http\\TermTagController@index', AUTH_MIDDLEWARE);
 
     // Text tags (Tags module)
+    // Same pattern as term tags: controller's new() handles GET and POST.
     $router->get('/tags/text/new', 'Lwt\\Modules\\Tags\\Http\\TextTagController@new', AUTH_MIDDLEWARE);
+    $router->post('/tags/text/new', 'Lwt\\Modules\\Tags\\Http\\TextTagController@new', AUTH_MIDDLEWARE);
 
     // Edit text tag (RESTful route): GET/POST /tags/text/123/edit
     $router->get('/tags/text/{id:int}/edit', 'Lwt\\Modules\\Tags\\Http\\TextTagController@edit', AUTH_MIDDLEWARE);
@@ -598,9 +602,17 @@ function registerRoutes(Router $router): void
 
     // Password Reset - no auth required, rate limited on POST
     $router->register('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPasswordForm', 'GET');
-    $router->post('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPassword', [AuthRateLimitMiddleware::class]);
+    $router->post(
+        '/password/forgot',
+        'Lwt\\Modules\\User\\Http\\UserController@forgotPassword',
+        [AuthRateLimitMiddleware::class]
+    );
     $router->register('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPasswordForm', 'GET');
-    $router->post('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPassword', [AuthRateLimitMiddleware::class]);
+    $router->post(
+        '/password/reset',
+        'Lwt\\Modules\\User\\Http\\UserController@resetPassword',
+        [AuthRateLimitMiddleware::class]
+    );
 
     // ==================== WORDPRESS INTEGRATION (PUBLIC) ====================
 
