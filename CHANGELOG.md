@@ -18,6 +18,17 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Gutenberg / Library coverage stats silently failed**: same
+  `data.data?.X` mismatch as Whisper. `text_suggestions.ts` read
+  `/api/v1/texts/library-preview` as
+  `data.data && !data.error → data.data.total_words …`, but
+  `Response::success` sends payloads flat. Every preview hit the
+  `else` branch and `book.statsError = true`, so every book on
+  the Gutenberg suggestions panel showed a permanent stats-load
+  error instead of the coverage breakdown. Switched the guard
+  to `!data.error && data.total_words !== undefined` and read
+  the fields directly.
+
 * **Whisper transcription failed: ffmpeg missing in NLP container**:
   Once the registration + shape + CSRF fixes let a transcribe job
   actually reach the Python service, `whisper.transcribe` died with

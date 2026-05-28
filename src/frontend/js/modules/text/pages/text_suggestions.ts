@@ -173,17 +173,22 @@ export function gutenbergBrowserData(): GutenbergBrowserData {
           fetch(`/api/v1/texts/library-preview?${params}`)
             .then(r => r.json())
             .then(data => {
-              if (data.data && !data.error) {
+              // Response::success sends the payload flat (no `{data: …}`
+              // wrapper); presence of total_words confirms a usable
+              // analysis. Older code expected the wrap and read
+              // `data.data?.X` everywhere — those reads always
+              // produced undefined and statsError was set unconditionally.
+              if (!data.error && data.total_words !== undefined) {
                 book.stats = {
-                  totalWords: data.data.total_words || 0,
-                  totalUniqueWords: data.data.total_unique_words || 0,
-                  knownWords: data.data.known_words || 0,
-                  unknownWords: data.data.unknown_words || 0,
-                  coveragePercent: data.data.coverage_percent || 0,
+                  totalWords: data.total_words || 0,
+                  totalUniqueWords: data.total_unique_words || 0,
+                  knownWords: data.known_words || 0,
+                  unknownWords: data.unknown_words || 0,
+                  coveragePercent: data.coverage_percent || 0,
                 };
                 // Update difficulty from actual coverage analysis
-                if (data.data.difficulty_label) {
-                  book.difficultyTier = data.data.difficulty_label;
+                if (data.difficulty_label) {
+                  book.difficultyTier = data.difficulty_label;
                 }
               } else {
                 book.statsError = true;
