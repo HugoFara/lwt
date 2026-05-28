@@ -96,7 +96,7 @@ class TranslationService
      */
     public function buildGlosbeUrl(string $phrase, string $from, string $dest): string
     {
-        return 'http://glosbe.com/' . urlencode($from) . '/' . urlencode($dest) . '/' . urlencode($phrase);
+        return 'https://glosbe.com/' . urlencode($from) . '/' . urlencode($dest) . '/' . urlencode($phrase);
     }
 
     /**

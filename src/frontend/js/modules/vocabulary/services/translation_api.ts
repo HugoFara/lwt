@@ -160,7 +160,7 @@ export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
       if (data.dest !== 'en' && data.from !== 'en') {
         translationsEl.id = 'no_trans';
         translationsEl.insertAdjacentHTML('afterend',
-          '<hr /><p>&nbsp;</p><h3><a href="http://glosbe.com/' +
+          '<hr /><p>&nbsp;</p><h3><a href="https://glosbe.com/' +
           data.from + '/en/' + data.phrase + '">Glosbe Dictionary (' +
           data.from + '-en):  &nbsp; <span class="has-text-danger has-text-weight-bold">' +
           data.phrase + '</span></a></h3>&nbsp;<p id="translations"></p>'
@@ -173,7 +173,7 @@ export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
       translationsEl.insertAdjacentHTML('afterend',
         '<p>&nbsp;<br/>' + data.tuc.length + ' translation' +
         (data.tuc.length === 1 ? '' : 's') +
-        ' retrieved via <a href="http://glosbe.com/a-api" target="_blank">' +
+        ' retrieved via <a href="https://glosbe.com/a-api" target="_blank">' +
         'Glosbe API</a>.</p><hr />'
       );
     }
