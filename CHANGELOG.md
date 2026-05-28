@@ -18,6 +18,12 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **`INSERT IGNORE INTO text_tags` 500'd when importing a feed
+  article in multi-user mode**: same INSERT-misuse-of-forTablePrepared
+  pattern as the term-create bug. `TextCreationAdapter::createText`
+  now injects `T2UsID` into the column/value list when multi-user
+  is on, so the per-user composite primary key is respected.
+
 * **Saving a new term via the word popup's full edit form 500'd in
   multi-user mode**: `TermCrudApiHandler::createTermFull` appended
   `UserScopedQuery::forTablePrepared('words', …)` (which yields

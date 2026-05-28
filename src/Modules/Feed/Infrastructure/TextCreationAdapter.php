@@ -48,10 +48,20 @@ class TextCreationAdapter implements TextCreationInterface
     ): int {
         DB::beginTransaction();
         try {
-            // Ensure tag exists - use raw SQL for INSERT IGNORE
+            // Ensure tag exists - use raw SQL for INSERT IGNORE.
+            // forTablePrepared appends " AND T2UsID = ?" which is invalid
+            // after a VALUES clause; inject T2UsID into the column/value
+            // list instead so the row is correctly scoped to this user.
             $bindings = [$tagName];
-            $sql = "INSERT IGNORE INTO text_tags (T2Text) VALUES (?)"
-                . UserScopedQuery::forTablePrepared('text_tags', $bindings);
+            $userScopeColumn = '';
+            $userScopeValue = '';
+            $userIdForInsert = UserScopedQuery::getUserIdForInsert('text_tags');
+            if ($userIdForInsert !== null) {
+                $userScopeColumn = ', T2UsID';
+                $userScopeValue = ', ?';
+                $bindings[] = $userIdForInsert;
+            }
+            $sql = "INSERT IGNORE INTO text_tags (T2Text{$userScopeColumn}) VALUES (?{$userScopeValue})";
             Connection::preparedExecute($sql, $bindings);
 
             // Create the text
