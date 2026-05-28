@@ -220,7 +220,8 @@ class ArticleExtractor
                 if ($attr->name === 'href') {
                     $link = $attr->value;
                     if (str_starts_with($link, '..')) {
-                        $link = 'http://' . ($feedHost['host'] ?? 'localhost') .
+                        $scheme = $feedHost['scheme'] ?? 'http';
+                        $link = $scheme . '://' . ($feedHost['host'] ?? 'localhost') .
                             substr($link, 2);
                     }
                 }
