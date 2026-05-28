@@ -187,8 +187,12 @@ async function checkWhisperAvailable(): Promise<boolean> {
 
   try {
     const response = await fetch('/api/v1/whisper/available');
+    // The LWT API returns flat objects (Response::success sends the
+    // payload directly, no `{data: …}` wrapper). Older code in this
+    // file expected the wrap and read `data.data?.X` everywhere —
+    // none of those reads ever produced a value.
     const data = await response.json();
-    whisperAvailable = data.data?.available === true;
+    whisperAvailable = data.available === true;
     return whisperAvailable;
   } catch {
     whisperAvailable = false;
@@ -206,7 +210,7 @@ async function loadWhisperLanguages(): Promise<void> {
   try {
     const response = await fetch('/api/v1/whisper/languages');
     const data = await response.json();
-    const languages: LanguageOption[] = data.data?.languages ?? [];
+    const languages: LanguageOption[] = data.languages ?? [];
 
     // Keep auto-detect option, add languages
     select.innerHTML = '<option value="">Auto-detect</option>';
@@ -264,11 +268,11 @@ async function startTranscription(): Promise<void> {
       throw new Error(data.error || 'Failed to start transcription');
     }
 
-    if (!data.data?.job_id) {
+    if (!data.job_id) {
       throw new Error('No job_id returned');
     }
 
-    currentJobId = data.data.job_id;
+    currentJobId = data.job_id;
     updateProgress(5, 'Transcription started...');
     startPolling();
 
@@ -298,7 +302,7 @@ function startPolling(): void {
     try {
       const response = await fetch(`/api/v1/whisper/status/${currentJobId}`);
       const data = await response.json();
-      const status: TranscriptionStatus = data.data;
+      const status: TranscriptionStatus = data;
 
       updateProgress(status.progress, status.message || 'Processing...');
 
@@ -346,7 +350,7 @@ async function fetchResult(): Promise<void> {
       throw new Error(data.error || 'Failed to get result');
     }
 
-    const result: TranscriptionResult = data.data;
+    const result: TranscriptionResult = data;
 
     // Populate form fields
     setInputByName('TxText', result.text);

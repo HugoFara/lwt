@@ -118,6 +118,13 @@ class Endpoints
         'whisper/languages' => ['GET'],
         'whisper/models' => ['GET'],
         'whisper/transcribe' => ['POST'],
+
+        // YouTube transcript endpoints (Google API key required at runtime).
+        // routeGet branches on the first segment ('configured' or 'video');
+        // the segment-fallback below covers both.
+        'youtube' => ['GET'],
+        'youtube/configured' => ['GET'],
+        'youtube/video' => ['GET'],
     ];
 
     /**

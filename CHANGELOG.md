@@ -18,6 +18,23 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Whisper response shape mismatch — frontend always saw
+  "unavailable"**: every fetch in `whisper_import.ts` read
+  `data.data?.field`, but `Response::success()` sends payloads
+  flat (no `{data: …}` wrapper). The availability probe parsed
+  `{"available":true}` as `data.data?.available === true` →
+  `undefined === true` → `false`, and the page permanently showed
+  "Whisper transcription is not available." Same shape mismatch
+  hid the languages list, the transcribe job_id, the status
+  poller, and the result text. Switched all five reads to use
+  `data.field` directly.
+
+* **YouTube transcript API unregistered**: same class of bug as
+  whisper — `'youtube' → YouTubeApiHandler::class` in HANDLER_MAP
+  but no entry in `Endpoints::ROUTES`. Added `youtube`,
+  `youtube/configured`, `youtube/video` so the configured-check
+  and video-info lookups dispatch correctly.
+
 * **Whisper transcription unreachable — endpoints unregistered**:
   `ApiV1::HANDLER_MAP` mapped `'whisper' → WhisperApiHandler::class`
   and the handler implemented `routeGet` / `routePost` / `routeDelete`,
