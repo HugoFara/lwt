@@ -306,6 +306,17 @@ export function textsGroupedData(): TextsGroupedData {
       form.method = 'POST';
       form.action = url;
       form.style.display = 'none';
+      // CsrfMiddleware rejects POST/PUT/DELETE/PATCH without an
+      // _csrf_token field or X-CSRF-TOKEN header. Inject the token
+      // from the meta tag added in PageLayoutHelper.
+      const csrf = getCsrfToken();
+      if (csrf) {
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = '_csrf_token';
+        csrfField.value = csrf;
+        form.appendChild(csrfField);
+      }
       document.body.appendChild(form);
       form.submit();
     },

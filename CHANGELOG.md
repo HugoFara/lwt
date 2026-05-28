@@ -18,6 +18,13 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Archive / Unarchive from the texts cards 403'd on CSRF**:
+  `handlePostAction` in `texts_grouped_app.ts` and
+  `archived_texts_grouped_app.ts` built an empty form and submitted
+  it. `CsrfMiddleware` rejects any POST/PUT/DELETE/PATCH without an
+  `_csrf_token` field or `X-CSRF-TOKEN` header. Inject a hidden
+  `_csrf_token` input read from the meta tag before submitting.
+
 * **Gutenberg / Library coverage stats silently failed**: same
   `data.data?.X` mismatch as Whisper. `text_suggestions.ts` read
   `/api/v1/texts/library-preview` as
