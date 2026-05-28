@@ -202,7 +202,7 @@ export const languageWizard = {
     // Set dictionary URL (Glosbe) and popup checkbox
     setInputValue(
       'input[name="LgDict1URI"]',
-      'https://de.glosbe.com/' + learningLg[0] + '/' + knownLg[0] + '/lwt_term'
+      'https://glosbe.com/' + learningLg[0] + '/' + knownLg[0] + '/lwt_term'
     );
     setChecked('input[name="LgDict1PopUp"]', true);
 
