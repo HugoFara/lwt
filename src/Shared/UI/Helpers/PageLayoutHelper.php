@@ -221,6 +221,10 @@ LANG;
         $userLabel = __('navbar.user');
         $preferencesLabel = __('navbar.preferences');
         $helpLabel = __('navbar.help');
+        $logoutLink = $isMultiUser
+            ? '<hr class="navbar-divider">'
+                . '<a class="navbar-item" href="' . $base . '/logout">' . __('navbar.logout') . '</a>'
+            : '';
 
         return <<<HTML
 <nav class="navbar is-light" role="navigation" aria-label="{$mainNav}" x-data="navbar()">
@@ -307,6 +311,7 @@ LANG;
                     {$adminItemsHtml}
                     <hr class="navbar-divider">
                     <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">{$helpLabel}</a>
+                    {$logoutLink}
                 </div>
             </div>
         </div>
