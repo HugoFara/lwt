@@ -396,9 +396,16 @@ class MediaService
      */
     private function renderOnlineVideoPlayer(string $url): void
     {
+        // TxAudioURI/TxSourceURI come from the user-supplied edit form
+        // and are reached here unescaped. AudioUriValidator filters
+        // schemes on save, but anything that survives still needs to
+        // be HTML-escaped when echoed into an attribute, otherwise a
+        // crafted URL with embedded quotes could break out and inject
+        // markup or script in the reader view.
+        $safeUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
         ?>
 <iframe class="lwt-video-iframe"
-src="<?php echo $url ?>"
+src="<?= $safeUrl ?>"
 title="Video player"
 frameborder="0"
 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -418,9 +425,14 @@ allowfullscreen type="text/html">
     {
         $type = "video/" . pathinfo($path, PATHINFO_EXTENSION);
         $title = pathinfo($path, PATHINFO_FILENAME);
+        // Same XSS concern as renderOnlineVideoPlayer: escape every
+        // user-controlled field that lands in an attribute.
+        $safePath = htmlspecialchars($path, ENT_QUOTES, 'UTF-8');
+        $safeType = htmlspecialchars($type, ENT_QUOTES, 'UTF-8');
+        $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
         ?>
-<video class="lwt-local-video" preload="auto" controls title="<?php echo $title ?>">
-    <source src="<?php echo $path; ?>" type="<?php echo $type; ?>">
+<video class="lwt-local-video" preload="auto" controls title="<?= $safeTitle ?>">
+    <source src="<?= $safePath ?>" type="<?= $safeType ?>">
     <p>Your browser does not support video tags.</p>
 </video>
         <?php

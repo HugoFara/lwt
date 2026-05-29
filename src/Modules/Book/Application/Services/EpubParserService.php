@@ -36,6 +36,28 @@ use RuntimeException;
 class EpubParserService
 {
     /**
+     * Hard cap on the uploaded EPUB size (compressed bytes on disk).
+     *
+     * Real EPUBs are usually < 5 MB; even very large illustrated books
+     * stay under ~50 MB. 100 MB leaves head-room for outliers without
+     * inviting trivially-DoSable uploads.
+     */
+    public const MAX_FILE_SIZE = 100 * 1024 * 1024;
+
+    /**
+     * Cap on the number of files inside the EPUB. EPUBs typically
+     * contain dozens of HTML chapters + assets, not thousands.
+     */
+    public const MAX_ENTRIES = 2000;
+
+    /**
+     * Cap on total decompressed bytes across all entries — the
+     * zip-bomb defense. 500 MB is well above any plausible legitimate
+     * EPUB and far below the level that would crash a typical worker.
+     */
+    public const MAX_DECOMPRESSED_BYTES = 500 * 1024 * 1024;
+
+    /**
      * Parse an EPUB file and extract metadata and chapters.
      *
      * @param string $filePath     Absolute path to the EPUB file
@@ -75,9 +97,17 @@ class EpubParserService
             throw new InvalidArgumentException("EPUB file is not readable: {$filePath}");
         }
 
-        if (filesize($filePath) === 0) {
+        $size = filesize($filePath);
+        if ($size === 0) {
             throw new InvalidArgumentException("EPUB file is empty: {$filePath}");
         }
+        if ($size > self::MAX_FILE_SIZE) {
+            throw new InvalidArgumentException(sprintf(
+                'EPUB file exceeds the %d MB limit.',
+                intdiv(self::MAX_FILE_SIZE, 1024 * 1024)
+            ));
+        }
+        $this->assertZipWithinLimits($filePath);
 
         try {
             $ebook = Ebook::read($filePath, $this->resolveFormat($filePath, $originalName));
@@ -419,6 +449,58 @@ class EpubParserService
         $zip->close();
 
         return $hasMimetype && $hasContainer;
+    }
+
+    /**
+     * Walk the ZIP central directory and refuse archives that exceed
+     * the entry-count or decompressed-size budget — the zip-bomb
+     * defense. Skipped silently when ext-zip is unavailable so the
+     * minimal magic-byte path in isValidEpub stays the only check.
+     *
+     * @param string $filePath Path to the EPUB on disk
+     *
+     * @throws InvalidArgumentException When the archive exceeds limits
+     */
+    private function assertZipWithinLimits(string $filePath): void
+    {
+        if (!extension_loaded('zip')) {
+            return;
+        }
+
+        /** @psalm-suppress UndefinedClass */
+        $zip = new \ZipArchive();
+        /** @psalm-suppress UndefinedClass */
+        if ($zip->open($filePath, \ZipArchive::RDONLY) !== true) {
+            return;
+        }
+
+        $entryCount = $zip->numFiles;
+        if ($entryCount > self::MAX_ENTRIES) {
+            $zip->close();
+            throw new InvalidArgumentException(sprintf(
+                'EPUB contains too many entries (%d > %d).',
+                $entryCount,
+                self::MAX_ENTRIES
+            ));
+        }
+
+        $totalUncompressed = 0;
+        for ($i = 0; $i < $entryCount; $i++) {
+            $stat = $zip->statIndex($i);
+            if ($stat === false) {
+                continue;
+            }
+            $totalUncompressed += (int) ($stat['size'] ?? 0);
+            if ($totalUncompressed > self::MAX_DECOMPRESSED_BYTES) {
+                $zip->close();
+                throw new InvalidArgumentException(sprintf(
+                    'EPUB exceeds the %d MB decompressed size limit (likely a zip bomb).',
+                    intdiv(self::MAX_DECOMPRESSED_BYTES, 1024 * 1024)
+                ));
+            }
+        }
+
+        $zip->close();
     }
 
     /**

@@ -670,7 +670,10 @@ class MediaServiceTest extends TestCase
         $this->service->renderVideoPlayer('https://www.bilibili.com/video/BV1xx411c7mD', 120);
         $output = ob_get_clean();
 
-        $this->assertStringContainsString('&t=120', $output);
+        // The URL is htmlspecialchars-escaped before landing in the
+        // iframe `src` attribute (XSS hardening), so the literal `&`
+        // is now `&amp;` in the HTML.
+        $this->assertStringContainsString('&amp;t=120', $output);
     }
 
     // =========================================================================

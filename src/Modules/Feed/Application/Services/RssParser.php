@@ -46,7 +46,14 @@ class RssParser
     public function parse(string $sourceUri, string $articleSection = ''): ?array
     {
         $rss = new \DOMDocument('1.0', 'utf-8');
-        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | ENT_NOQUOTES)) {
+        // LIBXML_NONET blocks libxml from fetching external entities
+        // (the XXE/SSRF vector); LIBXML_NOCDATA keeps CDATA sections
+        // inlined as text. We deliberately do NOT set LIBXML_NOENT —
+        // that flag *enables* entity expansion, which would re-open
+        // the billion-laughs DoS. The old code passed ENT_NOQUOTES
+        // (=2) here, which is an htmlspecialchars constant and was a
+        // no-op in this position.
+        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | LIBXML_NONET)) {
             return null;
         }
 
@@ -84,7 +91,14 @@ class RssParser
     public function detectAndParse(string $sourceUri): ?array
     {
         $rss = new \DOMDocument('1.0', 'utf-8');
-        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | ENT_NOQUOTES)) {
+        // LIBXML_NONET blocks libxml from fetching external entities
+        // (the XXE/SSRF vector); LIBXML_NOCDATA keeps CDATA sections
+        // inlined as text. We deliberately do NOT set LIBXML_NOENT —
+        // that flag *enables* entity expansion, which would re-open
+        // the billion-laughs DoS. The old code passed ENT_NOQUOTES
+        // (=2) here, which is an htmlspecialchars constant and was a
+        // no-op in this position.
+        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | LIBXML_NONET)) {
             return null;
         }
 
@@ -149,7 +163,14 @@ class RssParser
     public function getFeedTitle(string $sourceUri): ?string
     {
         $rss = new \DOMDocument('1.0', 'utf-8');
-        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | ENT_NOQUOTES)) {
+        // LIBXML_NONET blocks libxml from fetching external entities
+        // (the XXE/SSRF vector); LIBXML_NOCDATA keeps CDATA sections
+        // inlined as text. We deliberately do NOT set LIBXML_NOENT —
+        // that flag *enables* entity expansion, which would re-open
+        // the billion-laughs DoS. The old code passed ENT_NOQUOTES
+        // (=2) here, which is an htmlspecialchars constant and was a
+        // no-op in this position.
+        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | LIBXML_NONET)) {
             return null;
         }
 

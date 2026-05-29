@@ -27,6 +27,16 @@ use Lwt\Modules\Admin\Domain\BackupRepositoryInterface;
  */
 class RestoreFromUpload
 {
+    /**
+     * Hard cap on the uploaded backup file (compressed bytes on disk).
+     *
+     * 200 MB of gzipped SQL is far above any plausible legitimate LWT
+     * backup. The decompressed-bytes cap in Restore::restoreFile is
+     * the deeper defense; this stops the worker from buffering an
+     * obviously hostile upload before we even open it.
+     */
+    public const MAX_UPLOAD_SIZE = 200 * 1024 * 1024;
+
     private BackupRepositoryInterface $repository;
 
     /**
@@ -59,6 +69,18 @@ class RestoreFromUpload
 
         if ($fileData === null) {
             return ['success' => false, 'error' => "No Restore file specified"];
+        }
+
+        // PHP populates $_FILES['size'] from the real upload, not the
+        // client-supplied Content-Length, so this is the actual on-disk
+        // size of the gzipped backup.
+        if (($fileData['size'] ?? 0) > self::MAX_UPLOAD_SIZE) {
+            return [
+                'success' => false,
+                'error' => 'Restore file exceeds the '
+                    . intdiv(self::MAX_UPLOAD_SIZE, 1024 * 1024)
+                    . ' MB upload limit.'
+            ];
         }
 
         $handle = @gzopen($fileData["tmp_name"], "r");

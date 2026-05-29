@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Utilities\CsvFormulaGuard;
 
 /**
  * Service class for exporting vocabulary data.
@@ -241,14 +242,22 @@ class ExportService
      */
     private function formatTsvRow(array $record): string
     {
-        return self::replaceTabNewline((string)$record["WoText"]) . "\t" .
-            self::replaceTabNewline((string)$record["WoTranslation"]) . "\t" .
-            self::replaceTabNewline((string)$record["WoSentence"]) . "\t" .
-            self::replaceTabNewline((string)$record["WoRomanization"]) . "\t" .
+        // CsvFormulaGuard prepends a single quote to cells whose first
+        // character would trigger formula evaluation in Excel / Calc /
+        // Google Sheets (=, +, -, @, TAB, CR). The TSV file is saved
+        // with a .txt extension, but users routinely rename and open
+        // exports in spreadsheets — without the guard, an attacker
+        // could store an =cmd|...!A1 payload in a translation and
+        // execute it on import. WoStatus and WoID are numeric, no
+        // escaping needed.
+        return CsvFormulaGuard::escapeCell(self::replaceTabNewline((string)$record["WoText"])) . "\t" .
+            CsvFormulaGuard::escapeCell(self::replaceTabNewline((string)$record["WoTranslation"])) . "\t" .
+            CsvFormulaGuard::escapeCell(self::replaceTabNewline((string)$record["WoSentence"])) . "\t" .
+            CsvFormulaGuard::escapeCell(self::replaceTabNewline((string)$record["WoRomanization"])) . "\t" .
             (string)($record["WoStatus"] ?? '') . "\t" .
-            self::replaceTabNewline((string)$record["LgName"]) . "\t" .
+            CsvFormulaGuard::escapeCell(self::replaceTabNewline((string)$record["LgName"])) . "\t" .
             (string)($record["WoID"] ?? '') . "\t" .
-            (string)($record["taglist"] ?? '') . "\r\n";
+            CsvFormulaGuard::escapeCell((string)($record["taglist"] ?? '')) . "\r\n";
     }
 
     /**

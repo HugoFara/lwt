@@ -33,6 +33,15 @@ use Lwt\Shared\Infrastructure\Database\SqlValidator;
 class Restore
 {
     /**
+     * Hard cap on the total decompressed bytes read from a restore
+     * upload. The gzopen handle reads transparently; a tiny gzip can
+     * expand to many gigabytes (gzip-bomb). 1 GB of SQL covers any
+     * plausible legitimate LWT backup with margin while keeping a
+     * worker from OOMing on a hostile file.
+     */
+    public const MAX_DECOMPRESSED_BYTES = 1024 * 1024 * 1024;
+
+    /**
      * Drop all LWT tables to prepare for a clean restore.
      *
      * This is needed to ensure migrations run on a clean slate
@@ -116,8 +125,22 @@ class Restore
         $start = true;
         $curr_content = '';
         $queries_list = [];
+        $bytesRead = 0;
 
         while ($stream = fgets($handle)) {
+            // Gzip-bomb defense: cap the total decompressed bytes we
+            // pull off the handle. A 1 GB SQL dump is more than any
+            // real LWT install produces; anything bigger is almost
+            // certainly malicious or a runaway.
+            $bytesRead += strlen($stream);
+            if ($bytesRead > self::MAX_DECOMPRESSED_BYTES) {
+                $message = "Error: $title Restore file exceeds the "
+                    . intdiv(self::MAX_DECOMPRESSED_BYTES, 1024 * 1024)
+                    . " MB decompressed-size limit (likely a gzip bomb).";
+                $install_status["errors"] = 1;
+                $hasErrors = true;
+                break;
+            }
             // Check file header
             if ($start) {
                 if (

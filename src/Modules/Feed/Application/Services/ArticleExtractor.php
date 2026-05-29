@@ -201,7 +201,10 @@ class ArticleExtractor
             return $link;
         }
 
-        @$dom->loadHTML($htmlString);
+        // LIBXML_NONET prevents libxml from fetching external entities
+        // (the XXE/SSRF vector); we don't enable LIBXML_NOENT, so
+        // billion-laughs-style entity expansion stays off.
+        @$dom->loadHTML($htmlString, LIBXML_NONET);
         $xPath = new \DOMXPath($dom);
 
         $redirect = explode(' | ', $articleSection, 2);
@@ -369,7 +372,7 @@ class ArticleExtractor
     {
         $doc = new \DOMDocument();
         $previousValue = libxml_use_internal_errors(true);
-        @$doc->loadHTML($htmlString);
+        @$doc->loadHTML($htmlString, LIBXML_NONET);
         libxml_clear_errors();
         libxml_use_internal_errors($previousValue);
 
@@ -478,7 +481,7 @@ class ArticleExtractor
         $dom = new \DOMDocument();
         $previousValue = libxml_use_internal_errors(true);
 
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $htmlString);
+        $dom->loadHTML('<?xml encoding="UTF-8">' . $htmlString, LIBXML_NONET);
 
         // Remove XML processing instruction hack
         foreach ($dom->childNodes as $item) {
