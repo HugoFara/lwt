@@ -70,7 +70,13 @@
   "overrides": {
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "esbuild": ">=0.25.0"
+    "esbuild": ">=0.25.0",
+    "tmp": ">=0.2.6",
+    "systeminformation": ">=5.31.6",
+    "brace-expansion": ">=5.0.6",
+    "vitepress": {
+      "vite": "^6.4.2"
+    }
   },
   "devDependencies": {
     "@eslint/css": "^1.1.0",
@@ -82,7 +88,7 @@
     "@typescript-eslint/eslint-plugin": "^8.48.0",
     "@typescript-eslint/parser": "^8.48.0",
     "@vitest/coverage-v8": "^4.0.14",
-    "cypress": "^15.7.0",
+    "cypress": "^15.16.0",
     "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
