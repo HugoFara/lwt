@@ -171,4 +171,54 @@ class ChangePasswordTest extends TestCase
 
         $this->useCase->execute($user, 'wrong_password', 'NewStrongPass123!');
     }
+
+    /**
+     * Phase 6.2: a successful change must wipe the remember-me cookie token
+     * and the API bearer token. Otherwise the attacker who set them up on a
+     * shared/compromised browser still gets in after the victim "secures"
+     * the account by changing the password.
+     */
+    public function testSuccessfulChangeInvalidatesRememberAndApiTokens(): void
+    {
+        $user = User::reconstitute(
+            1,
+            'testuser',
+            'test@example.com',
+            'existing_hash',
+            'old_api_token',                // apiToken
+            new DateTimeImmutable('+1 day'), // apiTokenExpires
+            'old_remember_token',           // rememberToken
+            new DateTimeImmutable('+30 days'), // rememberTokenExpires
+            null,
+            null,
+            new DateTimeImmutable('-1 day'),
+            null,
+            null,
+            null,
+            null,
+            null,
+            new DateTimeImmutable('-30 days'),
+            null,
+            true,
+            'user'
+        );
+
+        $this->passwordHasher->method('verify')->willReturn(true);
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+        $this->passwordHasher->method('hash')->willReturn('new_hashed_password');
+
+        $this->repository->expects($this->once())
+            ->method('save')
+            ->with($this->callback(function (User $savedUser) {
+                return $savedUser->passwordHash() === 'new_hashed_password'
+                    && $savedUser->rememberToken() === null
+                    && $savedUser->apiToken() === null;
+            }));
+
+        $this->useCase->execute($user, 'correct_password', 'NewStrongPass123!');
+
+        $this->assertNull($user->rememberToken(), 'remember-me token must be wiped');
+        $this->assertNull($user->apiToken(), 'API token must be wiped');
+    }
 }

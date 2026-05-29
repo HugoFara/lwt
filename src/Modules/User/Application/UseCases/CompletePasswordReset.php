@@ -97,10 +97,17 @@ class CompletePasswordReset
             throw new \InvalidArgumentException(implode('. ', $validation['errors']));
         }
 
-        // Update password and invalidate token
+        // Update password, consume the reset token, and revoke every other
+        // long-lived auth credential. Password reset is the standard signal
+        // for "my account was compromised" — leaving the prior remember-me
+        // cookie or API bearer token live would defeat the point of the
+        // reset (the attacker who set them up retains access after the
+        // victim resets).
         $passwordHash = $this->passwordHasher->hash($newPassword);
         $user->changePassword($passwordHash);
         $user->invalidatePasswordResetToken();
+        $user->invalidateRememberToken();
+        $user->invalidateApiToken();
         $this->repository->save($user);
 
         return true;

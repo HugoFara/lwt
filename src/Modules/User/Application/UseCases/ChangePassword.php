@@ -63,9 +63,17 @@ class ChangePassword
             throw new \InvalidArgumentException(implode('. ', $validation['errors']));
         }
 
-        // Hash and save
+        // Hash the new password, then invalidate every other auth credential
+        // tied to this account before persisting. A password change is the
+        // user's signal that they want to revoke anything that may have been
+        // set up on a shared/compromised browser — long-lived remember-me
+        // cookies and the API bearer token must not survive it. The current
+        // PHP session is left alone (the actor doing the change keeps their
+        // own session) but everything else is wiped in the same save.
         $hash = $this->passwordHasher->hash($newPassword);
         $user->changePassword($hash);
+        $user->invalidateRememberToken();
+        $user->invalidateApiToken();
         $this->repository->save($user);
     }
 }

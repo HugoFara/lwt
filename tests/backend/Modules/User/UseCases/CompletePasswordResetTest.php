@@ -357,4 +357,59 @@ class CompletePasswordResetTest extends TestCase
 
         $this->useCase->execute('invalid', 'password');
     }
+
+    /**
+     * Phase 6.2: a successful reset must wipe the remember-me and API
+     * tokens. Password reset is the canonical "my account was compromised"
+     * signal; leaving prior long-lived credentials live keeps the attacker
+     * in even after the victim resets.
+     */
+    public function testExecuteInvalidatesRememberAndApiTokensOnSuccess(): void
+    {
+        $user = User::reconstitute(
+            id: 1,
+            username: 'testuser',
+            email: 'test@example.com',
+            passwordHash: 'old_hash',
+            apiToken: 'attacker_api_token',
+            apiTokenExpires: new DateTimeImmutable('+1 day'),
+            rememberToken: 'attacker_remember_token',
+            rememberTokenExpires: new DateTimeImmutable('+30 days'),
+            passwordResetToken: 'hashed_reset_token',
+            passwordResetTokenExpires: new DateTimeImmutable('+1 hour'),
+            emailVerifiedAt: null,
+            emailVerificationToken: null,
+            emailVerificationTokenExpires: null,
+            wordPressId: null,
+            googleId: null,
+            microsoftId: null,
+            created: new DateTimeImmutable('2024-01-01'),
+            lastLogin: null,
+            isActive: true,
+            role: User::ROLE_USER
+        );
+
+        $this->tokenHasher->method('hash')->willReturn('hashed_reset_token');
+        $this->repository->method('findByPasswordResetToken')->willReturn($user);
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+        $this->passwordHasher->method('hash')->willReturn('new_password_hash');
+
+        $captured = null;
+        $this->repository->expects($this->once())
+            ->method('save')
+            ->with($this->callback(function (User $u) use (&$captured) {
+                $captured = $u;
+                return true;
+            }));
+
+        $result = $this->useCase->execute('plaintext_token', 'NewStrongPass123!');
+
+        $this->assertTrue($result);
+        $this->assertInstanceOf(User::class, $captured);
+        $this->assertSame('new_password_hash', $captured->passwordHash());
+        $this->assertNull($captured->rememberToken(), 'remember-me token must be wiped on reset');
+        $this->assertNull($captured->apiToken(), 'API token must be wiped on reset');
+        $this->assertNull($captured->passwordResetToken(), 'reset token consumed');
+    }
 }

@@ -16,6 +16,26 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 6.2 (invalidate auth tokens on password change/reset)
+
+* **`ChangePassword` and `CompletePasswordReset` updated only the
+  password hash** — they did not touch the user's remember-me
+  cookie token or API bearer token. An attacker who set a
+  remember-me cookie on a victim's shared/compromised browser, or
+  who already exfiltrated the API token, retained access *after*
+  the victim "secured" the account by changing or resetting their
+  password. The reset path is the most acute case since it's the
+  canonical "my account was compromised" signal. Both use cases
+  now call `User::invalidateRememberToken()` and
+  `invalidateApiToken()` before persisting. The current PHP
+  session of the actor doing the change is left alone (they keep
+  their own session); every other long-lived credential is wiped.
+* **Regression tests**: `ChangePasswordTest::testSuccessful
+  ChangeInvalidatesRememberAndApiTokens` and
+  `CompletePasswordResetTest::testExecuteInvalidatesRememberAnd
+  ApiTokensOnSuccess` start a user with both tokens populated and
+  assert both are null after the use case runs.
+
 ### Security — phase 6.1 (CSRF on auth endpoints)
 
 * **`POST /login`, `/register`, `/password/forgot`, `/password/reset`
