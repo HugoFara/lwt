@@ -129,7 +129,7 @@ class TextReadController extends BaseController
             $bookContext = null;
         }
 
-        Settings::save('currenttext', $textId);
+        Settings::savePerUser('currenttext', $textId);
 
         $mediaPlayerHtml = (new \Lwt\Modules\Admin\Application\Services\MediaService())
             ->getMediaPlayerHtml($media, $audioPosition);

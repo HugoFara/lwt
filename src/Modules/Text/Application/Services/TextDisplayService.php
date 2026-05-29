@@ -59,7 +59,7 @@ class TextDisplayService
             $audio = trim((string) $record['TxAudioURI']);
         }
 
-        Settings::save('currenttext', $textId);
+        Settings::savePerUser('currenttext', $textId);
 
         return [
             'title' => (string) $record['TxTitle'],
@@ -224,6 +224,6 @@ class TextDisplayService
      */
     public function saveCurrentText(int $textId): void
     {
-        Settings::save('currenttext', $textId);
+        Settings::savePerUser('currenttext', $textId);
     }
 }

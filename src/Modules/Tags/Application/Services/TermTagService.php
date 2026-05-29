@@ -96,40 +96,10 @@ class TermTagService
      */
     public static function saveWordTagsFromArray(int $wordId, array $tagNames): void
     {
-        // Delete existing tags for this word
-        QueryBuilder::table('word_tag_map')
-            ->where('WtWoID', '=', $wordId)
-            ->delete();
-
-        if (empty($tagNames)) {
-            return;
-        }
-
-        foreach ($tagNames as $tag) {
-            $tag = trim($tag);
-            if ($tag === '') {
-                continue;
-            }
-
-            // Create tag if it doesn't exist
-            // Use INSERT IGNORE to handle race condition / stale cache (Issue #120)
-            $sessionTags = isset($_SESSION['TAGS']) && is_array($_SESSION['TAGS']) ? $_SESSION['TAGS'] : [];
-            if (!in_array($tag, $sessionTags, true)) {
-                Connection::preparedExecute(
-                    'INSERT IGNORE INTO tags (TgText) VALUES (?)',
-                    [$tag]
-                );
-            }
-
-            // Link tag to word using raw SQL for INSERT...SELECT
-            Connection::preparedExecute(
-                "INSERT INTO word_tag_map (WtWoID, WtTgID)
-                SELECT ?, TgID
-                FROM tags
-                WHERE TgText = ?",
-                [$wordId, $tag]
-            );
-        }
+        // Delegate to the user-scoped association. The previous raw-SQL path
+        // inserted into `tags` without TgUsID and linked by `TgText` lookup,
+        // which silently picked up other users' tags with the same name.
+        self::saveWordTags($wordId, $tagNames);
     }
 
     /**
@@ -365,24 +335,25 @@ class TermTagService
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
-            $rows = Connection::preparedFetchAll(
-                "SELECT TgID, TgText
+            $bindings = [];
+            $sql = "SELECT TgID, TgText
                 FROM words, tags, word_tag_map
-                WHERE TgID = WtTgID AND WtWoID = WoID
-                GROUP BY TgID
-                ORDER BY UPPER(TgText)",
-                []
-            );
+                WHERE TgID = WtTgID AND WtWoID = WoID"
+                . UserScopedQuery::forTablePrepared('words', $bindings)
+                . UserScopedQuery::forTablePrepared('tags', $bindings)
+                . " GROUP BY TgID
+                ORDER BY UPPER(TgText)";
         } else {
-            $rows = Connection::preparedFetchAll(
-                "SELECT TgID, TgText
+            $bindings = [$langId];
+            $sql = "SELECT TgID, TgText
                 FROM words, tags, word_tag_map
-                WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = ?
-                GROUP BY TgID
-                ORDER BY UPPER(TgText)",
-                [$langId]
-            );
+                WHERE TgID = WtTgID AND WtWoID = WoID AND WoLgID = ?"
+                . UserScopedQuery::forTablePrepared('words', $bindings)
+                . UserScopedQuery::forTablePrepared('tags', $bindings)
+                . " GROUP BY TgID
+                ORDER BY UPPER(TgText)";
         }
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
         foreach ($rows as $record) {

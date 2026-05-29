@@ -115,15 +115,15 @@ class TextPositionApiHandler
         }
 
         if ($annotations !== null) {
-            Settings::save('set-text-h-annotations', (string)$annotations);
+            Settings::savePerUser('set-text-h-annotations', (string)$annotations);
         }
 
         if ($romanization !== null) {
-            Settings::save('set-display-romanization', $romanization ? '1' : '0');
+            Settings::savePerUser('set-display-romanization', $romanization ? '1' : '0');
         }
 
         if ($translation !== null) {
-            Settings::save('set-display-translation', $translation ? '1' : '0');
+            Settings::savePerUser('set-display-translation', $translation ? '1' : '0');
         }
 
         return ['updated' => true];

@@ -349,12 +349,17 @@ class LemmaBatchService
      */
     private function fetchUnmatchedTextItems(int $languageId, ?int $textId = null): array
     {
+        // word_occurrences is not auto-scoped — inherit user scope through
+        // texts.TxUsID (joined via Ti2TxID) so cross-user rows never sneak
+        // into the batch.
+        $bindings = [$languageId];
         $sql = "SELECT ti.Ti2ID, ti.Ti2Text, LOWER(ti.Ti2Text) as Ti2TextLC, ti.Ti2TxID
                 FROM word_occurrences ti
+                JOIN texts ON ti.Ti2TxID = TxID
                 WHERE ti.Ti2LgID = ?
                   AND ti.Ti2WoID IS NULL
-                  AND ti.Ti2WordCount = 1";
-        $bindings = [$languageId];
+                  AND ti.Ti2WordCount = 1"
+                . UserScopedQuery::forTablePrepared('texts', $bindings);
 
         if ($textId !== null) {
             $sql .= " AND ti.Ti2TxID = ?";
@@ -444,15 +449,22 @@ class LemmaBatchService
      */
     public function linkTextItemsByLemmaSql(int $languageId, ?int $textId = null): int
     {
-        // This uses a subquery to find the best matching word for each unmatched text item
-        // Preference: exact text match > lemma match > first word with matching lemma
+        // Scope both the words subquery (by WoUsID) and the unmatched text
+        // items pool (by TxUsID, joined via Ti2TxID → texts) so this never
+        // links one user's rows to another user's vocabulary.
+        $bindings = [$languageId];
+        $wordsScope = UserScopedQuery::forTablePrepared('words', $bindings, 'w');
+        $bindings[] = $languageId;
+        $itemsScope = UserScopedQuery::forTablePrepared('texts', $bindings);
+
         $sql = "UPDATE word_occurrences ti
                 JOIN (
                     SELECT ti2.Ti2ID,
                            (SELECT w.WoID FROM words w
                             WHERE w.WoLgID = ?
                               AND w.WoWordCount = 1
-                              AND (w.WoLemmaLC = LOWER(ti2.Ti2Text) OR w.WoTextLC = LOWER(ti2.Ti2Text))
+                              AND (w.WoLemmaLC = LOWER(ti2.Ti2Text) OR w.WoTextLC = LOWER(ti2.Ti2Text))"
+                              . $wordsScope . "
                             ORDER BY CASE
                                 WHEN w.WoTextLC = LOWER(ti2.Ti2Text) THEN 0
                                 WHEN w.WoLemmaLC = LOWER(ti2.Ti2Text) THEN 1
@@ -461,11 +473,11 @@ class LemmaBatchService
                             LIMIT 1
                            ) as MatchedWoID
                     FROM word_occurrences ti2
+                    JOIN texts ON ti2.Ti2TxID = TxID
                     WHERE ti2.Ti2LgID = ?
                       AND ti2.Ti2WoID IS NULL
-                      AND ti2.Ti2WordCount = 1";
-
-        $bindings = [$languageId, $languageId];
+                      AND ti2.Ti2WordCount = 1"
+                  . $itemsScope;
 
         if ($textId !== null) {
             $sql .= " AND ti2.Ti2TxID = ?";

@@ -410,6 +410,7 @@ class TextTagService
             $count++;
             QueryBuilder::table('text_tag_map')
                 ->where('TtTxID', '=', (int)$record['TxID'])
+                ->where('TtT2ID', '=', $tagId)
                 ->delete();
         }
 
@@ -493,28 +494,30 @@ class TextTagService
         $html = '<option value="&amp;texttag"' . FormHelper::getSelected($selected, '') . '>';
         $html .= '[Filter off]</option>';
 
+        // text_tag_map / text_tags / texts are joined; only `texts` and
+        // `text_tags` carry an UsID column, so scope both. (text_tag_map
+        // rows inherit scope via TxID and T2ID.)
         if ($langId) {
-            $rows = Connection::preparedFetchAll(
-                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
-                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
-                FROM texts
-                LEFT JOIN text_tag_map ON TxID = TtTxID
-                LEFT JOIN text_tags ON TtT2ID = T2ID
-                WHERE TxLgID = ?
-                GROUP BY UPPER(TagName)',
-                [$langId]
-            );
+            $bindings = [$langId];
+            $where = 'WHERE TxLgID = ?'
+                . UserScopedQuery::forTablePrepared('texts', $bindings)
+                . UserScopedQuery::forTablePrepared('text_tags', $bindings);
         } else {
-            $rows = Connection::preparedFetchAll(
-                'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
-                GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
-                FROM texts
-                LEFT JOIN text_tag_map ON TxID = TtTxID
-                LEFT JOIN text_tags ON TtT2ID = T2ID
-                GROUP BY UPPER(TagName)',
-                []
-            );
+            $bindings = [];
+            $userScope = UserScopedQuery::forTablePrepared('texts', $bindings)
+                . UserScopedQuery::forTablePrepared('text_tags', $bindings);
+            $where = $userScope === '' ? '' : 'WHERE 1=1' . $userScope;
         }
+        $rows = Connection::preparedFetchAll(
+            'SELECT IFNULL(T2Text, 1) AS TagName, TtT2ID AS TagID,
+            GROUP_CONCAT(TxID ORDER BY TxID) AS TextID
+            FROM texts
+            LEFT JOIN text_tag_map ON TxID = TtTxID
+            LEFT JOIN text_tags ON TtT2ID = T2ID
+            ' . $where . '
+            GROUP BY UPPER(TagName)',
+            $bindings
+        );
 
         foreach ($rows as $record) {
             $tagName = (string) $record['TagName'];
@@ -552,24 +555,25 @@ class TextTagService
         $html .= '[Filter off]</option>';
 
         if ($langId === '') {
-            $rows = Connection::preparedFetchAll(
-                "SELECT T2ID, T2Text
+            $bindings = [];
+            $sql = "SELECT T2ID, T2Text
                 FROM texts, text_tags, text_tag_map
-                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL
-                GROUP BY T2ID
-                ORDER BY UPPER(T2Text)",
-                []
-            );
+                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL"
+                . UserScopedQuery::forTablePrepared('texts', $bindings)
+                . UserScopedQuery::forTablePrepared('text_tags', $bindings)
+                . " GROUP BY T2ID
+                ORDER BY UPPER(T2Text)";
         } else {
-            $rows = Connection::preparedFetchAll(
-                "SELECT T2ID, T2Text
+            $bindings = [$langId];
+            $sql = "SELECT T2ID, T2Text
                 FROM texts, text_tags, text_tag_map
-                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL AND TxLgID = ?
-                GROUP BY T2ID
-                ORDER BY UPPER(T2Text)",
-                [$langId]
-            );
+                WHERE T2ID = TtT2ID AND TtTxID = TxID AND TxArchivedAt IS NOT NULL AND TxLgID = ?"
+                . UserScopedQuery::forTablePrepared('texts', $bindings)
+                . UserScopedQuery::forTablePrepared('text_tags', $bindings)
+                . " GROUP BY T2ID
+                ORDER BY UPPER(T2Text)";
         }
+        $rows = Connection::preparedFetchAll($sql, $bindings);
 
         $count = 0;
         foreach ($rows as $record) {

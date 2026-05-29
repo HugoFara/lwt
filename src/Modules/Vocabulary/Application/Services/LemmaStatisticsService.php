@@ -100,12 +100,18 @@ class LemmaStatisticsService
      */
     public function getUnmatchedStatistics(int $languageId): array
     {
+        // word_occurrences has no UsID column — inherit user scope by joining
+        // through `texts` (via Ti2TxID) and filtering on TxUsID. Without this,
+        // aggregations across word_occurrences silently combine every user's
+        // data sharing the language.
         $bindings = [$languageId];
 
         // Count unmatched items
         $unmatchedCount = (int) Connection::preparedFetchValue(
             "SELECT COUNT(*) as cnt FROM word_occurrences
-             WHERE Ti2LgID = ? AND Ti2WoID IS NULL AND Ti2WordCount = 1",
+             JOIN texts ON Ti2TxID = TxID
+             WHERE Ti2LgID = ? AND Ti2WoID IS NULL AND Ti2WordCount = 1"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
             $bindings,
             'cnt'
         );
@@ -114,7 +120,9 @@ class LemmaStatisticsService
         $bindings = [$languageId];
         $uniqueWords = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT LOWER(Ti2Text)) as cnt FROM word_occurrences
-             WHERE Ti2LgID = ? AND Ti2WoID IS NULL AND Ti2WordCount = 1",
+             JOIN texts ON Ti2TxID = TxID
+             WHERE Ti2LgID = ? AND Ti2WoID IS NULL AND Ti2WordCount = 1"
+            . UserScopedQuery::forTablePrepared('texts', $bindings),
             $bindings,
             'cnt'
         );
@@ -124,11 +132,13 @@ class LemmaStatisticsService
         $matchableByLemma = (int) Connection::preparedFetchValue(
             "SELECT COUNT(DISTINCT LOWER(ti.Ti2Text)) as cnt
              FROM word_occurrences ti
+             JOIN texts ON ti.Ti2TxID = TxID
              JOIN words w ON w.WoLgID = ? AND LOWER(ti.Ti2Text) = w.WoLemmaLC
              WHERE ti.Ti2LgID = ?
                AND ti.Ti2WoID IS NULL
                AND ti.Ti2WordCount = 1
                AND w.WoWordCount = 1"
+            . UserScopedQuery::forTablePrepared('texts', $bindings)
             . UserScopedQuery::forTablePrepared('words', $bindings, 'w'),
             $bindings,
             'cnt'

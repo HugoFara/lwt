@@ -40,6 +40,6 @@ class SessionCleaner
     public function clearAllFilters(): void
     {
         // Clear current text setting (database-stored)
-        Settings::save('currenttext', '');
+        Settings::savePerUser('currenttext', '');
     }
 }

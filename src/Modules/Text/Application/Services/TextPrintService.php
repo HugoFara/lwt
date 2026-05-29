@@ -221,10 +221,10 @@ class TextPrintService
         int $statusRange,
         int $placement
     ): void {
-        Settings::save('currenttext', $textId);
-        Settings::save('currentprintannotation', $annotation);
-        Settings::save('currentprintstatus', $statusRange);
-        Settings::save('currentprintannotationplacement', $placement);
+        Settings::savePerUser('currenttext', $textId);
+        Settings::savePerUser('currentprintannotation', $annotation);
+        Settings::savePerUser('currentprintstatus', $statusRange);
+        Settings::savePerUser('currentprintannotationplacement', $placement);
     }
 
     /**
@@ -236,7 +236,7 @@ class TextPrintService
      */
     public function setCurrentText(int $textId): void
     {
-        Settings::save('currenttext', $textId);
+        Settings::savePerUser('currenttext', $textId);
     }
 
     // ===========================

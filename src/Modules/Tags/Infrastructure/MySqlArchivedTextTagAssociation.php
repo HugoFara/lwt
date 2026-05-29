@@ -129,14 +129,15 @@ class MySqlArchivedTextTagAssociation implements TagAssociationInterface
                     continue;
                 }
 
-                // Get or create the tag
+                // Get or create the tag for the current user. getOrCreate is
+                // user-scoped, so $tagId already points at the right row; using
+                // it directly avoids a T2Text re-lookup that would otherwise
+                // match another user's tag with the same name.
                 $tagId = $this->tagRepository->getOrCreate($tagName);
 
-                // Associate using INSERT...SELECT to handle concurrent inserts
                 Connection::preparedExecute(
-                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID)
-                    SELECT ?, T2ID FROM text_tags WHERE T2Text = ?',
-                    [$itemId, $tagName]
+                    'INSERT IGNORE INTO text_tag_map (TtTxID, TtT2ID) VALUES (?, ?)',
+                    [$itemId, $tagId]
                 );
             }
 

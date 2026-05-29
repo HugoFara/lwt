@@ -696,7 +696,7 @@ class ReviewService
                 ->valuePrepared('TxTitle');
             $title = is_string($titleRaw) ? $titleRaw : 'Unknown Text';
 
-            Settings::save('currenttext', (string) $textId);
+            Settings::savePerUser('currenttext', (string) $textId);
         } else {
             return null;
         }

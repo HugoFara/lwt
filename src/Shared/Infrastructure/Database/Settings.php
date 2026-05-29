@@ -177,6 +177,30 @@ class Settings
     }
 
     /**
+     * Save a setting under the current user's scope when multi-user mode is
+     * enabled, or globally otherwise.
+     *
+     * `Settings::get()` already reads through QueryBuilder, which auto-scopes
+     * the `settings` table; in multi-user mode that means a `Settings::save`
+     * to `StUsID=0` is invisible to the reader and the value is silently lost
+     * (or worse, overwrites the global default seen by users with no
+     * per-user row). This helper picks the matching write path so reads find
+     * the value the current request just stored.
+     *
+     * @param string $k Setting key
+     * @param mixed  $v Setting value, will get converted to string
+     */
+    public static function savePerUser(string $k, mixed $v): void
+    {
+        $userId = Globals::isMultiUserEnabled() ? Globals::getCurrentUserId() : null;
+        if ($userId !== null) {
+            self::saveForUser($k, $v, $userId);
+        } else {
+            self::save($k, $v);
+        }
+    }
+
+    /**
      * Save a user-scoped setting for a specific user.
      *
      * Uses StUsID = $userId for per-user storage.
