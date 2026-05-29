@@ -250,27 +250,19 @@ class GutenbergClient
      */
     public function fetchText(string $url): ?string
     {
-        $context = stream_context_create([
-            'http' => [
-                'follow_location' => true,
-                'max_redirects' => 5,
-                'timeout' => 15,
-                'user_agent' => 'LWT/3.0 (Language Learning Tool)',
-                'header' => "Accept: text/plain\r\n",
-            ],
-            'ssl' => [
-                'verify_peer' => true,
-                'verify_peer_name' => true,
-            ],
+        // Gutendex returns book-text URLs that point at
+        // gutenberg.org and friends — but a compromised or MITM'd
+        // Gutendex (or any 3xx in the chain) could rotate that URL
+        // into a private address. safeHttpGet revalidates every hop.
+        $text = UrlUtilities::safeHttpGet($url, [
+            'timeout' => 15,
+            'maxBytes' => 2 * 1024 * 1024,
+            'maxRedirects' => 5,
+            'userAgent' => 'LWT/3.0 (Language Learning Tool)',
+            'accept' => 'text/plain',
         ]);
 
-        $text = @file_get_contents($url, false, $context, 0, 2 * 1024 * 1024);
-
-        if ($text === false || $text === '') {
-            return null;
-        }
-
-        return $text;
+        return $text !== null && $text !== '' ? $text : null;
     }
 
     /**
@@ -282,21 +274,15 @@ class GutenbergClient
      */
     protected function fetchJson(string $url): ?array
     {
-        $context = stream_context_create([
-            'http' => [
-                'timeout' => self::TIMEOUT,
-                'user_agent' => 'LWT/3.0 (Language Learning Tool)',
-                'header' => "Accept: application/json\r\n",
-            ],
-            'ssl' => [
-                'verify_peer' => true,
-                'verify_peer_name' => true,
-            ],
+        $response = UrlUtilities::safeHttpGet($url, [
+            'timeout' => self::TIMEOUT,
+            'maxBytes' => 1024 * 1024,
+            'maxRedirects' => 5,
+            'userAgent' => 'LWT/3.0 (Language Learning Tool)',
+            'accept' => 'application/json',
         ]);
 
-        $response = @file_get_contents($url, false, $context, 0, 1024 * 1024);
-
-        if ($response === false || $response === '') {
+        if ($response === null || $response === '') {
             return null;
         }
 

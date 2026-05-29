@@ -189,17 +189,21 @@ class ArticleExtractor
         string $articleSection,
         string &$newSection
     ): string {
-        // Validate URL to prevent SSRF
-        $validation = UrlUtilities::validateUrlForFetch($link);
-        if (!$validation['valid']) {
+        // safeHttpGet revalidates each redirect hop — a 302 from the
+        // redirect-mapping page into a private range is rejected,
+        // closing the SSRF gap that the prior raw file_get_contents
+        // left open.
+        $htmlString = UrlUtilities::safeHttpGet(trim($link), [
+            'timeout' => 30,
+            'maxBytes' => 2 * 1024 * 1024,
+            'maxRedirects' => 5,
+            'userAgent' => 'Mozilla/5.0 (compatible; LWT Feed Reader)',
+        ]);
+        if ($htmlString === null) {
             return $link;
         }
 
         $dom = new \DOMDocument();
-        $htmlString = @file_get_contents(trim($link));
-        if ($htmlString === false) {
-            return $link;
-        }
 
         // LIBXML_NONET prevents libxml from fetching external entities
         // (the XXE/SSRF vector); we don't enable LIBXML_NOENT, so
@@ -247,23 +251,17 @@ class ArticleExtractor
      */
     public function fetchArticleContent(string $url, ?string $charset = null): string
     {
-        // Validate URL to prevent SSRF attacks
-        $validation = UrlUtilities::validateUrlForFetch($url);
-        if (!$validation['valid']) {
-            return '';
-        }
-
-        $context = stream_context_create([
-            'http' => [
-                'follow_location' => true,
-                'timeout' => 30,
-                'user_agent' => 'Mozilla/5.0 (compatible; LWT Feed Reader)',
-            ],
+        // safeHttpGet validates the entry URL *and* re-validates each
+        // redirect hop — without per-hop checks, an attacker-owned
+        // public host could 302 us to 127.0.0.1.
+        $htmlString = UrlUtilities::safeHttpGet(trim($url), [
+            'timeout' => 30,
+            'maxBytes' => 5 * 1024 * 1024,
+            'maxRedirects' => 5,
+            'userAgent' => 'Mozilla/5.0 (compatible; LWT Feed Reader)',
         ]);
 
-        $htmlString = @file_get_contents(trim($url), false, $context);
-
-        if ($htmlString === false || $htmlString === '') {
+        if ($htmlString === null || $htmlString === '') {
             return '';
         }
 
@@ -339,7 +337,14 @@ class ArticleExtractor
             return null;
         }
 
-        $header = @get_headers(trim($url), true);
+        // get_headers() defaults to following Location headers, so an
+        // attacker-owned public host could 302 the lookup into a
+        // private range. Disable redirect-follow on the context — we
+        // only need the initial response's Content-Type, and rejecting
+        // redirected charsets is safer than re-validating each hop in
+        // this narrow detection path.
+        $ctx = stream_context_create(['http' => ['follow_location' => 0]]);
+        $header = @get_headers(trim($url), true, $ctx);
         if ($header === false) {
             return null;
         }

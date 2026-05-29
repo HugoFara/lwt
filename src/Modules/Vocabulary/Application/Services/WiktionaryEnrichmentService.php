@@ -6,6 +6,7 @@ namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 
 /**
  * Enriches imported vocabulary with translations from kaikki.org
@@ -301,7 +302,14 @@ class WiktionaryEnrichmentService
                 }
 
                 // Skip form-of senses (inflections like "third-person singular of...")
-                if (isset($sense['form_of']) || isset($sense['tags']) && is_array($sense['tags']) && in_array('form-of', $sense['tags'], true)) {
+                if (
+                    isset($sense['form_of'])
+                    || (
+                        isset($sense['tags'])
+                        && is_array($sense['tags'])
+                        && in_array('form-of', $sense['tags'], true)
+                    )
+                ) {
                     continue;
                 }
 
@@ -469,32 +477,21 @@ class WiktionaryEnrichmentService
     /**
      * Perform an HTTP GET with timeout.
      *
+     * Defense-in-depth: the URLs constructed here come from a static
+     * host map (kaikki.org, *.wiktionary.org), so the realistic SSRF
+     * surface is small — but if `FrequencyLanguageMap` ever grew a
+     * user-influenced entry, routing through `safeHttpGet` keeps the
+     * fetch from escaping into a private range.
+     *
      * @return string|null Response body or null on failure
      */
     private function httpGet(string $url): ?string
     {
-        $context = stream_context_create([
-            'http' => [
-                'timeout' => self::FETCH_TIMEOUT,
-                'user_agent' => 'LWT/3.0 (Learning with Texts)',
-                'ignore_errors' => true,
-            ],
+        return UrlUtilities::safeHttpGet($url, [
+            'timeout' => self::FETCH_TIMEOUT,
+            'maxBytes' => 4 * 1024 * 1024,
+            'maxRedirects' => 5,
+            'userAgent' => 'LWT/3.0 (Learning with Texts)',
         ]);
-
-        $content = @file_get_contents($url, false, $context);
-        if ($content === false) {
-            return null;
-        }
-
-        // Check for HTTP errors via response headers
-        // @psalm-suppress RedundantCondition — $http_response_header is set by file_get_contents
-        if (isset($http_response_header)) {
-            $statusLine = $http_response_header[0] ?? '';
-            if (preg_match('/\b(4\d{2}|5\d{2})\b/', $statusLine)) {
-                return null;
-            }
-        }
-
-        return $content;
     }
 }

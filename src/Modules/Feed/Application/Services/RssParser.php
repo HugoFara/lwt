@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Feed\Application\Services;
 
+use Lwt\Shared\Infrastructure\Http\UrlUtilities;
+
 /**
  * Service for parsing RSS and Atom feeds.
  *
@@ -27,6 +29,35 @@ namespace Lwt\Modules\Feed\Application\Services;
  */
 class RssParser
 {
+    /**
+     * Cap individual feed downloads at 8 MB. The largest legitimate
+     * podcast feeds we've seen are ~3 MB; anything beyond that is
+     * either misconfigured or an attempt to OOM the parser.
+     */
+    private const MAX_FEED_BYTES = 8 * 1024 * 1024;
+
+    /**
+     * Fetch the feed body with SSRF guards applied.
+     *
+     * `DOMDocument::load($url)` would route the network fetch through
+     * PHP's stream wrappers — `LIBXML_NONET` only blocks libxml's
+     * *external entity* resolution, not the initial document load.
+     * So we have to do the fetch ourselves via `safeHttpGet` to get
+     * URL validation and per-hop redirect re-validation, then feed
+     * the bytes to `loadXML` instead.
+     *
+     * @return string|null Raw feed XML, or null if the URL is invalid,
+     *                     unreachable, or redirects to a private range.
+     */
+    private function fetchFeedBody(string $sourceUri): ?string
+    {
+        return UrlUtilities::safeHttpGet($sourceUri, [
+            'timeout' => 30,
+            'maxBytes' => self::MAX_FEED_BYTES,
+            'accept' => 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
+        ]);
+    }
+
     /**
      * Parse RSS/Atom feed and return article items with metadata.
      *
@@ -45,15 +76,38 @@ class RssParser
      */
     public function parse(string $sourceUri, string $articleSection = ''): ?array
     {
+        $body = $this->fetchFeedBody($sourceUri);
+        if ($body === null) {
+            return null;
+        }
+
+        return $this->parseXml($body, $articleSection);
+    }
+
+    /**
+     * Parse RSS/Atom feed XML already fetched into a string.
+     *
+     * The URI variant `parse()` adds an SSRF-guarded HTTP fetch on
+     * top of this; tests and any other in-memory caller should land
+     * here directly to skip the network entirely.
+     *
+     * @param string $xml            Raw feed XML
+     * @param string $articleSection Tag name for inline text extraction
+     *
+     * @return array<int, array{
+     *     title: string, link: string, desc: string,
+     *     date: string, audio: string, text: string
+     * }>|null Array of feed items or null on parse error
+     */
+    public function parseXml(string $xml, string $articleSection = ''): ?array
+    {
         $rss = new \DOMDocument('1.0', 'utf-8');
         // LIBXML_NONET blocks libxml from fetching external entities
         // (the XXE/SSRF vector); LIBXML_NOCDATA keeps CDATA sections
         // inlined as text. We deliberately do NOT set LIBXML_NOENT —
         // that flag *enables* entity expansion, which would re-open
-        // the billion-laughs DoS. The old code passed ENT_NOQUOTES
-        // (=2) here, which is an htmlspecialchars constant and was a
-        // no-op in this position.
-        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | LIBXML_NONET)) {
+        // the billion-laughs DoS.
+        if (!@$rss->loadXML($xml, LIBXML_NOCDATA | LIBXML_NONET)) {
             return null;
         }
 
@@ -90,15 +144,35 @@ class RssParser
      */
     public function detectAndParse(string $sourceUri): ?array
     {
+        $body = $this->fetchFeedBody($sourceUri);
+        if ($body === null) {
+            return null;
+        }
+
+        return $this->detectAndParseXml($body);
+    }
+
+    /**
+     * Detect and parse feed from XML already in memory.
+     *
+     * Same role as `parseXml` for the detection variant — splits the
+     * SSRF-guarded fetch from the parsing logic so tests don't have
+     * to round-trip through HTTP.
+     *
+     * @param string $xml Raw feed XML
+     *
+     * @return array<int|string, array<string, string>|string>|null
+     *     Feed data with feed_text indicator or null on parse error
+     */
+    public function detectAndParseXml(string $xml): ?array
+    {
         $rss = new \DOMDocument('1.0', 'utf-8');
         // LIBXML_NONET blocks libxml from fetching external entities
         // (the XXE/SSRF vector); LIBXML_NOCDATA keeps CDATA sections
         // inlined as text. We deliberately do NOT set LIBXML_NOENT —
         // that flag *enables* entity expansion, which would re-open
-        // the billion-laughs DoS. The old code passed ENT_NOQUOTES
-        // (=2) here, which is an htmlspecialchars constant and was a
-        // no-op in this position.
-        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | LIBXML_NONET)) {
+        // the billion-laughs DoS.
+        if (!@$rss->loadXML($xml, LIBXML_NOCDATA | LIBXML_NONET)) {
             return null;
         }
 
@@ -162,15 +236,30 @@ class RssParser
      */
     public function getFeedTitle(string $sourceUri): ?string
     {
+        $body = $this->fetchFeedBody($sourceUri);
+        if ($body === null) {
+            return null;
+        }
+
+        return $this->getFeedTitleFromXml($body);
+    }
+
+    /**
+     * Extract the feed title from XML already in memory.
+     *
+     * @param string $xml Raw feed XML
+     *
+     * @return string|null Feed title or null on parse error
+     */
+    public function getFeedTitleFromXml(string $xml): ?string
+    {
         $rss = new \DOMDocument('1.0', 'utf-8');
         // LIBXML_NONET blocks libxml from fetching external entities
         // (the XXE/SSRF vector); LIBXML_NOCDATA keeps CDATA sections
         // inlined as text. We deliberately do NOT set LIBXML_NOENT —
         // that flag *enables* entity expansion, which would re-open
-        // the billion-laughs DoS. The old code passed ENT_NOQUOTES
-        // (=2) here, which is an htmlspecialchars constant and was a
-        // no-op in this position.
-        if (!@$rss->load($sourceUri, LIBXML_NOCDATA | LIBXML_NONET)) {
+        // the billion-laughs DoS.
+        if (!@$rss->loadXML($xml, LIBXML_NOCDATA | LIBXML_NONET)) {
             return null;
         }
 

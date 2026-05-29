@@ -492,6 +492,155 @@ class UrlUtilities
     }
 
     /**
+     * Safely fetch an HTTP/HTTPS URL with SSRF protection.
+     *
+     * Unlike `file_get_contents` with `follow_location => true`, this
+     * routes every redirect hop through `validateUrlForFetch()` — so
+     * an attacker-controlled public host cannot 302 the request into
+     * `127.0.0.1:8080`, `169.254.169.254`, or any private range. The
+     * response body is capped at `maxBytes`, the wall-clock at
+     * `timeout`, and the redirect chain at `maxRedirects`.
+     *
+     * Residual: validation does its own DNS resolve, then the fetch
+     * does another — a TTL-0 rebinding attacker who wins the race
+     * could still hit a private IP. Mitigating that fully needs
+     * connecting by IP literal with an explicit Host header, which
+     * is more invasive than this helper provides; the per-hop
+     * revalidation here narrows the window to a single resolve per
+     * hop instead of an open-ended redirect chain.
+     *
+     * @param string $url The URL to fetch
+     * @param array{
+     *     timeout?: int,
+     *     maxBytes?: int,
+     *     maxRedirects?: int,
+     *     accept?: string,
+     *     userAgent?: string
+     * } $opts Override defaults (timeout=15s, maxBytes=2MB,
+     *         maxRedirects=5, accept='*‍/*', UA='LWT/3.0').
+     *
+     * @return string|null Response body, or null on any failure
+     *                     (invalid URL, network error, non-2xx,
+     *                     size/redirect cap exceeded, or a redirect
+     *                     into a blocked range).
+     */
+    public static function safeHttpGet(string $url, array $opts = []): ?string
+    {
+        $timeout = $opts['timeout'] ?? 15;
+        $maxBytes = $opts['maxBytes'] ?? 2 * 1024 * 1024;
+        $maxRedirects = $opts['maxRedirects'] ?? 5;
+        $userAgent = $opts['userAgent'] ?? 'LWT/3.0 (Learning with Texts)';
+        $accept = $opts['accept'] ?? '*/*';
+
+        $current = trim($url);
+        for ($hop = 0; $hop <= $maxRedirects; $hop++) {
+            $validation = self::validateUrlForFetch($current);
+            if (!$validation['valid']) {
+                return null;
+            }
+
+            $context = stream_context_create([
+                'http' => [
+                    'follow_location' => 0,
+                    'timeout' => $timeout,
+                    'user_agent' => $userAgent,
+                    'header' => "Accept: $accept\r\n",
+                    'ignore_errors' => true,
+                ],
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                ],
+            ]);
+
+            $body = @file_get_contents($current, false, $context, 0, $maxBytes);
+            if ($body === false) {
+                return null;
+            }
+
+            /** @var list<string>|null $http_response_header */
+            $headers = $http_response_header ?? null;
+            if ($headers === null || $headers === []) {
+                return null;
+            }
+
+            $status = 0;
+            if (preg_match('#^HTTP/[\d.]+\s+(\d+)#', $headers[0], $m)) {
+                $status = (int) $m[1];
+            }
+
+            if ($status >= 200 && $status < 300) {
+                return $body;
+            }
+
+            if ($status < 300 || $status >= 400) {
+                return null;
+            }
+
+            $location = null;
+            foreach ($headers as $header) {
+                if (preg_match('#^Location:\s*(.+?)\s*$#i', $header, $m)) {
+                    $location = $m[1];
+                }
+            }
+            if ($location === null || $location === '') {
+                return null;
+            }
+
+            $current = self::resolveRelativeUrl($current, $location);
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve a (possibly relative) URL against a base URL.
+     *
+     * Handles three Location header shapes that real servers emit:
+     * absolute (`https://other.com/x`), protocol-relative (`//cdn/x`),
+     * and absolute-path (`/x`). Anything else is treated as a path
+     * fragment relative to the base URL's directory.
+     *
+     * @param string $base     Base URL (the URL of the page that
+     *                         returned the redirect).
+     * @param string $relative The Location header value.
+     *
+     * @return string Fully qualified URL.
+     */
+    private static function resolveRelativeUrl(string $base, string $relative): string
+    {
+        if (preg_match('#^https?://#i', $relative) === 1) {
+            return $relative;
+        }
+
+        $parts = parse_url($base);
+        if ($parts === false || !isset($parts['scheme'], $parts['host'])) {
+            return $relative;
+        }
+
+        $scheme = $parts['scheme'];
+        $host = $parts['host'];
+        $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+        $origin = "$scheme://$host$port";
+
+        if (str_starts_with($relative, '//')) {
+            return "$scheme:$relative";
+        }
+
+        if (str_starts_with($relative, '/')) {
+            return $origin . $relative;
+        }
+
+        $basePath = $parts['path'] ?? '/';
+        $lastSlash = strrpos($basePath, '/');
+        $baseDir = $lastSlash === false ? '/' : substr($basePath, 0, $lastSlash + 1);
+        if ($baseDir === '') {
+            $baseDir = '/';
+        }
+        return $origin . $baseDir . $relative;
+    }
+
+    /**
      * Get the base URL of the application
      *
      * Honours `X-Forwarded-Proto` / `X-Forwarded-Host` when the proxy

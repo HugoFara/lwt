@@ -93,7 +93,9 @@ class WebPageExtractor
     {
         $url = trim($url);
 
-        // Validate URL (SSRF protection)
+        // Pre-flight URL validation for a clearer error message — the
+        // actual SSRF fence lives inside fetchPage()'s safeHttpGet,
+        // which re-validates the entry URL *and* every redirect hop.
         $validation = UrlUtilities::validateUrlForFetch($url);
         if (!$validation['valid']) {
             return ['error' => $validation['error'] ?? 'Invalid URL'];
@@ -107,7 +109,10 @@ class WebPageExtractor
 
         // Check for binary content (PDFs, images, etc.)
         if ($this->looksLikeBinary($html)) {
-            return ['error' => 'URL points to a binary file (PDF, image, etc.). Only HTML and plain text are supported.'];
+            return [
+                'error' => 'URL points to a binary file (PDF, image, etc.). '
+                    . 'Only HTML and plain text are supported.',
+            ];
         }
 
         // Plain text files (no HTML tags) — return directly
@@ -152,33 +157,25 @@ class WebPageExtractor
     /**
      * Fetch page content from URL.
      *
+     * Routes through `UrlUtilities::safeHttpGet` so the entry URL and
+     * every redirect hop are run through `validateUrlForFetch`. With
+     * the older `follow_location => true` setup, an attacker-owned
+     * public host could 302 the fetch into a private range; that
+     * vector is closed here.
+     *
      * @param string $url URL to fetch
      *
      * @return string|null HTML content or null on failure
      */
     protected function fetchPage(string $url): ?string
     {
-        $context = stream_context_create([
-            'http' => [
-                'follow_location' => true,
-                'max_redirects' => 5,
-                'timeout' => self::FETCH_TIMEOUT,
-                'user_agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0',
-                'header' => "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\n",
-            ],
-            'ssl' => [
-                'verify_peer' => true,
-                'verify_peer_name' => true,
-            ],
+        return UrlUtilities::safeHttpGet($url, [
+            'timeout' => self::FETCH_TIMEOUT,
+            'maxBytes' => self::MAX_RESPONSE_SIZE,
+            'maxRedirects' => 5,
+            'userAgent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0',
+            'accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         ]);
-
-        $html = @file_get_contents($url, false, $context, 0, self::MAX_RESPONSE_SIZE);
-
-        if ($html === false || $html === '') {
-            return null;
-        }
-
-        return $html;
     }
 
     /**

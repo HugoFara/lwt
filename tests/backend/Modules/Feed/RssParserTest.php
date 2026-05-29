@@ -16,37 +16,10 @@ use Lwt\Modules\Feed\Application\Services\RssParser;
 class RssParserTest extends TestCase
 {
     private RssParser $parser;
-    private string $tempDir;
 
     protected function setUp(): void
     {
         $this->parser = new RssParser();
-        $this->tempDir = sys_get_temp_dir() . '/rss_parser_test_' . uniqid();
-        mkdir($this->tempDir);
-    }
-
-    protected function tearDown(): void
-    {
-        // Clean up temp files
-        $files = glob($this->tempDir . '/*');
-        foreach ($files as $file) {
-            unlink($file);
-        }
-        rmdir($this->tempDir);
-    }
-
-    /**
-     * Create a temporary RSS feed file.
-     *
-     * @param string $content XML content
-     *
-     * @return string File path
-     */
-    private function createTempFeed(string $content): string
-    {
-        $path = $this->tempDir . '/feed_' . uniqid() . '.xml';
-        file_put_contents($path, $content);
-        return $path;
     }
 
     /**
@@ -105,8 +78,7 @@ XML;
 
     public function testParseReturnsNullForInvalidXml(): void
     {
-        $path = $this->createTempFeed('not valid xml content');
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml('not valid xml content');
         $this->assertNull($result);
     }
 
@@ -118,15 +90,13 @@ XML;
     <item><title>Test</title></item>
 </unknown>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
         $this->assertNull($result);
     }
 
     public function testParseMinimalRss(): void
     {
-        $path = $this->createTempFeed($this->getMinimalRss());
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($this->getMinimalRss());
 
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
@@ -137,8 +107,7 @@ XML;
 
     public function testParseMinimalAtom(): void
     {
-        $path = $this->createTempFeed($this->getMinimalAtom());
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($this->getMinimalAtom());
 
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
@@ -176,8 +145,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertCount(3, $result);
         $this->assertSame('Article 1', $result[0]['title']);
@@ -203,8 +171,7 @@ XML;
     </entry>
 </feed>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertCount(2, $result);
         $this->assertSame('Entry 1', $result[0]['title']);
@@ -230,8 +197,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertSame('2024-03-15 14:30:00', $result[0]['date']);
     }
@@ -249,8 +215,7 @@ XML;
     </entry>
 </feed>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertSame('2024-03-15 14:30:00', $result[0]['date']);
     }
@@ -269,8 +234,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         // Should have a date (fallback to current time)
         $this->assertArrayHasKey('date', $result[0]);
@@ -295,8 +259,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertSame('Multiple spaces in title', $result[0]['title']);
     }
@@ -315,8 +278,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         // The " & " pattern gets converted to " &amp; "
         $this->assertStringContainsString('Tom', $result[0]['title']);
@@ -342,8 +304,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertStringNotContainsString('<p>', $result[0]['desc']);
         $this->assertStringNotContainsString('<b>', $result[0]['desc']);
@@ -365,8 +326,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertLessThanOrEqual(1000, strlen($result[0]['desc']));
         $this->assertStringEndsWith('...', $result[0]['desc']);
@@ -391,8 +351,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertSame('https://example.com/audio.mp3', $result[0]['audio']);
     }
@@ -412,8 +371,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertSame('', $result[0]['audio']);
     }
@@ -437,8 +395,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path, 'encoded');
+        $result = $this->parser->parseXml($xml, 'encoded');
 
         $this->assertArrayHasKey('text', $result[0]);
         $this->assertStringContainsString('Full article content here', $result[0]['text']);
@@ -466,8 +423,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertCount(1, $result);
         $this->assertSame('Valid Item', $result[0]['title']);
@@ -491,8 +447,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertCount(1, $result);
         $this->assertSame('Valid Item', $result[0]['title']);
@@ -504,16 +459,14 @@ XML;
 
     public function testGetFeedTitleReturnsRssTitle(): void
     {
-        $path = $this->createTempFeed($this->getMinimalRss());
-        $result = $this->parser->getFeedTitle($path);
+        $result = $this->parser->getFeedTitleFromXml($this->getMinimalRss());
 
         $this->assertSame('Test Feed', $result);
     }
 
     public function testGetFeedTitleReturnsAtomTitle(): void
     {
-        $path = $this->createTempFeed($this->getMinimalAtom());
-        $result = $this->parser->getFeedTitle($path);
+        $result = $this->parser->getFeedTitleFromXml($this->getMinimalAtom());
 
         $this->assertSame('Test Atom Feed', $result);
     }
@@ -526,8 +479,7 @@ XML;
 
     public function testGetFeedTitleReturnsNullForInvalidXml(): void
     {
-        $path = $this->createTempFeed('invalid xml');
-        $result = $this->parser->getFeedTitle($path);
+        $result = $this->parser->getFeedTitleFromXml('invalid xml');
         $this->assertNull($result);
     }
 
@@ -541,8 +493,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->getFeedTitle($path);
+        $result = $this->parser->getFeedTitleFromXml($xml);
 
         $this->assertNull($result);
     }
@@ -559,8 +510,7 @@ XML;
 
     public function testDetectAndParseReturnsNullForInvalidXml(): void
     {
-        $path = $this->createTempFeed('invalid xml');
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml('invalid xml');
         $this->assertNull($result);
     }
 
@@ -572,15 +522,13 @@ XML;
     <item><title>Test</title></item>
 </unknown>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($xml);
         $this->assertNull($result);
     }
 
     public function testDetectAndParseIncludesFeedTitle(): void
     {
-        $path = $this->createTempFeed($this->getMinimalRss());
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($this->getMinimalRss());
 
         $this->assertArrayHasKey('feed_title', $result);
         $this->assertSame('Test Feed', $result['feed_title']);
@@ -588,8 +536,7 @@ XML;
 
     public function testDetectAndParseIncludesFeedText(): void
     {
-        $path = $this->createTempFeed($this->getMinimalRss());
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($this->getMinimalRss());
 
         $this->assertArrayHasKey('feed_text', $result);
     }
@@ -615,8 +562,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($xml);
 
         $this->assertSame('description', $result['feed_text']);
     }
@@ -645,8 +591,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($xml);
 
         $this->assertSame('encoded', $result['feed_text']);
     }
@@ -666,8 +611,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($xml);
 
         $this->assertSame('', $result['feed_text']);
     }
@@ -693,8 +637,7 @@ XML;
     </entry>
 </feed>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($xml);
 
         $this->assertSame('content', $result['feed_text']);
     }
@@ -717,8 +660,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($xml);
 
         // Should only have the valid item plus metadata keys
         $itemCount = 0;
@@ -748,8 +690,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->detectAndParse($path);
+        $result = $this->parser->detectAndParseXml($xml);
 
         // Count actual items
         $itemCount = 0;
@@ -780,8 +721,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertSame('CDATA Item Title', $result[0]['title']);
         $this->assertStringContainsString('CDATA description', $result[0]['desc']);
@@ -802,8 +742,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertSame('日本語タイトル', $result[0]['title']);
         $this->assertStringContainsString('Ελληνικά', $result[0]['desc']);
@@ -826,8 +765,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertStringContainsString('<', $result[0]['title']);
         $this->assertStringContainsString('>', $result[0]['title']);
@@ -843,8 +781,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertIsArray($result);
         $this->assertCount(0, $result);
@@ -864,8 +801,7 @@ XML;
     </entry>
 </feed>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         // Should pick up the first link's href
         $this->assertSame('https://example.com/article', $result[0]['link']);
@@ -890,8 +826,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         // Date should be parsed (exact value depends on timezone handling)
         $this->assertMatchesRegularExpression('/2024-01-01 \d{2}:\d{2}:\d{2}/', $result[0]['date']);
@@ -910,8 +845,7 @@ XML;
     </entry>
 </feed>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertMatchesRegularExpression('/2024-06-15 \d{2}:\d{2}:\d{2}/', $result[0]['date']);
     }
@@ -936,8 +870,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         // Should parse normally, ignoring DC namespace elements
         $this->assertCount(1, $result);
@@ -971,8 +904,7 @@ XML;
     </channel>
 </rss>
 XML;
-        $path = $this->createTempFeed($xml);
-        $result = $this->parser->parse($path);
+        $result = $this->parser->parseXml($xml);
 
         $this->assertCount(100, $result);
         $this->assertSame('Article 1', $result[0]['title']);
