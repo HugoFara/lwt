@@ -187,14 +187,63 @@ class ArchiveExtractor
     /**
      * Extract a tar archive (.tar.xz, .tar.gz, .tar.bz2, .tgz) using the system `tar` command.
      *
-     * @throws RuntimeException On extraction failure or file-count overflow.
+     * @throws RuntimeException On extraction failure, file-count overflow, or unsafe path.
      */
     private function extractTar(string $tarPath): string
     {
+        // Walk the archive listing BEFORE extracting. The legacy
+        // post-extraction count let a 10 GB / 1M-file archive blow up
+        // the filesystem before we noticed; listing via `tar -tf`
+        // lets us bail at any zip-bomb signal without writing a byte.
+        // `tar` auto-detects gzip/bzip2/xz from the magic bytes.
+        $listCommand = sprintf('tar -tf %s 2>&1', escapeshellarg($tarPath));
+        $listOutput = [];
+        $listExit = 0;
+        exec($listCommand, $listOutput, $listExit);
+
+        if ($listExit !== 0) {
+            throw new RuntimeException(
+                'Failed to read tar archive (exit code ' . $listExit . '): ' .
+                implode("\n", array_map(static fn ($e): string => (string) $e, $listOutput))
+            );
+        }
+
+        if (count($listOutput) > self::MAX_FILES) {
+            throw new RuntimeException(
+                'Archive contains too many files ('
+                . count($listOutput) . ' > ' . self::MAX_FILES . ')'
+            );
+        }
+
+        // exec()'s out-param is typed as `array` (mixed values) at
+        // the stub level — normalize to a list of strings up-front so
+        // the path-safety checks below can prove their operands.
+        $entries = [];
+        /** @psalm-suppress MixedAssignment */
+        foreach ($listOutput as $row) {
+            $entries[] = (string) $row;
+        }
+
+        foreach ($entries as $entry) {
+            // Absolute paths and parent-relative components are the two
+            // classic ways a tar entry escapes its target directory.
+            // tar's --no-absolute-names would also catch these at
+            // extraction time but the error there is opaque; rejecting
+            // here gives a clear cause.
+            if ($entry === '' || $entry[0] === '/' || str_contains($entry, '..')) {
+                throw new RuntimeException('Tar archive contains unsafe path: ' . $entry);
+            }
+        }
+
         $extractDir = $this->makeTempDir();
 
+        // --no-same-owner: don't try to chown extracted files (we're
+        //     not running as root, and even if we were, chown to a
+        //     uid from the archive is never what we want).
+        // --no-same-permissions: writeable+executable bits from the
+        //     archive aren't trustworthy; let umask apply.
         $command = sprintf(
-            'tar xf %s -C %s 2>&1',
+            'tar xf %s -C %s --no-same-owner --no-same-permissions 2>&1',
             escapeshellarg($tarPath),
             escapeshellarg($extractDir)
         );
@@ -209,21 +258,6 @@ class ArchiveExtractor
                 'Failed to extract tar archive (exit code ' . $exitCode . '): ' .
                 implode("\n", $output)
             );
-        }
-
-        $fileCount = 0;
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($extractDir, FilesystemIterator::SKIP_DOTS)
-        );
-        /** @psalm-suppress UnusedForeachValue */
-        foreach ($iterator as $_) {
-            $fileCount++;
-            if ($fileCount > self::MAX_FILES) {
-                $this->removeDir($extractDir);
-                throw new RuntimeException(
-                    'Archive contains too many files (>' . self::MAX_FILES . ')'
-                );
-            }
         }
 
         return $extractDir;

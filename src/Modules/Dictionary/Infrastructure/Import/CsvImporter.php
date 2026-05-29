@@ -61,6 +61,12 @@ class CsvImporter implements ImporterInterface
         }
 
         try {
+            // Advance past a UTF-8 BOM (or reject UTF-16/32 BOMs). A
+            // BOM left in place poisons the first cell of the first
+            // row — fgetcsv reads it as part of the term and the
+            // importer silently produces nothing.
+            self::skipBom($handle);
+
             $lineNumber = 0;
 
             // Skip header if present
@@ -154,6 +160,15 @@ class CsvImporter implements ImporterInterface
             return ',';
         }
 
+        try {
+            self::skipBom($handle);
+        } catch (RuntimeException $e) {
+            // UTF-16/32 input: delimiter counts on raw bytes would be
+            // meaningless, so back off to the safe default.
+            fclose($handle);
+            return ',';
+        }
+
         $firstLine = fgets($handle);
         fclose($handle);
 
@@ -190,10 +205,71 @@ class CsvImporter implements ImporterInterface
             return [];
         }
 
+        try {
+            self::skipBom($handle);
+        } catch (RuntimeException $e) {
+            // UTF-16/32 detected — header strings would be garbage on
+            // a byte read; let the caller surface an "encoding not
+            // supported" error during the real parse instead.
+            fclose($handle);
+            return [];
+        }
+
         $headers = fgetcsv($handle, 0, $delimiter, '"', '');
         fclose($handle);
 
         return $headers ?: [];
+    }
+
+    /**
+     * Inspect the first 4 bytes for a BOM and advance the read
+     * pointer past it, or reject unsupported encodings.
+     *
+     * Excel "Save As CSV" on Windows often produces UTF-16 LE with a
+     * BOM, which fgetcsv has no chance with — every other "cell" is
+     * a NUL byte. Rejecting up front gives the user a clear message
+     * to re-export as UTF-8 instead of silently producing zero
+     * entries.
+     *
+     * @param resource $handle Open file handle (read position at 0)
+     *
+     * @throws RuntimeException If the file is UTF-16 or UTF-32 encoded.
+     */
+    private static function skipBom($handle): void
+    {
+        $head = fread($handle, 4);
+        if ($head === false || $head === '') {
+            // Empty file — let the caller's main loop handle it.
+            rewind($handle);
+            return;
+        }
+
+        // UTF-8 BOM: EF BB BF — strip and continue.
+        if (str_starts_with($head, "\xEF\xBB\xBF")) {
+            fseek($handle, 3, SEEK_SET);
+            return;
+        }
+
+        // UTF-32 BOMs (check before UTF-16, since UTF-32 LE starts
+        // with the same two bytes FF FE as UTF-16 LE).
+        if (str_starts_with($head, "\x00\x00\xFE\xFF") || str_starts_with($head, "\xFF\xFE\x00\x00")) {
+            throw new RuntimeException(
+                'CSV import does not support UTF-32 input. '
+                . 'Please re-save the file as UTF-8.'
+            );
+        }
+
+        // UTF-16 BE / LE.
+        if (str_starts_with($head, "\xFE\xFF") || str_starts_with($head, "\xFF\xFE")) {
+            throw new RuntimeException(
+                'CSV import does not support UTF-16 input '
+                . '(common with Excel "Save As CSV" on Windows). '
+                . 'Please re-save the file as "CSV UTF-8".'
+            );
+        }
+
+        // No BOM: rewind so the caller sees the same offset 0.
+        rewind($handle);
     }
 
     /**

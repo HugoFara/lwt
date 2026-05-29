@@ -192,6 +192,18 @@ class ImportUtilities
         }
         fwrite($temp, Escaping::prepareTextdata($content));
         fclose($temp);
+
+        // Defense-in-depth: if a fatal error short-circuits the
+        // controller's `finally { unlink(...) }` block, this hook
+        // still removes the temp file at shutdown. Idempotent — a
+        // successful clean path that already unlinked the file
+        // produces a harmless ENOENT swallowed by the @.
+        register_shutdown_function(static function () use ($fileName): void {
+            if (is_file($fileName)) {
+                @unlink($fileName);
+            }
+        });
+
         return $fileName;
     }
 

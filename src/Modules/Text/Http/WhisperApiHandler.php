@@ -313,28 +313,14 @@ class WhisperApiHandler implements ApiRoutableInterface
 
     /**
      * Strip path components, control characters, and Unicode
-     * bidi-override runs from a client-supplied filename. The result is
-     * still UTF-8 and human-readable for legitimate inputs; hostile
-     * inputs collapse to harmless ASCII.
+     * bidi-override runs from a client-supplied filename. Thin
+     * wrapper around the shared {@see InputValidator::sanitizeUploadName}
+     * — kept here so the existing test suite continues to exercise
+     * the Whisper-specific input path.
      */
     private static function sanitizeFilename(string $name): string
     {
-        $name = basename($name);
-        // Strip C0/C1 control bytes and the bidi-control codepoints
-        // (U+202A..U+202E, U+2066..U+2069) that can reorder rendered
-        // text — these are the classic "trojan source" payload. The
-        // /u flag makes PCRE compare codepoints, so \x{...} escapes
-        // are required; raw \xE2\x80\xAE byte sequences would be
-        // re-decoded into a single codepoint and never match.
-        $name = (string) preg_replace(
-            '/[\x00-\x1F\x7F]|[\x{202A}-\x{202E}]|[\x{2066}-\x{2069}]/u',
-            '',
-            $name
-        );
-        if ($name === '') {
-            return 'unknown';
-        }
-        return $name;
+        return \Lwt\Shared\Infrastructure\Http\InputValidator::sanitizeUploadName($name);
     }
 
     /**

@@ -348,8 +348,24 @@ class TextCrudController extends BaseController
         if ($importFile !== null) {
             $extension = strtolower(pathinfo($importFile['name'], PATHINFO_EXTENSION));
             if ($extension === 'srt' || $extension === 'vtt') {
+                // Subtitle files are tiny in practice — a feature-length
+                // movie's SRT is ~50 KB. 10 MB is two orders of magnitude
+                // above any legitimate input, low enough that a hostile
+                // upload can't OOM the worker via file_get_contents.
+                $maxSubtitleSize = 10 * 1024 * 1024;
+                $tmpName = $importFile['tmp_name'];
+                $actualSize = filesize($tmpName);
+                if ($actualSize === false || $actualSize > $maxSubtitleSize) {
+                    return [
+                        'message' => __('text.flash.error_prefix', [
+                            'message' => 'Subtitle file exceeds the '
+                                . intdiv($maxSubtitleSize, 1024 * 1024) . ' MB limit.'
+                        ]),
+                        'redirect' => false,
+                    ];
+                }
                 $subtitleService = new \Lwt\Modules\Text\Application\Services\SubtitleParserService();
-                $fileContent = file_get_contents($importFile['tmp_name']);
+                $fileContent = file_get_contents($tmpName);
                 if ($fileContent !== false) {
                     $format = $subtitleService->detectFormat($importFile['name'], $fileContent);
                     if ($format !== null) {

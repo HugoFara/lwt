@@ -555,12 +555,48 @@ class InputValidator
 
         /** @psalm-suppress RedundantCast - Cast needed for robustness with varied input */
         return [
-            'name' => (string) $file['name'],
+            // Sanitize at ingestion so every downstream consumer (dict
+            // import, EPUB parser, error messages, logs) sees the same
+            // clean name without having to remember to call basename().
+            'name' => self::sanitizeUploadName((string) $file['name']),
             'type' => (string) $file['type'],
             'tmp_name' => (string) $file['tmp_name'],
             'error' => (int) $file['error'],
             'size' => (int) $file['size']
         ];
+    }
+
+    /**
+     * Strip path components, control bytes, and bidi-override
+     * codepoints from a client-supplied filename.
+     *
+     * The result is still UTF-8 and human-readable for legitimate
+     * inputs; hostile inputs collapse to harmless ASCII. Apply this
+     * to every $_FILES['name'] before storing, displaying, or
+     * embedding in an error message — basename() alone leaves the
+     * "trojan source" RTL-override class of payload intact.
+     */
+    public static function sanitizeUploadName(string $name): string
+    {
+        $name = basename($name);
+        // Strip C0/C1 control bytes and bidi-control codepoints
+        // (U+202A..U+202E, U+2066..U+2069). /u makes PCRE compare
+        // codepoints — \x{...} escapes are required, raw byte
+        // sequences would be re-decoded and never match.
+        $name = (string) preg_replace(
+            '/[\x00-\x1F\x7F]|[\x{202A}-\x{202E}]|[\x{2066}-\x{2069}]/u',
+            '',
+            $name
+        );
+        // Clamp absurdly long names — most filesystems cap at 255
+        // bytes, and a name that long usually signals an attack.
+        if (strlen($name) > 255) {
+            $name = substr($name, 0, 255);
+        }
+        if ($name === '') {
+            return 'unknown';
+        }
+        return $name;
     }
 
     /**

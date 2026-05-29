@@ -21,6 +21,46 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 4.2 (upload defensive depth)
+
+* **Centralized upload filename sanitization** at the
+  `InputValidator::getUploadedFile()` boundary. Every downstream
+  consumer — dictionary import, EPUB parser, error messages, logs —
+  now receives a `basename()`-stripped, bidi-override-free name
+  without having to remember to call it. The Whisper handler's
+  bespoke `sanitizeFilename` now delegates to this shared helper.
+* **`extractTar()` no longer extracts-then-counts**. The legacy path
+  shell-exec'd `tar xf` and only counted entries after extraction —
+  a 10 GB tar with millions of files exhausted the worker's
+  filesystem before it could bail. Now `tar -tf` lists entries
+  first; we reject the archive if it exceeds `MAX_FILES` (500) or
+  contains absolute paths or `..` components, and extraction adds
+  `--no-same-owner --no-same-permissions` to drop archive-supplied
+  ownership/perm bits.
+* **Subtitle import size cap**: SRT/VTT used `file_get_contents()`
+  with no upper bound — a hostile multi-GB upload OOM'd the worker.
+  Capped at 10 MB (a feature-length movie's SRT is ~50 KB).
+* **JSON dictionary import size cap**: `parseStreaming()` silently
+  delegates to `parseSimple()` (no real streaming parser in tree),
+  so any file gets fully loaded into memory before `json_decode`.
+  Added a `MAX_FILE_SIZE` of 100 MB enforced in `validateFile()`,
+  with a TODO comment on `parseStreaming()` so the cap is revisited
+  if real streaming lands.
+* **CSV importer now handles BOM/encoding correctly**. A UTF-8 BOM
+  left in place poisoned the first cell of the first row, silently
+  yielding zero entries. UTF-16 input (Excel "Save As CSV" on
+  Windows) used to fall through `fgetcsv` and corrupt every value.
+  New `skipBom()` helper strips UTF-8 BOMs and rejects UTF-16/UTF-32
+  inputs with a clear message asking the user to re-export as
+  UTF-8. Applied in `parse()`, `detectDelimiter()`, and
+  `detectHeaders()`.
+* **`ImportUtilities::createTempFile()` registers a
+  `register_shutdown_function` unlink**. The controller's
+  `finally { unlink(...) }` block doesn't run after a fatal error,
+  so the legacy temp files leaked indefinitely on parse failures.
+  The shutdown hook is idempotent — happy-path cleanup is still
+  the normal cleanup path.
+
 ### Security — phase 4.1 (audio robustness)
 
 * **Audio position lost on mobile tab close**: the save was tied to

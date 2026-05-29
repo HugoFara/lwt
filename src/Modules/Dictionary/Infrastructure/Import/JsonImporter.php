@@ -30,6 +30,18 @@ use RuntimeException;
 class JsonImporter implements ImporterInterface
 {
     /**
+     * Hard cap on the JSON input file size.
+     *
+     * parseStreaming() currently delegates to parseSimple() (no real
+     * streaming parser in tree), so the file gets loaded entirely into
+     * memory before json_decode. A 500 MB JSON dictionary OOMs the PHP
+     * worker; 100 MB is well above any plausible legitimate
+     * single-language dictionary (LWT's own JSON exports of 100k+
+     * terms are still under 20 MB).
+     */
+    public const MAX_FILE_SIZE = 100 * 1024 * 1024;
+
+    /**
      * Default field mapping for JSON entries.
      */
     private const DEFAULT_FIELD_MAP = [
@@ -177,13 +189,13 @@ class JsonImporter implements ImporterInterface
     }
 
     /**
-     * Validate that the file exists and is readable.
+     * Validate that the file exists, is readable, and within the size cap.
      *
      * @param string $filePath Path to the file
      *
      * @return void
      *
-     * @throws RuntimeException If file is invalid
+     * @throws RuntimeException If file is invalid or oversized
      */
     private function validateFile(string $filePath): void
     {
@@ -193,6 +205,15 @@ class JsonImporter implements ImporterInterface
 
         if (!is_readable($filePath)) {
             throw new RuntimeException("File is not readable: $filePath");
+        }
+
+        $size = filesize($filePath);
+        if ($size === false || $size > self::MAX_FILE_SIZE) {
+            throw new RuntimeException(
+                'JSON dictionary exceeds the '
+                . intdiv(self::MAX_FILE_SIZE, 1024 * 1024)
+                . ' MB import limit.'
+            );
         }
     }
 
@@ -246,17 +267,18 @@ class JsonImporter implements ImporterInterface
     /**
      * Parse JSON file using streaming for large files.
      *
-     * This is a simplified streaming approach that works for JSON arrays.
-     *
-     * @param string                   $filePath Path to the file
+     * @param string                     $filePath Path to the file
      * @param array<string, string>|null $fieldMap Custom field mapping
      *
      * @return Generator<array{term: string, definition: string, reading?: ?string, pos?: ?string}>
+     *
+     * @todo Real streaming via halaxa/json-machine. Today this is the
+     *       same in-memory parse as {@see parseSimple()}; the
+     *       {@see MAX_FILE_SIZE} cap is what prevents OOM in the
+     *       meantime. If you raise the cap, replace this body first.
      */
     private function parseStreaming(string $filePath, ?array $fieldMap): Generator
     {
-        // For very large files, fall back to simple parsing
-        // A proper streaming JSON parser would require a library like JsonMachine
         yield from $this->parseSimple($filePath, $fieldMap);
     }
 
