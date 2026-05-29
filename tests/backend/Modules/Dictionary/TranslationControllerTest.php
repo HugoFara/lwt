@@ -387,7 +387,7 @@ class TranslationControllerTest extends TestCase
 
         // Test that service methods work correctly
         $url = $service->buildGlosbeUrl('test', 'en', 'es');
-        $this->assertEquals('http://glosbe.com/en/es/test', $url);
+        $this->assertEquals('https://glosbe.com/en/es/test', $url);
 
         $validation = $service->validateGlosbeParams('en', 'es', 'hello');
         $this->assertTrue($validation['valid']);

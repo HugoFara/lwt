@@ -529,7 +529,7 @@ class GutenbergClientTest extends TestCase
         $this->client->search('test');
 
         $this->assertStringStartsWith(
-            'https://gutendex.com/books?',
+            'https://gutendex.com/books/?',
             $this->client->lastFetchedUrl
         );
     }

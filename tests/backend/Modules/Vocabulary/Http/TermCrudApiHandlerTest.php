@@ -1200,7 +1200,7 @@ class TermCrudApiHandlerTest extends TestCase
         $source = $this->getMethodSource('createTermFull');
 
         $this->assertStringContainsString('Connection::prepare(', $source);
-        $this->assertStringContainsString('->bind(', $source);
+        $this->assertStringContainsString('->bindValues(', $source);
         $this->assertStringContainsString('->execute()', $source);
     }
 
@@ -1208,7 +1208,7 @@ class TermCrudApiHandlerTest extends TestCase
     {
         $source = $this->getMethodSource('createTermFull');
 
-        $this->assertStringContainsString('UserScopedQuery::forTablePrepared(', $source);
+        $this->assertStringContainsString('UserScopedQuery::getUserIdForInsert(', $source);
     }
 
     public function testCreateTermFullUpdatesWordOccurrences(): void

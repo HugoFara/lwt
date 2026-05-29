@@ -17,7 +17,8 @@ vi.mock('../../../src/frontend/js/shared/icons/lucide_icons', () => ({
 
 // Mock API client
 vi.mock('../../../src/frontend/js/shared/api/client', () => ({
-  apiGet: vi.fn()
+  apiGet: vi.fn(),
+  getCsrfToken: vi.fn(() => 'test-csrf-token')
 }));
 
 // Mock TextsApi

@@ -166,7 +166,7 @@ class TranslationServiceTest extends TestCase
     {
         $url = $this->service->buildGlosbeUrl('hello', 'en', 'es');
 
-        $this->assertEquals('http://glosbe.com/en/es/hello', $url);
+        $this->assertEquals('https://glosbe.com/en/es/hello', $url);
     }
 
     public function testBuildGlosbeUrlWithSpecialCharacters(): void
@@ -184,14 +184,14 @@ class TranslationServiceTest extends TestCase
         $url = $this->service->buildGlosbeUrl('good morning', 'en', 'de');
 
         // urlencode uses + for spaces, which is valid
-        $this->assertEquals('http://glosbe.com/en/de/good+morning', $url);
+        $this->assertEquals('https://glosbe.com/en/de/good+morning', $url);
     }
 
     public function testBuildGlosbeUrlWithEmptyPhrase(): void
     {
         $url = $this->service->buildGlosbeUrl('', 'en', 'es');
 
-        $this->assertEquals('http://glosbe.com/en/es/', $url);
+        $this->assertEquals('https://glosbe.com/en/es/', $url);
     }
 
     // ===== validateGlosbeParams() tests =====
