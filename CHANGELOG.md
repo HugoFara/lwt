@@ -16,6 +16,32 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 6.1 (CSRF on auth endpoints)
+
+* **`POST /login`, `/register`, `/password/forgot`, `/password/reset`
+  had no CSRF middleware** — only `AuthRateLimitMiddleware`. The
+  matching forms already emitted `_csrf_token` via
+  `FormHelper::csrfField()`, so the token was there but never
+  validated; the field was effectively theatre. The login gap
+  enabled login-CSRF (force a victim to log in as the attacker so
+  the victim's subsequent vocabulary and reading land in the
+  attacker's account); the others enabled forced
+  registration / reset requests. Added `CsrfMiddleware` to all
+  four POST routes. The pre-login session token is lazily created
+  by `CsrfMiddleware::getToken()` when the form view calls
+  `FormHelper::csrfField()`, so the same session carries the
+  token through to the POST.
+* **`POST /email/resend-verification` had no middleware at all**
+  (the controller gated auth inline). Added
+  `AuthRateLimitMiddleware` + `CsrfMiddleware` so cross-site forms
+  cannot make a logged-in victim spam their own inbox.
+* **Regression test**: `RoutesTest::testAuthPostRoutesEnforceCsrf`
+  asserts that `/login`, `/register`, `/logout`,
+  `/email/resend-verification`, `/password/forgot`, and
+  `/password/reset` all carry `CsrfMiddleware`. A future route
+  edit that drops the middleware fails the test instead of
+  silently regressing.
+
 ### Security — phase 5 (SSRF hardening)
 
 * **RSS feed URL was unvalidated** in `RssParser::parse` /

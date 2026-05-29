@@ -431,4 +431,42 @@ class RoutesTest extends TestCase
             );
         }
     }
+
+    // ==================== AUTH CSRF COVERAGE ====================
+
+    /**
+     * Phase 6.1: every state-changing auth POST must carry CsrfMiddleware.
+     *
+     * The forms already emit FormHelper::csrfField(); a missing middleware
+     * on the matching POST route silently turns the field into theatre and
+     * leaves the endpoint open to login-CSRF / forced-registration / forced
+     * password-reset-request / verification-email spamming attacks.
+     */
+    #[DataProvider('authPostRoutesProvider')]
+    public function testAuthPostRoutesEnforceCsrf(string $path): void
+    {
+        $_SERVER['REQUEST_URI'] = $path;
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $result = $this->router->resolve();
+
+        $this->assertEquals('handler', $result['type'], "{$path} POST should resolve to a handler");
+        $middleware = $result['middleware'] ?? [];
+        $this->assertContains(
+            \Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware::class,
+            $middleware,
+            "POST {$path} must include CsrfMiddleware (forms emit the token; the route must validate it)"
+        );
+    }
+
+    public static function authPostRoutesProvider(): array
+    {
+        return [
+            'login'                => ['/login'],
+            'register'             => ['/register'],
+            'logout'               => ['/logout'],
+            'resend verification'  => ['/email/resend-verification'],
+            'forgot password'      => ['/password/forgot'],
+            'reset password'       => ['/password/reset'],
+        ];
+    }
 }

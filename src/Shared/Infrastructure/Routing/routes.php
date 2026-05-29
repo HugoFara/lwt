@@ -650,38 +650,53 @@ function registerRoutes(Router $router): void
     // ==================== AUTHENTICATION ROUTES (PUBLIC) ====================
     // All auth routes use UserController from the User module
 
-    // Login - no auth required, rate limited on POST
+    // Login - no auth required, rate limited and CSRF-protected on POST.
+    // CSRF on a pre-login form blocks login-CSRF: an attacker cannot force a
+    // victim to log in as the attacker's account (and then have the victim's
+    // reading/vocabulary land there) without first stealing the pre-login
+    // session token, which is HttpOnly+SameSite.
     $router->register('/login', 'Lwt\\Modules\\User\\Http\\UserController@loginForm', 'GET');
-    $router->post('/login', 'Lwt\\Modules\\User\\Http\\UserController@login', [AuthRateLimitMiddleware::class]);
+    $router->post(
+        '/login',
+        'Lwt\\Modules\\User\\Http\\UserController@login',
+        [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
+    );
 
-    // Registration - no auth required, rate limited on POST
+    // Registration - no auth required, rate limited and CSRF-protected on POST.
     $router->register('/register', 'Lwt\\Modules\\User\\Http\\UserController@registerForm', 'GET');
-    $router->post('/register', 'Lwt\\Modules\\User\\Http\\UserController@register', [AuthRateLimitMiddleware::class]);
+    $router->post(
+        '/register',
+        'Lwt\\Modules\\User\\Http\\UserController@register',
+        [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
+    );
 
     // Logout - POST-only with CSRF so cross-site `<img src=/logout>` cannot
     // log the victim out. The controller handles a missing session gracefully.
     $router->post('/logout', 'Lwt\\Modules\\User\\Http\\UserController@logout', [CsrfMiddleware::class]);
 
-    // Email Verification - no auth required for token link
+    // Email Verification - no auth required for token link.
     $router->register('/verify-email', 'Lwt\\Modules\\User\\Http\\UserController@verifyEmail', 'GET');
-    $router->register(
+    // Resend verification is an authenticated state-changing POST (controller
+    // gates auth inline). Add CSRF + rate-limit so cross-site forms cannot
+    // spam the victim's inbox with verification emails.
+    $router->post(
         '/email/resend-verification',
         'Lwt\\Modules\\User\\Http\\UserController@resendVerification',
-        'POST'
+        [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
     );
 
-    // Password Reset - no auth required, rate limited on POST
+    // Password Reset - no auth required, rate limited and CSRF-protected on POST.
     $router->register('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPasswordForm', 'GET');
     $router->post(
         '/password/forgot',
         'Lwt\\Modules\\User\\Http\\UserController@forgotPassword',
-        [AuthRateLimitMiddleware::class]
+        [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
     );
     $router->register('/password/reset', 'Lwt\\Modules\\User\\Http\\UserController@resetPasswordForm', 'GET');
     $router->post(
         '/password/reset',
         'Lwt\\Modules\\User\\Http\\UserController@resetPassword',
-        [AuthRateLimitMiddleware::class]
+        [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
     );
 
     // ==================== WORDPRESS INTEGRATION (PUBLIC) ====================
