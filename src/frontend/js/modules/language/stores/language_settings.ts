@@ -7,7 +7,7 @@
  */
 
 import { onDomReady } from '@shared/utils/dom_ready';
-import { apiPut } from '@shared/api/client';
+import { apiPut, getCsrfToken } from '@shared/api/client';
 
 /**
  * Statistics for a text showing word status counts.
@@ -71,11 +71,14 @@ export async function setLang(ctl: HTMLSelectElement, url: string): Promise<void
  * @returns Promise with the API response
  */
 export async function setLangAsync(languageId: string): Promise<LanguageChangeResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const csrf = getCsrfToken();
+  if (csrf) {
+    headers['X-CSRF-TOKEN'] = csrf;
+  }
   const response = await fetch('/api/v1/settings', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       key: 'currentlanguage',
       value: languageId
@@ -95,11 +98,14 @@ export async function setLangAsync(languageId: string): Promise<LanguageChangeRe
  * @returns Promise with the API response
  */
 export async function resetAllAsync(): Promise<LanguageChangeResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const csrf = getCsrfToken();
+  if (csrf) {
+    headers['X-CSRF-TOKEN'] = csrf;
+  }
   const response = await fetch('/api/v1/settings', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       key: 'currentlanguage',
       value: ''

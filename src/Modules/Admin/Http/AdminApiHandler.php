@@ -53,8 +53,21 @@ class AdminApiHandler implements ApiRoutableInterface
 
     public function routePost(array $fragments, array $params): JsonResponse
     {
+        $key = (string) ($params['key'] ?? '');
+
+        // Admin-scoped keys persist at StUsID=0 and are read back by every
+        // user. Non-admins writing them would clobber a global default for
+        // everyone, so the boundary must be enforced at the API edge.
+        if (
+            SettingDefinitions::getScope($key) === SettingDefinitions::SCOPE_ADMIN
+            && Globals::isMultiUserEnabled()
+            && !Globals::isCurrentUserAdmin()
+        ) {
+            return Response::error('Permission denied: admin-scoped setting', 403);
+        }
+
         return Response::success($this->formatSaveSetting(
-            (string) ($params['key'] ?? ''),
+            $key,
             (string) ($params['value'] ?? '')
         ));
     }

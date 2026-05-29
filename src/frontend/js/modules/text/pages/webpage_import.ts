@@ -9,6 +9,7 @@
  */
 
 import { onDomReady } from '@shared/utils/dom_ready';
+import { getCsrfToken } from '@shared/api/client';
 
 /**
  * Server extraction response structure.
@@ -84,9 +85,14 @@ async function fetchWebpage(): Promise<void> {
     const titleInput = document.querySelector<HTMLInputElement>('[name="TxTitle"]');
     const titleHint = titleInput?.value.trim() || '';
 
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const csrf = getCsrfToken();
+    if (csrf) {
+      headers['X-CSRF-TOKEN'] = csrf;
+    }
     const response = await fetch('/api/v1/texts/extract-url', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ url, titleHint }),
     });
 

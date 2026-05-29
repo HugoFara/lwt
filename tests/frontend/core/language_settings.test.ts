@@ -5,7 +5,8 @@ import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vite
 
 // Mock dependencies
 vi.mock('../../../src/frontend/js/shared/api/client', () => ({
-  apiPut: vi.fn().mockResolvedValue({ data: { count: 5 } })
+  apiPut: vi.fn().mockResolvedValue({ data: { count: 5 } }),
+  getCsrfToken: vi.fn().mockReturnValue('test-csrf-token')
 }));
 
 import {
@@ -78,7 +79,7 @@ describe('core/language_settings.ts', () => {
 
       expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'test-csrf-token' },
         body: JSON.stringify({ key: 'currentlanguage', value: '2' })
       });
       expect(locationHrefSpy).toHaveBeenCalledWith('/texts');
@@ -97,7 +98,7 @@ describe('core/language_settings.ts', () => {
 
       expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'test-csrf-token' },
         body: JSON.stringify({ key: 'currentlanguage', value: '1' })
       });
       expect(locationHrefSpy).toHaveBeenCalledWith('/home');
@@ -116,7 +117,7 @@ describe('core/language_settings.ts', () => {
 
       expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'test-csrf-token' },
         body: JSON.stringify({ key: 'currentlanguage', value: '' })
       });
       expect(locationHrefSpy).toHaveBeenCalledWith('/texts');
@@ -159,7 +160,7 @@ describe('core/language_settings.ts', () => {
 
       expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'test-csrf-token' },
         body: JSON.stringify({ key: 'currentlanguage', value: '5' })
       });
     });
@@ -181,7 +182,7 @@ describe('core/language_settings.ts', () => {
 
       expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'test-csrf-token' },
         body: JSON.stringify({ key: 'currentlanguage', value: '' })
       });
       expect(locationHrefSpy).toHaveBeenCalledWith('/texts');
@@ -216,7 +217,7 @@ describe('core/language_settings.ts', () => {
 
       expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'test-csrf-token' },
         body: JSON.stringify({ key: 'currentlanguage', value: '' })
       });
     });
@@ -462,7 +463,7 @@ describe('core/language_settings.ts', () => {
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/v1/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': 'test-csrf-token' },
         body: JSON.stringify({ key: 'currentlanguage', value: '2' })
       });
     });

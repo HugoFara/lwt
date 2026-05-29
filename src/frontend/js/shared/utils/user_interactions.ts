@@ -11,6 +11,7 @@ import { scrollTo } from '@shared/utils/hover_intent';
 import { getTTSSettingsWithMigration, type TTSLanguageSettings } from './tts_storage';
 import { getReadingPosition } from '@modules/text/stores/reading_state';
 import { url } from './url';
+import { getCsrfToken } from '@shared/api/client';
 
 // Type for text dictionary in newExpressionInteractable
 interface TextDictionary {
@@ -220,11 +221,16 @@ export function goToLastPosition(): void {
  * @since 2.9.0-fork
  */
 export function saveReadingPosition(text_id: number, position: number): void {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
+  const csrf = getCsrfToken();
+  if (csrf) {
+    headers['X-CSRF-TOKEN'] = csrf;
+  }
   fetch('/api/v1/texts/' + text_id + '/reading-position', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
+    headers,
     body: 'position=' + encodeURIComponent(position)
   });
 }
@@ -233,11 +239,16 @@ export function saveReadingPosition(text_id: number, position: number): void {
  * Save audio position
  */
 export function saveAudioPosition(text_id: number, pos: number): void {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
+  const csrf = getCsrfToken();
+  if (csrf) {
+    headers['X-CSRF-TOKEN'] = csrf;
+  }
   fetch('/api/v1/texts/' + text_id + '/audio-position', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
+    headers,
     body: 'position=' + encodeURIComponent(pos)
   });
 }
@@ -353,9 +364,14 @@ export async function readTextWithPiper(
   lang: string
 ): Promise<void> {
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const csrf = getCsrfToken();
+    if (csrf) {
+      headers['X-CSRF-TOKEN'] = csrf;
+    }
     const response = await fetch(url('/api/v1/tts/speak'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ text, voice_id: voiceId })
     });
 

@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { setLangAsync } from '@modules/language/stores/language_settings';
+import { getCsrfToken } from '@shared/api/client';
 
 interface NavbarData {
   isOpen: boolean;
@@ -22,6 +23,7 @@ interface NavbarData {
   closeDropdowns(): void;
   navigate(url: string): void;
   switchLanguage(event: Event): void;
+  logout(): void;
 }
 
 /**
@@ -95,6 +97,23 @@ export function navbarData(): NavbarData {
       }).catch((error) => {
         console.error('Failed to change language:', error);
       });
+    },
+
+    logout() {
+      // POST so `<img src=/logout>`-style cross-site GETs cannot log the user
+      // out; include the CSRF token so the server's CsrfMiddleware accepts it.
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/logout';
+
+      const tokenField = document.createElement('input');
+      tokenField.type = 'hidden';
+      tokenField.name = '_csrf_token';
+      tokenField.value = getCsrfToken();
+      form.appendChild(tokenField);
+
+      document.body.appendChild(form);
+      form.submit();
     }
   };
 }

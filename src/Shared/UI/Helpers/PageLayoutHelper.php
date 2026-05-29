@@ -221,9 +221,14 @@ LANG;
         $userLabel = __('navbar.user');
         $preferencesLabel = __('navbar.preferences');
         $helpLabel = __('navbar.help');
+        // Logout must POST with a CSRF token; the navbar Alpine component's
+        // logout() method builds and submits a hidden form. The anchor keeps
+        // its visual style but its href is decorative — the click handler
+        // does the work.
         $logoutLink = $isMultiUser
             ? '<hr class="navbar-divider">'
-                . '<a class="navbar-item" href="' . $base . '/logout">' . __('navbar.logout') . '</a>'
+                . '<a class="navbar-item" href="' . $base . '/logout"'
+                . ' @click.prevent="logout()">' . __('navbar.logout') . '</a>'
             : '';
 
         return <<<HTML

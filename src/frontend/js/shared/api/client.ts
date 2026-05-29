@@ -297,10 +297,10 @@ export async function apiPostForm<T>(
 
     const response = await fetch(defaultConfig.baseUrl + endpoint, {
       method: 'POST',
-      headers: {
+      headers: withCsrf({
         'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json'
-      },
+      }),
       body: formData.toString()
     });
 

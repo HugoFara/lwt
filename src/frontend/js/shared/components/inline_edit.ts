@@ -9,6 +9,7 @@
  */
 
 import { spinnerHtml } from '../icons/icons';
+import { getCsrfToken } from '@shared/api/client';
 
 export interface InlineEditOptions {
   /** URL to POST the edited value to */
@@ -192,6 +193,10 @@ async function saveEdit(
     const formData = new FormData();
     formData.append('id', id);
     formData.append('value', newValue.trim());
+    const csrf = getCsrfToken();
+    if (csrf) {
+      formData.append('_csrf_token', csrf);
+    }
 
     const response = await fetch(config.url, {
       method: 'POST',

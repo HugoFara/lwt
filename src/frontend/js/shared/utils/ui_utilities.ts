@@ -96,9 +96,14 @@ async function handleConfirmDelete(event: Event): Promise<void> {
  * @param value - Setting value
  */
 async function saveSetting(key: string, value: string): Promise<void> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const csrf = getCsrfToken();
+  if (csrf) {
+    headers['X-CSRF-TOKEN'] = csrf;
+  }
   const response = await fetch('/api/v1/settings', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ key, value })
   });
   if (!response.ok) {

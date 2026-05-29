@@ -96,13 +96,29 @@ function registerRoutes(Router $router): void
 
     // Print text (TextPrintController from Text module)
     // RESTful route: /text/123/print
-    $router->get('/text/{text:int}/print', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated', AUTH_MIDDLEWARE);
+    $router->get(
+        '/text/{text:int}/print',
+        'Lwt\\Modules\\Text\\Http\\TextPrintController@printAnnotated',
+        AUTH_MIDDLEWARE
+    );
     // RESTful route: /text/123/print/edit
-    $router->get('/text/{text:int}/print/edit', 'Lwt\\Modules\\Text\\Http\\TextPrintController@editAnnotation', AUTH_MIDDLEWARE);
+    $router->get(
+        '/text/{text:int}/print/edit',
+        'Lwt\\Modules\\Text\\Http\\TextPrintController@editAnnotation',
+        AUTH_MIDDLEWARE
+    );
     // RESTful route: DELETE /text/123/annotation
-    $router->delete('/text/{text:int}/annotation', 'Lwt\\Modules\\Text\\Http\\TextPrintController@deleteAnnotation', AUTH_MIDDLEWARE);
+    $router->delete(
+        '/text/{text:int}/annotation',
+        'Lwt\\Modules\\Text\\Http\\TextPrintController@deleteAnnotation',
+        AUTH_MIDDLEWARE
+    );
     // RESTful route: /text/123/print-plain
-    $router->get('/text/{text:int}/print-plain', 'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain', AUTH_MIDDLEWARE);
+    $router->get(
+        '/text/{text:int}/print-plain',
+        'Lwt\\Modules\\Text\\Http\\TextPrintController@printPlain',
+        AUTH_MIDDLEWARE
+    );
     // Legacy route: /text/print-plain?text=123
     $router->registerWithMiddleware(
         '/text/print-plain',
@@ -121,11 +137,23 @@ function registerRoutes(Router $router): void
     );
 
     // Edit archived text (RESTful route): /text/archived/123/edit
-    $router->get('/text/archived/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit', AUTH_MIDDLEWARE);
-    $router->post('/text/archived/{id:int}/edit', 'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit', AUTH_MIDDLEWARE);
+    $router->get(
+        '/text/archived/{id:int}/edit',
+        'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/text/archived/{id:int}/edit',
+        'Lwt\\Modules\\Text\\Http\\TextController@archivedEdit',
+        AUTH_MIDDLEWARE
+    );
 
     // Delete archived text (RESTful route): DELETE /text/archived/123
-    $router->delete('/text/archived/{id:int}', 'Lwt\\Modules\\Text\\Http\\TextController@deleteArchived', AUTH_MIDDLEWARE);
+    $router->delete(
+        '/text/archived/{id:int}',
+        'Lwt\\Modules\\Text\\Http\\TextController@deleteArchived',
+        AUTH_MIDDLEWARE
+    );
 
     // ==================== WORD/TERM ROUTES (PROTECTED) ====================
     // Split into focused controllers: TermEditController, TermDisplayController,
@@ -146,11 +174,23 @@ function registerRoutes(Router $router): void
     );
 
     // Edit single word form (RESTful route): /words/123/edit
-    $router->get('/words/{id:int}/edit', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById', AUTH_MIDDLEWARE);
-    $router->post('/words/{id:int}/edit', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById', AUTH_MIDDLEWARE);
+    $router->get(
+        '/words/{id:int}/edit',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/words/{id:int}/edit',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
+        AUTH_MIDDLEWARE
+    );
 
     // Delete word (RESTful route): DELETE /words/123
-    $router->delete('/words/{id:int}', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@deleteWord', AUTH_MIDDLEWARE);
+    $router->delete(
+        '/words/{id:int}',
+        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@deleteWord',
+        AUTH_MIDDLEWARE
+    );
 
     // Words list - Alpine.js SPA version (TermDisplayController)
     $router->registerWithMiddleware(
@@ -563,12 +603,36 @@ function registerRoutes(Router $router): void
     $router->post('/admin/users', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@index', ADMIN_MIDDLEWARE);
     $router->get('/admin/users/new', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@create', ADMIN_MIDDLEWARE);
     $router->post('/admin/users/new', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@create', ADMIN_MIDDLEWARE);
-    $router->get('/admin/users/{id:int}/edit', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users/{id:int}/edit', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users/{id:int}/delete', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@delete', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users/{id:int}/activate', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@activate', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users/{id:int}/deactivate', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@deactivate', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users/{id:int}/role', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@setRole', ADMIN_MIDDLEWARE);
+    $router->get(
+        '/admin/users/{id:int}/edit',
+        'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit',
+        ADMIN_MIDDLEWARE
+    );
+    $router->post(
+        '/admin/users/{id:int}/edit',
+        'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit',
+        ADMIN_MIDDLEWARE
+    );
+    $router->post(
+        '/admin/users/{id:int}/delete',
+        'Lwt\\Modules\\Admin\\Http\\UserManagementController@delete',
+        ADMIN_MIDDLEWARE
+    );
+    $router->post(
+        '/admin/users/{id:int}/activate',
+        'Lwt\\Modules\\Admin\\Http\\UserManagementController@activate',
+        ADMIN_MIDDLEWARE
+    );
+    $router->post(
+        '/admin/users/{id:int}/deactivate',
+        'Lwt\\Modules\\Admin\\Http\\UserManagementController@deactivate',
+        ADMIN_MIDDLEWARE
+    );
+    $router->post(
+        '/admin/users/{id:int}/role',
+        'Lwt\\Modules\\Admin\\Http\\UserManagementController@setRole',
+        ADMIN_MIDDLEWARE
+    );
 
     // ==================== USER PROFILE (AUTH REQUIRED) ====================
     $router->get('/profile', 'Lwt\\Modules\\User\\Http\\UserController@profileForm', AUTH_MIDDLEWARE);
@@ -593,12 +657,17 @@ function registerRoutes(Router $router): void
     $router->register('/register', 'Lwt\\Modules\\User\\Http\\UserController@registerForm', 'GET');
     $router->post('/register', 'Lwt\\Modules\\User\\Http\\UserController@register', [AuthRateLimitMiddleware::class]);
 
-    // Logout - technically needs auth but handles gracefully if not
-    $router->register('/logout', 'Lwt\\Modules\\User\\Http\\UserController@logout');
+    // Logout - POST-only with CSRF so cross-site `<img src=/logout>` cannot
+    // log the victim out. The controller handles a missing session gracefully.
+    $router->post('/logout', 'Lwt\\Modules\\User\\Http\\UserController@logout', [CsrfMiddleware::class]);
 
     // Email Verification - no auth required for token link
     $router->register('/verify-email', 'Lwt\\Modules\\User\\Http\\UserController@verifyEmail', 'GET');
-    $router->register('/email/resend-verification', 'Lwt\\Modules\\User\\Http\\UserController@resendVerification', 'POST');
+    $router->register(
+        '/email/resend-verification',
+        'Lwt\\Modules\\User\\Http\\UserController@resendVerification',
+        'POST'
+    );
 
     // Password Reset - no auth required, rate limited on POST
     $router->register('/password/forgot', 'Lwt\\Modules\\User\\Http\\UserController@forgotPasswordForm', 'GET');
@@ -622,32 +691,43 @@ function registerRoutes(Router $router): void
 
     // ==================== GOOGLE OAUTH INTEGRATION (PUBLIC) ====================
 
-    // Google OAuth routes are public - they handle their own auth via OAuth tokens
+    // Google OAuth routes are public - they handle their own auth via OAuth tokens.
+    // The link-confirm POST writes to the session and changes account linkage,
+    // so it must validate CSRF to block cross-site form submissions even though
+    // it does not require AuthMiddleware (controller checks the pending-link session state).
     $router->register('/google/start', 'Lwt\\Modules\\User\\Http\\GoogleController@start');
     $router->register('/google/callback', 'Lwt\\Modules\\User\\Http\\GoogleController@callback');
     $router->register('/google/link-confirm', 'Lwt\\Modules\\User\\Http\\GoogleController@linkConfirm', 'GET');
-    $router->register('/google/link-confirm', 'Lwt\\Modules\\User\\Http\\GoogleController@processLinkConfirm', 'POST');
+    $router->post(
+        '/google/link-confirm',
+        'Lwt\\Modules\\User\\Http\\GoogleController@processLinkConfirm',
+        [CsrfMiddleware::class]
+    );
 
     // ==================== MICROSOFT OAUTH INTEGRATION (PUBLIC) ====================
 
-    // Microsoft OAuth routes are public - they handle their own auth via OAuth tokens
+    // Microsoft OAuth routes are public - they handle their own auth via OAuth tokens.
+    // See the Google block above for why link-confirm POST needs CsrfMiddleware.
     $router->register('/microsoft/start', 'Lwt\\Modules\\User\\Http\\MicrosoftController@start');
     $router->register('/microsoft/callback', 'Lwt\\Modules\\User\\Http\\MicrosoftController@callback');
     $router->register('/microsoft/link-confirm', 'Lwt\\Modules\\User\\Http\\MicrosoftController@linkConfirm', 'GET');
-    $router->register(
+    $router->post(
         '/microsoft/link-confirm',
         'Lwt\\Modules\\User\\Http\\MicrosoftController@processLinkConfirm',
-        'POST'
+        [CsrfMiddleware::class]
     );
 
     // ==================== API ROUTES ====================
 
     // Main API - use prefix to catch all sub-paths
     // Note: API handles its own authentication internally via ApiV1::validateAuth()
-    // This allows /api/v1/auth/* endpoints to be public while protecting others
+    // This allows /api/v1/auth/* endpoints to be public while protecting others.
+    // CsrfMiddleware enforces token validation on POST/PUT/DELETE/PATCH for
+    // cookie-authenticated callers; requests carrying a Bearer token are
+    // exempted inside the middleware (the token itself defeats CSRF).
     // Support both /api/v1 (new) and /api.php/v1 (legacy) paths
-    $router->registerPrefix('/api/v1', 'ApiController@v1');
-    $router->registerPrefix('/api.php/v1', 'ApiController@v1');
+    $router->registerPrefixWithMiddleware('/api/v1', 'ApiController@v1', [CsrfMiddleware::class]);
+    $router->registerPrefixWithMiddleware('/api.php/v1', 'ApiController@v1', [CsrfMiddleware::class]);
 
     // Translation APIs (PROTECTED) - used by authenticated users
     $router->registerWithMiddleware(

@@ -9,6 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
+import { getCsrfToken } from '@shared/api/client';
 
 /**
  * Configuration for a single feed to load.
@@ -139,8 +140,14 @@ export function feedLoaderData(config: FeedLoaderConfig = { feeds: [], redirectU
         formData.append('source_uri', feed.sourceUri);
         formData.append('options', feed.options);
 
+        const headers: Record<string, string> = {};
+        const csrf = getCsrfToken();
+        if (csrf) {
+          headers['X-CSRF-TOKEN'] = csrf;
+        }
         const response = await fetch(`/api/v1/feeds/${feed.id}/load`, {
           method: 'POST',
+          headers,
           body: formData
         });
 
