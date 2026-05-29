@@ -208,6 +208,15 @@ class ApiV1
                 );
 
             case 'media-files':
+                // MediaService::searchMediaPaths recursively scans `media/`
+                // and returns every file. In multi-user mode `media/` is not
+                // segregated, so any non-admin could enumerate other users'
+                // uploaded filenames. Restrict to admins; in single-user
+                // mode there is one user (install owner) so the gate is a
+                // no-op there.
+                if (Globals::isMultiUserEnabled() && !Globals::isCurrentUserAdmin()) {
+                    return Response::error('Permission denied: admin only', 403);
+                }
                 /** @var AdminApiHandler $admin */
                 $admin = $this->container->get(AdminApiHandler::class);
                 return Response::success($admin->formatMediaFiles());

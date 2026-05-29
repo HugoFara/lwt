@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Text\Application\UseCases;
 
+use Lwt\Modules\Text\Domain\AudioUriValidator;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
@@ -56,18 +57,20 @@ class UpdateText
         // Remove soft hyphens
         $text = $this->removeSoftHyphens($text);
 
-        // Check if text content changed
+        // Check if text content changed + fetch the prior TxAudioURI so
+        // the validator can grandfather unchanged values.
         $bindings1 = [$textId];
-        /**
- * @var string|null $oldText
-*/
-        $oldText = Connection::preparedFetchValue(
-            "SELECT TxText FROM texts WHERE TxID = ?"
+        /** @var array{TxText: ?string, TxAudioURI: ?string}|null $existing */
+        $existing = Connection::preparedFetchOne(
+            "SELECT TxText, TxAudioURI FROM texts WHERE TxID = ?"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
-            $bindings1,
-            'TxText'
+            $bindings1
         );
+        $oldText = $existing['TxText'] ?? null;
+        $previousAudioUri = $existing['TxAudioURI'] ?? null;
         $textChanged = $text !== $oldText;
+
+        $audioUri = AudioUriValidator::validate($audioUri, $previousAudioUri);
 
         // Update text
         $bindings2 = [$languageId, $title, $text, $audioUri, $sourceUri, $textId];
@@ -151,18 +154,20 @@ class UpdateText
         string $audioUri,
         string $sourceUri
     ): int {
-        // Check if text content changed
+        // Check if text content changed + fetch the prior TxAudioURI so
+        // the validator can grandfather unchanged values.
         $bindings1 = [$textId];
-        /**
- * @var string|null $oldText
-*/
-        $oldText = Connection::preparedFetchValue(
-            "SELECT TxText FROM texts WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
+        /** @var array{TxText: ?string, TxAudioURI: ?string}|null $existing */
+        $existing = Connection::preparedFetchOne(
+            "SELECT TxText, TxAudioURI FROM texts WHERE TxID = ? AND TxArchivedAt IS NOT NULL"
             . UserScopedQuery::forTablePrepared('texts', $bindings1),
-            $bindings1,
-            'TxText'
+            $bindings1
         );
+        $oldText = $existing['TxText'] ?? null;
+        $previousAudioUri = $existing['TxAudioURI'] ?? null;
         $textsdiffer = $text !== $oldText;
+
+        $audioUri = AudioUriValidator::validate($audioUri, $previousAudioUri);
 
         $bindings2 = [$languageId, $title, $text, $audioUri, $sourceUri, $textId];
         $affected = Connection::preparedExecute(

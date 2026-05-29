@@ -44,6 +44,21 @@ class TextScoringService
      */
     public function scoreText(int $textId, int $unknownWordsLimit = 20): TextScore
     {
+        // word_occurrences is not user-scoped at the column level; it inherits
+        // scope through its Ti2TxID -> texts FK. We must verify ownership
+        // before running the queries, otherwise a non-owner can read another
+        // user's unknown-word list and vocabulary stats by guessing TxIDs.
+        if (!$this->ownsText($textId)) {
+            return new TextScore(
+                textId: $textId,
+                totalUniqueWords: 0,
+                knownWords: 0,
+                learningWords: 0,
+                unknownWords: 0,
+                unknownWordsList: []
+            );
+        }
+
         $stats = $this->calculateVocabularyStats($textId);
         $unknownWordsList = [];
 
@@ -74,6 +89,14 @@ class TextScoringService
             return [];
         }
 
+        // Silently drop any TxIDs the caller does not own. word_occurrences
+        // has no UsID column, so without this filter a caller could mix
+        // owned + unowned IDs and get back stats for the unowned ones too.
+        $textIds = $this->filterOwnedTextIds($textIds);
+        if (empty($textIds)) {
+            return [];
+        }
+
         $scores = [];
         $statsMap = $this->calculateVocabularyStatsForTexts($textIds);
 
@@ -96,6 +119,56 @@ class TextScoringService
         }
 
         return $scores;
+    }
+
+    /**
+     * Check if the current user owns the given text.
+     *
+     * `texts` is in QueryBuilder::USER_SCOPED_TABLES so the where + count
+     * returns 0 for unowned IDs in multi-user mode. In single-user mode
+     * the auto-scope is a no-op and existence is the only check.
+     *
+     * @param int $textId The text ID to check
+     *
+     * @return bool True if the text exists and belongs to the caller
+     */
+    private function ownsText(int $textId): bool
+    {
+        return \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->count() > 0;
+    }
+
+    /**
+     * Filter a list of text IDs down to those owned by the current user.
+     *
+     * Mirrors WordListService::filterOwnedWordIds — runs a single
+     * user-scoped SELECT and returns the surviving IDs.
+     *
+     * @param int[] $textIds Array of text IDs
+     *
+     * @return int[] Owned IDs (subset of $textIds)
+     */
+    private function filterOwnedTextIds(array $textIds): array
+    {
+        if (empty($textIds)) {
+            return [];
+        }
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('texts', $bindings);
+        if ($userScope === '') {
+            return array_values(array_map('intval', $textIds));
+        }
+        $rows = Connection::preparedFetchAll(
+            'SELECT TxID FROM texts WHERE TxID IN ' . $inClause . $userScope,
+            $bindings
+        );
+        $owned = [];
+        foreach ($rows as $row) {
+            $owned[] = (int) $row['TxID'];
+        }
+        return $owned;
     }
 
     /**

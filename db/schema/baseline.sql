@@ -253,6 +253,19 @@ CREATE TABLE IF NOT EXISTS feed_links (
     UNIQUE KEY FlTitle (FlNfID,FlTitle)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Whisper transcription job ownership map (binds NLP job_id to the
+-- caller). Without this, /api/v1/whisper/status|result|cancel would
+-- accept any client-supplied job_id with no per-user check.
+CREATE TABLE IF NOT EXISTS whisper_jobs (
+    WjJobID varchar(64) NOT NULL,
+    WjUsID int(10) unsigned DEFAULT NULL,
+    WjCreatedAt timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (WjJobID),
+    KEY idx_whisper_jobs_user (WjUsID),
+    CONSTRAINT fk_whisper_jobs_user FOREIGN KEY (WjUsID)
+        REFERENCES users(UsID) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Prefix migration tracking table for multi-user conversion
 CREATE TABLE IF NOT EXISTS _prefix_migration_log (
     prefix VARCHAR(40) NOT NULL,

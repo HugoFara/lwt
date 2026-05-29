@@ -21,6 +21,7 @@ namespace Lwt\Modules\Text\Http;
 
 use Lwt\Api\V1\Response;
 use Lwt\Modules\Text\Infrastructure\WhisperClient;
+use Lwt\Modules\Text\Infrastructure\WhisperJobRepository;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
@@ -49,10 +50,12 @@ class WhisperApiHandler implements ApiRoutableInterface
     private const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
     private WhisperClient $client;
+    private WhisperJobRepository $jobs;
 
-    public function __construct()
+    public function __construct(?WhisperClient $client = null, ?WhisperJobRepository $jobs = null)
     {
-        $this->client = new WhisperClient();
+        $this->client = $client ?? new WhisperClient();
+        $this->jobs = $jobs ?? new WhisperJobRepository();
     }
 
     /**
@@ -147,6 +150,10 @@ class WhisperApiHandler implements ApiRoutableInterface
             $model
         );
 
+        // Bind the NLP-issued job_id to the caller so status/result/cancel
+        // can reject foreign IDs even if the UUID leaks.
+        $this->jobs->recordForCurrentUser($jobId);
+
         return ['job_id' => $jobId];
     }
 
@@ -161,6 +168,9 @@ class WhisperApiHandler implements ApiRoutableInterface
     {
         if (empty($jobId)) {
             throw new \InvalidArgumentException('Job ID is required');
+        }
+        if (!$this->jobs->isOwnedByCurrentUser($jobId)) {
+            throw new \RuntimeException('Job not found');
         }
 
         return $this->client->getStatus($jobId);
@@ -178,6 +188,9 @@ class WhisperApiHandler implements ApiRoutableInterface
         if (empty($jobId)) {
             throw new \InvalidArgumentException('Job ID is required');
         }
+        if (!$this->jobs->isOwnedByCurrentUser($jobId)) {
+            throw new \RuntimeException('Job not found');
+        }
 
         return $this->client->getResult($jobId);
     }
@@ -194,8 +207,15 @@ class WhisperApiHandler implements ApiRoutableInterface
         if (empty($jobId)) {
             throw new \InvalidArgumentException('Job ID is required');
         }
+        if (!$this->jobs->isOwnedByCurrentUser($jobId)) {
+            throw new \RuntimeException('Job not found');
+        }
 
-        return ['cancelled' => $this->client->cancelJob($jobId)];
+        $cancelled = $this->client->cancelJob($jobId);
+        if ($cancelled) {
+            $this->jobs->forget($jobId);
+        }
+        return ['cancelled' => $cancelled];
     }
 
     public function routeGet(array $fragments, array $params): JsonResponse
@@ -214,7 +234,13 @@ class WhisperApiHandler implements ApiRoutableInterface
                 if ($frag2 === '') {
                     return Response::error('job_id is required', 400);
                 }
-                return Response::success($this->formatGetStatus($frag2));
+                try {
+                    return Response::success($this->formatGetStatus($frag2));
+                } catch (\RuntimeException $e) {
+                    // The ownership check throws "Job not found" — surface
+                    // it as 404 (same shape as an unknown job_id at NLP).
+                    return Response::error($e->getMessage(), 404);
+                }
             case 'result':
                 if ($frag2 === '') {
                     return Response::error('job_id is required', 400);
@@ -222,7 +248,8 @@ class WhisperApiHandler implements ApiRoutableInterface
                 try {
                     return Response::success($this->formatGetResult($frag2));
                 } catch (\RuntimeException $e) {
-                    return Response::error($e->getMessage(), 500);
+                    $code = $e->getMessage() === 'Job not found' ? 404 : 500;
+                    return Response::error($e->getMessage(), $code);
                 }
             default:
                 return Response::error(
@@ -264,7 +291,11 @@ class WhisperApiHandler implements ApiRoutableInterface
         $frag2 = $this->frag($fragments, 2);
 
         if ($frag1 === 'job' && $frag2 !== '') {
-            return Response::success($this->formatCancelJob($frag2));
+            try {
+                return Response::success($this->formatCancelJob($frag2));
+            } catch (\RuntimeException $e) {
+                return Response::error($e->getMessage(), 404);
+            }
         }
 
         return Response::error('Expected "job/{id}"', 404);

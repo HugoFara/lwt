@@ -69,6 +69,16 @@ class TextStatisticsService
             return $r;
         }
 
+        // word_occurrences has no user column; it inherits scope from its
+        // Ti2TxID -> texts FK only when joined. Without this filter a
+        // caller passing arbitrary TxIDs (or mixing owned + unowned) gets
+        // back word counts and status breakdowns for texts they do not
+        // own. Drop unowned IDs silently — mirrors WordListService.
+        $textIds = $this->filterOwnedTextIds($textIds);
+        if (empty($textIds)) {
+            return $r;
+        }
+
         // Raw SQL needed for complex aggregation with DISTINCT LOWER()
         // word_occurrences inherits user context via Ti2TxID -> texts FK
         $bindings = [];
@@ -132,6 +142,12 @@ class TextStatisticsService
      */
     public function getTodoWordsCount(int $textId): int
     {
+        // Verify ownership: word_occurrences has no user column, so a
+        // non-owner could otherwise read the "words left to learn" count
+        // for any text by guessing the TxID.
+        if (!$this->ownsText($textId)) {
+            return 0;
+        }
         // Raw SQL needed for COUNT(DISTINCT LOWER())
         // word_occurrences inherits user context via Ti2TxID -> texts FK
         /** @var int|string|null $count */
@@ -146,6 +162,50 @@ class TextStatisticsService
             return 0;
         }
         return (int) $count;
+    }
+
+    /**
+     * Check if the current user owns the given text.
+     *
+     * @param int $textId The text ID to check
+     */
+    private function ownsText(int $textId): bool
+    {
+        return QueryBuilder::table('texts')
+            ->where('TxID', '=', $textId)
+            ->count() > 0;
+    }
+
+    /**
+     * Filter text IDs down to those the current user owns.
+     *
+     * Mirrors WordListService::filterOwnedWordIds — single user-scoped
+     * SELECT, return surviving IDs.
+     *
+     * @param int[] $textIds Array of text IDs
+     *
+     * @return int[] Owned IDs (subset of $textIds)
+     */
+    private function filterOwnedTextIds(array $textIds): array
+    {
+        if (empty($textIds)) {
+            return [];
+        }
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause($textIds, $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('texts', $bindings);
+        if ($userScope === '') {
+            return array_values(array_map('intval', $textIds));
+        }
+        $rows = Connection::preparedFetchAll(
+            'SELECT TxID FROM texts WHERE TxID IN ' . $inClause . $userScope,
+            $bindings
+        );
+        $owned = [];
+        foreach ($rows as $row) {
+            $owned[] = (int) $row['TxID'];
+        }
+        return $owned;
     }
 
     /**

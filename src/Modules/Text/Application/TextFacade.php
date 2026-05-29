@@ -37,6 +37,7 @@ use Lwt\Modules\Text\Application\UseCases\ImportText;
 use Lwt\Modules\Text\Application\UseCases\ListTexts;
 use Lwt\Modules\Text\Application\UseCases\ParseText;
 use Lwt\Modules\Text\Application\UseCases\UpdateText;
+use Lwt\Modules\Text\Domain\AudioUriValidator;
 use Lwt\Modules\Text\Domain\TextRepositoryInterface;
 use Lwt\Modules\Text\Infrastructure\MySqlTextRepository;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -822,6 +823,22 @@ class TextFacade
         string $sourceUri
     ): array {
         $cleanText = str_replace("\xC2\xAD", "", $text);
+
+        // Validate TxAudioURI before persisting. On update, fetch the
+        // prior value so the validator can grandfather unchanged URIs
+        // (existing data from before per-user-subdir enforcement).
+        $previousAudioUri = null;
+        if ($textId !== 0) {
+            $bindings0 = [$textId];
+            /** @var string|null $previousAudioUri */
+            $previousAudioUri = Connection::preparedFetchValue(
+                "SELECT TxAudioURI FROM texts WHERE TxID = ?"
+                . UserScopedQuery::forTablePrepared('texts', $bindings0),
+                $bindings0,
+                'TxAudioURI'
+            );
+        }
+        $audioUri = AudioUriValidator::validate($audioUri, $previousAudioUri);
         $audioValue = $audioUri === '' ? null : $audioUri;
 
         if ($textId === 0) {
