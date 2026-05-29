@@ -140,7 +140,7 @@ ones are marked like "v1.0.0-fork".
   per-hop re-validation, cap response size and redirect count.
   Companion `resolveRelativeUrl` handles absolute, `//host/path`,
   and `/path` Location shapes. See
-  [Security followups](./docs-src/developer/security-followups.md)
+  [Security followups](docs-src/developer/security-followups.md)
   for known residuals.
 
 ### Security — phase 4.3 (cross-table authz guards)
