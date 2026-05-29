@@ -477,6 +477,50 @@ class MediaServiceTest extends TestCase
         $this->assertStringContainsString('video', $output);
     }
 
+    public function testRenderMediaPlayerOutputsAudioForOpus(): void
+    {
+        // .opus is a 4-letter extension that the legacy substr(-4)
+        // path skipped — pathinfo-based detection now picks it up.
+        ob_start();
+        $this->service->renderMediaPlayer('/path/to/audio.opus');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('audio', $output);
+    }
+
+    public function testRenderMediaPlayerOutputsAudioForAac(): void
+    {
+        ob_start();
+        $this->service->renderMediaPlayer('/path/to/audio.aac');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('audio', $output);
+    }
+
+    public function testRenderMediaPlayerIsCaseInsensitive(): void
+    {
+        // "SONG.MP3" used to fall through to the video branch because
+        // the substr compare was case-sensitive against lowercase
+        // constants. Now it's normalized to lowercase first.
+        ob_start();
+        $this->service->renderMediaPlayer('/path/to/SONG.MP3');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('audio', $output);
+    }
+
+    public function testRenderMediaPlayerHandlesQueryString(): void
+    {
+        // Signed media URLs end with "?token=..." — pathinfo must run
+        // on the path component, not the raw URL, or every .mp3?... is
+        // misclassified as video.
+        ob_start();
+        $this->service->renderMediaPlayer('https://cdn.example.com/audio.mp3?token=abc123');
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('audio', $output);
+    }
+
     // =========================================================================
     // renderVideoPlayer Tests (YouTube URL parsing)
     // =========================================================================

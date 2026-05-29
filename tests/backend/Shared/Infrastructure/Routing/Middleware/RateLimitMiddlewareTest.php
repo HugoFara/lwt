@@ -156,6 +156,26 @@ class RateLimitMiddlewareTest extends TestCase
         $this->assertNotNull($apiData);
     }
 
+    public function testWhisperTranscribeGetsItsOwnBucket(): void
+    {
+        $this->storage->clear();
+        $middleware = new RateLimitMiddleware($this->storage, 100, 60);
+
+        // /whisper/transcribe is the NLP-heavy kickoff: gets a separate
+        // 'whisper' bucket so the strict 5/15min cap can apply.
+        $_SERVER['REQUEST_URI'] = '/api/v1/whisper/transcribe';
+        $middleware->handle();
+
+        $this->assertNotNull($this->storage->get('rate_limit:whisper:192.168.1.100'));
+
+        // Polling endpoints (status/result) stay on the general bucket
+        // so a long-running transcription can be polled freely.
+        $_SERVER['REQUEST_URI'] = '/api/v1/whisper/status/abc';
+        $middleware->handle();
+
+        $this->assertNotNull($this->storage->get('rate_limit:api:192.168.1.100'));
+    }
+
     public function testForwardedIpHeader(): void
     {
         $middleware = new RateLimitMiddleware($this->storage, 10, 60);

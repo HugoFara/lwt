@@ -62,7 +62,7 @@ class TextApiHandler implements ApiRoutableInterface
         $this->positionHandler->saveTextPosition($textid, $position);
     }
 
-    public function saveAudioPosition(int $textid, int $audioposition): void
+    public function saveAudioPosition(int $textid, float $audioposition): void
     {
         $this->positionHandler->saveAudioPosition($textid, $audioposition);
     }
@@ -72,7 +72,7 @@ class TextApiHandler implements ApiRoutableInterface
         return $this->positionHandler->formatSetTextPosition($textId, $position);
     }
 
-    public function formatSetAudioPosition(int $textId, int $position): array
+    public function formatSetAudioPosition(int $textId, float $position): array
     {
         return $this->positionHandler->formatSetAudioPosition($textId, $position);
     }
@@ -273,7 +273,11 @@ class TextApiHandler implements ApiRoutableInterface
             }
             return Response::error('Expected "words", "print-items", or "annotation"', 404);
         }
-        return Response::error('Expected "gutenberg-suggestions", "library-search", "library-preview", "scoring", "by-language", "archived-by-language", or text ID', 404);
+        return Response::error(
+            'Expected "gutenberg-suggestions", "library-search", "library-preview", '
+            . '"scoring", "by-language", "archived-by-language", or text ID',
+            404
+        );
     }
 
     public function routePost(array $fragments, array $params): JsonResponse
@@ -311,7 +315,7 @@ class TextApiHandler implements ApiRoutableInterface
             case 'audio-position':
                 return Response::success($this->formatSetAudioPosition(
                     $textId,
-                    (int) ($params['position'] ?? 0)
+                    (float) ($params['position'] ?? 0)
                 ));
             case 'reading-position':
                 return Response::success($this->formatSetTextPosition(

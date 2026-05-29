@@ -236,9 +236,11 @@ export function saveReadingPosition(text_id: number, position: number): void {
 }
 
 /**
- * Save audio position
+ * Save audio position. Returns the in-flight fetch so callers can
+ * surface errors (most don't — fire-and-forget is fine on `timeupdate`
+ * ticks where the next tick will retry anyway).
  */
-export function saveAudioPosition(text_id: number, pos: number): void {
+export function saveAudioPosition(text_id: number, pos: number): Promise<Response> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/x-www-form-urlencoded'
   };
@@ -246,11 +248,35 @@ export function saveAudioPosition(text_id: number, pos: number): void {
   if (csrf) {
     headers['X-CSRF-TOKEN'] = csrf;
   }
-  fetch('/api/v1/texts/' + text_id + '/audio-position', {
+  return fetch('/api/v1/texts/' + text_id + '/audio-position', {
     method: 'POST',
     headers,
     body: 'position=' + encodeURIComponent(pos)
   });
+}
+
+/**
+ * Save audio position via navigator.sendBeacon — the only reliable
+ * way to flush a request during pagehide. fetch() is cancelled by
+ * Safari/Chrome mobile when the document is being unloaded; beacon
+ * keeps queued requests alive past tab close.
+ *
+ * Beacons can't set arbitrary headers (no X-CSRF-TOKEN), so the CSRF
+ * token rides as a form field instead — CsrfMiddleware accepts both.
+ *
+ * @returns true if the user agent accepted the beacon for delivery
+ */
+export function saveAudioPositionBeacon(text_id: number, pos: number): boolean {
+  if (typeof navigator === 'undefined' || typeof navigator.sendBeacon !== 'function') {
+    return false;
+  }
+  const body = new FormData();
+  body.append('position', String(pos));
+  const csrf = getCsrfToken();
+  if (csrf) {
+    body.append('_csrf_token', csrf);
+  }
+  return navigator.sendBeacon('/api/v1/texts/' + text_id + '/audio-position', body);
 }
 
 /**

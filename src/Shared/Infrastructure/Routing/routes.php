@@ -24,6 +24,7 @@ use Lwt\Shared\Infrastructure\Routing\Middleware\AuthMiddleware;
 use Lwt\Shared\Infrastructure\Routing\Middleware\AuthRateLimitMiddleware;
 use Lwt\Shared\Infrastructure\Routing\Middleware\AdminMiddleware;
 use Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware;
+use Lwt\Shared\Infrastructure\Routing\Middleware\RateLimitMiddleware;
 
 /**
  * Auth middleware for protected routes.
@@ -725,9 +726,21 @@ function registerRoutes(Router $router): void
     // CsrfMiddleware enforces token validation on POST/PUT/DELETE/PATCH for
     // cookie-authenticated callers; requests carrying a Bearer token are
     // exempted inside the middleware (the token itself defeats CSRF).
-    // Support both /api/v1 (new) and /api.php/v1 (legacy) paths
-    $router->registerPrefixWithMiddleware('/api/v1', 'ApiController@v1', [CsrfMiddleware::class]);
-    $router->registerPrefixWithMiddleware('/api.php/v1', 'ApiController@v1', [CsrfMiddleware::class]);
+    // Support both /api/v1 (new) and /api.php/v1 (legacy) paths.
+    // RateLimitMiddleware sits in front of CSRF so a flood of unsigned
+    // requests gets dropped before we spend cycles hashing the token —
+    // the middleware itself uses the per-endpoint window for /whisper
+    // (5/15min) and the general default for everything else.
+    $router->registerPrefixWithMiddleware(
+        '/api/v1',
+        'ApiController@v1',
+        [RateLimitMiddleware::class, CsrfMiddleware::class]
+    );
+    $router->registerPrefixWithMiddleware(
+        '/api.php/v1',
+        'ApiController@v1',
+        [RateLimitMiddleware::class, CsrfMiddleware::class]
+    );
 
     // Translation APIs (PROTECTED) - used by authenticated users
     $router->registerWithMiddleware(

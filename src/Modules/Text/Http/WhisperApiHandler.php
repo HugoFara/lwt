@@ -45,6 +45,18 @@ class WhisperApiHandler implements ApiRoutableInterface
     ];
 
     /**
+     * Allowed MIME-type prefixes.
+     *
+     * We don't pin the full type because finfo varies across distros
+     * (e.g. m4a as audio/mp4 vs audio/x-m4a). Prefix matching is
+     * narrow enough: a `text/html` masquerading as `.mp3` is rejected,
+     * but legitimate variants of audio/* and video/* go through.
+     * `application/ogg` covers Ogg containers that finfo sometimes
+     * tags under application instead of audio.
+     */
+    private const ALLOWED_MIME_PREFIXES = ['audio/', 'video/', 'application/ogg'];
+
+    /**
      * Maximum file size in bytes (500MB).
      */
     private const MAX_FILE_SIZE = 500 * 1024 * 1024;
@@ -111,8 +123,12 @@ class WhisperApiHandler implements ApiRoutableInterface
             throw new \InvalidArgumentException('No file uploaded');
         }
 
-        // Validate file extension
-        $filename = $file['name'] ?? 'unknown';
+        // Sanitize filename: basename strips path components a client could
+        // sneak in via something like "../../etc/passwd.mp3", and the
+        // control-char/RTL-override strip prevents the NLP service or any
+        // logger from rendering hostile filenames.
+        $rawName = $file['name'] ?? 'unknown';
+        $filename = self::sanitizeFilename($rawName);
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
         if (!in_array($ext, self::ALLOWED_EXTENSIONS, true)) {
@@ -121,13 +137,23 @@ class WhisperApiHandler implements ApiRoutableInterface
             );
         }
 
-        // Validate file size
-        $fileSize = $file['size'] ?? 0;
-        if ($fileSize > self::MAX_FILE_SIZE) {
+        // Validate file size from the real on-disk size, not $file['size']
+        // — that field comes from the multipart Content-Length and a
+        // crafted form can lie about it. filesize($tmpName) is what PHP
+        // actually wrote out.
+        $fileSize = @filesize($tmpName);
+        if ($fileSize === false || $fileSize > self::MAX_FILE_SIZE) {
             throw new \InvalidArgumentException(
-                'File too large. Maximum size: ' . (self::MAX_FILE_SIZE / (1024 * 1024)) . 'MB'
+                'File too large. Maximum size: ' . intdiv(self::MAX_FILE_SIZE, 1024 * 1024) . 'MB'
             );
         }
+
+        // MIME re-verification: a `.mp3` extension proves nothing — the
+        // file could be an executable, an HTML page with smuggled JS,
+        // or a polyglot. Whisper itself would reject most, but the NLP
+        // service is the most expensive consumer in the stack and we'd
+        // rather drop garbage here than after a transcoder spin-up.
+        self::assertAudioVideoMime($tmpName);
 
         // Validate model
         $validModels = ['tiny', 'base', 'small', 'medium', 'large'];
@@ -283,6 +309,63 @@ class WhisperApiHandler implements ApiRoutableInterface
         }
 
         return Response::error('Expected "transcribe"', 404);
+    }
+
+    /**
+     * Strip path components, control characters, and Unicode
+     * bidi-override runs from a client-supplied filename. The result is
+     * still UTF-8 and human-readable for legitimate inputs; hostile
+     * inputs collapse to harmless ASCII.
+     */
+    private static function sanitizeFilename(string $name): string
+    {
+        $name = basename($name);
+        // Strip C0/C1 control bytes and the bidi-control codepoints
+        // (U+202A..U+202E, U+2066..U+2069) that can reorder rendered
+        // text — these are the classic "trojan source" payload. The
+        // /u flag makes PCRE compare codepoints, so \x{...} escapes
+        // are required; raw \xE2\x80\xAE byte sequences would be
+        // re-decoded into a single codepoint and never match.
+        $name = (string) preg_replace(
+            '/[\x00-\x1F\x7F]|[\x{202A}-\x{202E}]|[\x{2066}-\x{2069}]/u',
+            '',
+            $name
+        );
+        if ($name === '') {
+            return 'unknown';
+        }
+        return $name;
+    }
+
+    /**
+     * Reject uploads whose detected MIME doesn't match an audio/video
+     * media type. Throws InvalidArgumentException on mismatch.
+     */
+    private static function assertAudioVideoMime(string $tmpName): void
+    {
+        $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo === false) {
+            // finfo extension missing: degrade to extension-only check
+            // (already done above). Don't fail closed — a misconfigured
+            // PHP shouldn't take Whisper offline.
+            return;
+        }
+        // finfo objects free themselves on scope exit since PHP 8.1, and
+        // finfo_close() is deprecated as of 8.5 — letting $finfo fall out
+        // of scope is both correct and forward-compatible.
+        $detected = (string) @finfo_file($finfo, $tmpName);
+
+        if ($detected === '') {
+            return;
+        }
+        foreach (self::ALLOWED_MIME_PREFIXES as $prefix) {
+            if (str_starts_with($detected, $prefix)) {
+                return;
+            }
+        }
+        throw new \InvalidArgumentException(
+            'File content does not match an audio or video type (detected: ' . $detected . ')'
+        );
     }
 
     public function routeDelete(array $fragments, array $params): JsonResponse

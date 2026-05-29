@@ -21,7 +21,318 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 4.1 (audio robustness)
+
+* **Audio position lost on mobile tab close**: the save was tied to
+  `beforeunload`, which Safari and Chrome mobile cancel during
+  teardown — long listening sessions silently lost progress. Switched
+  to `pagehide` + `navigator.sendBeacon` so the final write survives
+  navigation, tab close, and the bfcache. A debounced periodic save
+  (every 5s of playback) also checkpoints progress so a crash can't
+  swallow an hour of reading.
+* **`TxAudioPosition` truncated to int despite FLOAT column**: every
+  save lost up to a second of precision. Both
+  `TextPositionApiHandler::saveAudioPosition` and the routing layer
+  now thread the position through as `float`. NaN / negative /
+  >24h values are clamped to a sane range so a buggy player can't
+  poison the column.
+* **Whisper upload validation only trusted the client-supplied
+  extension and Content-Length**. Re-check the MIME via
+  `finfo_file()` against an `audio/*`, `video/*`, `application/ogg`
+  allowlist and use the on-disk `filesize()` instead of `$file['size']`
+  before queuing the NLP job. Filenames are sanitized with `basename()`
+  + a strip of C0/C1 controls and U+202A..U+202E / U+2066..U+2069
+  bidi-overrides ("trojan source" payload) before they reach the
+  NLP service via CURLFile.
+* **No rate limit on `/api/v1/whisper/transcribe`**: a runaway script
+  could saturate the model server. The shared `RateLimitMiddleware`
+  is now mounted on the entire `/api/v1` prefix (in front of CSRF so
+  unsigned floods drop fast) and gets a new endpoint type 'whisper'
+  capped at 5 kickoffs per 15 minutes per IP. Polling endpoints
+  (`/whisper/status/{id}`, `/whisper/result/{id}`) stay on the
+  general 100/min limit so long-running jobs can be polled freely.
+* **`MediaService` audio detection used `substr($path, -4)`**, which
+  mis-classified `.mp3` (3-letter) as not-audio and skipped `.opus`
+  / `.aac` entirely. Switched to a case-insensitive `pathinfo()`
+  check that also strips query strings, so signed CDN URLs like
+  `audio.mp3?token=...` resolve correctly.
+
 ### Fixed
+
+* **Bulk vocabulary actions and texts/archived-texts bulk-action 403'd
+  on CSRF**: `submitExportForm` in `word_list_app.ts` and
+  `handleMultiAction` in `texts_grouped_app.ts` /
+  `archived_texts_grouped_app.ts` built dynamic POST forms (for Anki/TSV
+  export, multi-select status change, etc.) and submitted them without
+  a `_csrf_token` field. `CsrfMiddleware` rejected the requests. Inject
+  the token from the meta tag (same fix pattern as `handlePostAction`
+  in commit 8c1fc9b60). The feed wizards (step 1/2/3) and other static
+  forms were unaffected — they get `FormHelper::csrfField()` server-side.
+
+* **Saving a new text in a language with multi-word expressions threw 500**
+  in multi-user mode: `TextParsingPersistence::registerSentencesTextItems`
+  (and its twin in `ParsingCoordinator`) built the multi-word
+  `INSERT INTO word_occurrences ... UNION ALL ...` with six positional
+  bindings, then concatenated two `UserScopedQuery::forTablePrepared()`
+  calls into the SQL — each of which injects ` AND WoUsID = ?` AND
+  appends `$userId` to the **end** of the bindings array. The two new
+  `?` placeholders land at SQL positions 3 and 8, but the corresponding
+  user IDs go to bindings 7 and 8, shifting every value after position
+  2 by one slot. The result swapped `Ti2LgID`/`Ti2TxID` in the UNION
+  branch and triggered an FK violation on `word_occurrences`,
+  surfacing as "A database error occurred" after the text row had
+  already been inserted (so the text appeared in /texts with zero
+  sentences). Rebuilt the SQL/bindings in lockstep so each
+  `forTablePrepared()` runs at the exact position its injected `?`
+  occupies, keeping placeholders and values aligned. Single-word
+  language paths (no multi-word expressions yet) were unaffected and
+  worked by accident — only one trailing injection, correct order.
+
+* **Saving 2+ tags on a term/text threw "An unexpected error occurred"**:
+  Tagify in the term and text edit forms serializes every selected tag
+  into a single comma-joined string posted under one
+  `TermTags[TagList][]` / `TextTags[TagList][]` field. The
+  `saveWordTagsFromForm` / `saveTextTagsFromForm` /
+  `saveArchivedTextTagsFromForm` services treated each array entry as a
+  single tag name and passed it straight to `Tag::create`, which
+  enforces a 20-char limit and then threw `InvalidArgumentException`
+  whenever two tags' combined stripped length exceeded the cap. Split
+  each entry on commas in the service layer so individual tags are
+  created and linked correctly regardless of how Tagify serializes.
+
+* **Multi-word term selection captured inline translation hints**:
+  selecting "petit" (translated as "small") in the reader pre-filled
+  the new-expression modal with `petitsmall` because
+  `text_multiword_selection.ts`/`getSelectedText` walked `el.textContent`
+  on `.word` spans — which include a child `<span class="word-ann">`
+  that renders the translation hint. Extract the surface form via the
+  `data_hex` attribute (fallback: first text node) so the modal
+  pre-fills with the clean term text.
+
+* **Archive / Unarchive from the texts cards 403'd on CSRF**:
+  `handlePostAction` in `texts_grouped_app.ts` and
+  `archived_texts_grouped_app.ts` built an empty form and submitted
+  it. `CsrfMiddleware` rejects any POST/PUT/DELETE/PATCH without an
+  `_csrf_token` field or `X-CSRF-TOKEN` header. Inject a hidden
+  `_csrf_token` input read from the meta tag before submitting.
+
+* **Gutenberg / Library coverage stats silently failed**: same
+  `data.data?.X` mismatch as Whisper. `text_suggestions.ts` read
+  `/api/v1/texts/library-preview` as
+  `data.data && !data.error → data.data.total_words …`, but
+  `Response::success` sends payloads flat. Every preview hit the
+  `else` branch and `book.statsError = true`, so every book on
+  the Gutenberg suggestions panel showed a permanent stats-load
+  error instead of the coverage breakdown. Switched the guard
+  to `!data.error && data.total_words !== undefined` and read
+  the fields directly.
+
+* **Whisper transcription failed: ffmpeg missing in NLP container**:
+  Once the registration + shape + CSRF fixes let a transcribe job
+  actually reach the Python service, `whisper.transcribe` died with
+  `[Errno 2] No such file or directory: 'ffmpeg'`. openai-whisper
+  shells out to ffmpeg for audio decoding; the lwt_nlp Dockerfile
+  installed mecab + curl but not ffmpeg. Added ffmpeg to the apt
+  install.
+
+* **Whisper response shape mismatch — frontend always saw
+  "unavailable"**: every fetch in `whisper_import.ts` read
+  `data.data?.field`, but `Response::success()` sends payloads
+  flat (no `{data: …}` wrapper). The availability probe parsed
+  `{"available":true}` as `data.data?.available === true` →
+  `undefined === true` → `false`, and the page permanently showed
+  "Whisper transcription is not available." Same shape mismatch
+  hid the languages list, the transcribe job_id, the status
+  poller, and the result text. Switched all five reads to use
+  `data.field` directly.
+
+* **YouTube transcript API unregistered**: same class of bug as
+  whisper — `'youtube' → YouTubeApiHandler::class` in HANDLER_MAP
+  but no entry in `Endpoints::ROUTES`. Added `youtube`,
+  `youtube/configured`, `youtube/video` so the configured-check
+  and video-info lookups dispatch correctly.
+
+* **Whisper transcription unreachable — endpoints unregistered**:
+  `ApiV1::HANDLER_MAP` mapped `'whisper' → WhisperApiHandler::class`
+  and the handler implemented `routeGet` / `routePost` / `routeDelete`,
+  but `Endpoints::ROUTES` had no `'whisper'` entry. `/api/v1/whisper/*`
+  always 404'd before reaching the handler, so the audio-import flow
+  on the text-edit form never even started its availability check.
+  Added the whisper paths to the routes registry (GET for available /
+  languages / models / status / result, POST for transcribe, DELETE
+  for job/{id}; first-segment fallback resolves the dynamic
+  `{job_id}` subpaths).
+
+* **fetch-based DELETE/PUT/POST silently 403'd from CSRF**: the
+  shared API client (`apiPost`, `apiPut`, `apiDelete`) and the
+  local `handleRestDelete` callers (texts grouped app, archived
+  texts grouped app, feed index, whisper, text-print annotation,
+  mark-all-wellknown/ignored) all sent the mutating fetch without
+  an `X-CSRF-TOKEN` header, so CsrfMiddleware rejected them.
+  Form-based POSTs were fine because the hidden `_csrf_token`
+  field was already part of the form. Added a CSRF meta tag
+  (`<meta name="csrf-token">`) to the page head and a `getCsrfToken()`
+  helper exported from the shared API client; the client and all
+  direct fetch callers now attach `X-CSRF-TOKEN` on state-changing
+  requests.
+
+* **Quick translation insert 500'd in multi-user mode**: third site
+  of the INSERT-misuse-of-forTablePrepared pattern.
+  `TermTranslationApiHandler::addNewTermTranslation` now uses
+  `getUserIdForInsert` to add `WoUsID` to the column/value list
+  instead of appending the meaningless `AND WoUsID = ?` fragment
+  to `VALUES(...)`.
+
+* **`INSERT IGNORE INTO text_tags` 500'd when importing a feed
+  article in multi-user mode**: same INSERT-misuse-of-forTablePrepared
+  pattern as the term-create bug. `TextCreationAdapter::createText`
+  now injects `T2UsID` into the column/value list when multi-user
+  is on, so the per-user composite primary key is respected.
+
+* **Saving a new term via the word popup's full edit form 500'd in
+  multi-user mode**: `TermCrudApiHandler::createTermFull` appended
+  `UserScopedQuery::forTablePrepared('words', …)` (which yields
+  `" AND WoUsID = ?"`) to an `INSERT INTO words … VALUES (…)` —
+  that fragment is meaningless after `VALUES` and MariaDB rejects
+  it. INSERT user-scoping has its own helper:
+  `UserScopedQuery::getUserIdForInsert('words')` returns the
+  user ID to add to the column/value lists. Switched to that and
+  also moved off the legacy `bind('issssissss', …)` type-string
+  call (the dynamic-binding count made it brittle).
+
+* **Feed article-import error messages were unreadable HTML**: when
+  the article-section selector found no text in an upstream page,
+  `ArticleExtractor::formatErrorMessage` emitted a string with `<a>`
+  and `<br />` markup intended for legacy HTML rendering. Modern
+  toasts use Alpine's `x-text` which renders the tags as literal
+  characters. Switched to plain text (`"Title" has no text section
+  (URL)`) and added a newline separator when multiple errors
+  accumulate per feed.
+
+* **CSP parser errors on archived-texts page**: Alpine's CSP build
+  rejected `x-data="archivedTextsGroupedApp()"` (function-call
+  syntax forbidden when component is registered via `Alpine.data`)
+  and choked on inline `x-text="languages.reduce((sum, lang) => …)"`
+  (arrow function with comma between params). Switched to
+  `x-data="archivedTextsGroupedApp"` and moved the three complex
+  expressions (`totalArchivedSummary`, `archivedCountLabel`,
+  `collapseAriaLabel` / `chevronIcon`) into component methods.
+
+* **User-scoped settings silently dropped in multi-user mode**: every
+  per-user preference POST (theme, current language, reader text
+  size, app language, …) appeared to succeed but never persisted.
+  Two bugs cancelled out: `AdminApiHandler::saveSetting` always
+  wrote to `StUsID=0`, and `Settings::getWithDefault` for SCOPE_USER
+  keys read `Connection::preparedFetchValue("SELECT StValue …")`
+  with no column-name argument — `preparedFetchValue` defaults to
+  column key `'value'`, so `$row['value']` missed the actual
+  `StValue` and returned NULL. Route writes through
+  `Settings::saveForUser` and pass `'StValue'` as the explicit
+  column name on the read.
+
+* **Asset chunks broken on every HTTPS install behind a TLS proxy**:
+  Vite's runtime preload helper emitted `/js/vite/chunks/X.js`
+  links that the .htaccess shim 301-redirected to `/dist/js/…`. The
+  redirect inherited the request's scheme (HTTP from inside Apache)
+  so `<link rel="modulepreload">` resolved to `http://…/dist/X.js`
+  and Chrome blocked it as mixed content before the proxy's
+  HTTPS-upgrade could fire. Set Vite's `base: '/dist/'` so preload
+  URLs match the served path directly, and convert the legacy
+  asset paths in .htaccess from `RedirectMatch 301` to internal
+  `RewriteRule [L]` (no client-visible redirect).
+
+* **`POST /tags/new` and `POST /tags/text/new` returned 404**: only
+  the GET routes were registered, but the controllers' `new()`
+  methods handle both GET (show form) and POST (save). Creating a
+  term tag or text tag from the UI hit 404 instead of saving.
+
+* **Multi-user SQL queries broken when `MULTI_USER_ENABLED=true`**:
+  `UserScopedQuery::forTablePrepared()` returns `" AND ColUsID = ?"`,
+  but four `SELECT … FROM …` queries (GetTextForEdit,
+  GetTextForReading, ParsingCoordinator, WordBulkService) and one
+  `UPDATE … SET` in ImportUtilities had no WHERE clause for the
+  fragment to attach to. Visiting `/texts/new`, parsing some texts,
+  saving terms in bulk, and linking imported words to text items
+  all produced syntax-error 500s. Added a base `WHERE 1=1` on the
+  SELECTs and moved the user-scope predicate into the JOIN ON of
+  the UPDATE.
+
+* **Review page `/review` rendered a blank 200**:
+  `ReviewController::index()` was typed `: void` and discarded
+  the `RedirectResponse` returned by `$this->redirect('/text/edit')`.
+  Execution fell through to `renderReviewPage()` which emitted
+  nothing when `$property === ''`. Changed the signature to
+  `?RedirectResponse` and `return $this->redirect(...)`.
+
+* **Logout link was missing from the navbar dropdown**: the
+  `/logout` route existed but only Preferences, Profile, Admin,
+  and Help showed in the user dropdown — multi-user installs left
+  users unable to sign out from the UI. Added a Logout entry
+  (translated for all nine supported locales), gated on multi-user
+  mode.
+
+* **Service worker leaked previous user's chrome across sessions**:
+  the SW keyed cached HTML by URL with no awareness of user
+  identity, so when User A logged out and User B logged in in the
+  same browser, B briefly saw A's navbar (language list, streak
+  badge) until each page re-fetched. Purge the runtime cache on
+  navigations to `/login` and `/logout`; app-shell assets stay
+  cached.
+
+* **`HEAD` requests returned 404 on every GET-only route**: route
+  resolution looked up the literal request method, so HEAD on
+  `/login`, `/register`, `/password/forgot`, … all 404'd. RFC 7231
+  §4.3.2 says HEAD MUST mirror GET (minus the body) — Apache strips
+  the body automatically, so the router now treats HEAD as GET
+  during resolution.
+
+* **Glosbe dictionary links used `http://`**: three references
+  (`buildGlosbeUrl()` and two user-facing `<a>` tags in the
+  translation popup) emitted `http://glosbe.com/…` URLs that CSP's
+  `script-src-elem` blocked on HTTPS installs. Switched to
+  `https://glosbe.com/`. Also dropped the `de.` subdomain from the
+  language-wizard's default Dict 1 URL so non-German users don't
+  get the German UI by default.
+
+* **RSS feed wizard 500'd for users with one language**: a freshly
+  created user has no `currentlanguage` setting saved (the navbar
+  shows the only option by default), so the curated-feed wizard
+  posted `NfLgID=0` and `Feed::create()` rejected with "Language ID
+  must be positive". `FeedEditController::showNewForm()` now falls
+  back to the user's first language when `currentlanguage` is unset.
+
+* **Feed `ArticleExtractor` downgraded HTTPS feeds to HTTP**: when
+  an article href started with `..`, the absolute-URL reconstruction
+  hardcoded `'http://' . $feedHost['host']`. `parse_url()` had
+  already extracted the scheme two lines above — just read it.
+
+* **Gutenberg suggestions endpoint returned 502 on prod**: two
+  cumulative issues. `https://gutendex.com/books` 301-redirects to
+  `/books/` (trailing slash), doubling the round-trip; and the
+  10 s timeout was tight for the upstream's 20-60 s response time
+  from small VPSes. Hit the canonical URL with the trailing slash,
+  bump the timeout to 60 s. Results are cached per language+page
+  so the slow first request only happens once.
+
+* **HTTPS detection broken behind a TLS-terminating reverse proxy**
+  (#234): when LWT runs behind Traefik / Caddy / nginx with TLS
+  offloading, the connection from the proxy to LWT is plain HTTP and
+  `$_SERVER['HTTPS']` stays unset. The cookie-secure and HSTS code
+  paths already handled this via `X-Forwarded-Proto`, but
+  `UrlUtilities::getAppOrigin()` and `UrlUtilities::urlBase()` did
+  not — so the admin "Server Location" panel and any code building
+  absolute URLs from the request showed `http://` even when the
+  browser was on HTTPS. Consolidated all four scheme-detection sites
+  into a single `UrlUtilities::isSecureRequest()` helper that honours
+  `X-Forwarded-Proto`, `X-Forwarded-Ssl`, `SERVER_PORT == 443`, and
+  the legacy `HTTPS` variable. Added `UrlUtilities::getRequestHost()`
+  that prefers `X-Forwarded-Host` over `HTTP_HOST` (with the same
+  Host-Header-Injection regex validation as before). Both gated by a
+  new `TRUST_PROXY` env var, defaulting to `true` for backwards
+  compatibility — operators running LWT directly on the public
+  internet without a shielding proxy should set `TRUST_PROXY=false`
+  to prevent header-spoofing attacks. Setting `APP_URL` continues to
+  short-circuit detection entirely.
 
 * **Term import was broken on every supported MariaDB and silently
   dropped imported rows in multi-user mode** (the "complete" import

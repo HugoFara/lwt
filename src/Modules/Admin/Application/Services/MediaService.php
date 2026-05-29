@@ -56,7 +56,14 @@ class MediaService
      *
      * @var string[]
      */
-    private const AUDIO_FORMATS = ['.mp3', '.wav', '.ogg', '.m4a', '.flac'];
+    /**
+     * Audio file extensions (without the leading dot).
+     *
+     * Note: matched via pathinfo() so case and 3-vs-4-letter suffix
+     * differences (mp3/flac/aac) work — the old substr(-4) compare
+     * mis-classified .mp3 as not-audio and dropped .opus/.aac entirely.
+     */
+    private const AUDIO_FORMATS = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'opus', 'aac'];
 
     // =========================================================================
     // Media File Discovery
@@ -237,8 +244,13 @@ class MediaService
             return;
         }
 
-        $extension = substr($path, -4);
-        if (in_array($extension, self::AUDIO_FORMATS)) {
+        // pathinfo handles both .mp3 (3-letter) and .flac/.opus (4-letter);
+        // strip query strings and case-fold first so "song.MP3?token=x"
+        // still classifies as audio.
+        $parsed = parse_url($path);
+        $pathOnly = is_array($parsed) ? ($parsed['path'] ?? $path) : $path;
+        $extension = strtolower(pathinfo($pathOnly, PATHINFO_EXTENSION));
+        if (in_array($extension, self::AUDIO_FORMATS, true)) {
             $this->renderAudioPlayer($path, $offset);
         } else {
             $this->renderVideoPlayer($path, $offset);

@@ -23,7 +23,8 @@ vi.mock('../../../src/frontend/js/modules/text/pages/reading/text_events', () =>
 vi.mock('../../../src/frontend/js/shared/utils/user_interactions', () => ({
   goToLastPosition: vi.fn(),
   saveReadingPosition: vi.fn(),
-  saveAudioPosition: vi.fn(),
+  saveAudioPosition: vi.fn().mockResolvedValue({} as Response),
+  saveAudioPositionBeacon: vi.fn().mockReturnValue(true),
   readRawTextAloud: vi.fn()
 }));
 
@@ -32,7 +33,7 @@ vi.mock('../../../src/frontend/js/media/html5_audio_player', () => ({
 }));
 
 import { getLangFromDict } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
-import { saveAudioPosition, readRawTextAloud } from '../../../src/frontend/js/shared/utils/user_interactions';
+import { saveAudioPosition, saveAudioPositionBeacon, readRawTextAloud } from '../../../src/frontend/js/shared/utils/user_interactions';
 import { getAudioPlayer } from '../../../src/frontend/js/media/html5_audio_player';
 import {
   initLanguageConfig,
@@ -169,20 +170,39 @@ describe('text_reading_init.ts', () => {
     it('does nothing when _lwtTextId is undefined', () => {
       saveTextStatus();
 
+      expect(saveAudioPositionBeacon).not.toHaveBeenCalled();
       expect(saveAudioPosition).not.toHaveBeenCalled();
     });
 
-    it('saves audio position from HTML5 audio player', () => {
+    it('saves audio position via beacon from HTML5 audio player', () => {
       (window as any)._lwtTextId = 123;
 
       const mockPlayer = {
         getCurrentTime: vi.fn().mockReturnValue(45.5)
       };
       (getAudioPlayer as any).mockReturnValue(mockPlayer);
+      (saveAudioPositionBeacon as any).mockReturnValue(true);
 
       saveTextStatus();
 
-      expect(saveAudioPosition).toHaveBeenCalledWith(123, 45.5);
+      // Beacon is the preferred path on pagehide — fetch only runs as
+      // a fallback when sendBeacon is unavailable or returns false.
+      expect(saveAudioPositionBeacon).toHaveBeenCalledWith(123, 45.5);
+      expect(saveAudioPosition).not.toHaveBeenCalled();
+    });
+
+    it('falls back to fetch when beacon is rejected', () => {
+      (window as any)._lwtTextId = 123;
+
+      const mockPlayer = {
+        getCurrentTime: vi.fn().mockReturnValue(10)
+      };
+      (getAudioPlayer as any).mockReturnValue(mockPlayer);
+      (saveAudioPositionBeacon as any).mockReturnValue(false);
+
+      saveTextStatus();
+
+      expect(saveAudioPosition).toHaveBeenCalledWith(123, 10);
     });
 
     it('does nothing when HTML5 player not available', () => {
@@ -191,6 +211,7 @@ describe('text_reading_init.ts', () => {
 
       saveTextStatus();
 
+      expect(saveAudioPositionBeacon).not.toHaveBeenCalled();
       expect(saveAudioPosition).not.toHaveBeenCalled();
     });
   });
@@ -262,12 +283,14 @@ describe('text_reading_init.ts', () => {
   // ===========================================================================
 
   describe('initTextReadingHeader', () => {
-    it('sets up beforeunload handler', () => {
+    it('sets up pagehide handler', () => {
       const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
       initTextReadingHeader();
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+      // pagehide replaced beforeunload — Safari/Chrome mobile cancel
+      // beforeunload during teardown and lose the final save.
+      expect(addEventListenerSpy).toHaveBeenCalledWith('pagehide', expect.any(Function));
       addEventListenerSpy.mockRestore();
     });
 

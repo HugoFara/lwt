@@ -410,7 +410,7 @@ class TextPositionApiHandlerTest extends TestCase
     }
 
     #[Test]
-    public function saveAudioPositionAcceptsTwoIntParams(): void
+    public function saveAudioPositionAcceptsIntAndFloatParams(): void
     {
         $method = new \ReflectionMethod(TextPositionApiHandler::class, 'saveAudioPosition');
         $params = $method->getParameters();
@@ -418,5 +418,11 @@ class TextPositionApiHandlerTest extends TestCase
         $this->assertCount(2, $params);
         $this->assertSame('textid', $params[0]->getName());
         $this->assertSame('audioposition', $params[1]->getName());
+
+        $secondType = $params[1]->getType();
+        $this->assertNotNull($secondType);
+        $this->assertInstanceOf(\ReflectionNamedType::class, $secondType);
+        // FLOAT column in DB — sub-second precision must survive the round-trip.
+        $this->assertSame('float', $secondType->getName());
     }
 }

@@ -53,6 +53,22 @@ class RateLimitMiddleware implements MiddlewareInterface
     private const AUTH_WINDOW = 300;
 
     /**
+     * Rate limit for Whisper transcription kickoffs.
+     *
+     * Each kickoff queues a heavy NLP job that can hold a worker for
+     * minutes. Even legitimate users rarely need more than a handful
+     * an hour, so cap aggressively — five per 15 minutes is enough
+     * for an actual reading workflow but blocks a runaway script
+     * from saturating the model server.
+     */
+    private const WHISPER_LIMIT = 5;
+
+    /**
+     * Window size for Whisper endpoints in seconds (15 minutes).
+     */
+    private const WHISPER_WINDOW = 900;
+
+    /**
      * Storage backend for rate limit data.
      */
     private RateLimitStorage $storage;
@@ -102,9 +118,19 @@ class RateLimitMiddleware implements MiddlewareInterface
         }
         $endpoint = $this->getEndpointType();
 
-        // Use stricter limits for auth endpoints (brute force protection)
-        $limit = $endpoint === 'auth' ? self::AUTH_LIMIT : $this->limit;
-        $window = $endpoint === 'auth' ? self::AUTH_WINDOW : $this->window;
+        // Endpoint-specific knobs: auth gets brute-force protection,
+        // whisper gets NLP-saturation protection, everything else
+        // uses the broad default.
+        if ($endpoint === 'auth') {
+            $limit = self::AUTH_LIMIT;
+            $window = self::AUTH_WINDOW;
+        } elseif ($endpoint === 'whisper') {
+            $limit = self::WHISPER_LIMIT;
+            $window = self::WHISPER_WINDOW;
+        } else {
+            $limit = $this->limit;
+            $window = $this->window;
+        }
 
         $key = $this->buildKey($clientId, $endpoint);
         $now = time();
@@ -174,7 +200,7 @@ class RateLimitMiddleware implements MiddlewareInterface
     /**
      * Get the endpoint type for rate limiting.
      *
-     * @return string Endpoint type: 'auth' for auth endpoints, 'api' for others
+     * @return string Endpoint type: 'auth', 'whisper', or 'api'
      */
     private function getEndpointType(): string
     {
@@ -188,6 +214,13 @@ class RateLimitMiddleware implements MiddlewareInterface
         }
         if (preg_match('#^/(login|register|password/forgot|password/reset)$#', $requestPath)) {
             return 'auth';
+        }
+
+        // Whisper transcription kickoff — heavy NLP work, stricter cap.
+        // /status, /result, /job/{id} are polling/cleanup endpoints
+        // and stay on the general API limit.
+        if (preg_match('#/api(?:\.php)?/v1/whisper/transcribe$#', $requestPath)) {
+            return 'whisper';
         }
 
         return 'api';

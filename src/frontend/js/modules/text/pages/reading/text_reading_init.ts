@@ -14,7 +14,13 @@
 import { onDomReady } from '@shared/utils/dom_ready';
 import { getLangFromDict } from '@modules/vocabulary/services/dictionary';
 import { prepareTextInteractions } from './text_events';
-import { goToLastPosition, saveReadingPosition, saveAudioPosition, readRawTextAloud } from '@shared/utils/user_interactions';
+import {
+  goToLastPosition,
+  saveReadingPosition,
+  saveAudioPosition,
+  saveAudioPositionBeacon,
+  readRawTextAloud
+} from '@shared/utils/user_interactions';
 import { getAudioPlayer } from '@/media/html5_audio_player';
 import { initNativeTooltips } from '@shared/components/native_tooltip';
 import { resetReadingPosition } from '@modules/text/stores/reading_state';
@@ -170,7 +176,9 @@ export function toggleReading(): void {
 }
 
 /**
- * Save text status (audio position) when leaving the page.
+ * Save text status (audio position) — used on unload/pagehide so we
+ * route through sendBeacon, which is the only transport mobile
+ * browsers don't cancel during teardown.
  */
 export function saveTextStatus(): void {
   const textId = window._lwtTextId;
@@ -178,13 +186,58 @@ export function saveTextStatus(): void {
     return;
   }
 
-  // Use HTML5 audio player
   if (typeof getAudioPlayer === 'function') {
     const player = getAudioPlayer();
     if (player) {
-      saveAudioPosition(textId, player.getCurrentTime());
+      // pagehide path: beacon survives close/navigate; on the rare
+      // platform without beacon support, fall back to a best-effort
+      // fetch and surface its rejection so we don't lose progress
+      // silently.
+      const queued = saveAudioPositionBeacon(textId, player.getCurrentTime());
+      if (!queued) {
+        saveAudioPosition(textId, player.getCurrentTime()).catch(err => {
+          console.warn('saveAudioPosition fetch failed:', err);
+        });
+      }
     }
   }
+}
+
+/**
+ * Throttle interval between periodic audio-position saves (ms).
+ *
+ * Save every 5s of real time, not every `timeupdate` (which fires
+ * 4-66×/s depending on the browser). Five seconds is small enough
+ * that an unexpected tab kill only loses a handful of seconds of
+ * progress, large enough that a long reading session doesn't
+ * hammer the API.
+ */
+const AUDIO_SAVE_INTERVAL_MS = 5000;
+
+/**
+ * Attach a debounced periodic audio-position save to the player.
+ * Complements the pagehide beacon — if the user keeps the tab open
+ * for hours we still want progress checkpointed.
+ */
+function startPeriodicAudioSave(textId: number): void {
+  if (typeof getAudioPlayer !== 'function') {
+    return;
+  }
+  const player = getAudioPlayer();
+  if (!player) {
+    return;
+  }
+  let lastSaveAt = 0;
+  player.onTimeUpdateCallback((currentTime: number) => {
+    const now = Date.now();
+    if (now - lastSaveAt < AUDIO_SAVE_INTERVAL_MS) {
+      return;
+    }
+    lastSaveAt = now;
+    saveAudioPosition(textId, currentTime).catch(err => {
+      console.warn('saveAudioPosition fetch failed:', err);
+    });
+  });
 }
 
 /**
@@ -309,8 +362,20 @@ export function initTextReading(): void {
  * Called when the header view is ready.
  */
 export function initTextReadingHeader(): void {
-  // Set up beforeunload handler for audio position
-  window.addEventListener('beforeunload', saveTextStatus);
+  // pagehide is the modern, mobile-safe equivalent of beforeunload —
+  // beforeunload often doesn't fire on Safari/Chrome mobile when the
+  // user navigates away or backgrounds the tab, so progress was being
+  // lost. pagehide also fires for the bfcache, so we still catch
+  // back/forward navigation.
+  window.addEventListener('pagehide', saveTextStatus);
+
+  // Periodic checkpoint: covers the case where the user reads for an
+  // hour with the tab open and the browser then crashes — without
+  // this we'd have nothing to restore to.
+  const textId = window._lwtTextId;
+  if (typeof textId === 'number') {
+    startPeriodicAudioSave(textId);
+  }
 
   // Initialize TTS
   initTTS();

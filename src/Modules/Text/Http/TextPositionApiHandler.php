@@ -52,18 +52,46 @@ class TextPositionApiHandler
     }
 
     /**
+     * Upper bound for a stored audio position, in seconds.
+     *
+     * 24h is well past any single-text recording while still small enough
+     * that storing nonsense (Number.MAX_VALUE from a buggy player, an
+     * Infinity coerced to float) can't overflow downstream consumers.
+     */
+    public const MAX_AUDIO_POSITION = 86400.0;
+
+    /**
      * Save the audio position in the text.
      *
-     * @param int $textid        Text ID
-     * @param int $audioposition Audio position
+     * @param int   $textid        Text ID
+     * @param float $audioposition Audio position in seconds
      *
      * @return void
      */
-    public function saveAudioPosition(int $textid, int $audioposition): void
+    public function saveAudioPosition(int $textid, float $audioposition): void
     {
         QueryBuilder::table('texts')
             ->where('TxID', '=', $textid)
-            ->updatePrepared(['TxAudioPosition' => $audioposition]);
+            ->updatePrepared(['TxAudioPosition' => self::sanitizePosition($audioposition)]);
+    }
+
+    /**
+     * Coerce a client-supplied audio position into a safe FLOAT.
+     *
+     * Browser players occasionally emit NaN (seeking before metadata
+     * loaded), Infinity (live streams), or negative values (rewind past
+     * zero). The DB column is FLOAT but UI assumes a sane second-offset,
+     * so clamp to [0, MAX_AUDIO_POSITION] and reject non-finite values.
+     */
+    private static function sanitizePosition(float $position): float
+    {
+        if (!is_finite($position) || $position < 0.0) {
+            return 0.0;
+        }
+        if ($position > self::MAX_AUDIO_POSITION) {
+            return self::MAX_AUDIO_POSITION;
+        }
+        return $position;
     }
 
     /**
@@ -83,12 +111,12 @@ class TextPositionApiHandler
     /**
      * Format response for setting audio position.
      *
-     * @param int $textId   Text ID
-     * @param int $position Audio position
+     * @param int   $textId   Text ID
+     * @param float $position Audio position in seconds
      *
      * @return array{audio: string}
      */
-    public function formatSetAudioPosition(int $textId, int $position): array
+    public function formatSetAudioPosition(int $textId, float $position): array
     {
         $this->saveAudioPosition($textId, $position);
         return ["audio" => "Audio position set"];
