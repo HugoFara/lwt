@@ -246,6 +246,12 @@ class FeedCrudApiHandler
         if ($langId <= 0) {
             return ['success' => false, 'error' => 'Language is required'];
         }
+        // Multi-user mass-assignment fence: NfLgID is a client-supplied
+        // reference into `languages`, so without an ownership check an
+        // attacker can pin their feed to another user's LgID.
+        if (!\Lwt\Shared\Infrastructure\Globals::languageBelongsToCurrentUser($langId)) {
+            return ['success' => false, 'error' => 'Language not found or access denied'];
+        }
         if (empty($name)) {
             return ['success' => false, 'error' => 'Feed name is required'];
         }
@@ -281,6 +287,19 @@ class FeedCrudApiHandler
         $existing = $this->feedFacade->getFeedById($feedId);
         if ($existing === null) {
             return ['success' => false, 'error' => 'Feed not found'];
+        }
+
+        // If the request reassigns NfLgID, the new LgID must also
+        // belong to the caller — otherwise an attacker who owns one
+        // feed could rotate it into another user's language.
+        if (isset($data['langId'])) {
+            $newLangId = (int) $data['langId'];
+            if (
+                $newLangId !== $existing['NfLgID']
+                && !\Lwt\Shared\Infrastructure\Globals::languageBelongsToCurrentUser($newLangId)
+            ) {
+                return ['success' => false, 'error' => 'Language not found or access denied'];
+            }
         }
 
         $this->feedFacade->updateFeed($feedId, [

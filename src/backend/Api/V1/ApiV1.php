@@ -274,6 +274,16 @@ class ApiV1
         $termLc = (string) ($params["term_lc"] ?? '');
         $frag1 = $fragments[1] ?? '';
 
+        // Per-user LgIDs are already unique in practice, so the
+        // downstream sentence/word query can't actually return another
+        // user's data. But accepting an arbitrary LgID still leaks
+        // existence — the response shape differs between "no such
+        // language" and "language not yours" — and an explicit guard
+        // here keeps the policy verifiable instead of incidental.
+        if (!Globals::languageBelongsToCurrentUser($languageId)) {
+            return Response::error('Language not found or access denied', 403);
+        }
+
         if ($frag1 !== '' && ctype_digit($frag1)) {
             return Response::success($lang->formatSentencesWithRegisteredTerm(
                 $languageId,

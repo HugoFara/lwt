@@ -21,6 +21,32 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 4.3 (cross-table authz guards)
+
+* **`POST /api/v1/local-dictionaries` and `POST .../import-curated`
+  accepted any `language_id`** in multi-user mode. The `LdLgID`
+  foreign key has no per-user constraint, so an authenticated user
+  could create dictionaries (or trigger curated imports) pinned to
+  another user's language. Both handlers now reject the request
+  with "Language not found or access denied" if the supplied LgID
+  doesn't belong to the caller.
+* **`POST /api/v1/feeds` and `PUT /api/v1/feeds/{id}` had the same
+  mass-assignment gap on `NfLgID`**. Creation now requires the
+  caller to own the supplied langId; update only re-verifies when
+  the request actually reassigns the column, so vanilla name/URI
+  edits don't pay the extra query.
+* **`GET /api/v1/sentences-with-term` accepted an arbitrary
+  `language_id`**. Per-user LgIDs are unique in practice so the
+  downstream query couldn't return another user's data, but
+  accepting a foreign id leaked existence (response shape differs
+  between "unknown language" and "language not yours"). The
+  request is now refused 403 if the LgID isn't owned by the
+  caller, making the policy verifiable rather than incidental.
+* **New `Globals::languageBelongsToCurrentUser(int $langId): bool`**
+  centralizes the check: a no-op in single-user mode, a
+  user-scoped `EXISTS` on `languages` in multi-user mode. Used by
+  all three handlers above.
+
 ### Security — phase 4.2 (upload defensive depth)
 
 * **Centralized upload filename sanitization** at the

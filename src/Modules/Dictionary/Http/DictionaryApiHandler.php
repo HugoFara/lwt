@@ -126,6 +126,15 @@ class DictionaryApiHandler implements ApiRoutableInterface
             return ['success' => false, 'error' => 'Language ID is required'];
         }
 
+        // In multi-user mode, refuse to create a dictionary against
+        // another user's language. The DB column `LdLgID` has no
+        // foreign-key constraint that fences cross-user references,
+        // so an authenticated user could otherwise plant rows pinned
+        // to a stranger's LgID.
+        if (!\Lwt\Shared\Infrastructure\Globals::languageBelongsToCurrentUser($langId)) {
+            return ['success' => false, 'error' => 'Language not found or access denied'];
+        }
+
         if (empty($name)) {
             return ['success' => false, 'error' => 'Dictionary name is required'];
         }
@@ -165,6 +174,11 @@ class DictionaryApiHandler implements ApiRoutableInterface
 
         if ($langId <= 0) {
             return ['success' => false, 'error' => 'Language ID is required'];
+        }
+        if (!\Lwt\Shared\Infrastructure\Globals::languageBelongsToCurrentUser($langId)) {
+            // Same fence as createDictionary — keep it consistent so
+            // both paths refuse cross-user LgID references.
+            return ['success' => false, 'error' => 'Language not found or access denied'];
         }
         if ($url === '') {
             return ['success' => false, 'error' => 'URL is required'];

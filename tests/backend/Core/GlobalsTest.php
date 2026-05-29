@@ -225,4 +225,27 @@ class GlobalsTest extends TestCase
 
         $this->assertFalse(Globals::isMultiUserEnabled());
     }
+
+    public function testLanguageBelongsToCurrentUserAlwaysTrueInSingleUser(): void
+    {
+        // Single-user mode: there are no other users to fence against,
+        // so the helper is a no-op. Importantly, this branch must not
+        // hit the DB — unit tests run without one and would skip
+        // otherwise.
+        Globals::setMultiUserEnabled(false);
+
+        $this->assertTrue(Globals::languageBelongsToCurrentUser(1));
+        $this->assertTrue(Globals::languageBelongsToCurrentUser(999999));
+    }
+
+    public function testLanguageBelongsToCurrentUserRejectsNonPositiveIds(): void
+    {
+        // Multi-user gate must reject sentinels (0, negative) without
+        // touching the DB — those values can never name a real
+        // language and signal a malformed request.
+        Globals::setMultiUserEnabled(true);
+
+        $this->assertFalse(Globals::languageBelongsToCurrentUser(0));
+        $this->assertFalse(Globals::languageBelongsToCurrentUser(-1));
+    }
 }

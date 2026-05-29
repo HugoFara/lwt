@@ -410,6 +410,34 @@ class Globals
     }
 
     /**
+     * Check whether the given language belongs to the current user.
+     *
+     * Returns true in single-user mode unconditionally — there are
+     * no other users to fence against. In multi-user mode, leverages
+     * the auto-scoping on the `languages` table: an EXISTS that
+     * comes back negative means either the row doesn't exist or it
+     * belongs to someone else, and either way the caller must
+     * refuse the request.
+     *
+     * Use this on any handler that writes a cross-table reference
+     * with a client-supplied LgID (local-dict create, feed create,
+     * etc.) — without the check, an authenticated user can pin
+     * their new row against a stranger's language.
+     */
+    public static function languageBelongsToCurrentUser(int $langId): bool
+    {
+        if (!self::$multiUserEnabled) {
+            return true;
+        }
+        if ($langId <= 0) {
+            return false;
+        }
+        return \Lwt\Shared\Infrastructure\Database\QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->existsPrepared();
+    }
+
+    /**
      * Reset all globals to initial state.
      *
      * Primarily used for testing.
