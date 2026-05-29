@@ -338,10 +338,16 @@ describe('feed_browse_component.ts', () => {
   // ===========================================================================
 
   describe('openPopup()', () => {
-    it('opens audio popup with specific dimensions', () => {
+    const anchor = (href: string): HTMLAnchorElement => {
+      const el = document.createElement('a');
+      el.setAttribute('href', href);
+      return el;
+    };
+
+    it('opens audio popup with specific dimensions, reading href from $el', () => {
       const component = feedBrowseData();
 
-      component.openPopup('http://example.com/audio.mp3', 'audio');
+      component.openPopup(anchor('http://example.com/audio.mp3'), 'audio');
 
       expect(window.open).toHaveBeenCalledWith(
         'http://example.com/audio.mp3',
@@ -350,12 +356,32 @@ describe('feed_browse_component.ts', () => {
       );
     });
 
-    it('opens external popup without dimensions', () => {
+    it('opens external popup without dimensions, reading href from $el', () => {
       const component = feedBrowseData();
 
-      component.openPopup('http://example.com/article', 'external');
+      component.openPopup(anchor('http://example.com/article'), 'external');
 
       expect(window.open).toHaveBeenCalledWith('http://example.com/article');
+    });
+
+    /**
+     * Phase 7 regression: a hostile RSS feed URL containing an apostrophe
+     * used to break out of the JS string literal embedded in the @click
+     * expression via addslashes(htmlspecialchars(...)). Now that the URL
+     * flows through href + getAttribute, no string-literal escaping is
+     * involved on the call path — the apostrophe stays inert.
+     */
+    it('passes the literal href through, even with quotes/script payloads', () => {
+      const component = feedBrowseData();
+      const hostile = "https://attacker.example/audio?x=');alert(1);//";
+
+      component.openPopup(anchor(hostile), 'audio');
+
+      expect(window.open).toHaveBeenCalledWith(
+        hostile,
+        'child',
+        'scrollbars,width=650,height=600'
+      );
     });
   });
 

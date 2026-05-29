@@ -221,7 +221,7 @@ endif; ?>
         <?php if ($row['FlAudio']) : ?>
             <?php $audioEscaped = htmlspecialchars($row['FlAudio'], ENT_QUOTES, 'UTF-8'); ?>
             <a href="<?php echo $audioEscaped; ?>"
-               @click.prevent="openPopup('<?php echo addslashes($audioEscaped); ?>', 'audio')"
+               @click.prevent="openPopup($el, 'audio')"
                target="_blank"
                rel="noopener">
                 <?php echo IconHelper::render('volume-2', ['alt' => 'Audio']); ?>
@@ -233,7 +233,7 @@ endif; ?>
             <?php $linkEscaped = htmlspecialchars(trim($row['FlLink']), ENT_QUOTES, 'UTF-8'); ?>
             <a href="<?php echo $linkEscaped; ?>"
                title="<?php echo $linkEscaped; ?>"
-               @click.prevent="openPopup('<?php echo addslashes($linkEscaped); ?>', 'external')"
+               @click.prevent="openPopup($el, 'external')"
                target="_blank"
                rel="noopener">
             <?php echo IconHelper::render('external-link', ['alt' => '-']); ?></a>

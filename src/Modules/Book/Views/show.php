@@ -91,7 +91,8 @@ $actions = [
             <div class="buttons">
                 <?php $confirmDelete = htmlspecialchars(__('book.confirm_delete_book'), ENT_QUOTES); ?>
                 <form method="post" action="/book/<?php echo $book['id']; ?>/delete"
-                      @submit="if(!confirm('<?php echo $confirmDelete; ?>')) $event.preventDefault()">
+                      data-confirm="<?php echo $confirmDelete; ?>"
+                      @submit="if(!confirm($el.dataset.confirm)) $event.preventDefault()">
                     <?php echo FormHelper::csrfField(); ?>
                     <button type="submit" class="button is-danger is-outlined">
                         <?php echo IconHelper::render('trash-2', ['alt' => __('common.delete')]); ?>

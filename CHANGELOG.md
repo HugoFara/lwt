@@ -16,6 +16,37 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 7 (XSS hardening: kill `addslashes`-into-attribute pattern)
+
+* **Feed browse view embedded hostile RSS URLs into an Alpine
+  `@click.prevent` expression via `addslashes(htmlspecialchars(...))`**.
+  The intent — produce a JS string literal — is broken: by the time
+  `addslashes` runs, `htmlspecialchars` has already encoded any `'`
+  as `&#039;`, so `addslashes` finds no quotes to escape; the browser
+  later HTML-decodes `&#039;` back to `'` inside the attribute value,
+  and that bare apostrophe terminates the JS string. An attacker who
+  controls an RSS feed the user subscribes to (or who plants articles
+  via a compromised public feed) can ship an audio/article URL like
+  `https://x.com/');…;//` and break out of the literal. Whether real
+  JS execution follows depends on `@alpinejs/csp`'s expression parser,
+  but the pattern is fundamentally wrong. Fixed by reading the URL
+  from `$el.getAttribute('href')` — the URL flows through DOM-string
+  context the whole way, so HTML escaping at the attribute boundary
+  is the only escape needed.
+* **Same anti-pattern in three `@submit="if(!confirm('…'))"` forms**
+  (Book index, Book show, Dictionary list). Translation strings are
+  dev-controlled today so no live XSS, but any future apostrophe in
+  the message silently breaks the confirm prompt and the form
+  submits unconditionally. Switched to `data-confirm` attribute +
+  `$el.dataset.confirm` so the message flows through DOM context.
+* **Dependency vuln scan**: `composer audit` and `npm audit
+  --omit=dev` both report 0 advisories. Documented for the record.
+* **Regression test**:
+  `feed_browse_component.test.ts` openPopup suite now passes an
+  `HTMLAnchorElement` and includes a hostile-URL case
+  (`https://attacker.example/audio?x=');alert(1);//`) to assert the
+  href flows through verbatim.
+
 ### Security — phase 6.3 (open-redirect + OAuth state hardening)
 
 * **Open redirect via `auth_redirect`**: `AuthMiddleware::redirectToLogin`

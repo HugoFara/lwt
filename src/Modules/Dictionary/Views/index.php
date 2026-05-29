@@ -245,7 +245,8 @@ echo PageLayoutHelper::buildActionCard([
                             );
                             ?>
                             <form method="POST" action="/dictionaries/delete" style="display:inline;"
-                                  @submit="if(!confirm('<?php echo $confirmDelete; ?>')) $event.preventDefault()">
+                                  data-confirm="<?php echo $confirmDelete; ?>"
+                                  @submit="if(!confirm($el.dataset.confirm)) $event.preventDefault()">
                                 <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
                                 <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
                                 <input type="hidden" name="lang_id" value="<?php echo $langId; ?>">

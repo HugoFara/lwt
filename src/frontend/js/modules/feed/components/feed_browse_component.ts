@@ -46,7 +46,7 @@ export interface FeedBrowseData {
   handleSort(event: Event): void;
   markAll(): void;
   markNone(): void;
-  openPopup(url: string, type: string): void;
+  openPopup(el: HTMLAnchorElement, type: string): void;
   handleNotFoundClick(event: Event): void;
 }
 
@@ -158,9 +158,19 @@ export function feedBrowseData(config: FeedBrowseConfig = {}): FeedBrowseData {
     },
 
     /**
-     * Open a popup window.
+     * Open a popup window for the clicked anchor.
+     *
+     * The URL is read from the element's href attribute, NOT inlined into
+     * the call site. Previously the view embedded the URL into the @click
+     * expression via addslashes(htmlspecialchars(...)) — a hostile RSS feed
+     * could ship a URL with a single quote that would break out of the
+     * JS string literal (HTML decode turns &#039; back into ', which
+     * addslashes can't see at PHP eval time). Reading from $el routes the
+     * URL through DOM-string context the whole way, so HTML escaping at
+     * the attribute boundary is sufficient.
      */
-    openPopup(url: string, type: string): void {
+    openPopup(el: HTMLAnchorElement, type: string): void {
+      const url = el.getAttribute('href') ?? '';
       if (type === 'audio') {
         window.open(url, 'child', 'scrollbars,width=650,height=600');
       } else {

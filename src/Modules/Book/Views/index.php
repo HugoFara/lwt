@@ -134,7 +134,8 @@ $actions = [
                     ?>
                     <form method="post" action="/book/<?php echo $book['id']; ?>/delete"
                           style="display: inline;"
-                          @submit="if(!confirm('<?php echo $confirmDelete; ?>')) $event.preventDefault()">
+                          data-confirm="<?php echo $confirmDelete; ?>"
+                          @submit="if(!confirm($el.dataset.confirm)) $event.preventDefault()">
                         <?php echo FormHelper::csrfField(); ?>
                         <button type="submit" class="button is-small is-danger is-outlined"
                                 title="<?php echo htmlspecialchars(__('common.delete'), ENT_QUOTES); ?>">
