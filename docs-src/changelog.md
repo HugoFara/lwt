@@ -21,6 +21,25 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 6.3 (open-redirect + OAuth state hardening)
+
+* **Open redirect via `auth_redirect`**: `AuthMiddleware::redirectToLogin`
+  (and the matching path in `AdminMiddleware`) stores raw
+  `$_SERVER['REQUEST_URI']` in `$_SESSION['auth_redirect']`; the post-login
+  flow read it back and redirected without validation. A crafted entry
+  URL like `https://lwt.example.com//evil.com/phish` becomes
+  `REQUEST_URI = //evil.com/phish`, which the browser interprets as
+  protocol-relative and follows to `evil.com`. `AuthFormDataManager::
+  getRedirectUrl` now refuses anything that isn't a single-`/` same-origin
+  path (rejects protocol-relative `//…`, backslash bypass `/\…`, absolute
+  URLs, and `javascript:` / `data:` schemes), falling back to the supplied
+  default. The store-side stays as-is — the validator is the chokepoint.
+* **OAuth state comparison was not timing-safe** in Google and Microsoft
+  callback handling: `$state !== $storedState`. Switched to
+  `hash_equals($storedState, $state)`. State is consumed in one shot so
+  the practical exploit window is tiny, but `hash_equals` is the standard
+  choice and removes the question entirely.
+
 ### Security — phase 6.2 (invalidate auth tokens on password change/reset)
 
 * **`ChangePassword` and `CompletePasswordReset` updated only the

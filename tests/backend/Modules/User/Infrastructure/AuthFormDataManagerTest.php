@@ -145,6 +145,47 @@ class AuthFormDataManagerTest extends TestCase
         $this->assertSame('/', $this->manager->getRedirectUrl());
     }
 
+    /**
+     * Phase 6.3: getRedirectUrl must refuse anything that is not a clean
+     * same-origin path. AuthMiddleware stores raw $_SERVER['REQUEST_URI']
+     * here; a crafted URL like `//evil.com/x` would otherwise land the
+     * post-login redirect on a third-party origin via the browser's
+     * protocol-relative URL interpretation.
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('unsafeRedirectUrlProvider')]
+    public function testGetRedirectUrlRejectsUnsafeValues(string $stored): void
+    {
+        $this->manager->setRedirectUrl($stored);
+        $this->assertSame(
+            '/safe-default',
+            $this->manager->getRedirectUrl('/safe-default'),
+            "Stored value `{$stored}` must not pass through; expected default"
+        );
+    }
+
+    public static function unsafeRedirectUrlProvider(): array
+    {
+        return [
+            'empty string'         => [''],
+            'protocol-relative'    => ['//evil.com/phish'],
+            'protocol-relative q'  => ['//evil.com/?a=1'],
+            'backslash bypass'     => ['/\\evil.com/phish'],
+            'absolute http'        => ['http://evil.com/x'],
+            'absolute https'       => ['https://evil.com/x'],
+            'javascript scheme'    => ['javascript:alert(1)'],
+            'data scheme'          => ['data:text/html,phish'],
+            'no leading slash'     => ['evil.com/x'],
+        ];
+    }
+
+    public function testGetRedirectUrlAcceptsCleanRelativePaths(): void
+    {
+        foreach (['/dashboard', '/texts/edit?text=5', '/profile/preferences'] as $path) {
+            $this->manager->setRedirectUrl($path);
+            $this->assertSame($path, $this->manager->getRedirectUrl(), $path);
+        }
+    }
+
     public function testGetAndClearRedirectUrlReturnsDefaultWhenNotSet(): void
     {
         $url = $this->manager->getAndClearRedirectUrl('/home');

@@ -174,7 +174,33 @@ class AuthFormDataManager
         }
         /** @var mixed $value */
         $value = $_SESSION[self::KEY_PREFIX . 'redirect'];
-        return is_string($value) ? $value : $default;
+        if (!is_string($value) || !self::isSafeRelativeUrl($value)) {
+            return $default;
+        }
+        return $value;
+    }
+
+    /**
+     * A stored redirect target is safe iff it's a same-origin path.
+     *
+     * AuthMiddleware stores raw $_SERVER['REQUEST_URI'] when redirecting
+     * unauthenticated users to /login. An attacker who tricks a victim
+     * into visiting `https://lwt.example.com//evil.com/phish` gets
+     * `REQUEST_URI = //evil.com/phish` stored verbatim; if the post-login
+     * redirect followed it, the browser would interpret the leading `//`
+     * as protocol-relative and navigate to evil.com. Reject anything that
+     * doesn't start with a single `/` followed by something other than
+     * `/` or `\` (some browsers treat `\` like `/` in URL paths).
+     */
+    private static function isSafeRelativeUrl(string $url): bool
+    {
+        if ($url === '' || $url[0] !== '/') {
+            return false;
+        }
+        if (strlen($url) >= 2 && ($url[1] === '/' || $url[1] === '\\')) {
+            return false;
+        }
+        return true;
     }
 
     /**

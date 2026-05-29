@@ -167,7 +167,7 @@ class MicrosoftAuthService
 
         unset($_SESSION[self::SESSION_STATE_KEY], $_SESSION[self::SESSION_LINK_KEY]);
 
-        if (empty($state) || $state !== $storedState) {
+        if (empty($state) || $storedState === '' || !hash_equals($storedState, $state)) {
             return [
                 'success' => false,
                 'redirect' => '/login',
