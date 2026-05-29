@@ -16,6 +16,139 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security — phase 5 (SSRF hardening)
+
+* **RSS feed URL was unvalidated** in `RssParser::parse` /
+  `detectAndParse` / `getFeedTitle`. `LIBXML_NONET` only blocks
+  libxml's external-entity loader, not the initial document fetch
+  through PHP's stream wrappers — so an authenticated user could
+  point a feed at `http://127.0.0.1:9200/_cat/indices`,
+  `http://169.254.169.254/latest/meta-data/`, or `/etc/passwd` and
+  read it through the feed preview. The parser now pre-fetches via
+  `UrlUtilities::safeHttpGet` and feeds the bytes to `loadXML`.
+  New `parseXml` / `detectAndParseXml` / `getFeedTitleFromXml`
+  methods expose the XML-string variant for in-memory callers.
+* **Redirect-bypass in five fetch sites**:
+  `WebPageExtractor::fetchPage`,
+  `ArticleExtractor::fetchArticleContent` / `handleRedirect` /
+  `detectCharsetFromHeaders`, and `GutenbergClient::fetchText` /
+  `fetchJson` all ran with `follow_location => true`.
+  `validateUrlForFetch` passed for a public host that then 302'd
+  the fetch into `127.0.0.1`. All sites now route through
+  `safeHttpGet`, which walks `Location` headers manually and
+  re-validates each hop. `WiktionaryEnrichmentService::httpGet`
+  gets the same treatment as defense-in-depth.
+* **New `UrlUtilities::safeHttpGet(string $url, array $opts): ?string`**
+  centralizes the safe-fetch pattern: validate the URL, fetch with
+  stream-level redirects disabled, walk `Location` manually with
+  per-hop re-validation, cap response size and redirect count.
+  Companion `resolveRelativeUrl` handles absolute, `//host/path`,
+  and `/path` Location shapes. See
+  [Security followups](./docs-src/developer/security-followups.md)
+  for known residuals.
+
+### Security — phase 4.3 (cross-table authz guards)
+
+* **`POST /api/v1/local-dictionaries` and `POST .../import-curated`
+  accepted any `language_id`** in multi-user mode. The `LdLgID`
+  foreign key has no per-user constraint, so an authenticated user
+  could create dictionaries (or trigger curated imports) pinned to
+  another user's language. Both handlers now reject the request
+  with "Language not found or access denied" if the supplied LgID
+  doesn't belong to the caller.
+* **`POST /api/v1/feeds` and `PUT /api/v1/feeds/{id}` had the same
+  mass-assignment gap on `NfLgID`**. Creation now requires the
+  caller to own the supplied langId; update only re-verifies when
+  the request actually reassigns the column, so vanilla name/URI
+  edits don't pay the extra query.
+* **`GET /api/v1/sentences-with-term` accepted an arbitrary
+  `language_id`**. Per-user LgIDs are unique in practice so the
+  downstream query couldn't return another user's data, but
+  accepting a foreign id leaked existence (response shape differs
+  between "unknown language" and "language not yours"). The
+  request is now refused 403 if the LgID isn't owned by the
+  caller, making the policy verifiable rather than incidental.
+* **New `Globals::languageBelongsToCurrentUser(int $langId): bool`**
+  centralizes the check: a no-op in single-user mode, a
+  user-scoped `EXISTS` on `languages` in multi-user mode. Used by
+  all three handlers above.
+
+### Security — phase 4.2 (upload defensive depth)
+
+* **Centralized upload filename sanitization** at the
+  `InputValidator::getUploadedFile()` boundary. Every downstream
+  consumer — dictionary import, EPUB parser, error messages, logs —
+  now receives a `basename()`-stripped, bidi-override-free name
+  without having to remember to call it. The Whisper handler's
+  bespoke `sanitizeFilename` now delegates to this shared helper.
+* **`extractTar()` no longer extracts-then-counts**. The legacy path
+  shell-exec'd `tar xf` and only counted entries after extraction —
+  a 10 GB tar with millions of files exhausted the worker's
+  filesystem before it could bail. Now `tar -tf` lists entries
+  first; we reject the archive if it exceeds `MAX_FILES` (500) or
+  contains absolute paths or `..` components, and extraction adds
+  `--no-same-owner --no-same-permissions` to drop archive-supplied
+  ownership/perm bits.
+* **Subtitle import size cap**: SRT/VTT used `file_get_contents()`
+  with no upper bound — a hostile multi-GB upload OOM'd the worker.
+  Capped at 10 MB (a feature-length movie's SRT is ~50 KB).
+* **JSON dictionary import size cap**: `parseStreaming()` silently
+  delegates to `parseSimple()` (no real streaming parser in tree),
+  so any file gets fully loaded into memory before `json_decode`.
+  Added a `MAX_FILE_SIZE` of 100 MB enforced in `validateFile()`,
+  with a TODO comment on `parseStreaming()` so the cap is revisited
+  if real streaming lands.
+* **CSV importer now handles BOM/encoding correctly**. A UTF-8 BOM
+  left in place poisoned the first cell of the first row, silently
+  yielding zero entries. UTF-16 input (Excel "Save As CSV" on
+  Windows) used to fall through `fgetcsv` and corrupt every value.
+  New `skipBom()` helper strips UTF-8 BOMs and rejects UTF-16/UTF-32
+  inputs with a clear message asking the user to re-export as
+  UTF-8. Applied in `parse()`, `detectDelimiter()`, and
+  `detectHeaders()`.
+* **`ImportUtilities::createTempFile()` registers a
+  `register_shutdown_function` unlink**. The controller's
+  `finally { unlink(...) }` block doesn't run after a fatal error,
+  so the legacy temp files leaked indefinitely on parse failures.
+  The shutdown hook is idempotent — happy-path cleanup is still
+  the normal cleanup path.
+
+### Security — phase 4.1 (audio robustness)
+
+* **Audio position lost on mobile tab close**: the save was tied to
+  `beforeunload`, which Safari and Chrome mobile cancel during
+  teardown — long listening sessions silently lost progress. Switched
+  to `pagehide` + `navigator.sendBeacon` so the final write survives
+  navigation, tab close, and the bfcache. A debounced periodic save
+  (every 5s of playback) also checkpoints progress so a crash can't
+  swallow an hour of reading.
+* **`TxAudioPosition` truncated to int despite FLOAT column**: every
+  save lost up to a second of precision. Both
+  `TextPositionApiHandler::saveAudioPosition` and the routing layer
+  now thread the position through as `float`. NaN / negative /
+  >24h values are clamped to a sane range so a buggy player can't
+  poison the column.
+* **Whisper upload validation only trusted the client-supplied
+  extension and Content-Length**. Re-check the MIME via
+  `finfo_file()` against an `audio/*`, `video/*`, `application/ogg`
+  allowlist and use the on-disk `filesize()` instead of `$file['size']`
+  before queuing the NLP job. Filenames are sanitized with `basename()`
+  + a strip of C0/C1 controls and U+202A..U+202E / U+2066..U+2069
+  bidi-overrides ("trojan source" payload) before they reach the
+  NLP service via CURLFile.
+* **No rate limit on `/api/v1/whisper/transcribe`**: a runaway script
+  could saturate the model server. The shared `RateLimitMiddleware`
+  is now mounted on the entire `/api/v1` prefix (in front of CSRF so
+  unsigned floods drop fast) and gets a new endpoint type 'whisper'
+  capped at 5 kickoffs per 15 minutes per IP. Polling endpoints
+  (`/whisper/status/{id}`, `/whisper/result/{id}`) stay on the
+  general 100/min limit so long-running jobs can be polled freely.
+* **`MediaService` audio detection used `substr($path, -4)`**, which
+  mis-classified `.mp3` (3-letter) as not-audio and skipped `.opus`
+  / `.aac` entirely. Switched to a case-insensitive `pathinfo()`
+  check that also strips query strings, so signed CDN URLs like
+  `audio.mp3?token=...` resolve correctly.
+
 ### Fixed
 
 * **Bulk vocabulary actions and texts/archived-texts bulk-action 403'd

@@ -24,52 +24,33 @@ ones are marked like "v1.0.0-fork".
 ### Security — phase 5 (SSRF hardening)
 
 * **RSS feed URL was unvalidated** in `RssParser::parse` /
-  `detectAndParse` / `getFeedTitle`. `LIBXML_NONET` was already set,
-  but it only blocks libxml's external-entity loader — the *initial*
-  document fetch goes through PHP's stream wrappers, which are not
-  covered. An authenticated user could create a feed pointing at
-  `http://127.0.0.1:9200/_cat/indices` (Elasticsearch),
-  `http://169.254.169.254/latest/meta-data/` (cloud metadata), or
-  any other internal service and read the response through the feed
-  preview. The parser now pre-fetches via `safeHttpGet` (URL
-  validated, redirects re-validated per hop) and feeds the bytes to
-  `loadXML`. Also closes an incidental local-file-read: the previous
-  `DOMDocument::load($uri)` accepted bare paths like `/etc/passwd`.
-* **`WebPageExtractor::fetchPage`, `ArticleExtractor::fetchArticleContent`
-  / `handleRedirect`, and `GutenbergClient::fetchText` / `fetchJson`
-  all set `follow_location => true`** with no per-hop revalidation.
-  `validateUrlForFetch` passed for `evil.com`; that public host then
-  302'd the fetch into `127.0.0.1:8080/admin`, bypassing the
-  validator entirely. All four sites now route through
-  `UrlUtilities::safeHttpGet`, which disables stream-level redirect
-  follow, manually walks each `Location`, and re-runs
-  `validateUrlForFetch` against every hop.
-* **`ArticleExtractor::detectCharsetFromHeaders` used `get_headers()`**
-  with PHP's default follow-redirects behaviour. Same redirect-bypass
-  shape — fixed by passing a stream context with
-  `follow_location => 0` so the lookup only inspects the initial
-  response.
-* **`WiktionaryEnrichmentService::httpGet`** had no URL validation
-  and no `max_redirects` cap. The hostnames it builds come from a
-  static map today, but routing through `safeHttpGet` is cheap
-  defense-in-depth in case the map ever grows a user-influenced
-  entry.
+  `detectAndParse` / `getFeedTitle`. `LIBXML_NONET` only blocks
+  libxml's external-entity loader, not the initial document fetch
+  through PHP's stream wrappers — so an authenticated user could
+  point a feed at `http://127.0.0.1:9200/_cat/indices`,
+  `http://169.254.169.254/latest/meta-data/`, or `/etc/passwd` and
+  read it through the feed preview. The parser now pre-fetches via
+  `UrlUtilities::safeHttpGet` and feeds the bytes to `loadXML`.
+  New `parseXml` / `detectAndParseXml` / `getFeedTitleFromXml`
+  methods expose the XML-string variant for in-memory callers.
+* **Redirect-bypass in five fetch sites**:
+  `WebPageExtractor::fetchPage`,
+  `ArticleExtractor::fetchArticleContent` / `handleRedirect` /
+  `detectCharsetFromHeaders`, and `GutenbergClient::fetchText` /
+  `fetchJson` all ran with `follow_location => true`.
+  `validateUrlForFetch` passed for a public host that then 302'd
+  the fetch into `127.0.0.1`. All sites now route through
+  `safeHttpGet`, which walks `Location` headers manually and
+  re-validates each hop. `WiktionaryEnrichmentService::httpGet`
+  gets the same treatment as defense-in-depth.
 * **New `UrlUtilities::safeHttpGet(string $url, array $opts): ?string`**
-  centralizes the safe-fetch pattern (`validateUrlForFetch` →
-  fetch with `follow_location=0` → walk redirects manually,
-  re-validating each → cap response size and redirect count). The
-  matching `resolveRelativeUrl` helper handles the three Location
-  shapes real servers emit (absolute, `//host/path`, `/path`).
-  Residual: DNS rebinding (TTL=0 attacker) can still win the race
-  between validation and fetch on a single hop — full mitigation
-  requires connecting by IP literal with an explicit `Host`
-  header, which is more invasive than this layer provides.
-* **Refactor**: `RssParser` exposes new `parseXml`,
-  `detectAndParseXml`, and `getFeedTitleFromXml` methods that
-  operate on raw XML strings. The URI-based methods are now thin
-  wrappers that fetch through `safeHttpGet` and delegate. Tests
-  use the XML variants directly, eliminating the need for
-  temporary files.
+  centralizes the safe-fetch pattern: validate the URL, fetch with
+  stream-level redirects disabled, walk `Location` manually with
+  per-hop re-validation, cap response size and redirect count.
+  Companion `resolveRelativeUrl` handles absolute, `//host/path`,
+  and `/path` Location shapes. See
+  [Security followups](./developer/security-followups.md) for
+  known residuals.
 
 ### Security — phase 4.3 (cross-table authz guards)
 
