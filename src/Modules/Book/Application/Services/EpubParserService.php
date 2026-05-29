@@ -220,6 +220,10 @@ class EpubParserService
                 /** @var EpubHtml[] $htmlFiles */
                 $htmlFiles = $epubModule->getHtml();
                 foreach ($htmlFiles as $htmlFile) {
+                    if ($this->isNavigationFile($htmlFile)) {
+                        continue;
+                    }
+
                     $content = $this->cleanHtmlContent($htmlFile->getBody() ?? '');
 
                     if (trim($content) === '') {
@@ -242,6 +246,37 @@ class EpubParserService
         }
 
         return $chapters;
+    }
+
+    /**
+     * Detect EPUB 3 navigation / TOC documents that should not appear as
+     * chapters.
+     *
+     * The kiwilan library's NCX-based getChapters() ignores nav.xhtml, but
+     * when an EPUB ships without an NCX the HTML fallback would otherwise
+     * include the nav document as a phantom chapter. Filename heuristics
+     * cover the common cases (nav.xhtml, toc.xhtml); the body sniff catches
+     * less conventionally-named EPUB 3 nav documents identified by the
+     * `epub:type="toc"` (or related) attribute on a `<nav>` element.
+     */
+    public function isNavigationFile(EpubHtml $htmlFile): bool
+    {
+        $filename = strtolower(basename($htmlFile->getFilename()));
+        if (preg_match('/^(nav|toc|navigation|contents)(\.|-|_)/', $filename) === 1) {
+            return true;
+        }
+        if (in_array($filename, ['nav.xhtml', 'nav.html', 'toc.xhtml', 'toc.html'], true)) {
+            return true;
+        }
+
+        $body = $htmlFile->getBody() ?? '';
+        if ($body === '') {
+            return false;
+        }
+        return preg_match(
+            '/<nav\b[^>]*epub:type\s*=\s*["\'][^"\']*\b(toc|landmarks|page-list)\b/i',
+            $body
+        ) === 1;
     }
 
     /**

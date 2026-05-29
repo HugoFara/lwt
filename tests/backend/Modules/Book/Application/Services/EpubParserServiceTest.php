@@ -17,9 +17,11 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Book\Application\Services;
 
+use Kiwilan\Ebook\Formats\Epub\Parser\EpubHtml;
 use Lwt\Modules\Book\Application\Services\EpubParserService;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use RuntimeException;
 use InvalidArgumentException;
 
@@ -391,5 +393,60 @@ class EpubParserServiceTest extends TestCase
         $html = '   <div>   </div>   ';
         $result = $this->service->cleanHtmlContent($html);
         $this->assertSame('', $result);
+    }
+
+    /**
+     * Construct an EpubHtml instance from a filename and body.
+     *
+     * EpubHtml's only public constructor (::make) expects a full HTML
+     * document; we want to set the filename and body independently for the
+     * navigation-detection tests, so reach in via reflection.
+     */
+    private function makeEpubHtml(string $filename, string $body = ''): EpubHtml
+    {
+        $reflection = new ReflectionClass(EpubHtml::class);
+        $instance = $reflection->newInstanceWithoutConstructor();
+
+        $filenameProp = $reflection->getProperty('filename');
+        $filenameProp->setAccessible(true);
+        $filenameProp->setValue($instance, $filename);
+
+        $bodyProp = $reflection->getProperty('body');
+        $bodyProp->setAccessible(true);
+        $bodyProp->setValue($instance, $body);
+
+        return $instance;
+    }
+
+    #[Test]
+    public function isNavigationFileMatchesNavXhtmlFilename(): void
+    {
+        $file = $this->makeEpubHtml('OEBPS/nav.xhtml', '<h1>Whatever</h1>');
+        $this->assertTrue($this->service->isNavigationFile($file));
+    }
+
+    #[Test]
+    public function isNavigationFileMatchesTocXhtmlFilename(): void
+    {
+        $file = $this->makeEpubHtml('OEBPS/toc.xhtml', '<h1>Whatever</h1>');
+        $this->assertTrue($this->service->isNavigationFile($file));
+    }
+
+    #[Test]
+    public function isNavigationFileMatchesEpubTypeTocAttribute(): void
+    {
+        $body = '<nav epub:type="toc" id="toc"><ol><li><a href="ch1.xhtml">Chapter 1</a></li></ol></nav>';
+        $file = $this->makeEpubHtml('OEBPS/anonymous-nav.xhtml', $body);
+        $this->assertTrue($this->service->isNavigationFile($file));
+    }
+
+    #[Test]
+    public function isNavigationFileAllowsRegularChapter(): void
+    {
+        $file = $this->makeEpubHtml(
+            'OEBPS/chapter_01.xhtml',
+            '<h1>Chapter 1</h1><p>It was the best of times...</p>'
+        );
+        $this->assertFalse($this->service->isNavigationFile($file));
     }
 }
