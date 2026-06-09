@@ -106,6 +106,15 @@
     "edit.gutenberg.preview": "プレビュー",
     "edit.gutenberg.load_more": "さらに読み込む",
 
+    "edit.gdl.intro": "Global Digital Library のオープンライセンスの児童書・初級者向けの本を閲覧できます（StoryWeaver を含む）。やさしいテキストに最適です。",
+    "edit.gdl.no_language": "Global Digital Library の本を閲覧するには、上で言語を選択してください。",
+    "edit.gdl.no_results": "この言語の Global Digital Library の本は見つかりませんでした。",
+    "edit.gdl.search_placeholder": "タイトルやキーワードで検索…",
+    "edit.gdl.search": "検索",
+    "edit.gdl.browse": "人気の本を見る",
+    "edit.gdl.import": "インポート",
+    "edit.gdl.load_more": "さらに読み込む",
+
     "edit.feeds.intro": "設定済みのニュースフィードから記事を閲覧します。まだ設定していない場合は <a href=\"/feeds/new\">新しいフィードをセットアップ</a> してください。",
     "edit.feeds.no_feeds": "フィードがまだ設定されていません。",
     "edit.feeds.add_feed": "フィードを追加",
@@ -121,6 +130,7 @@
     "new.source.url": "Web／URL",
     "new.source.file": "ファイルをアップロード",
     "new.source.gutenberg": "Gutenberg",
+    "new.source.gdl": "子供の図書館",
     "new.source.feeds": "ニュースフィード",
     "new.file.help": "テキストファイル、EPUB、SRT/VTT字幕、または文字起こし用の音声／動画",
     "new.file.from_computer": "お使いのコンピューターから",

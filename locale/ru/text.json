@@ -106,6 +106,15 @@
     "edit.gutenberg.preview": "Предпросмотр",
     "edit.gutenberg.load_more": "Загрузить ещё",
 
+    "edit.gdl.intro": "Просматривайте детские книги и книги для начинающих со свободной лицензией из Global Digital Library (включая StoryWeaver). Отлично подходит для более простых текстов.",
+    "edit.gdl.no_language": "Пожалуйста, выберите язык выше, чтобы просматривать книги Global Digital Library.",
+    "edit.gdl.no_results": "Книги Global Digital Library для этого языка не найдены.",
+    "edit.gdl.search_placeholder": "Поиск по названию или ключевому слову…",
+    "edit.gdl.search": "Поиск",
+    "edit.gdl.browse": "Популярное",
+    "edit.gdl.import": "Импортировать",
+    "edit.gdl.load_more": "Загрузить ещё",
+
     "edit.feeds.intro": "Просматривайте статьи из настроенных вами новостных лент. <a href=\"/feeds/new\">Настройте новую ленту</a>, если у вас её ещё нет.",
     "edit.feeds.no_feeds": "Ленты ещё не настроены.",
     "edit.feeds.add_feed": "Добавить ленту",
@@ -121,6 +130,7 @@
     "new.source.url": "Веб / URL",
     "new.source.file": "Загрузить файл",
     "new.source.gutenberg": "Gutenberg",
+    "new.source.gdl": "Детская библиотека",
     "new.source.feeds": "Новостная лента",
     "new.file.help": "Текстовые файлы, EPUB, субтитры SRT/VTT или аудио/видео для расшифровки",
     "new.file.from_computer": "С вашего компьютера",

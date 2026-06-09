@@ -106,6 +106,15 @@
     "edit.gutenberg.preview": "Aperçu",
     "edit.gutenberg.load_more": "Charger plus",
 
+    "edit.gdl.intro": "Parcourez des livres pour enfants et débutants sous licence libre de la Global Digital Library (inclut StoryWeaver). Parfait pour des textes plus faciles.",
+    "edit.gdl.no_language": "Veuillez sélectionner une langue ci-dessus pour parcourir les livres de la Global Digital Library.",
+    "edit.gdl.no_results": "Aucun livre de la Global Digital Library trouvé pour cette langue.",
+    "edit.gdl.search_placeholder": "Rechercher par titre ou mot-clé…",
+    "edit.gdl.search": "Rechercher",
+    "edit.gdl.browse": "Parcourir les populaires",
+    "edit.gdl.import": "Importer",
+    "edit.gdl.load_more": "Charger plus",
+
     "edit.feeds.intro": "Parcourez les articles de vos flux d'actualités configurés. <a href=\"/feeds/new\">Configurez un nouveau flux</a> si vous n'en avez pas encore.",
     "edit.feeds.no_feeds": "Aucun flux configuré pour le moment.",
     "edit.feeds.add_feed": "Ajouter un flux",
@@ -121,6 +130,7 @@
     "new.source.url": "Web / URL",
     "new.source.file": "Téléverser un fichier",
     "new.source.gutenberg": "Gutenberg",
+    "new.source.gdl": "Bibliothèque enfants",
     "new.source.feeds": "Flux d'actualités",
     "new.file.help": "Fichiers texte, EPUB, sous-titres SRT/VTT, ou audio/vidéo pour transcription",
     "new.file.from_computer": "Depuis votre ordinateur",

@@ -111,6 +111,29 @@ class GdlClientTest extends TestCase
     }
 
     #[Test]
+    public function searchDecodesHtmlEntitiesInText(): void
+    {
+        // GDL's WordPress API HTML-encodes apostrophes and spaces; x-text on
+        // the frontend would otherwise render them literally.
+        $this->client->setMockResponse([
+            'books' => [[
+                'postId' => 1,
+                'title' => 'La petite étoile d&#039;Ali',
+                'description' => 'Une&nbsp;histoire d&#039;amitié',
+                'publisher' => 'Biblioth&egrave;que',
+                'epubUrl' => 'https://gdl/book/1',
+                'language' => [['slug' => 'fr']],
+            ]],
+            'meta' => ['count' => 1],
+        ]);
+
+        $book = $this->client->search('', 'fr')['results'][0];
+        $this->assertSame("La petite étoile d'Ali", $book['title']);
+        $this->assertSame("Une\u{00A0}histoire d'amitié", $book['description']);
+        $this->assertSame('Bibliothèque', $book['publisher']);
+    }
+
+    #[Test]
     public function searchSkipsBooksWithoutEpub(): void
     {
         $this->client->setMockResponse($this->sampleResponse());

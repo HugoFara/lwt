@@ -127,9 +127,9 @@ class GdlClient
             $level = $this->extractLevel($book);
             $results[] = [
                 'id' => (int) ($book['postId'] ?? 0),
-                'title' => (string) ($book['title'] ?? ''),
-                'publisher' => (string) ($book['publisher'] ?? ''),
-                'description' => trim((string) ($book['description'] ?? '')),
+                'title' => $this->decodeText((string) ($book['title'] ?? '')),
+                'publisher' => $this->decodeText((string) ($book['publisher'] ?? '')),
+                'description' => trim($this->decodeText((string) ($book['description'] ?? ''))),
                 'language' => $this->firstTermSlug($book['language'] ?? []),
                 'license' => $this->firstTermName($book['license'] ?? []),
                 'level' => $level,
@@ -177,6 +177,27 @@ class GdlClient
         }
 
         return 'medium';
+    }
+
+    /**
+     * Decode HTML entities in GDL text fields.
+     *
+     * GDL's WordPress API HTML-encodes apostrophes and spaces in titles and
+     * descriptions (e.g. "d&#039;Ali", "&nbsp;"). The frontend renders these
+     * via Alpine `x-text`, which sets textContent and does not decode
+     * entities — so they must be decoded here, at the data boundary.
+     *
+     * @param string $text Raw text from the GDL API
+     *
+     * @return string Text with HTML entities decoded
+     */
+    private function decodeText(string $text): string
+    {
+        if ($text === '') {
+            return '';
+        }
+
+        return html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
     /**

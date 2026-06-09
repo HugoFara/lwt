@@ -120,8 +120,10 @@ class SecurityHeaders
             "script-src 'self'",
             // Styles: self + inline (needed for dynamic styling in views)
             "style-src 'self' 'unsafe-inline'",
-            // Images: self + data URIs + blob for generated content
-            "img-src 'self' data: blob:",
+            // Images: self + data URIs + blob for generated content;
+            // content.digitallibrary.io serves Global Digital Library book
+            // cover thumbnails shown in the "Kids' Library" text source.
+            "img-src 'self' data: blob: https://content.digitallibrary.io",
             // Fonts: self only
             "font-src 'self'",
             // AJAX/fetch requests: self + GitHub API for release checks
