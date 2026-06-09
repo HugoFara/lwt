@@ -19,6 +19,10 @@ ones are marked like "v1.0.0-fork".
   image-only picture books with too little readable text. Difficulty tiers
   come from GDL's per-book reading level. New endpoints
   `GET /api/v1/texts/gdl-search` and `POST /api/v1/texts/extract-epub-url`.
+  The home page also shows GDL suggestions with **beginner-aware ordering**:
+  readers with a small vocabulary in the current language see the easy GDL
+  readers above the Gutenberg classics, advanced readers see them below
+  (`GET /api/v1/texts/reader-level`).
 * **StarDict dictionary uploads via archives** (#233): the import form now
   accepts `.zip`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.tgz` containing
   the StarDict triplet (`.ifo` + `.idx` + `.dict`/`.dict.dz`). FreeDict

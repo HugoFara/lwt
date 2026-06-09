@@ -234,6 +234,8 @@ class TextApiHandler implements ApiRoutableInterface
             return $this->handleLibraryPreview($params);
         } elseif ($frag1 === 'gdl-search') {
             return $this->handleGdlSearch($params);
+        } elseif ($frag1 === 'reader-level') {
+            return $this->handleReaderLevel($params);
         } elseif ($frag1 === 'scoring') {
             if ($frag2 === 'recommended') {
                 $langId = (int) ($params['language_id'] ?? 0);
@@ -498,6 +500,28 @@ class TextApiHandler implements ApiRoutableInterface
         }
 
         return Response::success($result);
+    }
+
+    /**
+     * Handle reader-level requests (vocabulary size + beginner flag).
+     *
+     * Drives beginner-aware ordering of home-page suggestions: beginners see
+     * the Global Digital Library's easy readers first, advanced learners see
+     * Project Gutenberg first.
+     *
+     * @param array $params Request parameters (language_id)
+     *
+     * @return JsonResponse
+     */
+    private function handleReaderLevel(array $params): JsonResponse
+    {
+        $languageId = (int) ($params['language_id'] ?? 0);
+        if ($languageId <= 0) {
+            return Response::error('language_id is required', 400);
+        }
+
+        $service = new DifficultyEstimationService();
+        return Response::success($service->getReaderProfile($languageId));
     }
 
     /**

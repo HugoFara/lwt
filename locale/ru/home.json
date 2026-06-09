@@ -7,6 +7,7 @@
     "search_library_placeholder": "Поиск по названию или автору…",
     "search": "Поиск",
     "suggested_from_gutenberg": "Рекомендуемое из Project Gutenberg",
+    "suggested_from_gdl": "Простые тексты для начала",
     "books_found": "Найдено книг: {count}",
     "downloads_suffix": "загрузок",
     "no_books_found": "Книги не найдены. Попробуйте другой поисковый запрос.",

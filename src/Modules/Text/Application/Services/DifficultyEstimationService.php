@@ -34,6 +34,15 @@ use Lwt\Shared\Infrastructure\Http\WebPageExtractor;
 class DifficultyEstimationService
 {
     /**
+     * Known-word count below which a reader is treated as a beginner.
+     *
+     * Matches the lower vocabulary threshold used by computeQuickTier(): under
+     * ~500 known words, even "easy" classics read hard, so beginners are
+     * better served by the Global Digital Library's early-grade readers.
+     */
+    public const BEGINNER_VOCAB_THRESHOLD = 500;
+
+    /**
      * Maximum number of words to sample for accurate coverage.
      */
     private const SAMPLE_WORD_COUNT = 2000;
@@ -221,6 +230,34 @@ class DifficultyEstimationService
      *
      * @return int Number of known words
      */
+    /**
+     * Build a reader profile for a language used to order home suggestions.
+     *
+     * @param int $languageId Language ID
+     *
+     * @return array{vocabularySize: int, beginner: bool}
+     */
+    public function getReaderProfile(int $languageId): array
+    {
+        $known = $this->getKnownWordCount($languageId);
+        return [
+            'vocabularySize' => $known,
+            'beginner' => self::isBeginnerVocabulary($known),
+        ];
+    }
+
+    /**
+     * Decide whether a known-word count puts the reader at beginner level.
+     *
+     * @param int $knownWordCount Number of known words in the language
+     *
+     * @return bool True if the reader is a beginner
+     */
+    public static function isBeginnerVocabulary(int $knownWordCount): bool
+    {
+        return $knownWordCount < self::BEGINNER_VOCAB_THRESHOLD;
+    }
+
     private function getKnownWordCount(int $languageId): int
     {
         $bindings = [$languageId];

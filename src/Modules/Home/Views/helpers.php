@@ -194,3 +194,92 @@ function renderSuggestionsGrid(): void
     </div>
     <?php
 }
+
+/**
+ * Render the Global Digital Library suggestions grid for the home page.
+ *
+ * Must be called inside a `gdlSuggestions` Alpine scope. Unlike the Gutenberg
+ * grid it shows a cover and reading level instead of authors and has no
+ * coverage preview (GDL books are ePUB, not analyzable by URL).
+ *
+ * @return void
+ */
+function renderGdlSuggestionsGrid(): void
+{
+    ?>
+    <!-- Loading state -->
+    <div x-show="loading && books.length === 0" class="has-text-centered py-4">
+        <span class="icon is-large has-text-grey-light">
+            <i data-lucide="loader" style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+        </span>
+    </div>
+
+    <!-- Error -->
+    <div x-show="error" class="notification is-danger is-light is-size-7" x-text="error"></div>
+
+    <!-- Books grid (horizontal scroll) -->
+    <div
+        :style="books.length > 0
+            ? 'display: flex; flex-wrap: nowrap; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem;'
+            : 'display: none;'"
+    >
+        <template x-for="book in books" :key="book.id">
+            <div
+                class="box p-3"
+                style="flex: 0 0 220px; width: 220px; min-width: 220px; min-height: 140px;
+                    display: flex; flex-direction: column; justify-content: space-between;"
+            >
+                <div>
+                    <figure x-show="book.thumbnail" class="image mb-2"
+                            style="height: 90px; overflow: hidden; border-radius: 4px;">
+                        <img :src="book.thumbnail" :alt="book.title" loading="lazy"
+                             style="width: 100%; height: 90px; object-fit: cover;" />
+                    </figure>
+                    <p
+                        class="has-text-weight-semibold is-size-7"
+                        x-text="book.title"
+                        style="overflow: hidden; text-overflow: ellipsis;
+                            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"
+                    ></p>
+                    <span
+                        x-show="hasLevel(book)"
+                        class="tag is-rounded mb-1"
+                        style="font-size: 0.65rem;"
+                        :class="tierClass(book)"
+                        x-text="bookLevel(book)"
+                    ></span>
+                    <p
+                        class="has-text-grey is-size-7"
+                        x-text="formatMeta(book)"
+                        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                    ></p>
+                </div>
+                <div class="mt-2">
+                    <button
+                        @click="importBook(book)"
+                        class="button is-primary is-small is-fullwidth"
+                        :class="importingClass(book)"
+                        :disabled="isImporting()"
+                    >
+                        <span class="icon"><i data-lucide="download"></i></span>
+                        <span><?= __('home.import') ?></span>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Load more -->
+    <div x-show="hasMore && books.length > 0" class="has-text-centered mt-2">
+        <button
+            @click="loadMore()"
+            class="button is-small is-light"
+            :class="{ 'is-loading': loading }"
+            :disabled="loading"
+        >
+            <span class="icon"><i data-lucide="chevron-right"></i></span>
+            <span><?= __('home.load_more') ?></span>
+        </button>
+    </div>
+    <?php
+}

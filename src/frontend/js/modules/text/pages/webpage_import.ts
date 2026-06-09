@@ -142,6 +142,80 @@ async function fetchWebpage(): Promise<void> {
 }
 
 /**
+ * Import a Global Digital Library ePUB by URL via the server-side extractor.
+ *
+ * GDL books are ePUB, so they use the dedicated extract-epub-url endpoint
+ * (download + parse + picture-book rejection) rather than the HTML path.
+ */
+async function importEpubUrl(epubUrl: string, titleHint: string): Promise<void> {
+  setWebpageStatus('Importing book...');
+
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const csrf = getCsrfToken();
+    if (csrf) {
+      headers['X-CSRF-TOKEN'] = csrf;
+    }
+
+    const response = await fetch('/api/v1/texts/extract-epub-url', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ url: epubUrl }),
+    });
+    const result = await response.json();
+
+    if (!response.ok || result.error) {
+      setWebpageStatus(result.error || `Server error: ${response.status}`, true);
+      const errEl = document.querySelector<HTMLFormElement>('form[x-data]');
+      if (errEl) {
+        errEl.dispatchEvent(new CustomEvent('webpage-import-error', { bubbles: true }));
+      }
+      return;
+    }
+
+    const data = result as ExtractUrlResponse;
+    setInputByName('TxTitle', data.title || titleHint);
+    setInputByName('TxText', data.text);
+    setInputByName('TxSourceURI', data.sourceUri);
+
+    const formEl = document.querySelector<HTMLFormElement>('form[x-data]');
+    if (formEl) {
+      formEl.dispatchEvent(new CustomEvent('webpage-imported', { bubbles: true }));
+    }
+    setWebpageStatus(`Imported "${data.title || titleHint}" — review the text below, then save.`);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    setWebpageStatus(`Error: ${msg}`, true);
+    const formEl = document.querySelector<HTMLFormElement>('form[x-data]');
+    if (formEl) {
+      formEl.dispatchEvent(new CustomEvent('webpage-import-error', { bubbles: true }));
+    }
+  }
+}
+
+/**
+ * Check for import_epub_url query parameter and auto-trigger an ePUB import.
+ *
+ * Used when arriving from the home page's "Kids' Library" suggestions.
+ */
+function checkAutoImportEpub(): void {
+  const params = new URLSearchParams(window.location.search);
+  const epubUrl = params.get('import_epub_url');
+  if (!epubUrl) return;
+
+  const title = params.get('import_title') || '';
+  const run = (): void => {
+    void importEpubUrl(epubUrl, title);
+  };
+
+  if (document.querySelector('[x-data]._x_dataStack')) {
+    run();
+  } else {
+    document.addEventListener('alpine:initialized', () => run(), { once: true });
+  }
+}
+
+/**
  * Check for import_url query parameter and auto-trigger import.
  *
  * Used when redirecting from library search to pre-populate the form.
@@ -206,6 +280,9 @@ export function initWebpageImport(): void {
 
   // Check for auto-import from library search
   checkAutoImport();
+
+  // Check for ePUB auto-import from the home "Kids' Library" suggestions
+  checkAutoImportEpub();
 }
 
 // Auto-initialize on document ready

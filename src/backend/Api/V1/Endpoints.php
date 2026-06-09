@@ -81,6 +81,7 @@ class Endpoints
         'texts/library-search' => ['GET'],
         'texts/library-preview' => ['GET'],
         'texts/gdl-search' => ['GET'],
+        'texts/reader-level' => ['GET'],
         'texts/statistics' => ['GET'],
         'texts/scoring' => ['GET'],
         'texts/scoring/recommended' => ['GET'],

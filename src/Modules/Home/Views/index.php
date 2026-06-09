@@ -222,19 +222,40 @@ $base = UrlUtilities::getBasePath();
             </div>
         </div>
 
-        <!-- Gutenberg suggestions (second row) -->
-        <div x-data="gutenbergSuggestions" x-cloak class="mt-4">
-            <template x-if="books.length > 0 || loading">
-                <div>
-                    <p class="is-size-6 has-text-grey mb-2">
-                        <span class="icon-text">
-                            <span class="icon"><i data-lucide="book-open-text"></i></span>
-                            <span><?= __('home.suggested_from_gutenberg') ?></span>
-                        </span>
-                    </p>
-                    <?php renderSuggestionsGrid(); ?>
-                </div>
-            </template>
+        <!-- Suggestion rows. Ordered by reader level: the GDL "easy readers"
+             row exposes its own flex order (before Gutenberg for beginners,
+             after for advanced); Gutenberg sits at the fixed middle order. -->
+        <div class="mt-4" style="display: flex; flex-direction: column;">
+
+            <!-- Global Digital Library suggestions (easy readers) -->
+            <div x-data="gdlSuggestions" x-cloak :style="beginner ? 'order: 0' : 'order: 2'">
+                <template x-if="showRow()">
+                    <div class="mt-4">
+                        <p class="is-size-6 has-text-grey mb-2">
+                            <span class="icon-text">
+                                <span class="icon"><i data-lucide="library"></i></span>
+                                <span><?= __('home.suggested_from_gdl') ?></span>
+                            </span>
+                        </p>
+                        <?php renderGdlSuggestionsGrid(); ?>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Gutenberg suggestions -->
+            <div x-data="gutenbergSuggestions" x-cloak style="order: 1;">
+                <template x-if="books.length > 0 || loading">
+                    <div class="mt-4">
+                        <p class="is-size-6 has-text-grey mb-2">
+                            <span class="icon-text">
+                                <span class="icon"><i data-lucide="book-open-text"></i></span>
+                                <span><?= __('home.suggested_from_gutenberg') ?></span>
+                            </span>
+                        </p>
+                        <?php renderSuggestionsGrid(); ?>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 </section>

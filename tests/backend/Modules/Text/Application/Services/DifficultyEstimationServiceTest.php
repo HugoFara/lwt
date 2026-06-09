@@ -24,6 +24,34 @@ class DifficultyEstimationServiceTest extends TestCase
     }
 
     // =========================================================================
+    // isBeginnerVocabulary tests
+    // =========================================================================
+
+    public function testIsBeginnerVocabularyTrueForZeroWords(): void
+    {
+        $this->assertTrue(DifficultyEstimationService::isBeginnerVocabulary(0));
+    }
+
+    public function testIsBeginnerVocabularyTrueJustBelowThreshold(): void
+    {
+        $this->assertTrue(DifficultyEstimationService::isBeginnerVocabulary(
+            DifficultyEstimationService::BEGINNER_VOCAB_THRESHOLD - 1
+        ));
+    }
+
+    public function testIsBeginnerVocabularyFalseAtThreshold(): void
+    {
+        $this->assertFalse(DifficultyEstimationService::isBeginnerVocabulary(
+            DifficultyEstimationService::BEGINNER_VOCAB_THRESHOLD
+        ));
+    }
+
+    public function testIsBeginnerVocabularyFalseForLargeVocabulary(): void
+    {
+        $this->assertFalse(DifficultyEstimationService::isBeginnerVocabulary(5000));
+    }
+
+    // =========================================================================
     // classifySubjects tests
     // =========================================================================
 

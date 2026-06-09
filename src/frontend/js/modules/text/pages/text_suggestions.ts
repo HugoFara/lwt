@@ -798,9 +798,10 @@ export function textNewFormData(): TextNewFormData {
     fileType: '',
 
     init() {
-      // When arriving via import_url (Gutenberg/Feed), skip step 1 and show loading
+      // When arriving via import_url (Gutenberg/Feed) or import_epub_url
+      // (GDL "Kids' Library"), skip step 1 and show the loading/review state.
       const params = new URLSearchParams(window.location.search);
-      if (params.get('import_url')) {
+      if (params.get('import_url') || params.get('import_epub_url')) {
         this.source = 'url';
         this.step = 2;
         this.autoImporting = true;
