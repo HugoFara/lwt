@@ -225,6 +225,16 @@ if (!$isNew) {
                 </div>
                 <div
                     class="box has-text-centered p-3 is-clickable"
+                    :class="sourceActive('gdl')"
+                    @click="selectSource('gdl')"
+                    style="cursor: pointer;">
+                    <span class="icon is-medium has-text-primary">
+                        <?php echo IconHelper::render('library', ['alt' => __('text.new.source.gdl')]); ?>
+                    </span>
+                    <p class="is-size-7 has-text-weight-medium mt-1"><?= __e('text.new.source.gdl') ?></p>
+                </div>
+                <div
+                    class="box has-text-centered p-3 is-clickable"
                     :class="sourceActive('feeds')"
                     @click="selectSource('feeds')"
                     style="cursor: pointer;">
@@ -635,6 +645,112 @@ if (!$isNew) {
                             :disabled="loading">
                         <span class="icon"><i data-lucide="chevron-right"></i></span>
                         <span><?= __e('text.edit.gutenberg.load_more') ?></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Digital Library Browser Section -->
+        <div x-show="source === 'gdl'" x-transition x-cloak class="mt-4">
+            <div x-data="gdlBrowser">
+                <p class="help mb-4">
+                    <?= __e('text.edit.gdl.intro') ?>
+                </p>
+
+                <!-- Search bar -->
+                <div class="field has-addons mb-4">
+                    <div class="control is-expanded">
+                        <input type="text" class="input is-small"
+                               x-model="query"
+                               @keydown.enter.prevent="doSearch()"
+                               placeholder="<?= __e('text.edit.gdl.search_placeholder') ?>" />
+                    </div>
+                    <div class="control">
+                        <button type="button" class="button is-small is-primary"
+                                @click="doSearch()" :class="loadingClass()">
+                            <span class="icon"><i data-lucide="search"></i></span>
+                            <span><?= __e('text.edit.gdl.search') ?></span>
+                        </button>
+                    </div>
+                    <div class="control" x-show="query">
+                        <button type="button" class="button is-small is-light" @click="clearSearch()">
+                            <span class="icon"><i data-lucide="x"></i></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- No language selected -->
+                <div x-show="showPlaceholder()" class="notification is-warning is-light">
+                    <?= __e('text.edit.gdl.no_language') ?>
+                </div>
+
+                <!-- Language selected but no books found -->
+                <div x-show="showNoResults()" class="notification is-info is-light">
+                    <?= __e('text.edit.gdl.no_results') ?>
+                </div>
+
+                <!-- Loading state -->
+                <div x-show="loading && books.length === 0" class="has-text-centered py-4">
+                    <span class="icon is-large has-text-grey-light">
+                        <i
+                            data-lucide="loader"
+                            style="width: 32px; height: 32px; animation: spin 1s linear infinite;"></i>
+                    </span>
+                </div>
+
+                <!-- Error -->
+                <div x-show="error" class="notification is-danger is-light is-size-7" x-text="error"></div>
+
+                <!-- Books grid -->
+                <div x-show="books.length > 0"
+                     style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+                    <template x-for="book in books" :key="book.id">
+                        <div
+                            class="box p-3"
+                            style="display: flex; flex-direction: column;
+                                   justify-content: space-between; min-height: 160px;">
+                            <div>
+                                <figure x-show="book.thumbnail" class="image mb-2"
+                                        style="height: 110px; overflow: hidden; border-radius: 4px;">
+                                    <img :src="book.thumbnail" :alt="book.title" loading="lazy"
+                                         style="width: 100%; height: 110px; object-fit: cover;" />
+                                </figure>
+                                <p class="has-text-weight-semibold is-size-7" x-text="book.title"
+                                   style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+                                          -webkit-line-clamp: 2; -webkit-box-orient: vertical;"></p>
+                                <div class="mb-1">
+                                    <span x-show="hasLevel(book)"
+                                          class="tag is-rounded" style="font-size: 0.65rem;"
+                                          :class="bookTierClass(book)"
+                                          x-text="bookTierLabel(book)"></span>
+                                </div>
+                                <p class="has-text-grey is-size-7" x-text="formatMeta(book)"
+                                   style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
+                                <p class="has-text-grey-light is-size-7 mt-1" x-text="book.description"
+                                   style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+                                          -webkit-line-clamp: 2; -webkit-box-orient: vertical;"></p>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" @click="importBook(book)"
+                                        class="button is-primary is-small is-fullwidth"
+                                        :class="importingClass(book)"
+                                        :disabled="isImporting()">
+                                    <span class="icon"><i data-lucide="download"></i></span>
+                                    <span><?= __e('text.edit.gdl.import') ?></span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Load more -->
+                <div x-show="hasMore && books.length > 0" class="has-text-centered mt-3">
+                    <button type="button" @click="loadMore()"
+                            class="button is-small is-light"
+                            :class="loadingClass()"
+                            :disabled="loading">
+                        <span class="icon"><i data-lucide="chevron-right"></i></span>
+                        <span><?= __e('text.edit.gdl.load_more') ?></span>
                     </button>
                 </div>
             </div>

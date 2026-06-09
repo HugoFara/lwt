@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { getCsrfToken } from '@shared/api/client';
 
 // ── Gutenberg browser ───────────────────────────────────────────────
 
@@ -304,6 +305,223 @@ export function gutenbergBrowserData(): GutenbergBrowserData {
     bookWordCount(book: GutenbergBook): string {
       if (!book.stats) return '';
       return this.formatWordCount(book.stats.totalWords) + ' words';
+    },
+  };
+}
+
+// ── Global Digital Library browser ──────────────────────────────────
+
+interface GdlBook {
+  id: number;
+  title: string;
+  publisher: string;
+  description: string;
+  language: string;
+  license: string;
+  level: string;
+  difficultyTier?: 'easy' | 'medium' | 'hard';
+  thumbnail: string;
+  sourceUri: string;
+  epubUrl: string;
+}
+
+interface GdlBrowserData {
+  books: GdlBook[];
+  hasMore: boolean;
+  page: number;
+  query: string;
+  loading: boolean;
+  error: string;
+  importing: number | null;
+
+  init(): void;
+  fetchBooks(page: number): Promise<void>;
+  doSearch(): void;
+  clearSearch(): void;
+  loadMore(): Promise<void>;
+  importBook(book: GdlBook): Promise<void>;
+  formatMeta(book: GdlBook): string;
+  bookTierLabel(book: GdlBook): string;
+  bookTierClass(book: GdlBook): string;
+  hasLevel(book: GdlBook): boolean;
+  importingClass(book: GdlBook): string;
+  isImporting(): boolean;
+  loadingClass(): string;
+  showPlaceholder(): boolean;
+  showNoResults(): boolean;
+}
+
+export function gdlBrowserData(): GdlBrowserData {
+  return {
+    books: [],
+    hasMore: false,
+    page: 1,
+    query: '',
+    loading: false,
+    error: '',
+    importing: null,
+
+    init() {
+      const langId = getSelectedLanguageId();
+      if (langId > 0) {
+        this.fetchBooks(1);
+      }
+
+      onLanguageChange((newLangId) => {
+        this.books = [];
+        this.page = 1;
+        this.error = '';
+        if (newLangId > 0) {
+          this.fetchBooks(1);
+        }
+      });
+    },
+
+    async fetchBooks(page: number) {
+      const langId = getSelectedLanguageId();
+      if (this.loading || langId <= 0) return;
+
+      this.loading = true;
+      this.error = '';
+
+      try {
+        const params = new URLSearchParams({
+          language_id: String(langId),
+          page: String(page),
+        });
+        if (this.query.trim()) {
+          params.set('q', this.query.trim());
+        }
+
+        const response = await fetch(`/api/v1/texts/gdl-search?${params}`);
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          this.error = data.error || 'Could not load books.';
+          return;
+        }
+
+        const newBooks: GdlBook[] = data.results || [];
+        if (page === 1) {
+          this.books = newBooks;
+        } else {
+          this.books = this.books.concat(newBooks);
+        }
+        this.hasMore = data.next || false;
+        this.page = page;
+        requestAnimationFrame(() => initIcons());
+      } catch {
+        this.error = 'Could not reach the server.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    doSearch() {
+      this.books = [];
+      this.page = 1;
+      this.fetchBooks(1);
+    },
+
+    clearSearch() {
+      this.query = '';
+      this.doSearch();
+    },
+
+    async loadMore() {
+      if (this.loading || !this.hasMore) return;
+      await this.fetchBooks(this.page + 1);
+    },
+
+    async importBook(book: GdlBook) {
+      if (this.importing !== null) return;
+      this.importing = book.id;
+      this.error = '';
+
+      try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const csrf = getCsrfToken();
+        if (csrf) {
+          headers['X-CSRF-TOKEN'] = csrf;
+        }
+
+        // GDL books are ePUB; the dedicated endpoint downloads and extracts
+        // text server-side (and rejects image-only picture books).
+        const response = await fetch('/api/v1/texts/extract-epub-url', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ url: book.epubUrl }),
+        });
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          this.error = data.error || `Server error: ${response.status}`;
+          return;
+        }
+
+        // Populate the form and advance to the review step, matching the
+        // webpage-import flow (form listens for `webpage-imported`).
+        const set = (name: string, value: string): void => {
+          const el = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+            `[name="${name}"]`,
+          );
+          if (el) el.value = value;
+        };
+        set('TxTitle', data.title || book.title);
+        set('TxText', data.text || '');
+        set('TxSourceURI', data.sourceUri || book.sourceUri);
+
+        const formEl = document.querySelector<HTMLFormElement>('form[x-data]');
+        if (formEl) {
+          formEl.dispatchEvent(new CustomEvent('webpage-imported', { bubbles: true }));
+        }
+      } catch {
+        this.error = 'Could not reach the server.';
+      } finally {
+        this.importing = null;
+      }
+    },
+
+    formatMeta(book: GdlBook): string {
+      const parts: string[] = [];
+      if (book.publisher) parts.push(book.publisher);
+      if (book.license) parts.push(book.license);
+      return parts.join(' · ');
+    },
+
+    hasLevel(book: GdlBook): boolean {
+      return !!book.level;
+    },
+
+    bookTierLabel(book: GdlBook): string {
+      return book.level || '';
+    },
+
+    bookTierClass(book: GdlBook): string {
+      const tier = book.difficultyTier;
+      if (tier === 'easy') return 'is-success is-light';
+      if (tier === 'hard') return 'is-danger is-light';
+      return 'is-warning is-light';
+    },
+
+    importingClass(book: GdlBook): string {
+      return this.importing === book.id ? 'is-loading' : '';
+    },
+
+    isImporting(): boolean {
+      return this.importing !== null;
+    },
+
+    loadingClass(): string {
+      return this.loading ? 'is-loading' : '';
+    },
+
+    showPlaceholder(): boolean {
+      return !this.loading && this.books.length === 0 && !this.error && getSelectedLanguageId() <= 0;
+    },
+
+    showNoResults(): boolean {
+      return !this.loading && this.books.length === 0 && !this.error && getSelectedLanguageId() > 0;
     },
   };
 }
@@ -661,4 +879,5 @@ export function textNewFormData(): TextNewFormData {
 
 Alpine.data('textNewForm', textNewFormData);
 Alpine.data('gutenbergBrowser', gutenbergBrowserData);
+Alpine.data('gdlBrowser', gdlBrowserData);
 Alpine.data('feedBrowser', feedBrowserData);

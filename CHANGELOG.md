@@ -9,6 +9,16 @@ ones are marked like "v1.0.0-fork".
 
 ### Added
 
+* **Global Digital Library as a text source** ("Kids' Library"): browse and
+  search openly-licensed (CC-BY/CC-BY-SA) children's and early-grade readers —
+  including StoryWeaver content — directly on the New Text page, filling the
+  gap in easier texts that Gutenberg and Wikisource leave. A new `GdlClient`
+  talks to GDL's current WordPress JSON API (the legacy OPDS/`book-api` hosts
+  were decommissioned), and `GdlImportService` downloads each book's ePUB,
+  extracts the reading text via the Book module's parser, and rejects
+  image-only picture books with too little readable text. Difficulty tiers
+  come from GDL's per-book reading level. New endpoints
+  `GET /api/v1/texts/gdl-search` and `POST /api/v1/texts/extract-epub-url`.
 * **StarDict dictionary uploads via archives** (#233): the import form now
   accepts `.zip`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.tgz` containing
   the StarDict triplet (`.ifo` + `.idx` + `.dict`/`.dict.dz`). FreeDict

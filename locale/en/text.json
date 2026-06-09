@@ -106,6 +106,15 @@
     "edit.gutenberg.preview": "Preview",
     "edit.gutenberg.load_more": "Load more",
 
+    "edit.gdl.intro": "Browse openly-licensed children's and early-grade readers from the Global Digital Library (includes StoryWeaver). Great for easier texts.",
+    "edit.gdl.no_language": "Please select a language above to browse Global Digital Library books.",
+    "edit.gdl.no_results": "No Global Digital Library books found for this language.",
+    "edit.gdl.search_placeholder": "Search by title or keyword…",
+    "edit.gdl.search": "Search",
+    "edit.gdl.browse": "Browse popular",
+    "edit.gdl.import": "Import",
+    "edit.gdl.load_more": "Load more",
+
     "edit.feeds.intro": "Browse articles from your configured newsfeeds. <a href=\"/feeds/new\">Set up a new feed</a> if you don't have any yet.",
     "edit.feeds.no_feeds": "No feeds configured yet.",
     "edit.feeds.add_feed": "Add a feed",
@@ -121,6 +130,7 @@
     "new.source.url": "Web / URL",
     "new.source.file": "Upload File",
     "new.source.gutenberg": "Gutenberg",
+    "new.source.gdl": "Kids' Library",
     "new.source.feeds": "News Feed",
     "new.file.help": "Text files, EPUB, SRT/VTT subtitles, or audio/video for transcription",
     "new.file.from_computer": "From your computer",

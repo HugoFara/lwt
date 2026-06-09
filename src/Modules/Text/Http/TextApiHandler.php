@@ -23,7 +23,9 @@ declare(strict_types=1);
 namespace Lwt\Modules\Text\Http;
 
 use Lwt\Modules\Text\Application\Services\DifficultyEstimationService;
+use Lwt\Modules\Text\Application\Services\GdlImportService;
 use Lwt\Modules\Text\Application\Services\GutenbergSuggestionService;
+use Lwt\Shared\Infrastructure\Http\GdlClient;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
@@ -230,6 +232,8 @@ class TextApiHandler implements ApiRoutableInterface
             return $this->handleLibrarySearch($params);
         } elseif ($frag1 === 'library-preview') {
             return $this->handleLibraryPreview($params);
+        } elseif ($frag1 === 'gdl-search') {
+            return $this->handleGdlSearch($params);
         } elseif ($frag1 === 'scoring') {
             if ($frag2 === 'recommended') {
                 $langId = (int) ($params['language_id'] ?? 0);
@@ -275,7 +279,7 @@ class TextApiHandler implements ApiRoutableInterface
         }
         return Response::error(
             'Expected "gutenberg-suggestions", "library-search", "library-preview", '
-            . '"scoring", "by-language", "archived-by-language", or text ID',
+            . '"gdl-search", "scoring", "by-language", "archived-by-language", or text ID',
             404
         );
     }
@@ -297,6 +301,10 @@ class TextApiHandler implements ApiRoutableInterface
                 return Response::error($result['error'], 422);
             }
             return Response::success($result);
+        }
+
+        if ($frag1 === 'extract-epub-url') {
+            return $this->handleExtractEpubUrl($params);
         }
 
         if ($frag1 === '' || !ctype_digit($frag1)) {
@@ -451,6 +459,66 @@ class TextApiHandler implements ApiRoutableInterface
 
         $service = new DifficultyEstimationService();
         $result = $service->analyzeTextSample($url, $languageId);
+
+        if (isset($result['error'])) {
+            return Response::error($result['error'], 422);
+        }
+
+        return Response::success($result);
+    }
+
+    /**
+     * Handle Global Digital Library search/browse requests.
+     *
+     * An empty query browses the catalog; difficulty tiers come from the
+     * client (derived from each book's GDL reading level).
+     *
+     * @param array $params Request parameters (q, language_id, page)
+     *
+     * @return JsonResponse
+     */
+    private function handleGdlSearch(array $params): JsonResponse
+    {
+        $query = trim((string) ($params['q'] ?? ''));
+        $languageId = (int) ($params['language_id'] ?? 0);
+        $page = max(1, (int) ($params['page'] ?? 1));
+
+        // GDL uses ISO 639-1 slugs for the common languages (en, fr, de, …),
+        // so the same LgSourceLang resolution as Gutenberg applies.
+        $languageCode = null;
+        if ($languageId > 0) {
+            $languageCode = $this->resolveLanguageCode($languageId);
+        }
+
+        $client = new GdlClient();
+        $result = $client->search($query, $languageCode, $page);
+
+        if (isset($result['error'])) {
+            return Response::error($result['error'], 502);
+        }
+
+        return Response::success($result);
+    }
+
+    /**
+     * Handle Global Digital Library ePUB import requests.
+     *
+     * Downloads the ePUB, extracts its text, and rejects image-only picture
+     * books with too little readable content.
+     *
+     * @param array $params Request parameters (url)
+     *
+     * @return JsonResponse
+     */
+    private function handleExtractEpubUrl(array $params): JsonResponse
+    {
+        $url = (string) ($params['url'] ?? '');
+        if ($url === '') {
+            return Response::error('url parameter is required', 400);
+        }
+
+        $service = new GdlImportService();
+        $result = $service->extractText($url);
 
         if (isset($result['error'])) {
             return Response::error($result['error'], 422);
