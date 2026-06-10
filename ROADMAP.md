@@ -68,10 +68,19 @@ that makes a good client today and offline/local-first possible tomorrow.
 ## Phase 0 — Foundations (now)
 
 - [ ] Confirm and document the strategy above.
-- [ ] **API base URL decoupling**: stop the frontend assuming same-origin;
-      route API calls through a single configurable base URL. This is the
-      primitive that the mobile client, self-hosting, and a future default
-      instance all depend on.
+- [x] **API base URL decoupling**: the frontend no longer assumes same-origin.
+      `@shared/api/client` resolves an injectable server root (`setApiServer`,
+      precedence runtime > localStorage `lwt.apiServer` > meta > same-origin),
+      so the mobile client / self-host / future default instance can all point
+      it at a chosen server. Unset = unchanged same-origin behavior.
+- [x] **Cross-origin auth plumbing** (the seam's server + client halves):
+      - [x] Opt-in **CORS** on `/api/v1` via `CORS_ALLOWED_ORIGINS`
+        (`Cors` helper + preflight handling in `ApiV1::handleRequest`).
+      - [x] Client sends **`Authorization: Bearer`** (`setAuthToken`/`getAuthToken`,
+        persisted as `lwt.apiToken`); server already validated Bearer tokens.
+      - [ ] **First-run auth UX**: a login screen that calls `/auth/login` and
+        stores the returned token via `setAuthToken` — the remaining piece
+        before a packaged client can actually sign in. Lands with Phase 2.
 - [ ] **Security hardening pass** — continue the XSS phases. Gate for any
       shared/public exposure; non-negotiable before a public instance.
 
