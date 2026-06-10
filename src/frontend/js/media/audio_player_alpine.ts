@@ -10,12 +10,33 @@
 
 import Alpine from 'alpinejs';
 import { saveSetting } from '@shared/utils/ajax_utilities';
+import { apiGet } from '@shared/api/client';
 
 /**
  * Audio player configuration from PHP
  */
 export interface AudioPlayerConfig {
   containerId: string;
+  mediaUrl: string;
+  offset: number;
+  repeatMode: boolean;
+  skipSeconds: number;
+  playbackRate: number;
+}
+
+/** Shape of GET /texts/{id}/audio (the shell-free config source). */
+interface AudioApiResponse {
+  uri: string;
+  position: number;
+  playerSettings: {
+    repeatMode: boolean;
+    skipSeconds: number;
+    playbackRate: number;
+  };
+}
+
+/** Normalized config applied to the player, regardless of source. */
+interface NormalizedAudioConfig {
   mediaUrl: string;
   offset: number;
   repeatMode: boolean;
@@ -37,6 +58,8 @@ export interface AudioPlayerData {
   repeatMode: boolean;
   skipSeconds: number;
   isLoaded: boolean;
+  /** Whether the current text has audio; drives x-show on the player. */
+  hasAudio: boolean;
 
   // Computed
   readonly progressPercent: number;
@@ -50,6 +73,8 @@ export interface AudioPlayerData {
   // Lifecycle
   init(): void;
   destroy(): void;
+  applyAudioConfig(config: NormalizedAudioConfig): void;
+  loadAudioFromApi(): Promise<void>;
 
   // Playback controls
   play(): void;
@@ -109,6 +134,7 @@ export function audioPlayerData(): AudioPlayerData {
     repeatMode: false,
     skipSeconds: 5,
     isLoaded: false,
+    hasAudio: false,
 
     // Audio element reference
     audio: null,
@@ -147,29 +173,22 @@ export function audioPlayerData(): AudioPlayerData {
         return;
       }
 
-      // Load config from data attribute
+      // Config has two sources. A server-rendered player embeds it inline
+      // (data-audio-config); the shell-free reader ships markup only and the
+      // player fetches GET /texts/{id}/audio instead. The inline path keeps the
+      // legacy/improved-text views unchanged; the API path makes the reader work
+      // in a bundled/offline client.
       const configEl = container.querySelector('[data-audio-config]');
       if (configEl) {
         try {
           const config = JSON.parse(configEl.textContent || '{}') as AudioPlayerConfig;
-          this.repeatMode = config.repeatMode;
-          this.skipSeconds = config.skipSeconds || 5;
-          this.playbackRate = (config.playbackRate || 10) / 10;
-
-          // Set media source if not already set
-          if (config.mediaUrl && !this.audio.src) {
-            this.audio.src = config.mediaUrl;
-          }
-
-          // Seek to offset when loaded
-          if (config.offset > 0) {
-            this.audio.addEventListener('loadedmetadata', () => {
-              this.audio!.currentTime = config.offset;
-            }, { once: true });
-          }
+          this.applyAudioConfig(config);
+          this.hasAudio = true;
         } catch (e) {
           console.error('Failed to parse audio config:', e);
         }
+      } else {
+        void this.loadAudioFromApi();
       }
 
       // Setup event listeners
@@ -212,6 +231,60 @@ export function audioPlayerData(): AudioPlayerData {
 
     destroy() {
       // Cleanup if needed
+    },
+
+    /**
+     * Apply a normalized config to the player: settings + source + start offset.
+     * Shared by the inline (data-audio-config) and API (loadAudioFromApi) paths.
+     */
+    applyAudioConfig(config: NormalizedAudioConfig): void {
+      this.repeatMode = config.repeatMode;
+      this.skipSeconds = config.skipSeconds || 5;
+      // playbackRate is stored as an integer x10 (10 = 1.0x) by both sources.
+      this.playbackRate = (config.playbackRate || 10) / 10;
+
+      if (config.mediaUrl && this.audio && !this.audio.src) {
+        this.audio.src = config.mediaUrl;
+      }
+
+      if (config.offset > 0 && this.audio) {
+        this.audio.addEventListener('loadedmetadata', () => {
+          this.audio!.currentTime = config.offset;
+        }, { once: true });
+      }
+    },
+
+    /**
+     * Fetch the audio config from GET /texts/{id}/audio for a shell-free reader.
+     *
+     * The text id comes from the reader config blob on the page. The player only
+     * reveals itself (hasAudio) when the text actually has an audio URI; any
+     * failure or absent audio leaves it hidden.
+     */
+    async loadAudioFromApi(): Promise<void> {
+      const cfgEl = document.getElementById('text-reader-config');
+      if (!cfgEl?.textContent) return;
+
+      let textId: number;
+      try {
+        textId = (JSON.parse(cfgEl.textContent) as { textId?: number }).textId ?? 0;
+      } catch {
+        return;
+      }
+      if (textId <= 0) return;
+
+      const res = await apiGet<AudioApiResponse>(`/texts/${textId}/audio`);
+      const info = res.data;
+      if (!info || !info.uri) return;
+
+      this.applyAudioConfig({
+        mediaUrl: info.uri,
+        offset: info.position,
+        repeatMode: info.playerSettings.repeatMode,
+        skipSeconds: info.playerSettings.skipSeconds,
+        playbackRate: info.playerSettings.playbackRate,
+      });
+      this.hasAudio = true;
     },
 
     // Playback controls

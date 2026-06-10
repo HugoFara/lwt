@@ -114,17 +114,14 @@ class TextReadController extends BaseController
 
         $title = (string) $headerData['TxTitle'];
         $langId = (int) $headerData['TxLgID'];
-        $media = isset($headerData['TxAudioURI']) ? trim((string) $headerData['TxAudioURI']) : '';
-        $audioPosition = (int) ($headerData['TxAudioPosition'] ?? 0);
         $sourceUri = (string) ($headerData['TxSourceURI'] ?? '');
 
-        // Book/chapter nav is fetched client-side from /texts/{id}/book-context
-        // (book_nav_renderer.ts), so it is no longer rendered server-side here.
+        // The reader's chrome is now fetched client-side from the API: the audio
+        // player from /texts/{id}/audio (audio_player.php + audioPlayer) and the
+        // chapter nav from /texts/{id}/book-context (book_nav_renderer.ts), so
+        // neither is rendered server-side here.
 
         Settings::savePerUser('currenttext', $textId);
-
-        $mediaPlayerHtml = (new \Lwt\Modules\Admin\Application\Services\MediaService())
-            ->getMediaPlayerHtml($media, $audioPosition);
 
         PageLayoutHelper::renderPageStartNobody('Read', 'full-width');
         include self::MODULE_VIEWS . '/read_desktop.php';

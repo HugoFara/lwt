@@ -715,4 +715,97 @@ describe('audio_player_alpine.ts', () => {
       expect(() => component.destroy()).not.toThrow();
     });
   });
+
+  // ===========================================================================
+  // Shell-free API config path (GET /texts/{id}/audio)
+  // ===========================================================================
+
+  describe('loadAudioFromApi', () => {
+    const okJson = (body: unknown) => ({
+      ok: true,
+      text: () => Promise.resolve(JSON.stringify(body)),
+    });
+    let originalFetch: typeof global.fetch;
+
+    beforeEach(() => {
+      originalFetch = global.fetch;
+    });
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+      document.body.innerHTML = '';
+    });
+
+    function readerConfig(textId: number): void {
+      document.body.innerHTML =
+        `<script type="application/json" id="text-reader-config">{"textId":${textId}}</script>`;
+    }
+
+    it('applies the API config and reveals the player', async () => {
+      global.fetch = vi.fn().mockResolvedValue(
+        okJson({
+          uri: 'http://example.test/a.mp3',
+          position: 0,
+          playerSettings: { repeatMode: true, skipSeconds: 10, playbackRate: 15 },
+        })
+      ) as typeof global.fetch;
+      readerConfig(5);
+
+      const context = { ...audioPlayerData(), audio: mockAudio, hasAudio: false };
+      await context.loadAudioFromApi.call(context);
+
+      expect(String(((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0]))).toContain(
+        '/texts/5/audio'
+      );
+      expect(context.hasAudio).toBe(true);
+      expect(mockAudio.src).toContain('a.mp3');
+      expect(context.repeatMode).toBe(true);
+      expect(context.skipSeconds).toBe(10);
+      expect(context.playbackRate).toBe(1.5);
+    });
+
+    it('stays hidden and makes no request when no reader config is present', async () => {
+      global.fetch = vi.fn() as typeof global.fetch;
+
+      const context = { ...audioPlayerData(), audio: mockAudio, hasAudio: false };
+      await context.loadAudioFromApi.call(context);
+
+      expect(context.hasAudio).toBe(false);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('stays hidden when the text has no audio uri', async () => {
+      global.fetch = vi.fn().mockResolvedValue(
+        okJson({
+          uri: '',
+          position: 0,
+          playerSettings: { repeatMode: false, skipSeconds: 5, playbackRate: 10 },
+        })
+      ) as typeof global.fetch;
+      readerConfig(5);
+
+      const context = { ...audioPlayerData(), audio: mockAudio, hasAudio: false };
+      await context.loadAudioFromApi.call(context);
+
+      expect(context.hasAudio).toBe(false);
+    });
+
+    it('init without inline config falls back to the API path', () => {
+      global.fetch = vi.fn().mockResolvedValue(
+        okJson({
+          uri: '',
+          position: 0,
+          playerSettings: { repeatMode: false, skipSeconds: 5, playbackRate: 10 },
+        })
+      ) as typeof global.fetch;
+      const container = document.createElement('div');
+      container.appendChild(mockAudio);
+
+      const context = { ...audioPlayerData(), $el: container };
+      context.init.call(context);
+
+      // No inline config blob -> not revealed synchronously; the API path runs.
+      expect(context.hasAudio).toBe(false);
+    });
+  });
 });

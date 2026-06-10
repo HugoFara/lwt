@@ -13,8 +13,6 @@ declare(strict_types=1);
  * - $langId: int - Language ID (optional, will be fetched from API)
  * - $title: string - Text title (optional)
  * - $sourceUri: string|null - Source URI (optional)
- * - $media: string - Audio URI (optional)
- * - $audioPosition: int - Audio playback position (optional)
  *
  * PHP version 8.1
  *
@@ -29,8 +27,6 @@ declare(strict_types=1);
  * @var int $langId
  * @var string $title
  * @var string|null $sourceUri
- * @var string $media
- * @var int $audioPosition
  */
 
 namespace Lwt\Views\Text;
@@ -41,9 +37,6 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 assert(is_int($textId));
 assert(is_int($langId));
 assert(is_string($title));
-assert(is_string($media));
-assert(is_int($audioPosition));
-assert(is_string($mediaPlayerHtml));
 // Note: $sourceUri is typed as string|null in file-level docblock
 
 ?>
@@ -213,12 +206,9 @@ assert(is_string($mediaPlayerHtml));
     </div>
   </div>
 
-  <!-- Audio player (if media available) -->
-  <?php if ($media !== '') : ?>
-  <div class="box py-2 px-4 mb-0" style="border-radius: 0;">
-        <?php echo $mediaPlayerHtml; ?>
-  </div>
-  <?php endif; ?>
+  <!-- Audio player: markup-only; the audioPlayer component fetches
+       /texts/{id}/audio and reveals itself only when the text has audio. -->
+  <?php require __DIR__ . '/audio_player.php'; ?>
 
   <!-- Chapter navigation: client-rendered from /texts/{id}/book-context
        (book_nav_renderer.ts) so the reader carries no server-rendered chrome.
