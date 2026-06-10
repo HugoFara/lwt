@@ -141,4 +141,81 @@ describe('shared/i18n/translator.ts — API + cache delivery', () => {
       document.body.innerHTML = '';
     });
   });
+
+  describe('loadI18nFromApi — locale persistence', () => {
+    it('remembers the resolved locale for next-launch hydration', async () => {
+      const { loadI18nFromApi, getStoredLocale } = await freshTranslator();
+      mockFetch.mockResolvedValue(
+        okJson({ locale: 'es', messages: { 'common.save': 'Guardar' } })
+      );
+
+      await loadI18nFromApi('es');
+
+      expect(getStoredLocale()).toBe('es');
+    });
+
+    it('does not persist a locale when the request fails', async () => {
+      const { loadI18nFromApi, getStoredLocale } = await freshTranslator();
+      mockFetch.mockRejectedValue(new Error('offline'));
+
+      await loadI18nFromApi('es');
+
+      expect(getStoredLocale()).toBeNull();
+    });
+  });
+
+  describe('bootI18n (dual delivery path)', () => {
+    /**
+     * The shared test setup injects a global `lwt-i18n` blob in <head>; a
+     * shell-free client has none, so these tests strip every blob node
+     * (head and any left over from another case) to exercise the API path.
+     */
+    function removeAllBlobs() {
+      document.querySelectorAll('#lwt-i18n').forEach((e) => e.remove());
+    }
+
+    afterEach(removeAllBlobs);
+
+    it('uses the server blob and skips the network when one is present', async () => {
+      const { bootI18n, t } = await freshTranslator();
+      removeAllBlobs();
+      const el = document.createElement('script');
+      el.type = 'application/json';
+      el.id = 'lwt-i18n';
+      el.textContent = '{"common.save":"FromBlob"}';
+      document.body.appendChild(el);
+
+      await bootI18n();
+
+      expect(t('common.save')).toBe('FromBlob');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('fetches from the API when no blob is present', async () => {
+      const { bootI18n, t } = await freshTranslator();
+      removeAllBlobs();
+      mockFetch.mockResolvedValue(
+        okJson({ locale: 'es', messages: { 'common.save': 'Guardar' } })
+      );
+
+      await bootI18n();
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(t('common.save')).toBe('Guardar');
+    });
+
+    it('requests the stored locale and hydrates its cache first when blob is absent', async () => {
+      const { bootI18n, t } = await freshTranslator();
+      removeAllBlobs();
+      localStorage.setItem('lwt.locale', 'es');
+      localStorage.setItem('lwt.i18n.es', JSON.stringify({ 'common.save': 'Cached' }));
+      // API is slow/unreachable: the cached value must still be available.
+      mockFetch.mockRejectedValue(new Error('offline'));
+
+      await bootI18n();
+
+      expect(String(mockFetch.mock.calls[0][0])).toContain('/api/v1/i18n/es');
+      expect(t('common.save')).toBe('Cached');
+    });
+  });
 });

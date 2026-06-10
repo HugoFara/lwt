@@ -24,6 +24,15 @@ interface I18nBundle {
 /** localStorage key prefix for cached per-locale API bundles. */
 const CACHE_PREFIX = 'lwt.i18n.';
 
+/**
+ * localStorage key for the last resolved locale.
+ *
+ * A shell-free client has no server-rendered page to tell it which locale the
+ * user picked, so we remember the locale the API resolved last time and use it
+ * to hydrate synchronously on the next launch (offline-capable first paint).
+ */
+const LOCALE_KEY = 'lwt.locale';
+
 let messages: TranslationMessages = {};
 let initialized = false;
 
@@ -101,17 +110,63 @@ export async function loadI18nFromApi(
 
   mergeMessages(bundle.messages);
 
-  // Cache under the resolved locale so hydration can find it next launch.
+  // Cache under the resolved locale so hydration can find it next launch, and
+  // remember which locale that was so the next boot knows what to hydrate.
   try {
     localStorage.setItem(
       CACHE_PREFIX + bundle.locale,
       JSON.stringify(bundle.messages)
     );
+    localStorage.setItem(LOCALE_KEY, bundle.locale);
   } catch {
     // Storage full or unavailable — strings still work for this session.
   }
 
   return true;
+}
+
+/**
+ * Read the last resolved locale persisted by {@link loadI18nFromApi}.
+ *
+ * @returns the stored locale code, or null if none has been resolved yet
+ */
+export function getStoredLocale(): string | null {
+  try {
+    return localStorage.getItem(LOCALE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Boot translations, transparently handling both delivery paths.
+ *
+ * On a server-rendered page the `<script id="lwt-i18n">` blob is present, so we
+ * use it and return immediately — identical to the previous behavior. On a
+ * shell-free / bundled client (no blob) we hydrate synchronously from the
+ * cached bundle for an instant first paint, then refresh from the API in the
+ * foreground so the rendered strings are current before the UI starts. When the
+ * device is offline the API refresh fails silently and the cached strings
+ * stand; a never-launched-online client simply falls back to raw keys until it
+ * reaches the network once.
+ *
+ * @returns once strings are ready for first render
+ */
+export async function bootI18n(): Promise<void> {
+  const el = document.getElementById('lwt-i18n');
+  if (el?.textContent) {
+    initI18n();
+    return;
+  }
+
+  const cached = getStoredLocale();
+  if (cached) {
+    hydrateI18nFromCache(cached);
+  }
+
+  // Omitting the locale lets the server resolve its default on first run; the
+  // resolved locale is then persisted for next launch's synchronous hydration.
+  await loadI18nFromApi(cached ?? undefined);
 }
 
 /**

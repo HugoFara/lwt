@@ -55,7 +55,7 @@ import '@shared/components/theme_toggle';
 import '@shared/components/footer';
 
 // Shared i18n
-import { initI18n, t } from '@shared/i18n/translator';
+import { bootI18n, t } from '@shared/i18n/translator';
 
 // Shared accessibility
 import { initAriaLive } from '@shared/accessibility/aria_live';
@@ -130,9 +130,10 @@ document.addEventListener('lwt:auth-expired', () => {
 });
 
 // Wait for all dynamic modules to load, then initialize Alpine
-Promise.all(loaders).then(() => {
-  // Initialize i18n translations from server-injected JSON
-  initI18n();
+Promise.all(loaders).then(async () => {
+  // Initialize i18n: server-injected blob on SSR pages, or API + cache for a
+  // shell-free/bundled client (awaited so first paint has strings).
+  await bootI18n();
 
   // Initialize ARIA live regions for screen reader announcements
   initAriaLive();
