@@ -202,10 +202,13 @@ export function prerenderPhpView(absPath, warn = () => {}) {
     return '';
   });
 
-  // 10. Drop `<link>`/`<a>` tags whose href emptied out when a PHP helper that
-  //     produced a server path (printFilePath, UrlUtilities::url) was stripped —
-  //     `href=""` would otherwise refetch the current document.
+  // 10. Drop `<link>`/`<source>` tags whose URL emptied out when a PHP helper
+  //     that produced a server path (printFilePath, UrlUtilities::url) was
+  //     stripped: `href=""` would refetch the current document, and a
+  //     `<source src="">` in an <audio> has no bundled asset to point at (e.g.
+  //     review feedback sounds are not bundled — playback is simply silent).
   html = html.replace(/<link\b[^>]*\bhref=""[^>]*>/g, '');
+  html = html.replace(/<source\b[^>]*\bsrc=""[^>]*>/g, '');
 
   return html.trim();
 }

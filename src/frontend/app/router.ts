@@ -30,6 +30,10 @@ export const pageUrl = {
   read(textId: number | string, langId?: number | string): string {
     const lang = langId ? `&lang=${encodeURIComponent(String(langId))}` : '';
     return `read.html?text=${encodeURIComponent(String(textId))}${lang}`;
+  },
+  review(params: URLSearchParams): string {
+    const query = params.toString();
+    return query ? `review.html?${query}` : 'review.html';
   }
 };
 
@@ -52,6 +56,15 @@ export function bundledPageFor(path: string): string | null {
   if (readMatch) {
     const params = new URLSearchParams(query);
     return pageUrl.read(readMatch[1], params.get('lang') ?? undefined);
+  }
+  // /review[?text=|lang=|selection=] — carry the selection params through.
+  if (pathname === '/review') {
+    const params = new URLSearchParams();
+    for (const key of ['text', 'lang', 'selection']) {
+      const value = new URLSearchParams(query).get(key);
+      if (value) params.set(key, value);
+    }
+    return pageUrl.review(params);
   }
   return null;
 }
