@@ -33,6 +33,104 @@ function getBasePath(): string {
 }
 
 /**
+ * In-memory override for the API server root, set via {@link setApiServer}.
+ * `null` means "no override — consult localStorage/meta"; a non-empty string is
+ * the active override. It is never set to '' (a reset clears it back to `null`).
+ */
+let overrideApiServer: string | null = null;
+
+/**
+ * Safely read the persisted API server. Returns '' when localStorage is
+ * unavailable (privacy modes, non-DOM test environments, etc.).
+ */
+function readStoredApiServer(): string {
+  try {
+    return localStorage.getItem('lwt.apiServer') || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Resolve the configured API server **root** (scheme + host, optionally a
+ * sub-path), or '' when the app should talk to its own origin.
+ *
+ * Precedence:
+ *   1. runtime override set via {@link setApiServer}
+ *   2. persisted choice in localStorage (`lwt.apiServer`)
+ *   3. `<meta name="lwt-api-server">` (optional server-declared default)
+ *   4. '' — same-origin (the classic web-app behavior)
+ *
+ * Returning '' keeps every existing same-origin install byte-for-byte
+ * identical; a non-empty value lets a packaged client (e.g. a Capacitor shell
+ * for F-Droid) point at a user-chosen LWT server.
+ */
+function getConfiguredApiServer(): string {
+  if (overrideApiServer !== null) {
+    return overrideApiServer;
+  }
+  const stored = readStoredApiServer();
+  if (stored) {
+    return stored;
+  }
+  const meta = document.querySelector('meta[name="lwt-api-server"]');
+  return meta ? meta.getAttribute('content') || '' : '';
+}
+
+/**
+ * Compute the full API root (ending in `/api/v1`) for the current request.
+ *
+ * - Remote server configured -> `https://server[/subpath]/api/v1` (absolute).
+ * - Nothing configured        -> `<base-path>/api/v1` (relative, same-origin).
+ */
+function resolveApiRoot(): string {
+  const server = getConfiguredApiServer();
+  if (server) {
+    return server.replace(/\/+$/, '') + '/api/v1';
+  }
+  return getBasePath() + '/api/v1';
+}
+
+/**
+ * Point the API client at a specific LWT server, persisting the choice to
+ * localStorage so a packaged client remembers it across launches. Pass
+ * `null`/'' to reset — forgetting both the override and the persisted value so
+ * resolution falls back to localStorage/meta/same-origin.
+ *
+ * This function owns URL construction only. Cross-origin use additionally
+ * requires the server to send permissive CORS headers and — for cookie
+ * sessions — `credentials: 'include'`; token auth avoids the CSRF-meta
+ * dependency. See ROADMAP.md (Phase 1) for those follow-ups.
+ */
+export function setApiServer(server: string | null): void {
+  const normalized = (server || '').trim().replace(/\/+$/, '');
+  if (!normalized) {
+    // Reset: forget the override and any persisted choice.
+    overrideApiServer = null;
+    try {
+      localStorage.removeItem('lwt.apiServer');
+    } catch {
+      // localStorage unavailable: nothing persisted to clear.
+    }
+    return;
+  }
+  overrideApiServer = normalized;
+  try {
+    localStorage.setItem('lwt.apiServer', normalized);
+  } catch {
+    // localStorage unavailable: the in-memory override still applies for
+    // the rest of this session.
+  }
+}
+
+/**
+ * The API server root the client is currently using, or '' for same-origin.
+ */
+export function getApiServer(): string {
+  return getConfiguredApiServer();
+}
+
+/**
  * Read the CSRF token from `<meta name="csrf-token">`. Exported so
  * non-API-client callers (handleRestDelete in texts_grouped_app, etc.)
  * can attach the same `X-CSRF-TOKEN` header that CsrfMiddleware checks
@@ -58,7 +156,7 @@ function withCsrf(headers: Record<string, string>): Record<string, string> {
  */
 function getDefaultConfig(): ApiClientConfig {
   return {
-    baseUrl: getBasePath() + '/api/v1',
+    baseUrl: resolveApiRoot(),
     defaultHeaders: {
       'Content-Type': 'application/json',
       Accept: 'application/json'
