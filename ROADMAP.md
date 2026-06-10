@@ -174,6 +174,17 @@ the next achievable target. See `lukaisu/ROADMAP.md` for the build-side detail.
       dependency) — Capacitor 8, Android platform committed.
 - [x] **Server-URL config screen** — native `GET /api/v1/version` probe, choice
       persisted in native Preferences, then navigates the WebView to the server.
+- [~] **Bundled-client (Model B) build mode.** `npm run build:app`
+      (`vite.app.config.ts` → `dist-app/`) emits standalone connect/library/
+      reader pages that boot `main.ts` against a remote `/api/v1` with no PHP in
+      the loop. Each page body is **prerendered from the real PHP view** at build
+      time (`build/php-view-prerender.mjs`) so the Alpine scaffolds, icons and
+      labels stay a single source of truth. `../lukaisu` consumes `dist-app/` as
+      its Capacitor `webDir` (`npm run sync:model-b` there). First slice: connect
+      → library → reader. **CORS is now required** — the bundle origin
+      (`https://localhost`) is cross-origin to every server, so servers must set
+      `CORS_ALLOWED_ORIGINS=https://localhost`. Remaining: review surface,
+      client-rendered global navbar, on-device QA.
 - [ ] Reuse existing PWA assets; close the small gaps: real adaptive/maskable
       launcher icons (replace placeholders) and a manifest **`id`** (Lukaisu v0.2).
 - [ ] Ship through **our own F-Droid repo first** (low bar, full control,

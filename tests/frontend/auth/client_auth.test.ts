@@ -13,7 +13,9 @@ import {
   setAuthToken,
   getApiServer,
   getAuthToken,
-  getAuthTokenExpiry
+  getAuthTokenExpiry,
+  setAuthOptional,
+  isAuthOptional
 } from '../../../src/frontend/js/shared/api/client';
 
 describe('modules/auth/client_auth.ts', () => {
@@ -39,7 +41,29 @@ describe('modules/auth/client_auth.ts', () => {
   });
 
   function okJson(body: string) {
-    return { ok: true, text: () => Promise.resolve(body) };
+    return { ok: true, status: 200, text: () => Promise.resolve(body) };
+  }
+
+  function status(code: number) {
+    return { ok: code >= 200 && code < 300, status: code, text: () => Promise.resolve('') };
+  }
+
+  /**
+   * Route the mocked fetch by URL: a reachable LWT `/version`, plus a
+   * configurable auth-probe (`/languages`) response so a test can model a
+   * multi-user (401) or single-user (200) server.
+   */
+  function mockServer(opts: { languagesStatus: number }) {
+    mockFetch.mockImplementation((u: string) => {
+      const target = String(u);
+      if (target.includes('/api/v1/version')) {
+        return Promise.resolve(okJson('{"version":"3.0.2"}'));
+      }
+      if (target.includes('/api/v1/languages')) {
+        return Promise.resolve(status(opts.languagesStatus));
+      }
+      return Promise.resolve(okJson('{}'));
+    });
   }
 
   function calledUrl(): string {
@@ -85,15 +109,32 @@ describe('modules/auth/client_auth.ts', () => {
       expect(c.step).toBe('server');
     });
 
-    it('probes /version on the chosen server and advances on success', async () => {
-      mockFetch.mockResolvedValue(okJson('{"version":"3.0.2"}'));
+    it('probes /version on the chosen server and advances to login on a multi-user server', async () => {
+      mockServer({ languagesStatus: 401 }); // auth required
       const c = clientAuthData();
+      c.onAuthenticated = vi.fn();
       c.serverUrl = 'demo.example.org';
       await c.connect();
 
       expect(calledUrl()).toBe('https://demo.example.org/api/v1/version');
       expect(getApiServer()).toBe('https://demo.example.org');
       expect(c.step).toBe('login');
+      expect(isAuthOptional()).toBe(false);
+      expect(c.onAuthenticated).not.toHaveBeenCalled();
+      expect(c.error).toBe('');
+    });
+
+    it('skips login and enters the app when the server needs no auth (single-user)', async () => {
+      mockServer({ languagesStatus: 200 }); // every endpoint public
+      const c = clientAuthData();
+      c.onAuthenticated = vi.fn();
+      c.serverUrl = 'demo.example.org';
+      await c.connect();
+
+      expect(getApiServer()).toBe('https://demo.example.org');
+      expect(c.step).toBe('server'); // never advanced to the login step
+      expect(isAuthOptional()).toBe(true);
+      expect(c.onAuthenticated).toHaveBeenCalledOnce();
       expect(c.error).toBe('');
     });
 
@@ -203,6 +244,16 @@ describe('modules/auth/client_auth.ts', () => {
       expect(c.step).toBe('login');
       expect(c.serverUrl).toBe('https://known.example');
       expect(c.onAuthenticated).not.toHaveBeenCalled();
+    });
+
+    it('skips login on relaunch when the server is known to need no auth', () => {
+      setApiServer('https://single.example'); // clears any prior flag…
+      setAuthOptional(true); // …then mark this server auth-optional
+      const c = clientAuthData();
+      c.onAuthenticated = vi.fn();
+      c.init();
+      expect(c.onAuthenticated).toHaveBeenCalledOnce();
+      expect(c.step).toBe('server'); // never routed to login
     });
 
     it('starts on the server step, prefilled from config, when nothing is set', () => {

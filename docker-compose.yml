@@ -32,6 +32,10 @@ services:
       - MULTI_USER_ENABLED=${MULTI_USER_ENABLED:-false}
       - APP_URL=${APP_URL:-}
       - TRUST_PROXY=${TRUST_PROXY:-true}
+      # Cross-origin allow-list for the bundled ("Model B") client. Empty by
+      # default (CORS stays off); set to the bundle origin(s), e.g.
+      # https://localhost for the Android app.
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-}
     volumes:
       - ./media:/var/www/html${APP_BASE_PATH:-}/media
     ports:

@@ -103,6 +103,9 @@ function resolveApiRoot(): string {
  * dependency. See ROADMAP.md (Phase 1) for those follow-ups.
  */
 export function setApiServer(server: string | null): void {
+  // Changing (or clearing) the server invalidates any cached knowledge of
+  // whether that server needed a login — re-probed on the next connect.
+  setAuthOptional(false);
   const normalized = (server || '').trim().replace(/\/+$/, '');
   if (!normalized) {
     // Reset: forget the override and any persisted choice.
@@ -120,6 +123,66 @@ export function setApiServer(server: string | null): void {
   } catch {
     // localStorage unavailable: the in-memory override still applies for
     // the rest of this session.
+  }
+}
+
+/**
+ * Persisted flag: the configured server does not require authentication (e.g. a
+ * single-user self-host, where the API treats every endpoint as public). When
+ * set, a packaged client can enter the app with no bearer token. Determined by
+ * {@link probeAuthRequirement} during the connect flow and persisted so a
+ * relaunch skips the login step. Cleared by {@link setApiServer}.
+ */
+const AUTH_OPTIONAL_KEY = 'lwt.authOptional';
+
+/** Mark whether the current server lets a client in without authentication. */
+export function setAuthOptional(optional: boolean): void {
+  try {
+    if (optional) {
+      localStorage.setItem(AUTH_OPTIONAL_KEY, '1');
+    } else {
+      localStorage.removeItem(AUTH_OPTIONAL_KEY);
+    }
+  } catch {
+    // localStorage unavailable: detection just won't persist across launches.
+  }
+}
+
+/** True when the configured server was found not to require authentication. */
+export function isAuthOptional(): boolean {
+  try {
+    return localStorage.getItem(AUTH_OPTIONAL_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Outcome of probing whether the configured server requires authentication. */
+export type AuthRequirement = 'required' | 'optional' | 'unknown';
+
+/**
+ * Probe whether the configured server requires authentication, by requesting a
+ * normally-protected endpoint (`/languages`) *without* a token:
+ *   - HTTP 401  -> 'required'  (multi-user server: show the login step)
+ *   - HTTP 2xx  -> 'optional'  (single-user server: every endpoint is public)
+ *   - anything else / network error -> 'unknown' (caller should assume login)
+ *
+ * Must be called after {@link setApiServer} but before a token is obtained.
+ */
+export async function probeAuthRequirement(): Promise<AuthRequirement> {
+  try {
+    const response = await fetch(resolveApiRoot() + '/languages', {
+      headers: { Accept: 'application/json' }
+    });
+    if (response.status === 401) {
+      return 'required';
+    }
+    if (response.ok) {
+      return 'optional';
+    }
+    return 'unknown';
+  } catch {
+    return 'unknown';
   }
 }
 

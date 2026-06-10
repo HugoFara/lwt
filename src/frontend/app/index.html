@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Lukaisu — Connect</title>
+  <!-- Drives main.ts's dynamic module loading (read at import time). -->
+  <meta name="lwt-modules" content="auth" />
+  <style>[x-cloak]{display:none !important}</style>
+</head>
+<body>
+  <section class="section">
+    <!-- Body prerendered at build time from the server's connect view. -->
+    <!--LWT_VIEW:src/Modules/User/Views/client_auth.php-->
+  </section>
+  <script type="module" src="./connect.ts"></script>
+</body>
+</html>

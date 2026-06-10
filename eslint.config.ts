@@ -22,7 +22,7 @@ export default defineConfig([
 
   // JavaScript/TypeScript source files
   {
-    files: ["src/frontend/js/**/*.{js,mjs,cjs,ts,mts,cts}"],
+    files: ["src/frontend/{js,app}/**/*.{js,mjs,cjs,ts,mts,cts}"],
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: {
@@ -32,7 +32,7 @@ export default defineConfig([
 
   // TypeScript-specific configuration
   {
-    files: ["src/frontend/js/**/*.{ts,mts,cts}"],
+    files: ["src/frontend/{js,app}/**/*.{ts,mts,cts}"],
     extends: [tseslint.configs.recommended],
   },
 

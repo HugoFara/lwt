@@ -28,6 +28,9 @@ import {
   getApiServer,
   setAuthToken,
   getAuthToken,
+  setAuthOptional,
+  isAuthOptional,
+  probeAuthRequirement,
   type ApiResponse
 } from '@shared/api/client';
 import { url } from '@shared/utils/url';
@@ -139,9 +142,15 @@ export function clientAuthData(): ClientAuthData {
         return;
       }
 
-      // Server already chosen previously: jump straight to the login step.
+      // Server already chosen previously.
       const knownServer = getApiServer();
       if (knownServer) {
+        // Known to need no login (single-user self-host): go straight in.
+        if (isAuthOptional()) {
+          this.onAuthenticated();
+          return;
+        }
+        // Otherwise jump straight to the login step.
         this.serverUrl = knownServer;
         this.step = 'login';
         return;
@@ -178,13 +187,25 @@ export function clientAuthData(): ClientAuthData {
       // this origin).
       setApiServer(server);
       const res = await apiGet<VersionResponse>('/version');
-      this.loading = false;
 
       if (res.error || !res.data || !res.data.version) {
+        this.loading = false;
         setApiServer(null); // roll back the bad choice
         this.error =
           'Could not reach an LWT server at that address. Check the URL and '
           + 'that the server allows this app.';
+        return;
+      }
+
+      // Reachable. Does this server require a login? A single-user self-host
+      // treats every endpoint as public, so there is nothing to log in to —
+      // enter the app directly. Multi-user servers (401) show the login step.
+      const authMode = await probeAuthRequirement();
+      this.loading = false;
+
+      if (authMode === 'optional') {
+        setAuthOptional(true);
+        this.onAuthenticated();
         return;
       }
 
