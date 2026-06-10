@@ -35,6 +35,14 @@ ones are marked like "v1.0.0-fork".
   selected via `[data_hex]`, and to hash the identity token (retiring the legacy
   `¤`/Latin-1 `toClassName` encoding flagged by the PHP 8.5 `ord()` deprecation).
   Proposal only — implementation deferred until after the next release.
+* **Design proposal: term status model + FSRS scheduling** (#238). New developer
+  doc (`docs-src/developer/term-status-fsrs.md`) proposing to (1) make the word-status
+  model (1–5/98/99) a single source of truth — the scattered literals and ~6
+  duplicated frontend tables collapse onto the existing `TermStatus` value object —
+  and (2) align review scheduling with Anki/FSRS by separating display familiarity
+  from memory state (Stability/Difficulty/Retrievability, 4-grade reviews), deriving
+  the 1–5 reading colours from memory strength. Proposal only — implementation
+  deferred until after the next release.
 
 ### Security (XSS hardening: JSON-into-`<script>` breakout + DOM sinks)
 
