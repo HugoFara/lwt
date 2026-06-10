@@ -29,6 +29,12 @@ ones are marked like "v1.0.0-fork".
   downloads import directly. Extraction is shared with the curated-import
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
+* **Design proposal: single `data_hex` word identity** (#237). New developer
+  doc (`docs-src/developer/word-identity-data-hex.md`) proposing to replace the
+  reading-view `TERM<hex>` CSS class-as-index with a `data_hex` attribute
+  selected via `[data_hex]`, and to hash the identity token (retiring the legacy
+  `¤`/Latin-1 `toClassName` encoding flagged by the PHP 8.5 `ord()` deprecation).
+  Proposal only — implementation deferred until after the next release.
 
 ### Security (XSS hardening: JSON-into-`<script>` breakout + DOM sinks)
 
