@@ -125,13 +125,14 @@ converting pages**. Three dependencies to sever + one real conversion:
       orphaned `status_change_result.php` (HTML fragment, no route/no caller;
       superseded by the JSON `status_change_config.php`). The legacy non-SPA
       review-AJAX page is a separate, non-mobile entry — out of scope.
-- [~] **Text list / library — content shell-free; bulk actions aren't.**
-      `texts_grouped_app.ts` client-renders the list from `/texts/by-language/{id}`
-      + `/texts/statistics`. Residual: the multi-select **bulk archive/delete**
-      still submits a legacy form POST to `/texts` (`handleMultiAction`), which
-      needs a new REST bulk endpoint to work against a remote API base; plus
-      `__e()` labels. Admin-ish, not a mobile-critical reading flow → lower
-      urgency.
+- [x] **Text list / library — shell-free.** `texts_grouped_app.ts`
+      client-renders the list from `/texts/by-language/{id}` + `/texts/statistics`,
+      and the destructive **bulk archive/delete** now go through
+      `PUT /api/v1/texts/bulk-action` (per-user scoped) instead of a same-origin
+      form POST, so they work against a configurable API base. The remaining
+      bulk actions (tag / review / reparse) intentionally stay on the form path —
+      they need pickers/navigation and are desktop-admin, not mobile flows.
+      `__e()` labels resolve via the i18n API once a page boots from it.
 - [~] **Vocabulary mgmt — mobile path already shell-free; legacy fragments
       remain.** *Re-audit (corrected):* the **modern reader's** word actions
       already go through `/api/v1/terms/*` — `word_store.ts`/`word_modal.ts` call
