@@ -662,6 +662,10 @@ function registerRoutes(Router $router): void
         [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
     );
 
+    // Packaged-client entry: client-rendered "choose server + log in" flow
+    // (token auth). The login POST goes to /api/v1/auth/login, not here.
+    $router->register('/connect', 'Lwt\\Modules\\User\\Http\\UserController@clientAuthForm', 'GET');
+
     // Registration - no auth required, rate limited and CSRF-protected on POST.
     $router->register('/register', 'Lwt\\Modules\\User\\Http\\UserController@registerForm', 'GET');
     $router->post(

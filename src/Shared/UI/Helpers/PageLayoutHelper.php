@@ -630,6 +630,7 @@ HTML;
             str_starts_with($path, '/login')
             || str_starts_with($path, '/register')
             || str_starts_with($path, '/reset-password')
+            || str_starts_with($path, '/connect')
         ) {
             return ['auth'];
         }

@@ -117,6 +117,31 @@ class UserController extends BaseController
     }
 
     /**
+     * Display the packaged-client auth screen ("choose server + log in").
+     *
+     * Client-rendered, token-based entry flow for a cross-origin/packaged
+     * client (the planned Capacitor/F-Droid app). Distinct from loginForm,
+     * which is the same-origin cookie-session login.
+     *
+     * GET /connect
+     *
+     * @return ResponseInterface|null
+     */
+    public function clientAuthForm(): mixed
+    {
+        // Already signed in via the web session: nothing to connect to.
+        if (Globals::isAuthenticated()) {
+            return $this->redirect('/');
+        }
+
+        $this->render(__('user.login.page_title'), false);
+        require __DIR__ . '/../Views/client_auth.php';
+        $this->endRender();
+
+        return null;
+    }
+
+    /**
      * Process the login form submission.
      *
      * POST /login

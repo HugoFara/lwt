@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * Packaged-client auth view — "choose server + log in".
+ *
+ * Entry screen for a cross-origin/packaged client (the planned Capacitor /
+ * F-Droid app). Unlike login.php (server-rendered cookie session), this is a
+ * client-rendered, token-based flow driven by the `clientAuth` Alpine
+ * component (src/frontend/js/modules/auth/pages/client_auth.ts):
+ *   step 1 — pick a server (validated against /api/v1/version)
+ *   step 2 — log in (POST /api/v1/auth/login -> bearer token)
+ *
+ * Strings are intentionally inline English for now; client-side i18n is a
+ * separate roadmap item (Phase 1).
+ *
+ * PHP version 8.1
+ *
+ * @category Lwt
+ * @package  Lwt\Modules\User\Views
+ * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @license  Unlicense <http://unlicense.org/>
+ * @since    3.1.1
+ */
+
+declare(strict_types=1);
+
+namespace Lwt\Modules\User\Views;
+
+?>
+<div class="container">
+    <div class="columns is-centered">
+        <div class="column is-6-tablet is-5-desktop">
+            <div class="box" x-data="clientAuth">
+                <!-- Logo/Title -->
+                <div class="has-text-centered mb-5">
+                    <h1 class="title is-3">
+                        <span class="icon-text">
+                            <span class="icon has-text-primary">
+                                <i data-lucide="book-open"></i>
+                            </span>
+                            <span>LWT</span>
+                        </span>
+                    </h1>
+                    <p class="subtitle is-6 has-text-grey">Connect to your server</p>
+                </div>
+
+                <!-- Error message -->
+                <div class="notification is-danger is-light" x-show="error" x-cloak>
+                    <span x-text="error"></span>
+                </div>
+
+                <!-- Step 1: choose server -->
+                <form @submit.prevent="connect()" x-show="onServerStep" x-cloak>
+                    <div class="field">
+                        <label class="label" for="server-url">Server address</label>
+                        <div class="control has-icons-left">
+                            <input
+                                type="text"
+                                id="server-url"
+                                class="input"
+                                placeholder="https://my-lwt-server.org"
+                                x-model="serverUrl"
+                                inputmode="url"
+                                autocomplete="url"
+                                required
+                            >
+                            <span class="icon is-small is-left">
+                                <i data-lucide="server"></i>
+                            </span>
+                        </div>
+                        <p class="help">The address of the LWT server you want to read from.</p>
+                    </div>
+
+                    <div class="field">
+                        <div class="control">
+                            <button
+                                type="submit"
+                                class="button is-primary is-fullwidth"
+                                :class="{ 'is-loading': loading }"
+                                :disabled="loading"
+                            >
+                                <span class="icon"><i data-lucide="plug"></i></span>
+                                <span>Connect</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Step 2: log in -->
+                <form @submit="submitLogin($event)" x-show="onLoginStep" x-cloak>
+                    <div class="field">
+                        <label class="label" for="client-username">Username or email</label>
+                        <div class="control has-icons-left">
+                            <input
+                                type="text"
+                                id="client-username"
+                                class="input"
+                                x-model="username"
+                                autocomplete="username"
+                                required
+                            >
+                            <span class="icon is-small is-left">
+                                <i data-lucide="user"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="client-password">Password</label>
+                        <div class="control has-icons-left">
+                            <input
+                                type="password"
+                                id="client-password"
+                                class="input"
+                                x-model="password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <span class="icon is-small is-left">
+                                <i data-lucide="lock"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="control">
+                            <button
+                                type="submit"
+                                class="button is-primary is-fullwidth"
+                                :class="{ 'is-loading': loading }"
+                                :disabled="loading"
+                            >
+                                <span class="icon"><i data-lucide="log-in"></i></span>
+                                <span>Log in</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="has-text-centered">
+                        <a class="is-size-7" @click="back()">Use a different server</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="client-auth-config">
+{}
+</script>
