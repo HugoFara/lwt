@@ -78,9 +78,12 @@ that makes a good client today and offline/local-first possible tomorrow.
         (`Cors` helper + preflight handling in `ApiV1::handleRequest`).
       - [x] Client sends **`Authorization: Bearer`** (`setAuthToken`/`getAuthToken`,
         persisted as `lwt.apiToken`); server already validated Bearer tokens.
-      - [ ] **First-run auth UX**: a login screen that calls `/auth/login` and
-        stores the returned token via `setAuthToken` — the remaining piece
-        before a packaged client can actually sign in. Lands with Phase 2.
+      - [x] **First-run auth UX** (`GET /connect`, `clientAuth` component):
+        choose-server (probes `/version`) → log in **or register** against the
+        auth API, storing the bearer token. Plus session longevity — proactive
+        token refresh before the 30-day expiry, and `lwt:auth-expired` →
+        `/connect` on a 401. Remaining for Phase 2: the Capacitor shell that
+        hosts these screens and supplies a default server.
 - [ ] **Security hardening pass** — continue the XSS phases. Gate for any
       shared/public exposure; non-negotiable before a public instance.
 
