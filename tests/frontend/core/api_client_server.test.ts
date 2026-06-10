@@ -15,7 +15,10 @@ import {
   setApiServer,
   getApiServer,
   setAuthToken,
-  getAuthToken
+  getAuthToken,
+  getAuthTokenExpiry,
+  refreshAuthToken,
+  maybeRefreshAuthToken
 } from '../../../src/frontend/js/shared/api/client';
 
 describe('shared/api/client.ts — injectable API server', () => {
@@ -46,6 +49,10 @@ describe('shared/api/client.ts — injectable API server', () => {
 
   function calledHeaders(): Record<string, string> {
     return (mockFetch.mock.calls[0][1].headers ?? {}) as Record<string, string>;
+  }
+
+  function okJson(body: string) {
+    return { ok: true, text: () => Promise.resolve(body) };
   }
 
   function calledUrl(): string {
@@ -195,6 +202,140 @@ describe('shared/api/client.ts — injectable API server', () => {
       await apiGet('/terms/1');
       expect(calledUrl()).toBe('https://remote.example.org/api/v1/terms/1');
       expect(calledHeaders().Authorization).toBe('Bearer tok-123');
+    });
+  });
+
+  describe('token expiry storage', () => {
+    it('persists and reads the expiry passed to setAuthToken', () => {
+      setAuthToken('tok-123', '2999-01-01T00:00:00+00:00');
+      const expiry = getAuthTokenExpiry();
+      expect(expiry).not.toBeNull();
+      expect(expiry?.getUTCFullYear()).toBe(2999);
+    });
+
+    it('returns null when no expiry is known', () => {
+      setAuthToken('tok-123');
+      expect(getAuthTokenExpiry()).toBeNull();
+    });
+
+    it('clears the expiry when the token is cleared', () => {
+      setAuthToken('tok-123', '2999-01-01T00:00:00+00:00');
+      setAuthToken(null);
+      expect(getAuthTokenExpiry()).toBeNull();
+      expect(localStorage.getItem('lwt.apiTokenExpires')).toBeNull();
+    });
+  });
+
+  describe('refreshAuthToken', () => {
+    it('does nothing without a token', async () => {
+      const ok = await refreshAuthToken();
+      expect(ok).toBe(false);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('exchanges a valid token for a new one via /auth/refresh', async () => {
+      setAuthToken('old-token', '2999-01-01T00:00:00+00:00');
+      mockFetch.mockResolvedValue(
+        okJson('{"success":true,"token":"new-token","expires_at":"2999-06-01T00:00:00+00:00"}')
+      );
+
+      const ok = await refreshAuthToken();
+
+      expect(ok).toBe(true);
+      expect(calledUrl()).toContain('/api/v1/auth/refresh');
+      expect(calledHeaders().Authorization).toBe('Bearer old-token');
+      expect(getAuthToken()).toBe('new-token');
+      expect(getAuthTokenExpiry()?.getUTCMonth()).toBe(5); // June
+    });
+
+    it('keeps the old token when refresh fails', async () => {
+      setAuthToken('old-token', '2999-01-01T00:00:00+00:00');
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+        text: () => Promise.resolve('{"error":"expired"}')
+      });
+
+      const ok = await refreshAuthToken();
+
+      expect(ok).toBe(false);
+      expect(getAuthToken()).toBe('old-token');
+    });
+  });
+
+  describe('maybeRefreshAuthToken (proactive)', () => {
+    function isoIn(ms: number): string {
+      return new Date(Date.now() + ms).toISOString();
+    }
+    const DAY = 24 * 60 * 60 * 1000;
+
+    it('refreshes a token nearing expiry (inside the 7-day window)', async () => {
+      setAuthToken('old-token', isoIn(2 * DAY));
+      mockFetch.mockResolvedValue(
+        okJson('{"success":true,"token":"new-token","expires_at":"2999-06-01T00:00:00+00:00"}')
+      );
+
+      const refreshed = await maybeRefreshAuthToken();
+
+      expect(refreshed).toBe(true);
+      expect(getAuthToken()).toBe('new-token');
+    });
+
+    it('does not refresh a token that is still far from expiry', async () => {
+      setAuthToken('old-token', isoIn(30 * DAY));
+      const refreshed = await maybeRefreshAuthToken();
+      expect(refreshed).toBe(false);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh an already-expired token (cannot be refreshed)', async () => {
+      setAuthToken('old-token', isoIn(-DAY));
+      const refreshed = await maybeRefreshAuthToken();
+      expect(refreshed).toBe(false);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('does nothing without a token or known expiry', async () => {
+      expect(await maybeRefreshAuthToken()).toBe(false);
+      setAuthToken('tok-no-expiry');
+      expect(await maybeRefreshAuthToken()).toBe(false);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('401 handling', () => {
+    function unauthorized() {
+      return {
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+        text: () => Promise.resolve('{"message":"Authentication required"}')
+      };
+    }
+
+    it('clears the token and fires lwt:auth-expired on a 401 with a token set', async () => {
+      setAuthToken('doomed-token');
+      const onExpired = vi.fn();
+      document.addEventListener('lwt:auth-expired', onExpired);
+      mockFetch.mockResolvedValue(unauthorized());
+
+      await apiGet('/terms/1');
+
+      expect(getAuthToken()).toBe('');
+      expect(onExpired).toHaveBeenCalledOnce();
+      document.removeEventListener('lwt:auth-expired', onExpired);
+    });
+
+    it('does not fire when there is no token (same-origin cookie session)', async () => {
+      const onExpired = vi.fn();
+      document.addEventListener('lwt:auth-expired', onExpired);
+      mockFetch.mockResolvedValue(unauthorized());
+
+      await apiGet('/terms/1');
+
+      expect(onExpired).not.toHaveBeenCalled();
+      document.removeEventListener('lwt:auth-expired', onExpired);
     });
   });
 });

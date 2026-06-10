@@ -186,17 +186,22 @@ export function getAuthToken(): string {
  * packaged client stays signed in across launches. Pass `null`/'' to clear,
  * e.g. on logout.
  *
+ * `expiresAt` (the ISO-8601 `expires_at` the auth endpoints return) is stored
+ * alongside so the client can refresh proactively before it lapses
+ * ({@link maybeRefreshAuthToken}).
+ *
  * When set, every request carries `Authorization: Bearer <token>`. This is how
  * a cross-origin client authenticates, since cookies are not sent to a remote
  * server (see {@link setApiServer}); same-origin callers can ignore it and keep
  * using the session cookie.
  */
-export function setAuthToken(token: string | null): void {
+export function setAuthToken(token: string | null, expiresAt?: string | null): void {
   const normalized = (token || '').trim();
   if (!normalized) {
     authTokenOverride = null;
     try {
       localStorage.removeItem('lwt.apiToken');
+      localStorage.removeItem('lwt.apiTokenExpires');
     } catch {
       // localStorage unavailable: nothing persisted to clear.
     }
@@ -205,9 +210,32 @@ export function setAuthToken(token: string | null): void {
   authTokenOverride = normalized;
   try {
     localStorage.setItem('lwt.apiToken', normalized);
+    if (expiresAt) {
+      localStorage.setItem('lwt.apiTokenExpires', expiresAt);
+    } else {
+      localStorage.removeItem('lwt.apiTokenExpires');
+    }
   } catch {
     // localStorage unavailable: the in-memory token still applies this session.
   }
+}
+
+/**
+ * The bearer token's expiry, or null when unknown. Used to decide whether to
+ * refresh proactively.
+ */
+export function getAuthTokenExpiry(): Date | null {
+  let raw: string;
+  try {
+    raw = localStorage.getItem('lwt.apiTokenExpires') || '';
+  } catch {
+    return null;
+  }
+  if (!raw) {
+    return null;
+  }
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 /**
@@ -218,6 +246,105 @@ function withAuth(headers: Record<string, string>): Record<string, string> {
   const token = getAuthToken();
   if (!token) return headers;
   return { ...headers, Authorization: `Bearer ${token}` };
+}
+
+/** How long before expiry a still-valid token gets rolled forward (7 days). */
+const TOKEN_REFRESH_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** De-dupes concurrent refreshes so we never fire two `/auth/refresh` at once. */
+let refreshInFlight: Promise<boolean> | null = null;
+
+interface RefreshResponse {
+  success?: boolean;
+  token?: string;
+  expires_at?: string | null;
+}
+
+/**
+ * Exchange the current (still-valid) bearer token for a fresh one via
+ * `POST /auth/refresh`, updating storage on success.
+ *
+ * NB: this backend can only refresh a token that is *still valid* — once a
+ * token has expired (and started returning 401) it cannot be refreshed, so
+ * this is a *proactive* mechanism, not a 401 recovery path. Uses raw `fetch`
+ * (not the 401-aware wrapper) to avoid recursive teardown.
+ *
+ * @returns true if a new token was stored.
+ */
+export async function refreshAuthToken(): Promise<boolean> {
+  if (!getAuthToken()) {
+    return false;
+  }
+  if (refreshInFlight) {
+    return refreshInFlight;
+  }
+  refreshInFlight = (async (): Promise<boolean> => {
+    try {
+      const response = await fetch(resolveApiRoot() + '/auth/refresh', {
+        method: 'POST',
+        headers: withAuth({
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        })
+      });
+      if (!response.ok) {
+        return false;
+      }
+      const text = await response.text();
+      const data = (text ? JSON.parse(text) : {}) as RefreshResponse;
+      if (data.success === true && typeof data.token === 'string' && data.token) {
+        setAuthToken(data.token, data.expires_at ?? null);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+  return refreshInFlight;
+}
+
+/**
+ * Refresh the token only when it is still valid but within
+ * {@link TOKEN_REFRESH_WINDOW_MS} of expiring. Safe to call on every app
+ * launch: a no-op when there is no token, the expiry is unknown, it is not yet
+ * due, or it has already lapsed (an expired token can't be refreshed).
+ */
+export async function maybeRefreshAuthToken(): Promise<boolean> {
+  if (!getAuthToken()) {
+    return false;
+  }
+  const expiry = getAuthTokenExpiry();
+  if (!expiry) {
+    return false;
+  }
+  const msLeft = expiry.getTime() - Date.now();
+  if (msLeft <= 0 || msLeft > TOKEN_REFRESH_WINDOW_MS) {
+    return false;
+  }
+  return refreshAuthToken();
+}
+
+/**
+ * `fetch` wrapper that ends the session on a 401 while a bearer token is set:
+ * the token has been rejected (expired or invalidated) and cannot be
+ * refreshed, so it is cleared and a `lwt:auth-expired` event is dispatched for
+ * the UI to route back to the login screen. A no-op for same-origin cookie
+ * callers (no token), so their behavior is unchanged.
+ */
+async function apiFetch(input: string, init: RequestInit): Promise<Response> {
+  const response = await fetch(input, init);
+  if (response.status === 401 && getAuthToken()) {
+    setAuthToken(null);
+    try {
+      document.dispatchEvent(new CustomEvent('lwt:auth-expired'));
+    } catch {
+      // Non-DOM environment: nothing to notify.
+    }
+  }
+  return response;
 }
 
 /**
@@ -309,7 +436,7 @@ export async function apiGet<T>(
   params?: Record<string, string | number | boolean | undefined>
 ): Promise<ApiResponse<T>> {
   try {
-    const response = await fetch(buildUrl(endpoint, params), {
+    const response = await apiFetch(buildUrl(endpoint, params), {
       method: 'GET',
       headers: withAuth(defaultConfig.defaultHeaders ?? {})
     });
@@ -345,7 +472,7 @@ export async function apiPost<T>(
   body: Record<string, unknown>
 ): Promise<ApiResponse<T>> {
   try {
-    const response = await fetch(defaultConfig.baseUrl + endpoint, {
+    const response = await apiFetch(defaultConfig.baseUrl + endpoint, {
       method: 'POST',
       headers: withAuth(withCsrf(defaultConfig.defaultHeaders ?? {})),
       body: JSON.stringify(body)
@@ -382,7 +509,7 @@ export async function apiPut<T>(
   body: Record<string, unknown>
 ): Promise<ApiResponse<T>> {
   try {
-    const response = await fetch(defaultConfig.baseUrl + endpoint, {
+    const response = await apiFetch(defaultConfig.baseUrl + endpoint, {
       method: 'PUT',
       headers: withAuth(withCsrf(defaultConfig.defaultHeaders ?? {})),
       body: JSON.stringify(body)
@@ -425,7 +552,7 @@ export async function apiDelete<T>(
     if (body) {
       options.body = JSON.stringify(body);
     }
-    const response = await fetch(defaultConfig.baseUrl + endpoint, options);
+    const response = await apiFetch(defaultConfig.baseUrl + endpoint, options);
 
     if (!response.ok) {
       const errorData = await parseResponse<{ message?: string }>(response);
@@ -463,7 +590,7 @@ export async function apiPostForm<T>(
       formData.append(key, String(value));
     });
 
-    const response = await fetch(defaultConfig.baseUrl + endpoint, {
+    const response = await apiFetch(defaultConfig.baseUrl + endpoint, {
       method: 'POST',
       headers: withAuth(withCsrf({
         'Content-Type': 'application/x-www-form-urlencoded',

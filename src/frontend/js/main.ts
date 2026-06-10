@@ -60,6 +60,10 @@ import { initI18n, t } from '@shared/i18n/translator';
 // Shared accessibility
 import { initAriaLive } from '@shared/accessibility/aria_live';
 
+// Token session management (packaged/cross-origin clients)
+import { maybeRefreshAuthToken } from '@shared/api/client';
+import { url } from '@shared/utils/url';
+
 // Shared icons
 import '@shared/icons/lucide_icons';
 
@@ -115,6 +119,15 @@ const requestedModules = meta?.content?.split(',').map(m => m.trim()).filter(Boo
 const loaders = requestedModules
   .filter(m => m in moduleMap)
   .map(m => moduleMap[m]());
+
+// Token-session upkeep for packaged/cross-origin clients. Both are no-ops for
+// the same-origin web app (no bearer token), so cookie sessions are unaffected.
+// Roll a still-valid token forward if it is nearing expiry...
+void maybeRefreshAuthToken();
+// ...and when a token is rejected (expired/invalidated), route back to login.
+document.addEventListener('lwt:auth-expired', () => {
+  window.location.assign(url('/connect'));
+});
 
 // Wait for all dynamic modules to load, then initialize Alpine
 Promise.all(loaders).then(() => {
