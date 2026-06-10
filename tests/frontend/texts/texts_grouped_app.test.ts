@@ -24,7 +24,8 @@ vi.mock('../../../src/frontend/js/shared/api/client', () => ({
 // Mock TextsApi
 vi.mock('../../../src/frontend/js/modules/text/api/texts_api', () => ({
   TextsApi: {
-    getStatistics: vi.fn().mockResolvedValue({ data: {} })
+    getStatistics: vi.fn().mockResolvedValue({ data: {} }),
+    bulkAction: vi.fn().mockResolvedValue({ data: { count: 1 } })
   }
 }));
 
@@ -36,6 +37,7 @@ vi.mock('../../../src/frontend/js/shared/utils/ui_utilities', () => ({
 import Alpine from 'alpinejs';
 import { textsGroupedData, initTextsGroupedAlpine } from '../../../src/frontend/js/modules/text/pages/texts_grouped_app';
 import { apiGet } from '../../../src/frontend/js/shared/api/client';
+import { TextsApi } from '../../../src/frontend/js/modules/text/api/texts_api';
 import { confirmDelete } from '../../../src/frontend/js/shared/utils/ui_utilities';
 
 describe('texts_grouped_app.ts', () => {
@@ -583,6 +585,86 @@ describe('texts_grouped_app.ts', () => {
       component.handleMultiAction(event);
 
       expect(selectEl.value).toBe('');
+    });
+  });
+
+  // ===========================================================================
+  // Destructive bulk actions via the JSON API
+  // ===========================================================================
+
+  describe('bulk archive/delete via API', () => {
+    const originalLocation = window.location;
+    let reloadMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      reloadMock = vi.fn();
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: { ...originalLocation, reload: reloadMock }
+      });
+    });
+
+    afterEach(() => {
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: originalLocation
+      });
+    });
+
+    it('routes archive to the JSON API (not a form POST)', () => {
+      const component = textsGroupedData();
+      component.markedTexts = new Set([10, 20]);
+
+      const selectEl = { value: 'arch' };
+      component.handleMultiAction({ target: selectEl } as unknown as Event);
+
+      // bulkAction is invoked synchronously (before the first await); the
+      // selection control is reset immediately.
+      expect(selectEl.value).toBe('');
+      expect(TextsApi.bulkAction).toHaveBeenCalledWith('archive', [10, 20]);
+    });
+
+    it('routes confirmed delete to the JSON API', () => {
+      (confirmDelete as ReturnType<typeof vi.fn>).mockReturnValue(true);
+
+      const component = textsGroupedData();
+      component.markedTexts = new Set([7]);
+
+      component.handleMultiAction({ target: { value: 'del' } } as unknown as Event);
+
+      expect(TextsApi.bulkAction).toHaveBeenCalledWith('delete', [7]);
+    });
+
+    it('does not call the API when delete is cancelled', () => {
+      (confirmDelete as ReturnType<typeof vi.fn>).mockReturnValue(false);
+
+      const component = textsGroupedData();
+      component.markedTexts = new Set([7]);
+
+      component.handleMultiAction({ target: { value: 'del' } } as unknown as Event);
+
+      expect(TextsApi.bulkAction).not.toHaveBeenCalled();
+    });
+
+    it('reloads the list after a successful bulk action', async () => {
+      const component = textsGroupedData();
+      await component.submitBulkApiAction('archive', [10]);
+      expect(reloadMock).toHaveBeenCalled();
+    });
+
+    it('alerts and does not reload when the API returns an error', async () => {
+      (TextsApi.bulkAction as ReturnType<typeof vi.fn>).mockResolvedValue({
+        error: 'boom'
+      });
+      const alertMock = vi.fn();
+      vi.stubGlobal('alert', alertMock);
+
+      const component = textsGroupedData();
+      await component.submitBulkApiAction('delete', [10]);
+
+      expect(alertMock).toHaveBeenCalled();
+      expect(reloadMock).not.toHaveBeenCalled();
+      vi.unstubAllGlobals();
     });
   });
 

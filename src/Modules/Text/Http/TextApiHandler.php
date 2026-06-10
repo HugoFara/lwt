@@ -25,6 +25,8 @@ namespace Lwt\Modules\Text\Http;
 use Lwt\Modules\Text\Application\Services\DifficultyEstimationService;
 use Lwt\Modules\Text\Application\Services\GdlImportService;
 use Lwt\Modules\Text\Application\Services\GutenbergSuggestionService;
+use Lwt\Modules\Text\Application\TextFacade;
+use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\GdlClient;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Shared\Http\ApiRoutableInterface;
@@ -342,6 +344,10 @@ class TextApiHandler implements ApiRoutableInterface
         $frag1 = $this->frag($fragments, 1);
         $frag2 = $this->frag($fragments, 2);
 
+        if ($frag1 === 'bulk-action') {
+            return $this->handleBulkAction($params);
+        }
+
         if ($frag1 === '' || !ctype_digit($frag1)) {
             return Response::error('Text ID (Integer) Expected', 404);
         }
@@ -358,6 +364,45 @@ class TextApiHandler implements ApiRoutableInterface
             default:
                 return Response::error('Expected "display-mode", "mark-all-wellknown", or "mark-all-ignored"', 404);
         }
+    }
+
+    /**
+     * Handle PUT /texts/bulk-action — archive or delete multiple texts.
+     *
+     * The JSON counterpart of the legacy mark-action form POST: it calls the
+     * same TextFacade methods, which run under QueryBuilder's automatic
+     * per-user scope, so a caller can only affect their own texts regardless of
+     * the IDs sent. Only the two destructive actions are exposed here; tag /
+     * review / reparse stay on the form path. Delivered as JSON so it works
+     * against a configurable API base URL (a form POST would hit the page
+     * origin, not the chosen server).
+     *
+     * @param array<string, mixed> $params { action: "archive"|"delete", ids: int[] }
+     */
+    private function handleBulkAction(array $params): JsonResponse
+    {
+        $action = (string) ($params['action'] ?? '');
+        if ($action !== 'archive' && $action !== 'delete') {
+            return Response::error('Expected action "archive" or "delete"', 400);
+        }
+
+        $rawIds = $params['ids'] ?? [];
+        if (!is_array($rawIds)) {
+            return Response::error('ids must be an array', 400);
+        }
+        $ids = array_values(array_filter(
+            array_map(static fn ($id): int => (int) $id, $rawIds),
+            static fn (int $id): bool => $id > 0
+        ));
+        if ($ids === []) {
+            return Response::error('No text IDs provided', 400);
+        }
+
+        $facade = Container::getInstance()->getTyped(TextFacade::class);
+
+        return $action === 'archive'
+            ? Response::success($facade->archiveTexts($ids))
+            : Response::success($facade->deleteTexts($ids));
     }
 
     // =========================================================================

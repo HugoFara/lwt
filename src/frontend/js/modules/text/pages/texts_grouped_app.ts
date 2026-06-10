@@ -99,6 +99,7 @@ export interface TextsGroupedData {
 
   // Actions
   handleMultiAction(event: Event): void;
+  submitBulkApiAction(action: 'archive' | 'delete', ids: number[]): Promise<void>;
   handleRestDelete(event: Event, url: string): void;
   handleRestDeleteFromEvent(event: Event): void;
   handlePostAction(event: Event, url: string): void;
@@ -251,6 +252,19 @@ export function textsGroupedData(): TextsGroupedData {
         return;
       }
 
+      // Destructive bulk actions go through the JSON API so they work against
+      // a configurable server (a form POST would hit the page origin instead).
+      // Tag / review / reparse stay on the form path below.
+      if (action === 'arch' || action === 'del') {
+        if (action === 'del' && !confirmDelete()) {
+          select.value = '';
+          return;
+        }
+        void this.submitBulkApiAction(action === 'arch' ? 'archive' : 'delete', markedIds);
+        select.value = '';
+        return;
+      }
+
       // Create a temporary form with the marked IDs
       const form = document.createElement('form');
       form.method = 'POST';
@@ -281,15 +295,21 @@ export function textsGroupedData(): TextsGroupedData {
       actionInput.value = action;
       form.appendChild(actionInput);
 
-      if (action === 'del') {
-        if (!confirmDelete()) {
-          select.value = '';
-          return;
-        }
-      }
-
       document.body.appendChild(form);
       form.submit();
+    },
+
+    /**
+     * Run a destructive bulk action (archive/delete) via the JSON API and
+     * refresh the list on success.
+     */
+    async submitBulkApiAction(action: 'archive' | 'delete', ids: number[]) {
+      const res = await TextsApi.bulkAction(action, ids);
+      if (res.error) {
+        alert('Action failed. Please try again.');
+        return;
+      }
+      window.location.reload();
     },
 
     handleRestDelete(event: Event, url: string) {

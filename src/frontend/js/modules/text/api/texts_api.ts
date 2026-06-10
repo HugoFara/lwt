@@ -305,6 +305,24 @@ export const TextsApi = {
   },
 
   /**
+   * Archive or delete multiple texts in one call.
+   *
+   * The JSON path for the destructive bulk actions, so they work against a
+   * configurable API base URL instead of a same-origin form POST. The server
+   * scopes the action to the current user's texts.
+   *
+   * @param action 'archive' or 'delete'
+   * @param ids    Text IDs to act on
+   * @returns Promise with the number of texts affected
+   */
+  async bulkAction(
+    action: 'archive' | 'delete',
+    ids: number[]
+  ): Promise<ApiResponse<{ count: number }>> {
+    return apiPut<{ count: number }>('/texts/bulk-action', { action, ids });
+  },
+
+  /**
    * Get all words for a text (for client-side rendering).
    *
    * @param textId Text ID
