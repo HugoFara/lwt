@@ -18,7 +18,6 @@ export * from './components/text_reader';
 // Reading pages
 export * from './pages/reading/text_renderer';
 export * from './pages/reading/text_display';
-export * from './pages/reading/text_events';
 export * from './pages/reading/text_keyboard';
 export * from './pages/reading/text_multiword_selection';
 export * from './pages/reading/text_reading_init';

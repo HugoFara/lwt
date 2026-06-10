@@ -9,7 +9,6 @@
 import { onDomReady } from '@shared/utils/dom_ready';
 import { closePopup } from '@modules/vocabulary/components/word_popup';
 import { speechDispatcher } from '@shared/utils/user_interactions';
-import { handleReviewWordClick, handleReviewKeydown } from './review_mode';
 import { startElapsedTimer } from '../utils/elapsed_timer';
 import { ReviewApi } from '@modules/review/api/review_api';
 import { setCurrentWordId, setReviewSolution, setAnswerOpened } from '@modules/review/stores/review_state';
@@ -80,11 +79,6 @@ export function insertNewWord(wordId: number, solution: string, group: string): 
   if (termReviewEl) {
     termReviewEl.innerHTML = group;
   }
-
-  document.addEventListener('keydown', handleReviewKeydown);
-  document.querySelectorAll('.word').forEach(el => {
-    el.addEventListener('click', handleReviewWordClick);
-  });
 }
 
 /**

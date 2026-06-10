@@ -35,11 +35,9 @@ export * from './components/result_panel';
 export * from './services/word_status';
 export * from './services/dictionary';
 export * from './services/translation_api';
-export * from './services/word_popup_interface';
 export * from './services/term_operations';
 export * from './services/word_dom_updates';
 export * from './services/word_status_ajax';
-export * from './services/word_actions';
 
 // Shared utilities needed by vocabulary pages
 import '@shared/forms/bulk_actions';

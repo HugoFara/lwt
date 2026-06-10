@@ -13,7 +13,6 @@
 
 import { onDomReady } from '@shared/utils/dom_ready';
 import { getLangFromDict } from '@modules/vocabulary/services/dictionary';
-import { prepareTextInteractions } from './text_events';
 import {
   goToLastPosition,
   saveReadingPosition,
@@ -351,8 +350,7 @@ export function initTextReading(): void {
     initNativeTooltips(thetext);
   }
 
-  // Set up event handlers (DOM should already be ready at this point)
-  prepareTextInteractions();
+  // Set up reading position handling.
   goToLastPosition();
   window.addEventListener('beforeunload', saveCurrentPosition);
 }

@@ -22,7 +22,6 @@ export * from './utils/elapsed_timer';
 import '@shared/components/sorttable';
 
 // Side-effect imports (pages)
-import './pages/review_mode';
 import './pages/review_header';
 import './pages/review_table';
 import './pages/review_ajax';
