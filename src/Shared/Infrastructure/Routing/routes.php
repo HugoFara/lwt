@@ -311,39 +311,15 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Legacy PHP endpoint replacements (iframe-based status changes)
-    // These render HTML responses for display in iframes during text reading
-    // Status controllers (TermStatusController)
-    $router->registerWithMiddleware(
-        '/word/set-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@setWordStatusView',
-        AUTH_MIDDLEWARE
-    );
+    // Review status change during review (iframe/ajax view).
+    // NB: the dead text-reader frame routes (set-status, delete-term,
+    // delete-multi, insert-wellknown, insert-ignore) are unregistered here —
+    // the modern reader changes status via /api/v1/terms/* and never linked to
+    // them. Their now-unreachable controller methods + result views are retained
+    // pending the frontend dead-popup cleanup (needs in-browser E2E to verify).
     $router->registerWithMiddleware(
         '/word/set-review-status',
         'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@setReviewStatusView',
-        AUTH_MIDDLEWARE
-    );
-    // Delete controllers
-    $router->registerWithMiddleware(
-        '/word/delete-term',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@deleteWordView',
-        AUTH_MIDDLEWARE
-    );
-    $router->registerWithMiddleware(
-        '/word/delete-multi',
-        'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController@deleteMultiWordView',
-        AUTH_MIDDLEWARE
-    );
-    // Insert with status (TermStatusController)
-    $router->registerWithMiddleware(
-        '/word/insert-wellknown',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@insertWellknown',
-        AUTH_MIDDLEWARE
-    );
-    $router->registerWithMiddleware(
-        '/word/insert-ignore',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@insertIgnore',
         AUTH_MIDDLEWARE
     );
 
