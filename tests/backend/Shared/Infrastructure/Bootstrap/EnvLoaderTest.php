@@ -363,6 +363,63 @@ class EnvLoaderTest extends TestCase
         $this->assertEquals([], EnvLoader::all());
     }
 
+    // ===== set() tests =====
+
+    public function testSetStoresValueRetrievableViaGet(): void
+    {
+        EnvLoader::set('SET_KEY', 'set_value');
+
+        $this->assertSame('set_value', EnvLoader::get('SET_KEY'));
+        $this->assertTrue(EnvLoader::has('SET_KEY'));
+    }
+
+    public function testSetOverridesAPreviouslyLoadedValue(): void
+    {
+        file_put_contents($this->testEnvFile, "OVERRIDE_KEY=from_file\n");
+        EnvLoader::load($this->testEnvFile);
+
+        EnvLoader::set('OVERRIDE_KEY', 'from_set');
+
+        $this->assertSame('from_set', EnvLoader::get('OVERRIDE_KEY'));
+    }
+
+    public function testSetSyncsEnvSuperglobalAndGetenv(): void
+    {
+        EnvLoader::set('SYNC_KEY', 'sync_value');
+
+        $this->assertSame('sync_value', $_ENV['SYNC_KEY']);
+        $this->assertSame('sync_value', getenv('SYNC_KEY'));
+    }
+
+    public function testSetNullRemovesTheKeyEverywhere(): void
+    {
+        EnvLoader::set('REMOVE_KEY', 'value');
+
+        EnvLoader::set('REMOVE_KEY', null);
+
+        $this->assertNull(EnvLoader::get('REMOVE_KEY'));
+        $this->assertFalse(EnvLoader::has('REMOVE_KEY'));
+        $this->assertArrayNotHasKey('REMOVE_KEY', $_ENV);
+        $this->assertFalse(getenv('REMOVE_KEY'));
+    }
+
+    public function testSetNullClearsAnAmbientLoadedValue(): void
+    {
+        file_put_contents($this->testEnvFile, "AMBIENT_KEY=loaded\n");
+        EnvLoader::load($this->testEnvFile);
+
+        EnvLoader::set('AMBIENT_KEY', null);
+
+        $this->assertNull(EnvLoader::get('AMBIENT_KEY'));
+    }
+
+    public function testSetIgnoresEmptyKey(): void
+    {
+        EnvLoader::set('', 'value');
+
+        $this->assertFalse(EnvLoader::has(''));
+    }
+
     // ===== getDatabaseConfig() tests =====
 
     public function testGetDatabaseConfigReturnsDefaults(): void

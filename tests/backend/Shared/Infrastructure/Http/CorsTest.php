@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Shared\Infrastructure\Http;
 
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Http\Cors;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -18,8 +19,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(Cors::class)]
 class CorsTest extends TestCase
 {
-    /** @var array<string, mixed> */
-    private array $envBackup = [];
+    private ?string $corsBackup = null;
+
+    private bool $hadCors = false;
 
     private string $originBackup = '';
 
@@ -27,15 +29,23 @@ class CorsTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->envBackup = $_ENV;
+        // Snapshot any ambient CORS_ALLOWED_ORIGINS (a developer's .env may set
+        // it for local Model B testing) and clear it through EnvLoader so each
+        // test sees a deterministic baseline regardless of .env/$_ENV/getenv —
+        // EnvLoader::get consults the loaded store first, which a bare
+        // unset($_ENV[...]) would not clear.
+        $this->hadCors = EnvLoader::has('CORS_ALLOWED_ORIGINS');
+        $this->corsBackup = EnvLoader::get('CORS_ALLOWED_ORIGINS');
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', null);
+
         $this->hadOrigin = isset($_SERVER['HTTP_ORIGIN']);
         $this->originBackup = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
-        unset($_ENV['CORS_ALLOWED_ORIGINS'], $_SERVER['HTTP_ORIGIN']);
+        unset($_SERVER['HTTP_ORIGIN']);
     }
 
     protected function tearDown(): void
     {
-        $_ENV = $this->envBackup;
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', $this->hadCors ? $this->corsBackup : null);
         if ($this->hadOrigin) {
             $_SERVER['HTTP_ORIGIN'] = $this->originBackup;
         } else {
@@ -50,8 +60,10 @@ class CorsTest extends TestCase
 
     public function testAllowedOriginsParsesCommaList(): void
     {
-        $_ENV['CORS_ALLOWED_ORIGINS']
-            = 'https://app.example.org, capacitor://localhost ,http://localhost';
+        EnvLoader::set(
+            'CORS_ALLOWED_ORIGINS',
+            'https://app.example.org, capacitor://localhost ,http://localhost'
+        );
 
         $this->assertSame(
             ['https://app.example.org', 'capacitor://localhost', 'http://localhost'],
@@ -61,7 +73,7 @@ class CorsTest extends TestCase
 
     public function testAllowedOriginsStripsTrailingSlashesAndBlanks(): void
     {
-        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://app.example.org/,, ,https://b.example/';
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', 'https://app.example.org/,, ,https://b.example/');
 
         $this->assertSame(
             ['https://app.example.org', 'https://b.example'],
@@ -71,14 +83,14 @@ class CorsTest extends TestCase
 
     public function testResolveOriginNullWhenNoOriginHeader(): void
     {
-        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://app.example.org';
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', 'https://app.example.org');
 
         $this->assertNull(Cors::resolveOrigin());
     }
 
     public function testResolveOriginNullWhenNotAllowListed(): void
     {
-        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://app.example.org';
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', 'https://app.example.org');
         $_SERVER['HTTP_ORIGIN'] = 'https://evil.example';
 
         $this->assertNull(Cors::resolveOrigin());
@@ -93,7 +105,7 @@ class CorsTest extends TestCase
 
     public function testResolveOriginEchoesAllowListedOrigin(): void
     {
-        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://app.example.org,capacitor://localhost';
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', 'https://app.example.org,capacitor://localhost');
         $_SERVER['HTTP_ORIGIN'] = 'capacitor://localhost';
 
         $this->assertSame('capacitor://localhost', Cors::resolveOrigin());
@@ -101,7 +113,7 @@ class CorsTest extends TestCase
 
     public function testResolveOriginMatchesDespiteTrailingSlash(): void
     {
-        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://app.example.org';
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', 'https://app.example.org');
         $_SERVER['HTTP_ORIGIN'] = 'https://app.example.org/';
 
         $this->assertSame('https://app.example.org', Cors::resolveOrigin());

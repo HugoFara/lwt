@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Shared\Infrastructure\Routing\Middleware;
 
+use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\Cors;
 use Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware;
@@ -18,7 +19,8 @@ class CsrfMiddlewareTest extends TestCase
     private array $originalServer;
     private array $originalSession;
     private array $originalPost;
-    private array $originalEnv;
+    private ?string $corsBackup = null;
+    private bool $hadCors = false;
 
     protected function setUp(): void
     {
@@ -26,7 +28,14 @@ class CsrfMiddlewareTest extends TestCase
         $this->originalServer = $_SERVER;
         $this->originalSession = $_SESSION ?? [];
         $this->originalPost = $_POST;
-        $this->originalEnv = $_ENV;
+
+        // Snapshot + clear any ambient CORS_ALLOWED_ORIGINS through EnvLoader so
+        // the CORS-origin tests are deterministic regardless of a developer's
+        // .env (EnvLoader::get consults the loaded store first, which a bare
+        // unset($_ENV[...]) would not clear).
+        $this->hadCors = EnvLoader::has('CORS_ALLOWED_ORIGINS');
+        $this->corsBackup = EnvLoader::get('CORS_ALLOWED_ORIGINS');
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', null);
 
         // Reset Globals
         Globals::reset();
@@ -45,7 +54,7 @@ class CsrfMiddlewareTest extends TestCase
         $_SERVER = $this->originalServer;
         $_SESSION = $this->originalSession;
         $_POST = $this->originalPost;
-        $_ENV = $this->originalEnv;
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', $this->hadCors ? $this->corsBackup : null);
         Globals::reset();
         parent::tearDown();
     }
@@ -144,7 +153,7 @@ class CsrfMiddlewareTest extends TestCase
     public function testAllowsPostFromAllowListedCorsOrigin(): void
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://localhost,http://localhost:4173';
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', 'https://localhost,http://localhost:4173');
         $_SERVER['HTTP_ORIGIN'] = 'https://localhost';
         // No CSRF token and no Bearer token present.
 
@@ -161,7 +170,7 @@ class CsrfMiddlewareTest extends TestCase
      */
     public function testNonAllowListedOriginGetsNoCsrfExemption(): void
     {
-        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://localhost';
+        EnvLoader::set('CORS_ALLOWED_ORIGINS', 'https://localhost');
         $_SERVER['HTTP_ORIGIN'] = 'https://attacker.example';
 
         $this->assertNull(Cors::resolveOrigin());

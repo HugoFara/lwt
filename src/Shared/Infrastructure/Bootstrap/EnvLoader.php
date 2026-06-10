@@ -239,6 +239,36 @@ class EnvLoader
     }
 
     /**
+     * Set (or remove) an environment variable across every source {@link get}
+     * consults — the loaded store, `$_ENV`, and `putenv()` — so the value is
+     * returned deterministically regardless of any previously-loaded `.env`
+     * entry. Pass `null` to remove the key entirely.
+     *
+     * Mirrors how {@link load} writes a value and how {@link reset} removes one,
+     * giving callers (runtime overrides, tests) a single authoritative setter
+     * rather than poking `$_ENV` directly, which the loaded store would shadow.
+     *
+     * @param string      $key   The environment variable name
+     * @param string|null $value The value, or null to remove the variable
+     *
+     * @return void
+     */
+    public static function set(string $key, ?string $value): void
+    {
+        if ($key === '') {
+            return;
+        }
+        if ($value === null) {
+            unset(self::$env[$key], $_ENV[$key]);
+            putenv($key);
+            return;
+        }
+        self::$env[$key] = $value;
+        $_ENV[$key] = $value;
+        putenv("$key=$value");
+    }
+
+    /**
      * Reset the loader state.
      *
      * Primarily used for testing.
