@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Routing\Middleware;
 
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Http\Cors;
 
 /**
  * Middleware that validates CSRF tokens.
@@ -80,6 +81,19 @@ class CsrfMiddleware implements MiddlewareInterface
 
         // Skip for API requests with Bearer token (token acts as CSRF protection)
         if ($this->hasApiToken()) {
+            return true;
+        }
+
+        // Skip for cross-origin requests from a CORS-allow-listed origin.
+        // CSRF protects cookie sessions, but the server never sends
+        // `Access-Control-Allow-Credentials` (see Cors), so a browser never
+        // attaches cookies to a cross-origin request — there is no session to
+        // forge. The admin-controlled allow-list is the trust boundary, and
+        // this is what lets a packaged client reach `/auth/login` for its first
+        // bearer token (before which it has no token for the exemption above).
+        // Same-origin requests carry the app's own origin, which is not in the
+        // cross-origin allow-list, so the web app stays protected.
+        if (Cors::resolveOrigin() !== null) {
             return true;
         }
 

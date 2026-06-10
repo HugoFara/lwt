@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Shared\Infrastructure\Routing\Middleware;
 
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Http\Cors;
 use Lwt\Shared\Infrastructure\Routing\Middleware\CsrfMiddleware;
 use Lwt\Shared\Infrastructure\Routing\Middleware\MiddlewareInterface;
 use PHPUnit\Framework\TestCase;
@@ -17,6 +18,7 @@ class CsrfMiddlewareTest extends TestCase
     private array $originalServer;
     private array $originalSession;
     private array $originalPost;
+    private array $originalEnv;
 
     protected function setUp(): void
     {
@@ -24,6 +26,7 @@ class CsrfMiddlewareTest extends TestCase
         $this->originalServer = $_SERVER;
         $this->originalSession = $_SESSION ?? [];
         $this->originalPost = $_POST;
+        $this->originalEnv = $_ENV;
 
         // Reset Globals
         Globals::reset();
@@ -42,6 +45,7 @@ class CsrfMiddlewareTest extends TestCase
         $_SERVER = $this->originalServer;
         $_SESSION = $this->originalSession;
         $_POST = $this->originalPost;
+        $_ENV = $this->originalEnv;
         Globals::reset();
         parent::tearDown();
     }
@@ -129,6 +133,38 @@ class CsrfMiddlewareTest extends TestCase
         $result = $middleware->handle();
 
         $this->assertTrue($result);
+    }
+
+    /**
+     * A cross-origin request from a CORS-allow-listed origin is exempt from
+     * CSRF (no token needed): the server never allows credentials cross-origin,
+     * so no session cookie is attached and there is nothing to forge. This is
+     * what lets a packaged client reach /auth/login for its first bearer token.
+     */
+    public function testAllowsPostFromAllowListedCorsOrigin(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://localhost,http://localhost:4173';
+        $_SERVER['HTTP_ORIGIN'] = 'https://localhost';
+        // No CSRF token and no Bearer token present.
+
+        $middleware = new CsrfMiddleware();
+        $result = $middleware->handle();
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * The CORS exemption must NOT fire for an origin that is not allow-listed,
+     * so the cookie-session web app stays protected. (resolveOrigin() returns
+     * null, so handle() would fall through to token validation.)
+     */
+    public function testNonAllowListedOriginGetsNoCsrfExemption(): void
+    {
+        $_ENV['CORS_ALLOWED_ORIGINS'] = 'https://localhost';
+        $_SERVER['HTTP_ORIGIN'] = 'https://attacker.example';
+
+        $this->assertNull(Cors::resolveOrigin());
     }
 
     public function testAllowsPutWithValidToken(): void
