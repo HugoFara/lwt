@@ -86,60 +86,157 @@ namespace Lwt\Modules\User\Views;
                     </div>
                 </form>
 
-                <!-- Step 2: log in -->
-                <form @submit="submitLogin($event)" x-show="onLoginStep" x-cloak>
-                    <div class="field">
-                        <label class="label" for="client-username">Username or email</label>
-                        <div class="control has-icons-left">
-                            <input
-                                type="text"
-                                id="client-username"
-                                class="input"
-                                x-model="username"
-                                autocomplete="username"
-                                required
-                            >
-                            <span class="icon is-small is-left">
-                                <i data-lucide="user"></i>
-                            </span>
+                <!-- Step 2: log in or create an account -->
+                <div x-show="onLoginStep" x-cloak>
+                    <!-- Log in -->
+                    <form @submit="submitLogin($event)" x-show="onLoginMode">
+                        <div class="field">
+                            <label class="label" for="client-username">Username or email</label>
+                            <div class="control has-icons-left">
+                                <input
+                                    type="text"
+                                    id="client-username"
+                                    class="input"
+                                    x-model="username"
+                                    autocomplete="username"
+                                    required
+                                >
+                                <span class="icon is-small is-left">
+                                    <i data-lucide="user"></i>
+                                </span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="field">
-                        <label class="label" for="client-password">Password</label>
-                        <div class="control has-icons-left">
-                            <input
-                                type="password"
-                                id="client-password"
-                                class="input"
-                                x-model="password"
-                                autocomplete="current-password"
-                                required
-                            >
-                            <span class="icon is-small is-left">
-                                <i data-lucide="lock"></i>
-                            </span>
+                        <div class="field">
+                            <label class="label" for="client-password">Password</label>
+                            <div class="control has-icons-left">
+                                <input
+                                    type="password"
+                                    id="client-password"
+                                    class="input"
+                                    x-model="password"
+                                    autocomplete="current-password"
+                                    required
+                                >
+                                <span class="icon is-small is-left">
+                                    <i data-lucide="lock"></i>
+                                </span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="field">
-                        <div class="control">
-                            <button
-                                type="submit"
-                                class="button is-primary is-fullwidth"
-                                :class="{ 'is-loading': loading }"
-                                :disabled="loading"
-                            >
-                                <span class="icon"><i data-lucide="log-in"></i></span>
-                                <span>Log in</span>
-                            </button>
+                        <div class="field">
+                            <div class="control">
+                                <button
+                                    type="submit"
+                                    class="button is-primary is-fullwidth"
+                                    :class="{ 'is-loading': loading }"
+                                    :disabled="loading"
+                                >
+                                    <span class="icon"><i data-lucide="log-in"></i></span>
+                                    <span>Log in</span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
+                        <p class="has-text-centered">
+                            <a class="is-size-7" @click="showRegister()">Create an account</a>
+                        </p>
+                    </form>
+
+                    <!-- Create an account -->
+                    <form @submit="submitRegister($event)" x-show="onRegisterMode">
+                        <div class="field">
+                            <label class="label" for="reg-username">Username</label>
+                            <div class="control has-icons-left">
+                                <input
+                                    type="text"
+                                    id="reg-username"
+                                    class="input"
+                                    x-model="username"
+                                    autocomplete="username"
+                                    required
+                                >
+                                <span class="icon is-small is-left">
+                                    <i data-lucide="user"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label" for="reg-email">Email</label>
+                            <div class="control has-icons-left">
+                                <input
+                                    type="email"
+                                    id="reg-email"
+                                    class="input"
+                                    x-model="email"
+                                    autocomplete="email"
+                                    required
+                                >
+                                <span class="icon is-small is-left">
+                                    <i data-lucide="mail"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label" for="reg-password">Password</label>
+                            <div class="control has-icons-left">
+                                <input
+                                    type="password"
+                                    id="reg-password"
+                                    class="input"
+                                    x-model="password"
+                                    autocomplete="new-password"
+                                    required
+                                >
+                                <span class="icon is-small is-left">
+                                    <i data-lucide="lock"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label" for="reg-password-confirm">Confirm password</label>
+                            <div class="control has-icons-left">
+                                <input
+                                    type="password"
+                                    id="reg-password-confirm"
+                                    class="input"
+                                    x-model="passwordConfirm"
+                                    autocomplete="new-password"
+                                    required
+                                >
+                                <span class="icon is-small is-left">
+                                    <i data-lucide="lock"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="control">
+                                <button
+                                    type="submit"
+                                    class="button is-primary is-fullwidth"
+                                    :class="{ 'is-loading': loading }"
+                                    :disabled="loading"
+                                >
+                                    <span class="icon"><i data-lucide="user-plus"></i></span>
+                                    <span>Create account</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="has-text-centered">
+                            <a class="is-size-7" @click="showLogin()">Already have an account? Log in</a>
+                        </p>
+                    </form>
+
+                    <hr>
                     <p class="has-text-centered">
                         <a class="is-size-7" @click="back()">Use a different server</a>
                     </p>
-                </form>
+                </div>
             </div>
         </div>
     </div>

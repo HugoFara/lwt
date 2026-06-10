@@ -27,7 +27,8 @@ import {
   setApiServer,
   getApiServer,
   setAuthToken,
-  getAuthToken
+  getAuthToken,
+  type ApiResponse
 } from '@shared/api/client';
 import { url } from '@shared/utils/url';
 
@@ -35,27 +36,37 @@ interface VersionResponse {
   version?: string;
 }
 
-interface LoginResponse {
+interface AuthResponse {
   success?: boolean;
   token?: string;
+  expires_at?: string | null;
   error?: string;
 }
 
 interface ClientAuthData {
   step: 'server' | 'login';
+  authMode: 'login' | 'register';
   serverUrl: string;
   username: string;
+  email: string;
   password: string;
+  passwordConfirm: string;
   loading: boolean;
   error: string;
   homeUrl: string;
   readonly onServerStep: boolean;
   readonly onLoginStep: boolean;
+  readonly onLoginMode: boolean;
+  readonly onRegisterMode: boolean;
   init(): void;
   normalizeServerUrl(input: string): string;
   connect(): Promise<void>;
   back(): void;
+  showRegister(): void;
+  showLogin(): void;
   submitLogin(event: Event): Promise<void>;
+  submitRegister(event: Event): Promise<void>;
+  finishAuth(res: ApiResponse<AuthResponse>, fallbackError: string): void;
   onAuthenticated(): void;
 }
 
@@ -89,14 +100,17 @@ function readConfig(): { defaultServer: string; homeUrl: string } {
 export function clientAuthData(): ClientAuthData {
   return {
     step: 'server',
+    authMode: 'login',
     serverUrl: '',
     username: '',
+    email: '',
     password: '',
+    passwordConfirm: '',
     loading: false,
     error: '',
     homeUrl: '/',
 
-    // CSP-safe step flags for x-show (the @alpinejs/csp evaluator handles
+    // CSP-safe step/mode flags for x-show (the @alpinejs/csp evaluator handles
     // property access, not `step === '…'` string comparisons in templates).
     get onServerStep(): boolean {
       return this.step === 'server';
@@ -104,6 +118,14 @@ export function clientAuthData(): ClientAuthData {
 
     get onLoginStep(): boolean {
       return this.step === 'login';
+    },
+
+    get onLoginMode(): boolean {
+      return this.authMode === 'login';
+    },
+
+    get onRegisterMode(): boolean {
+      return this.authMode === 'register';
     },
 
     init(): void {
@@ -187,27 +209,71 @@ export function clientAuthData(): ClientAuthData {
       this.loading = true;
       this.error = '';
 
-      const res = await apiPost<LoginResponse>('/auth/login', {
+      const res = await apiPost<AuthResponse>('/auth/login', {
         username,
         password: this.password
       });
       this.loading = false;
+      this.finishAuth(res, 'Login failed.');
+    },
 
-      // Transport-level failure (network/CORS/HTTP error).
+    showRegister(): void {
+      this.authMode = 'register';
+      this.error = '';
+    },
+
+    showLogin(): void {
+      this.authMode = 'login';
+      this.error = '';
+    },
+
+    async submitRegister(event: Event): Promise<void> {
+      event.preventDefault();
+
+      const username = this.username.trim();
+      const email = this.email.trim();
+      if (username === '' || email === '' || this.password === '') {
+        this.error = 'Enter a username, email, and password.';
+        return;
+      }
+      if (this.password !== this.passwordConfirm) {
+        this.error = 'Passwords do not match.';
+        return;
+      }
+
+      this.loading = true;
+      this.error = '';
+
+      const res = await apiPost<AuthResponse>('/auth/register', {
+        username,
+        email,
+        password: this.password,
+        password_confirm: this.passwordConfirm
+      });
+      this.loading = false;
+      this.finishAuth(res, 'Registration failed.');
+    },
+
+    /**
+     * Apply a login/register API result: on success store the token (with its
+     * expiry) and enter the app; otherwise surface the error. The handlers
+     * return HTTP 200 with `success: false` for validation/credential errors,
+     * so both the transport error and the body are checked.
+     */
+    finishAuth(res: ApiResponse<AuthResponse>, fallbackError: string): void {
       if (res.error) {
         this.error = res.error;
         return;
       }
-
-      // The handler returns HTTP 200 with `success: false` for bad credentials.
       const data = res.data;
       if (!data || data.success !== true || !data.token) {
-        this.error = data && data.error ? data.error : 'Login failed.';
+        this.error = data && data.error ? data.error : fallbackError;
         return;
       }
 
-      setAuthToken(data.token);
+      setAuthToken(data.token, data.expires_at ?? null);
       this.password = '';
+      this.passwordConfirm = '';
       this.onAuthenticated();
     },
 

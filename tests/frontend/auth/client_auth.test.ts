@@ -12,7 +12,8 @@ import {
   setApiServer,
   setAuthToken,
   getApiServer,
-  getAuthToken
+  getAuthToken,
+  getAuthTokenExpiry
 } from '../../../src/frontend/js/shared/api/client';
 
 describe('modules/auth/client_auth.ts', () => {
@@ -226,5 +227,99 @@ describe('modules/auth/client_auth.ts', () => {
     c.back();
     expect(c.step).toBe('server');
     expect(getApiServer()).toBe('');
+  });
+
+  it('login stores the token expiry from the response', async () => {
+    mockFetch.mockResolvedValue(
+      okJson('{"success":true,"token":"tok","expires_at":"2999-01-01T00:00:00+00:00"}')
+    );
+    const c = clientAuthData();
+    c.onAuthenticated = vi.fn();
+    c.username = 'alice';
+    c.password = 'secret';
+    await c.submitLogin({ preventDefault: () => {} } as Event);
+
+    expect(getAuthToken()).toBe('tok');
+    expect(getAuthTokenExpiry()?.getUTCFullYear()).toBe(2999);
+  });
+
+  // ---------------------------------------------------------------------------
+  // register
+  // ---------------------------------------------------------------------------
+
+  describe('register', () => {
+    const event = { preventDefault: () => {} } as Event;
+
+    it('showRegister/showLogin toggle the mode and clear errors', () => {
+      const c = clientAuthData();
+      c.error = 'stale';
+      c.showRegister();
+      expect(c.authMode).toBe('register');
+      expect(c.onRegisterMode).toBe(true);
+      expect(c.error).toBe('');
+
+      c.error = 'stale';
+      c.showLogin();
+      expect(c.authMode).toBe('login');
+      expect(c.onLoginMode).toBe(true);
+      expect(c.error).toBe('');
+    });
+
+    it('errors and does not fetch when fields are missing', async () => {
+      const c = clientAuthData();
+      c.username = 'alice';
+      c.email = '';
+      c.password = 'secret123';
+      await c.submitRegister(event);
+      expect(c.error).not.toBe('');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('errors when passwords do not match', async () => {
+      const c = clientAuthData();
+      c.username = 'alice';
+      c.email = 'a@b.co';
+      c.password = 'secret123';
+      c.passwordConfirm = 'different';
+      await c.submitRegister(event);
+      expect(c.error).toMatch(/match/i);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('posts to /auth/register and stores the token on success', async () => {
+      mockFetch.mockResolvedValue(
+        okJson('{"success":true,"token":"new-acct","expires_at":null}')
+      );
+      const c = clientAuthData();
+      c.onAuthenticated = vi.fn();
+      c.username = 'alice';
+      c.email = 'a@b.co';
+      c.password = 'secret123';
+      c.passwordConfirm = 'secret123';
+
+      await c.submitRegister(event);
+
+      expect(calledUrl()).toContain('/api/v1/auth/register');
+      expect(getAuthToken()).toBe('new-acct');
+      expect(c.onAuthenticated).toHaveBeenCalledOnce();
+    });
+
+    it('surfaces a server-side validation error', async () => {
+      mockFetch.mockResolvedValue(
+        okJson('{"success":false,"error":"Username already taken"}')
+      );
+      const c = clientAuthData();
+      c.onAuthenticated = vi.fn();
+      c.username = 'taken';
+      c.email = 'a@b.co';
+      c.password = 'secret123';
+      c.passwordConfirm = 'secret123';
+
+      await c.submitRegister(event);
+
+      expect(getAuthToken()).toBe('');
+      expect(c.error).toBe('Username already taken');
+      expect(c.onAuthenticated).not.toHaveBeenCalled();
+    });
   });
 });
