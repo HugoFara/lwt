@@ -132,18 +132,21 @@ converting pages**. Three dependencies to sever + one real conversion:
       needs a new REST bulk endpoint to work against a remote API base; plus
       `__e()` labels. Admin-ish, not a mobile-critical reading flow → lower
       urgency.
-- [ ] **Vocabulary mgmt — the real conversion** (not started; the bulk of
-      remaining work). Replace the ~12 legacy AJAX-returns-HTML `*_result.php`
-      endpoints in `Modules/Vocabulary/Views/` (set_status, hover_save, save,
-      edit, bulk_save, delete, all_wellknown…) with JSON + client render.
-      **Good news from the audit:** the JSON API already covers ~90%
-      (`/api/v1/terms/*` status/CRUD/multi-word) and the client DOM re-render
-      functions already exist (`vocabulary/services/word_dom_updates.ts`), so
-      this is mostly *frontend rewiring* (call the API, call the DOM updater)
-      plus ~2 small new endpoints (quick-create-with-status, mark-all-with-status)
-      and retiring the fragment views. Touches the **core reading word
-      interaction** → do as its own focused pass with E2E coverage. Lowest mobile
-      urgency → last.
+- [~] **Vocabulary mgmt — mobile path already shell-free; legacy fragments
+      remain.** *Re-audit (corrected):* the **modern reader's** word actions
+      already go through `/api/v1/terms/*` — `word_store.ts`/`word_modal.ts` call
+      `TermsApi.setStatus/createQuick/delete`, and the unknown-word popup uses the
+      API button family (`createWellKnownButton`/`createIgnoreButton` with a
+      `WordActionContext`). The modern reader has no `#frames-r`, so the legacy
+      `target="ro"` → `*_result.php` mechanism isn't even wired there. So the
+      **mobile-critical vocab flow needs no conversion — it's done.**
+      What's left is *legacy/transitional* code, not a mobile blocker: the
+      `*_result.php` views + the `word_popup_interface.ts` link-builders
+      (`createStatusChangeLinks`, review-status links, etc.) that some
+      known/learning/review popups still emit. The clean fix is **consolidating
+      those popups onto the API button family / `word_modal`** and then deleting
+      the fragments — a UI-consolidation pass that needs live E2E in the reader,
+      not a server-vs-client data conversion. Track as cleanup; low urgency.
 
 **Out of Phase 1** (leave server-rendered, fine in a WebView online): imports
 (file/web/youtube/whisper), admin/settings, language config, feeds.
