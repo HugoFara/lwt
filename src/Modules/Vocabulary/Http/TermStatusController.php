@@ -20,7 +20,6 @@ namespace Lwt\Modules\Vocabulary\Http;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
-use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /**
@@ -28,10 +27,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  *
  * Handles:
  * - PUT /vocabulary/term/{wid}/status - Update status
- * - /word/set-status - Set status (iframe view)
  * - /word/set-review-status - Set review status (iframe view)
- * - /word/insert-wellknown - Insert as well-known
- * - /word/insert-ignore - Insert as ignored
  * - /word/set-all-status - Mark all words with status
  *
  * @since 3.0.0
@@ -44,23 +40,15 @@ class TermStatusController extends VocabularyBaseController
     private VocabularyFacade $facade;
 
     /**
-     * Create term from hover use case.
-     */
-    private CreateTermFromHover $createTermFromHover;
-
-    /**
      * Constructor.
      *
-     * @param VocabularyFacade|null    $facade              Vocabulary facade
-     * @param CreateTermFromHover|null $createTermFromHover Create term from hover use case
+     * @param VocabularyFacade|null $facade Vocabulary facade
      */
     public function __construct(
-        ?VocabularyFacade $facade = null,
-        ?CreateTermFromHover $createTermFromHover = null
+        ?VocabularyFacade $facade = null
     ) {
         parent::__construct();
         $this->facade = $facade ?? new VocabularyFacade();
-        $this->createTermFromHover = $createTermFromHover ?? new CreateTermFromHover();
     }
 
     /**
@@ -92,55 +80,6 @@ class TermStatusController extends VocabularyBaseController
 
         header('Content-Type: application/json');
         echo json_encode(['success' => $result]);
-    }
-
-    /**
-     * Set word status (iframe view).
-     *
-     * Replaces set_word_status.php - sets status and renders result in iframe.
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function setWordStatusView(array $params): void
-    {
-        $wid = InputValidator::getInt('wid', 0) ?? 0;
-        $textId = InputValidator::getInt('tid', 0) ?? 0;
-        $ord = InputValidator::getInt('ord', 0) ?? 0;
-        $status = InputValidator::getInt('status', 0) ?? 0;
-
-        if ($wid === 0 || $status === 0) {
-            PageLayoutHelper::renderPageStartNobody('Error');
-            echo '<p>Invalid parameters</p>';
-            PageLayoutHelper::renderPageEnd();
-            return;
-        }
-
-        // Update status
-        $this->facade->updateStatus($wid, $status);
-
-        // Get updated term info
-        $term = $this->facade->getTerm($wid);
-        if ($term === null) {
-            PageLayoutHelper::renderPageStartNobody('Error');
-            echo '<p>Term not found</p>';
-            PageLayoutHelper::renderPageEnd();
-            return;
-        }
-
-        PageLayoutHelper::renderPageStartNobody('Term Status');
-
-        $this->render('set_status_result', [
-            'wid' => $wid,
-            'textId' => $textId,
-            'ord' => $ord,
-            'status' => $status,
-            'term' => $term,
-            'todoContent' => $this->getTextStatisticsService()->getTodoWordsContent($textId),
-        ]);
-
-        PageLayoutHelper::renderPageEnd();
     }
 
     /**
@@ -206,108 +145,6 @@ class TermStatusController extends VocabularyBaseController
         PageLayoutHelper::renderPageStartNobody('Error');
         echo '<p>No status operation specified</p>';
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Insert word as well-known (iframe view).
-     *
-     * Replaces insert_word_wellknown.php - creates term with status 99.
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function insertWellknown(array $params): void
-    {
-        $this->insertWordWithStatus($params, 99);
-    }
-
-    /**
-     * Insert word as ignored (iframe view).
-     *
-     * Replaces insert_word_ignore.php - creates term with status 98.
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function insertIgnore(array $params): void
-    {
-        $this->insertWordWithStatus($params, 98);
-    }
-
-    /**
-     * Insert word with specified status.
-     *
-     * Common logic for insertWellknown and insertIgnore.
-     *
-     * @param array<string, string> $params Route parameters
-     * @param int                   $status Status to set (98 or 99)
-     *
-     * @return void
-     */
-    private function insertWordWithStatus(array $params, int $status): void
-    {
-        $textId = InputValidator::getInt('tid', 0) ?? 0;
-        $ord = InputValidator::getInt('ord', 0) ?? 0;
-        $text = InputValidator::getString('text');
-
-        if ($textId === 0 || $text === '') {
-            PageLayoutHelper::renderPageStartNobody('Error');
-            echo '<p>Invalid parameters</p>';
-            PageLayoutHelper::renderPageEnd();
-            return;
-        }
-
-        // Use hover create mechanism
-        $result = $this->createFromHover($textId, $text, $status);
-
-        PageLayoutHelper::renderPageStartNobody($status === 99 ? 'Well-Known' : 'Ignored');
-
-        $this->render('insert_status_result', [
-            'wid' => $result['wid'],
-            'textId' => $textId,
-            'ord' => $ord,
-            'status' => $status,
-            'hex' => $result['hex'],
-            'word' => $result['word'],
-            'todoContent' => $this->getTextStatisticsService()->getTodoWordsContent($textId),
-        ]);
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Create a term from hover action in reading view.
-     *
-     * @param int    $textId     Text ID
-     * @param string $wordText   Word text
-     * @param int    $status     Word status (1-5)
-     * @param string $sourceLang Source language code
-     * @param string $targetLang Target language code
-     *
-     * @return array Term creation result
-     */
-    private function createFromHover(
-        int $textId,
-        string $wordText,
-        int $status,
-        string $sourceLang = '',
-        string $targetLang = ''
-    ): array {
-        // Set no-cache headers for new words
-        if ($this->createTermFromHover->shouldSetNoCacheHeaders($status)) {
-            header('Pragma: no-cache');
-            header('Expires: 0');
-        }
-
-        return $this->createTermFromHover->execute(
-            $textId,
-            $wordText,
-            $status,
-            $sourceLang,
-            $targetLang
-        );
     }
 
     /**

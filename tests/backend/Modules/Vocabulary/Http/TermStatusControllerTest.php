@@ -7,8 +7,6 @@ namespace Lwt\Tests\Modules\Vocabulary\Http;
 use Lwt\Modules\Vocabulary\Http\TermStatusController;
 use Lwt\Modules\Vocabulary\Http\VocabularyBaseController;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
-use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
-use Lwt\Modules\Vocabulary\Domain\Term;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,26 +15,19 @@ use PHPUnit\Framework\MockObject\MockObject;
  * Unit tests for TermStatusController.
  *
  * Tests constructor behavior, class structure, method signatures,
- * status update logic, hover insert, and edge cases.
+ * status update logic, and edge cases.
  */
 class TermStatusControllerTest extends TestCase
 {
     /** @var VocabularyFacade&MockObject */
     private VocabularyFacade $facade;
 
-    /** @var CreateTermFromHover&MockObject */
-    private CreateTermFromHover $createTermFromHover;
-
     private TermStatusController $controller;
 
     protected function setUp(): void
     {
         $this->facade = $this->createMock(VocabularyFacade::class);
-        $this->createTermFromHover = $this->createMock(CreateTermFromHover::class);
-        $this->controller = new TermStatusController(
-            $this->facade,
-            $this->createTermFromHover
-        );
+        $this->controller = new TermStatusController($this->facade);
     }
 
     // =========================================================================
@@ -50,9 +41,9 @@ class TermStatusControllerTest extends TestCase
     }
 
     #[Test]
-    public function constructorAcceptsAllNullParameters(): void
+    public function constructorAcceptsNullParameter(): void
     {
-        $controller = new TermStatusController(null, null);
+        $controller = new TermStatusController(null);
         $this->assertInstanceOf(TermStatusController::class, $controller);
     }
 
@@ -62,14 +53,6 @@ class TermStatusControllerTest extends TestCase
         $reflection = new \ReflectionProperty(TermStatusController::class, 'facade');
 
         $this->assertSame($this->facade, $reflection->getValue($this->controller));
-    }
-
-    #[Test]
-    public function constructorSetsCreateTermFromHoverProperty(): void
-    {
-        $reflection = new \ReflectionProperty(TermStatusController::class, 'createTermFromHover');
-
-        $this->assertSame($this->createTermFromHover, $reflection->getValue($this->controller));
     }
 
     // =========================================================================
@@ -94,10 +77,7 @@ class TermStatusControllerTest extends TestCase
 
         $expectedMethods = [
             'updateStatus',
-            'setWordStatusView',
             'setReviewStatusView',
-            'insertWellknown',
-            'insertIgnore',
             'markAllWords',
         ];
 
@@ -110,29 +90,6 @@ class TermStatusControllerTest extends TestCase
             $this->assertTrue(
                 $method->isPublic(),
                 "Method $methodName should be public"
-            );
-        }
-    }
-
-    #[Test]
-    public function classHasRequiredPrivateMethods(): void
-    {
-        $reflection = new \ReflectionClass(TermStatusController::class);
-
-        $expectedMethods = [
-            'insertWordWithStatus',
-            'createFromHover',
-        ];
-
-        foreach ($expectedMethods as $methodName) {
-            $this->assertTrue(
-                $reflection->hasMethod($methodName),
-                "TermStatusController should have private method: $methodName"
-            );
-            $method = $reflection->getMethod($methodName);
-            $this->assertTrue(
-                $method->isPrivate(),
-                "Method $methodName should be private"
             );
         }
     }
@@ -155,39 +112,9 @@ class TermStatusControllerTest extends TestCase
     }
 
     #[Test]
-    public function setWordStatusViewAcceptsArrayParameter(): void
-    {
-        $method = new \ReflectionMethod(TermStatusController::class, 'setWordStatusView');
-        $params = $method->getParameters();
-
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
-
-    #[Test]
     public function setReviewStatusViewAcceptsArrayParameter(): void
     {
         $method = new \ReflectionMethod(TermStatusController::class, 'setReviewStatusView');
-        $params = $method->getParameters();
-
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
-
-    #[Test]
-    public function insertWellknownAcceptsArrayParameter(): void
-    {
-        $method = new \ReflectionMethod(TermStatusController::class, 'insertWellknown');
-        $params = $method->getParameters();
-
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
-
-    #[Test]
-    public function insertIgnoreAcceptsArrayParameter(): void
-    {
-        $method = new \ReflectionMethod(TermStatusController::class, 'insertIgnore');
         $params = $method->getParameters();
 
         $this->assertCount(1, $params);
@@ -271,68 +198,6 @@ class TermStatusControllerTest extends TestCase
         $this->assertFalse($decoded['success']);
 
         unset($_REQUEST['status']);
-    }
-
-    // =========================================================================
-    // insertWordWithStatus tests via reflection
-    // =========================================================================
-
-    #[Test]
-    public function insertWordWithStatusAcceptsIntStatus(): void
-    {
-        $method = new \ReflectionMethod(TermStatusController::class, 'insertWordWithStatus');
-
-        $params = $method->getParameters();
-        $this->assertCount(2, $params);
-        $this->assertSame('params', $params[0]->getName());
-        $this->assertSame('status', $params[1]->getName());
-        $this->assertSame('int', $params[1]->getType()->getName());
-    }
-
-    // =========================================================================
-    // createFromHover tests via reflection
-    // =========================================================================
-
-    #[Test]
-    public function createFromHoverCallsExecuteOnUseCase(): void
-    {
-        $method = new \ReflectionMethod(TermStatusController::class, 'createFromHover');
-
-        $this->createTermFromHover->expects($this->once())
-            ->method('shouldSetNoCacheHeaders')
-            ->with(1)
-            ->willReturn(false);
-
-        $this->createTermFromHover->expects($this->once())
-            ->method('execute')
-            ->with(10, 'hello', 1, '', '')
-            ->willReturn([
-                'wid' => 5,
-                'hex' => 'abc123',
-                'word' => 'hello',
-            ]);
-
-        $result = $method->invoke($this->controller, 10, 'hello', 1, '', '');
-
-        $this->assertSame(5, $result['wid']);
-        $this->assertSame('abc123', $result['hex']);
-    }
-
-    #[Test]
-    public function createFromHoverPassesLanguageParams(): void
-    {
-        $method = new \ReflectionMethod(TermStatusController::class, 'createFromHover');
-
-        $this->createTermFromHover->expects($this->once())
-            ->method('shouldSetNoCacheHeaders')
-            ->willReturn(false);
-
-        $this->createTermFromHover->expects($this->once())
-            ->method('execute')
-            ->with(1, 'bonjour', 2, 'fr', 'en')
-            ->willReturn(['wid' => 1, 'hex' => '', 'word' => 'bonjour']);
-
-        $method->invoke($this->controller, 1, 'bonjour', 2, 'fr', 'en');
     }
 
     // =========================================================================

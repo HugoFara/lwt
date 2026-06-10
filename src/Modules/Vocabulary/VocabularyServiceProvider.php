@@ -318,8 +318,7 @@ class VocabularyServiceProvider implements ServiceProviderInterface
 
         $container->singleton(TermStatusController::class, function (Container $c) {
             return new TermStatusController(
-                $c->getTyped(VocabularyFacade::class),
-                $c->getTyped(CreateTermFromHover::class)
+                $c->getTyped(VocabularyFacade::class)
             );
         });
 

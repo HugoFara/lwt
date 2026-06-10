@@ -113,7 +113,6 @@ class TermEditControllerTest extends TestCase
             'editTerm',
             'inlineEdit',
             'createWord',
-            'deleteWordView',
             'deleteWord',
         ];
 
@@ -205,16 +204,6 @@ class TermEditControllerTest extends TestCase
     public function createWordAcceptsArrayParameter(): void
     {
         $method = new \ReflectionMethod(TermEditController::class, 'createWord');
-        $params = $method->getParameters();
-
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
-
-    #[Test]
-    public function deleteWordViewAcceptsArrayParameter(): void
-    {
-        $method = new \ReflectionMethod(TermEditController::class, 'deleteWordView');
         $params = $method->getParameters();
 
         $this->assertCount(1, $params);

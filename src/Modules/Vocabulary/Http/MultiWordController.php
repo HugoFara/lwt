@@ -352,47 +352,4 @@ class MultiWordController extends VocabularyBaseController
             'wordTagsHtml' => $wordTagsHtml,
         ]);
     }
-
-    /**
-     * Delete multi-word expression (iframe view).
-     *
-     * Replaces delete_mword.php - deletes a multi-word and renders confirmation.
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function deleteMultiWordView(array $params): void
-    {
-        $wid = InputValidator::getInt('wid', 0) ?? 0;
-        $textId = InputValidator::getInt('tid', 0) ?? 0;
-
-        if ($wid === 0) {
-            PageLayoutHelper::renderPageStartNobody('Error');
-            echo '<p>Invalid word ID</p>';
-            PageLayoutHelper::renderPageEnd();
-            return;
-        }
-
-        // Get term info before deletion
-        $term = $this->facade->getTerm($wid);
-        $showAll = (bool) Settings::getWithDefault('set-show-all-words');
-
-        // Delete the multi-word
-        $result = $this->getMultiWordService()->deleteMultiWord($wid);
-
-        PageLayoutHelper::renderPageStartNobody('Term Deleted');
-
-        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
-
-        $this->render('delete_multi_result', [
-            'wid' => $wid,
-            'textId' => $textId,
-            'deleted' => $result > 0,
-            'showAll' => $showAll,
-            'todoContent' => $todoContent,
-        ]);
-
-        PageLayoutHelper::renderPageEnd();
-    }
 }

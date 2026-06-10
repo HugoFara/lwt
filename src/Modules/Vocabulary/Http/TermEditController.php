@@ -789,53 +789,6 @@ class TermEditController extends VocabularyBaseController
     }
 
     /**
-     * Delete word (iframe view).
-     *
-     * Replaces delete_word.php - deletes a word and renders confirmation.
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function deleteWordView(array $params): void
-    {
-        $wid = InputValidator::getInt('wid', 0) ?? 0;
-        $textId = InputValidator::getInt('tid', 0) ?? 0;
-
-        if ($wid === 0) {
-            PageLayoutHelper::renderPageStartNobody('Error');
-            echo '<p>Invalid word ID</p>';
-            PageLayoutHelper::renderPageEnd();
-            return;
-        }
-
-        // Get term info before deletion for display
-        $term = $this->facade->getTerm($wid);
-        $termText = $term !== null ? $term->text() : '';
-        $termTextLc = $term !== null ? $term->textLowercase() : '';
-
-        // Delete the term
-        $result = $this->facade->deleteTerm($wid);
-
-        PageLayoutHelper::renderPageStartNobody('Term Deleted');
-
-        $todoContent = $textId > 0
-            ? $this->getTextStatisticsService()->getTodoWordsContent($textId)
-            : '';
-
-        $this->render('delete_result', [
-            'wid' => $wid,
-            'textId' => $textId,
-            'deleted' => $result,
-            'term' => $termText,
-            'termLc' => $termTextLc,
-            'todoContent' => $todoContent,
-        ]);
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
      * Delete word.
      *
      * Route: DELETE /words/{id}
