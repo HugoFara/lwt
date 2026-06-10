@@ -688,8 +688,7 @@ describe('text_keyboard.ts', () => {
       initSettingsConfig({
         hts: 0,
         wordStatusFilter: ':not(.status2)',
-        annotationsMode: 0,
-        useFrameMode: false
+        annotationsMode: 0
       });
 
       const event = createKeyEvent(36);

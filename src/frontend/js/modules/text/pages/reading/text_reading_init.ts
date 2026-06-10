@@ -318,8 +318,7 @@ export function initTextReading(): void {
       initSettingsConfig({
         hts: (settings.hts as number) || 0,
         wordStatusFilter: (settings.word_status_filter as string) || '',
-        annotationsMode: (settings.annotations_mode as number) || 1,
-        useFrameMode: (settings.use_frame_mode as boolean) || false
+        annotationsMode: (settings.annotations_mode as number) || 1
       });
     }
   }

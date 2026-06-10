@@ -30,8 +30,6 @@ import {
   isTtsOnClick,
   getWordStatusFilter,
   getAnnotationsMode,
-  isFrameModeEnabled,
-  isApiModeEnabled,
   getSettingsConfig,
   resetSettingsConfig,
   // Reading state
@@ -174,22 +172,18 @@ describe('lwt_state.ts', () => {
       expect(config.hts).toBe(0);
       expect(config.wordStatusFilter).toBe('');
       expect(config.annotationsMode).toBe(1);
-      expect(config.useFrameMode).toBe(false);
     });
 
     it('initializes from config object', () => {
       initSettingsConfig({
         hts: 2,
         wordStatusFilter: '1,2,3',
-        annotationsMode: 3,
-        useFrameMode: true
+        annotationsMode: 3
       });
 
       expect(getHtsMode()).toBe(2);
       expect(getWordStatusFilter()).toBe('1,2,3');
       expect(getAnnotationsMode()).toBe(3);
-      expect(isFrameModeEnabled()).toBe(true);
-      expect(isApiModeEnabled()).toBe(false);
     });
 
     it('isTtsOnHover returns true when hts is 2', () => {

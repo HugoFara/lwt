@@ -15,15 +15,12 @@ export interface SettingsConfig {
   wordStatusFilter: string;
   /** Annotation display mode (1-4) */
   annotationsMode: number;
-  /** Use legacy frame-based navigation instead of API mode */
-  useFrameMode: boolean;
 }
 
 const defaultConfig: SettingsConfig = {
   hts: 0,
   wordStatusFilter: '',
-  annotationsMode: 1,
-  useFrameMode: false
+  annotationsMode: 1
 };
 
 let currentConfig: SettingsConfig = { ...defaultConfig };
@@ -71,20 +68,6 @@ export function getWordStatusFilter(): string {
  */
 export function getAnnotationsMode(): number {
   return currentConfig.annotationsMode;
-}
-
-/**
- * Check if legacy frame mode is enabled.
- */
-export function isFrameModeEnabled(): boolean {
-  return currentConfig.useFrameMode;
-}
-
-/**
- * Check if API mode is enabled (default since v3.0.0).
- */
-export function isApiModeEnabled(): boolean {
-  return !currentConfig.useFrameMode;
 }
 
 /**
