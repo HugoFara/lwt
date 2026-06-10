@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace Lwt\Api\V1;
 
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\I18n\Translator;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Shared\Infrastructure\Http\Cors;
@@ -59,6 +60,20 @@ class ApiV1
         'auth/login' => true,
         'auth/register' => true,
         'version' => true,
+    ];
+
+    /**
+     * Top-level route names that are public regardless of trailing segments.
+     *
+     * Unlike PUBLIC_ENDPOINTS (exact match), these match the first path
+     * fragment, so "i18n/es" or "i18n?locale=es" are all public. UI strings
+     * are not user data and the client needs them before authentication
+     * (e.g. on the /connect screen).
+     *
+     * @var array<string, bool>
+     */
+    private const PUBLIC_RESOURCES = [
+        'i18n' => true,
     ];
 
     /**
@@ -208,6 +223,9 @@ class ApiV1
                     \Lwt\Modules\Vocabulary\Application\Services\TermStatusService::getStatuses()
                 );
 
+            case 'i18n':
+                return $this->handleI18nGet($fragments, $params);
+
             case 'media-files':
                 // MediaService::searchMediaPaths recursively scans `media/`
                 // and returns every file. In multi-user mode `media/` is not
@@ -301,6 +319,47 @@ class ApiV1
     }
 
     /**
+     * Handle GET /i18n[/{locale}] — deliver UI translations to the client.
+     *
+     * Lets a configurable client fetch and cache per-locale string bundles
+     * instead of relying on the server-injected page blob. Locale precedence:
+     * path segment, then ?locale=, then the server's active locale. An
+     * optional ?namespaces=a,b,c filter limits the payload; default is all.
+     *
+     * Response: { "locale": "es", "messages": { "common.save": "...", ... } }
+     *
+     * @param list<string>         $fragments Endpoint path segments
+     * @param array<string, mixed> $params    Query parameters
+     */
+    private function handleI18nGet(array $fragments, array $params): JsonResponse
+    {
+        /** @var Translator $translator */
+        $translator = $this->container->get(Translator::class);
+
+        $locale = $fragments[1] ?? '';
+        if ($locale === '') {
+            $locale = isset($params['locale']) && $params['locale'] !== ''
+                ? (string) $params['locale']
+                : $translator->getLocale();
+        }
+
+        $namespaces = null;
+        if (isset($params['namespaces']) && (string) $params['namespaces'] !== '') {
+            $namespaces = array_values(array_filter(
+                array_map('trim', explode(',', (string) $params['namespaces'])),
+                static fn (string $ns): bool => $ns !== ''
+            ));
+        }
+
+        $messages = $translator->getAllTranslations($locale, $namespaces);
+
+        return Response::success([
+            'locale' => $locale,
+            'messages' => $messages,
+        ]);
+    }
+
+    /**
      * Check if an endpoint is public (does not require authentication).
      *
      * @param string $endpoint The endpoint path
@@ -312,6 +371,12 @@ class ApiV1
         }
 
         if ($endpoint === 'auth/login' || $endpoint === 'auth/register') {
+            return true;
+        }
+
+        // Public by top-level resource (matches any trailing segments).
+        $resource = explode('/', $endpoint, 2)[0];
+        if (isset(self::PUBLIC_RESOURCES[$resource])) {
             return true;
         }
 

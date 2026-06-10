@@ -145,6 +145,76 @@ class Translator
     }
 
     /**
+     * Get every translation for a locale as a flat dot-notation map.
+     *
+     * Used to deliver translations to the frontend over the API (so a
+     * configurable client can fetch strings instead of relying on the
+     * server-injected page blob). Keys are "{namespace}.{key}"; values are
+     * the locale's string with English fallback for missing keys — the same
+     * shape PageLayoutHelper::buildI18nScript() injects, so the frontend
+     * translator consumes either source identically.
+     *
+     * Both inputs are validated against the on-disk locale set, which also
+     * neutralises path traversal via crafted locale/namespace names.
+     *
+     * @param string        $locale     Locale code (e.g. "es")
+     * @param string[]|null $namespaces Limit to these namespaces; null = all
+     *
+     * @return array<string, string> Flat map of "namespace.key" => translation
+     */
+    public function getAllTranslations(string $locale, ?array $namespaces = null): array
+    {
+        $available = $this->availableNamespaces();
+        if ($namespaces === null) {
+            $namespaces = $available;
+        } else {
+            // Drop anything that isn't a real namespace. Also stops a crafted
+            // value like "../../etc/passwd" from reaching the filesystem.
+            $namespaces = array_values(array_intersect($namespaces, $available));
+        }
+
+        // An unknown locale falls back to English (and can't traverse paths).
+        if (!in_array($locale, $this->getAvailableLocales(), true)) {
+            $locale = 'en';
+        }
+
+        $result = [];
+        foreach ($namespaces as $namespace) {
+            $strings = $this->loadNamespace($locale, $namespace);
+            if ($locale !== 'en') {
+                $strings = array_merge($this->loadNamespace('en', $namespace), $strings);
+            }
+            foreach ($strings as $key => $value) {
+                $result[$namespace . '.' . $key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * List available namespaces from the English locale directory.
+     *
+     * English is the canonical, complete locale, so its files define the
+     * full namespace set.
+     *
+     * @return string[] Namespace names (e.g. ["common", "navbar", "text"])
+     */
+    private function availableNamespaces(): array
+    {
+        $files = glob($this->localePath . '/en/*.json');
+        if ($files === false) {
+            return [];
+        }
+        $namespaces = [];
+        foreach ($files as $file) {
+            $namespaces[] = basename($file, '.json');
+        }
+        sort($namespaces);
+        return $namespaces;
+    }
+
+    /**
      * Get list of available locale codes.
      *
      * A locale is considered available if its directory contains a common.json file.

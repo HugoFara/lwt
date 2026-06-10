@@ -96,24 +96,54 @@ that makes a good client today and offline/local-first possible tomorrow.
 rendered by Alpine.js." So Phase 1 is **cutting the server-shell umbilical, not
 converting pages**. Three dependencies to sever + one real conversion:
 
-- [ ] **(Phase 0 gate) Injectable API base URL.** `@shared/api/client` + `url.ts`
-      build same-origin relative URLs from a meta tag. Make the base an
-      injectable **absolute** URL so a client can target a user-chosen server.
-      One centralized seam; everything client-rendered already routes through it.
-- [ ] **Reading — prove the shell-free path here first.** Verify it runs
-      end-to-end from `/api/v1` alone; start cutting the i18n/shell deps on this
-      surface (it has the offline prototype → best proving ground).
-- [ ] **i18n → client.** Templates bake translations via PHP `__e()`. Ship
-      per-language **JSON string bundles** to the client — the biggest hidden
-      dependency, forced the moment reading runs shell-free. Reusable everywhere.
-- [ ] **Review — finish** (mostly verification; `review/next-word`, `review/status`,
-      `review/config` already exist).
-- [ ] **Text list / library** — verify/de-shell (`texts_grouped_app.ts` already
-      client-renders; likely near-done).
-- [ ] **Vocabulary mgmt — the real conversion.** Replace the legacy
-      AJAX-returns-HTML `*_result.php` endpoints (set_status_result,
-      hover_save_result, save_result…) with JSON + client render. Biggest effort,
-      lowest mobile urgency → last.
+- [x] **(Phase 0 gate) Injectable API base URL.** Done in Phase 0 — same seam.
+      `@shared/api/client` resolves an injectable **absolute** server root and
+      everything client-rendered already routes through it. (Listed here too
+      because it's the gate the rest of Phase 1 depends on.)
+- [~] **Reading — content is shell-free; chrome isn't.** The word grid + state
+      render 100% client-side from `/api/v1/texts/{id}/words`
+      (`TextTermApiHandler` → `word_store.ts` → `text_reader.ts`); offline
+      prototype at `shared/offline/offline-text-reader.ts`. Residual server-side
+      pieces are non-data **chrome**: the navbar, book-context nav, and media
+      player are PHP-rendered, and toolbar labels use `__e()`. None carry per-text
+      data; the i18n labels resolve client-side once the page boots from the i18n
+      API. Remaining for full shell-freeness (lower urgency): client book-context
+      + media-config (small new endpoints), client navbar.
+- [x] **i18n → client (delivery mechanism).** Shipped: `GET /api/v1/i18n[/{locale}]`
+      (public; `Translator::getAllTranslations()`) returns the flat
+      "namespace.key" => string bundle, merging English fallback — the same shape
+      the page blob uses. `shared/i18n/translator.ts` gained `loadI18nFromApi()`
+      (fetch + localStorage cache) and `hydrateI18nFromCache()` (sync first-paint),
+      so a shell-free client gets strings without a server-rendered page. The
+      server-injected blob stays as the default for SSR pages (additive, no
+      breakage). *Remaining (Phase 2 client boot):* pick the locale on the client
+      and call these instead of relying on the blob; templates still calling
+      `__e()` resolve client-side once a page boots from the API path.
+- [x] **Review — verified shell-free.** The review SPA (`review_desktop.php` →
+      `review_api.ts`) renders entirely from `/api/v1/review/*`
+      (next-word/status/config/table-words/tomorrow-count all exist). Removed the
+      orphaned `status_change_result.php` (HTML fragment, no route/no caller;
+      superseded by the JSON `status_change_config.php`). The legacy non-SPA
+      review-AJAX page is a separate, non-mobile entry — out of scope.
+- [~] **Text list / library — content shell-free; bulk actions aren't.**
+      `texts_grouped_app.ts` client-renders the list from `/texts/by-language/{id}`
+      + `/texts/statistics`. Residual: the multi-select **bulk archive/delete**
+      still submits a legacy form POST to `/texts` (`handleMultiAction`), which
+      needs a new REST bulk endpoint to work against a remote API base; plus
+      `__e()` labels. Admin-ish, not a mobile-critical reading flow → lower
+      urgency.
+- [ ] **Vocabulary mgmt — the real conversion** (not started; the bulk of
+      remaining work). Replace the ~12 legacy AJAX-returns-HTML `*_result.php`
+      endpoints in `Modules/Vocabulary/Views/` (set_status, hover_save, save,
+      edit, bulk_save, delete, all_wellknown…) with JSON + client render.
+      **Good news from the audit:** the JSON API already covers ~90%
+      (`/api/v1/terms/*` status/CRUD/multi-word) and the client DOM re-render
+      functions already exist (`vocabulary/services/word_dom_updates.ts`), so
+      this is mostly *frontend rewiring* (call the API, call the DOM updater)
+      plus ~2 small new endpoints (quick-create-with-status, mark-all-with-status)
+      and retiring the fragment views. Touches the **core reading word
+      interaction** → do as its own focused pass with E2E coverage. Lowest mobile
+      urgency → last.
 
 **Out of Phase 1** (leave server-rendered, fine in a WebView online): imports
 (file/web/youtube/whisper), admin/settings, language config, feeds.
