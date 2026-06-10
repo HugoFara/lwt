@@ -155,7 +155,6 @@ class FrequencyImportServiceTest extends TestCase
     private function invokeParseFrequencyList(string $content): array
     {
         $method = new \ReflectionMethod(FrequencyImportService::class, 'parseFrequencyList');
-        $method->setAccessible(true);
         return $method->invoke($this->service, $content);
     }
 }

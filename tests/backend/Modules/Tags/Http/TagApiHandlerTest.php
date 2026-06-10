@@ -481,7 +481,6 @@ class TagApiHandlerTest extends TestCase
     public function fragHelperReturnsFragmentAtIndex(): void
     {
         $method = new \ReflectionMethod(TagApiHandler::class, 'frag');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, ['a', 'b', 'c'], 1);
 
@@ -492,7 +491,6 @@ class TagApiHandlerTest extends TestCase
     public function fragHelperReturnsEmptyStringForMissingIndex(): void
     {
         $method = new \ReflectionMethod(TagApiHandler::class, 'frag');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, ['a'], 5);
 
@@ -503,7 +501,6 @@ class TagApiHandlerTest extends TestCase
     public function fragHelperReturnsEmptyStringForEmptyArray(): void
     {
         $method = new \ReflectionMethod(TagApiHandler::class, 'frag');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [], 0);
 

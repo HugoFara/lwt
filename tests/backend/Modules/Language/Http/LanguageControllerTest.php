@@ -38,7 +38,6 @@ class LanguageControllerTest extends TestCase
     public function testConstructorSetsLanguageFacade(): void
     {
         $reflection = new \ReflectionProperty(LanguageController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $facade = $reflection->getValue($this->controller);
 
@@ -52,7 +51,6 @@ class LanguageControllerTest extends TestCase
     public function testGetWizardSelectOptionsWithEmptySelection(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'getWizardSelectOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '');
 
@@ -65,7 +63,6 @@ class LanguageControllerTest extends TestCase
     public function testGetWizardSelectOptionsWithSelection(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'getWizardSelectOptions');
-        $method->setAccessible(true);
 
         // Get a valid language name from presets
         $presets = LanguagePresets::getAll();
@@ -83,7 +80,6 @@ class LanguageControllerTest extends TestCase
     public function testGetWizardSelectOptionsContainsAllPresets(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'getWizardSelectOptions');
-        $method->setAccessible(true);
 
         $presets = LanguagePresets::getAll();
         $result = $method->invoke($this->controller, '');
@@ -97,7 +93,6 @@ class LanguageControllerTest extends TestCase
     public function testGetWizardSelectOptionsHtmlStructure(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'getWizardSelectOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '');
 
@@ -109,7 +104,6 @@ class LanguageControllerTest extends TestCase
     public function testGetWizardSelectOptionsWithNonExistentLanguage(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'getWizardSelectOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'NonExistentLanguage12345');
 
@@ -125,7 +119,6 @@ class LanguageControllerTest extends TestCase
     public function testPrepareLanguageCodesWithEmptyLanguageName(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'prepareLanguageCodes');
-        $method->setAccessible(true);
 
         // Create a language with empty name
         $language = $this->createMockLanguage('', '');
@@ -142,7 +135,6 @@ class LanguageControllerTest extends TestCase
     public function testPrepareLanguageCodesWithValidPresetLanguage(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'prepareLanguageCodes');
-        $method->setAccessible(true);
 
         // Find a language that exists in presets
         $presets = LanguagePresets::getAll();
@@ -168,7 +160,6 @@ class LanguageControllerTest extends TestCase
     public function testPrepareLanguageCodesWithNativeLanguage(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'prepareLanguageCodes');
-        $method->setAccessible(true);
 
         // Use a common native language
         $presets = LanguagePresets::getAll();
@@ -191,7 +182,6 @@ class LanguageControllerTest extends TestCase
     public function testPrepareLanguageCodesExtractsFromTranslatorUri(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'prepareLanguageCodes');
-        $method->setAccessible(true);
 
         // Create a language with a translator URI containing language codes
         $translatorUri = 'https://translate.google.com/?sl=es&tl=en';
@@ -209,7 +199,6 @@ class LanguageControllerTest extends TestCase
     public function testPrepareLanguageCodesDoesNotOverrideEmptyUri(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'prepareLanguageCodes');
-        $method->setAccessible(true);
 
         $presets = LanguagePresets::getAll();
         if (!isset($presets['Spanish'])) {
@@ -248,7 +237,6 @@ class LanguageControllerTest extends TestCase
     public function testGetWizardSelectOptionsWithSpecialCharacters(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'getWizardSelectOptions');
-        $method->setAccessible(true);
 
         // Test with special characters that might need HTML encoding
         $result = $method->invoke($this->controller, '<script>alert(1)</script>');
@@ -261,7 +249,6 @@ class LanguageControllerTest extends TestCase
     public function testPrepareLanguageCodesHandlesNullValues(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'prepareLanguageCodes');
-        $method->setAccessible(true);
 
         $language = $this->createMockLanguage('', '');
         $sourceLg = '';
@@ -277,7 +264,6 @@ class LanguageControllerTest extends TestCase
     public function testPrepareLanguageCodesWithBothSourceAndTarget(): void
     {
         $method = new \ReflectionMethod(LanguageController::class, 'prepareLanguageCodes');
-        $method->setAccessible(true);
 
         $presets = LanguagePresets::getAll();
         if (!isset($presets['French']) || !isset($presets['German'])) {

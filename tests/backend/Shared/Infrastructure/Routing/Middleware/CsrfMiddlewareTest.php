@@ -189,7 +189,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('validateToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -214,7 +213,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('validateToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -234,7 +232,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('validateToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -254,7 +251,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('hasApiToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -271,7 +267,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('hasApiToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -288,7 +283,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('hasApiToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -305,7 +299,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('hasApiToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -322,7 +315,6 @@ class CsrfMiddlewareTest extends TestCase
         $middleware = new CsrfMiddleware();
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('hasApiToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 

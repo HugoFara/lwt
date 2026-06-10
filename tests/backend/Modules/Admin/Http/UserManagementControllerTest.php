@@ -94,7 +94,6 @@ class UserManagementControllerTest extends TestCase
 
         foreach ($props as $name => $expected) {
             $reflection = new \ReflectionProperty(UserManagementController::class, $name);
-            $reflection->setAccessible(true);
             $this->assertSame(
                 $expected,
                 $reflection->getValue($this->controller),
@@ -107,7 +106,6 @@ class UserManagementControllerTest extends TestCase
     public function constructorSetsViewPath(): void
     {
         $reflection = new \ReflectionProperty(UserManagementController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
         $this->assertStringEndsWith('/Views/users/', $viewPath);

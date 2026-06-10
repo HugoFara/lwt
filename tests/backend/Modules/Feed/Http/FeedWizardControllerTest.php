@@ -82,7 +82,6 @@ class FeedWizardControllerTest extends TestCase
     private function invokePrivate(string $method, array $args = []): mixed
     {
         $ref = new \ReflectionMethod(FeedWizardController::class, $method);
-        $ref->setAccessible(true);
         return $ref->invoke($this->controller, ...$args);
     }
 
@@ -108,7 +107,6 @@ class FeedWizardControllerTest extends TestCase
     public function constructorSetsFeedFacadeProperty(): void
     {
         $ref = new \ReflectionProperty(FeedWizardController::class, 'feedFacade');
-        $ref->setAccessible(true);
         $this->assertSame($this->feedFacade, $ref->getValue($this->controller));
     }
 
@@ -116,7 +114,6 @@ class FeedWizardControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $ref = new \ReflectionProperty(FeedWizardController::class, 'languageFacade');
-        $ref->setAccessible(true);
         $this->assertSame($this->languageFacade, $ref->getValue($this->controller));
     }
 
@@ -124,7 +121,6 @@ class FeedWizardControllerTest extends TestCase
     public function constructorSetsWizardSessionProperty(): void
     {
         $ref = new \ReflectionProperty(FeedWizardController::class, 'wizardSession');
-        $ref->setAccessible(true);
         $this->assertSame($this->wizardSession, $ref->getValue($this->controller));
     }
 
@@ -137,7 +133,6 @@ class FeedWizardControllerTest extends TestCase
             null
         );
         $ref = new \ReflectionProperty(FeedWizardController::class, 'wizardSession');
-        $ref->setAccessible(true);
         $this->assertInstanceOf(FeedWizardSessionManager::class, $ref->getValue($ctrl));
     }
 
@@ -150,7 +145,6 @@ class FeedWizardControllerTest extends TestCase
     {
         $this->controller->setViewPath('/custom/path');
         $ref = new \ReflectionProperty(FeedWizardController::class, 'viewPath');
-        $ref->setAccessible(true);
         $this->assertSame('/custom/path/', $ref->getValue($this->controller));
     }
 
@@ -159,7 +153,6 @@ class FeedWizardControllerTest extends TestCase
     {
         $this->controller->setViewPath('/custom/path/');
         $ref = new \ReflectionProperty(FeedWizardController::class, 'viewPath');
-        $ref->setAccessible(true);
         $this->assertSame('/custom/path/', $ref->getValue($this->controller));
     }
 

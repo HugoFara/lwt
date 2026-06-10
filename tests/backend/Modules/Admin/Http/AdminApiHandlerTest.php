@@ -44,7 +44,6 @@ class AdminApiHandlerTest extends TestCase
     public function constructorStoresAdminFacade(): void
     {
         $reflection = new \ReflectionProperty(AdminApiHandler::class, 'adminFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->facade, $reflection->getValue($this->handler));
     }
@@ -568,7 +567,6 @@ class AdminApiHandlerTest extends TestCase
     public function fragReturnsEmptyStringForMissingIndex(): void
     {
         $method = new \ReflectionMethod(AdminApiHandler::class, 'frag');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [], 0);
         $this->assertSame('', $result);
@@ -578,7 +576,6 @@ class AdminApiHandlerTest extends TestCase
     public function fragReturnsValueAtIndex(): void
     {
         $method = new \ReflectionMethod(AdminApiHandler::class, 'frag');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, ['zero', 'one', 'two'], 1);
         $this->assertSame('one', $result);
@@ -588,7 +585,6 @@ class AdminApiHandlerTest extends TestCase
     public function fragReturnsEmptyStringForOutOfBoundsIndex(): void
     {
         $method = new \ReflectionMethod(AdminApiHandler::class, 'frag');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, ['only'], 5);
         $this->assertSame('', $result);

@@ -67,7 +67,6 @@ class TermEditControllerTest extends TestCase
     public function constructorSetsFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(TermEditController::class, 'facade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->facade, $reflection->getValue($this->controller));
     }
@@ -76,7 +75,6 @@ class TermEditControllerTest extends TestCase
     public function constructorSetsDictionaryAdapterProperty(): void
     {
         $reflection = new \ReflectionProperty(TermEditController::class, 'dictionaryAdapter');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->dictionaryAdapter, $reflection->getValue($this->controller));
     }
@@ -85,7 +83,6 @@ class TermEditControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(TermEditController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->languageFacade, $reflection->getValue($this->controller));
     }
@@ -499,7 +496,6 @@ class TermEditControllerTest extends TestCase
     public function getWordFormDataReturnsExpectedKeys(): void
     {
         $method = new \ReflectionMethod(TermEditController::class, 'getWordFormData');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
 
@@ -518,7 +514,6 @@ class TermEditControllerTest extends TestCase
     public function getWordFormDataReturnsCorrectCount(): void
     {
         $method = new \ReflectionMethod(TermEditController::class, 'getWordFormData');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
 
@@ -529,7 +524,6 @@ class TermEditControllerTest extends TestCase
     public function getWordFormDataDefaultWoLgIDIsZero(): void
     {
         $method = new \ReflectionMethod(TermEditController::class, 'getWordFormData');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
 
@@ -544,7 +538,6 @@ class TermEditControllerTest extends TestCase
     public function handleEditWordOperationReturnsBool(): void
     {
         $method = new \ReflectionMethod(TermEditController::class, 'handleEditWordOperation');
-        $method->setAccessible(true);
 
         $returnType = $method->getReturnType();
         $this->assertNotNull($returnType);
@@ -559,7 +552,6 @@ class TermEditControllerTest extends TestCase
     public function crudServiceIsNullByDefault(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'crudService');
-        $reflection->setAccessible(true);
 
         $this->assertNull($reflection->getValue($this->controller));
     }
@@ -568,7 +560,6 @@ class TermEditControllerTest extends TestCase
     public function contextServiceIsNullByDefault(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'contextService');
-        $reflection->setAccessible(true);
 
         $this->assertNull($reflection->getValue($this->controller));
     }
@@ -577,7 +568,6 @@ class TermEditControllerTest extends TestCase
     public function linkingServiceIsNullByDefault(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'linkingService');
-        $reflection->setAccessible(true);
 
         $this->assertNull($reflection->getValue($this->controller));
     }
@@ -586,7 +576,6 @@ class TermEditControllerTest extends TestCase
     public function expressionServiceIsNullByDefault(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'expressionService');
-        $reflection->setAccessible(true);
 
         $this->assertNull($reflection->getValue($this->controller));
     }
@@ -595,7 +584,6 @@ class TermEditControllerTest extends TestCase
     public function textStatisticsServiceIsNullByDefault(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'textStatisticsService');
-        $reflection->setAccessible(true);
 
         $this->assertNull($reflection->getValue($this->controller));
     }
@@ -608,7 +596,6 @@ class TermEditControllerTest extends TestCase
     public function viewPathEndsWithViews(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $path = $reflection->getValue($this->controller);
 
@@ -621,7 +608,6 @@ class TermEditControllerTest extends TestCase
         $this->controller->setViewPath('/custom/path');
 
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $this->assertSame('/custom/path/', $reflection->getValue($this->controller));
     }
@@ -632,7 +618,6 @@ class TermEditControllerTest extends TestCase
         $this->controller->setViewPath('/custom/path/');
 
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $this->assertSame('/custom/path/', $reflection->getValue($this->controller));
     }
@@ -645,7 +630,6 @@ class TermEditControllerTest extends TestCase
     public function renderThrowsOnMissingView(): void
     {
         $method = new \ReflectionMethod(VocabularyBaseController::class, 'render');
-        $method->setAccessible(true);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('View not found: nonexistent_view');

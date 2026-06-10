@@ -42,7 +42,6 @@ class TestableHomeController extends HomeController
 
         // Access languageFacade via reflection since it's private
         $ref = new \ReflectionProperty(HomeController::class, 'languageFacade');
-        $ref->setAccessible(true);
         /** @var LanguageFacade $langFacade */
         $langFacade = $ref->getValue($this);
         $this->capturedLanguages = $langFacade->getLanguagesForSelect();

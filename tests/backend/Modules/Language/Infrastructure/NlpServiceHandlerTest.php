@@ -32,7 +32,6 @@ class NlpServiceHandlerTest extends TestCase
     public function testConstructorSetsDefaultBaseUrl(): void
     {
         $reflection = new \ReflectionProperty(NlpServiceHandler::class, 'baseUrl');
-        $reflection->setAccessible(true);
 
         $baseUrl = $reflection->getValue($this->handler);
 
@@ -44,7 +43,6 @@ class NlpServiceHandlerTest extends TestCase
     public function testConstructorSetsDefaultTimeout(): void
     {
         $reflection = new \ReflectionProperty(NlpServiceHandler::class, 'timeout');
-        $reflection->setAccessible(true);
 
         $timeout = $reflection->getValue($this->handler);
 

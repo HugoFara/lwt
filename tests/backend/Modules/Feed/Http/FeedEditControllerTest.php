@@ -96,7 +96,6 @@ class FeedEditControllerTest extends TestCase
     public function constructorSetsFeedFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedEditController::class, 'feedFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->feedFacade, $reflection->getValue($this->controller));
     }
@@ -105,7 +104,6 @@ class FeedEditControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedEditController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->languageFacade, $reflection->getValue($this->controller));
     }
@@ -114,7 +112,6 @@ class FeedEditControllerTest extends TestCase
     public function constructorSetsWizardSessionProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedEditController::class, 'wizardSession');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->wizardSession, $reflection->getValue($this->controller));
     }
@@ -123,7 +120,6 @@ class FeedEditControllerTest extends TestCase
     public function constructorSetsFlashServiceProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedEditController::class, 'flashService');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->flashService, $reflection->getValue($this->controller));
     }
@@ -132,7 +128,6 @@ class FeedEditControllerTest extends TestCase
     public function constructorSetsViewPathProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedEditController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
         $this->assertStringEndsWith('/Views/', $viewPath);
@@ -147,11 +142,9 @@ class FeedEditControllerTest extends TestCase
         );
 
         $reflection = new \ReflectionProperty(FeedEditController::class, 'wizardSession');
-        $reflection->setAccessible(true);
         $this->assertInstanceOf(FeedWizardSessionManager::class, $reflection->getValue($controller));
 
         $flashRef = new \ReflectionProperty(FeedEditController::class, 'flashService');
-        $flashRef->setAccessible(true);
         $this->assertInstanceOf(FlashMessageService::class, $flashRef->getValue($controller));
     }
 
@@ -229,7 +222,6 @@ class FeedEditControllerTest extends TestCase
         $_REQUEST = ['markaction' => '', 'selected_feed' => '5'];
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '5');
         $this->assertNull($result);
@@ -241,7 +233,6 @@ class FeedEditControllerTest extends TestCase
         $_REQUEST = ['markaction' => 'del'];
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '');
         $this->assertNull($result);
@@ -257,7 +248,6 @@ class FeedEditControllerTest extends TestCase
             ->with('5');
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '5');
         $this->assertSame(['action' => 'del', 'success' => true], $result);
@@ -273,7 +263,6 @@ class FeedEditControllerTest extends TestCase
             ->with('3');
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '3');
         $this->assertSame(['action' => 'del_art', 'success' => true], $result);
@@ -289,7 +278,6 @@ class FeedEditControllerTest extends TestCase
             ->with('7');
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '7');
         $this->assertSame(['action' => 'res_art', 'success' => true], $result);
@@ -301,7 +289,6 @@ class FeedEditControllerTest extends TestCase
         $_REQUEST = ['markaction' => 'unknown'];
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, '5');
         $this->assertNull($result);
@@ -315,7 +302,6 @@ class FeedEditControllerTest extends TestCase
     public function formatMarkActionMessageReturnsEmptyForNull(): void
     {
         $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, null);
         $this->assertSame('', $result);
@@ -325,7 +311,6 @@ class FeedEditControllerTest extends TestCase
     public function formatMarkActionMessageReturnsDeleteMessage(): void
     {
         $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, ['action' => 'del', 'success' => true]);
         $this->assertStringContainsString('deleted', $result);
@@ -336,7 +321,6 @@ class FeedEditControllerTest extends TestCase
     public function formatMarkActionMessageReturnsDeleteArticlesMessage(): void
     {
         $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, ['action' => 'del_art', 'success' => true]);
         $this->assertSame('Article item(s) deleted', $result);
@@ -346,7 +330,6 @@ class FeedEditControllerTest extends TestCase
     public function formatMarkActionMessageReturnsResetMessage(): void
     {
         $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, ['action' => 'res_art', 'success' => true]);
         $this->assertSame('Article(s) reset', $result);
@@ -356,7 +339,6 @@ class FeedEditControllerTest extends TestCase
     public function formatMarkActionMessageReturnsEmptyForUnknownAction(): void
     {
         $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, ['action' => 'unknown', 'success' => true]);
         $this->assertSame('', $result);
@@ -375,7 +357,6 @@ class FeedEditControllerTest extends TestCase
             ->method('updateFeed');
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->setAccessible(true);
         $method->invoke($this->controller);
     }
 
@@ -404,7 +385,6 @@ class FeedEditControllerTest extends TestCase
             );
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->setAccessible(true);
         $method->invoke($this->controller);
     }
 
@@ -432,7 +412,6 @@ class FeedEditControllerTest extends TestCase
             );
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->setAccessible(true);
         $method->invoke($this->controller);
     }
 
@@ -449,7 +428,6 @@ class FeedEditControllerTest extends TestCase
             ->method('createFeed');
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleSaveFeed');
-        $method->setAccessible(true);
         $method->invoke($this->controller);
     }
 
@@ -474,7 +452,6 @@ class FeedEditControllerTest extends TestCase
             }));
 
         $method = new \ReflectionMethod(FeedEditController::class, 'handleSaveFeed');
-        $method->setAccessible(true);
         $method->invoke($this->controller);
     }
 
@@ -490,7 +467,6 @@ class FeedEditControllerTest extends TestCase
             ->willReturn(null);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showEditForm');
-        $method->setAccessible(true);
 
         ob_start();
         $method->invoke($this->controller, 999);
@@ -527,7 +503,6 @@ class FeedEditControllerTest extends TestCase
             ->willReturn(null);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showEditForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -568,7 +543,6 @@ class FeedEditControllerTest extends TestCase
             });
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showEditForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -601,7 +575,6 @@ class FeedEditControllerTest extends TestCase
         $this->feedFacade->method('getNfOption')->willReturn(null);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showEditForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -626,7 +599,6 @@ class FeedEditControllerTest extends TestCase
             ->willReturn([['id' => 1, 'name' => 'English']]);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showNewForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -654,7 +626,6 @@ class FeedEditControllerTest extends TestCase
             ->willReturn([]);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showMultiLoadForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -675,7 +646,6 @@ class FeedEditControllerTest extends TestCase
         $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
 
         $method = new \ReflectionMethod(FeedEditController::class, 'showMultiLoadForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {

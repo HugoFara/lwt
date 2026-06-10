@@ -116,7 +116,6 @@ class ArticleExtractorTest extends TestCase
     public function testDetectCharsetFromMetaContentTypeViaReflection(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'detectCharsetFromMeta');
-        $method->setAccessible(true);
 
         $html = '<html><head><meta http-equiv="Content-Type" '
             . 'content="text/html; charset=UTF-8">'
@@ -129,7 +128,6 @@ class ArticleExtractorTest extends TestCase
     public function testDetectCharsetFromMetaCharsetViaReflection(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'detectCharsetFromMeta');
-        $method->setAccessible(true);
 
         $html = '<html><head><meta charset="ISO-8859-1"></head><body>Test</body></html>';
         $result = $method->invoke($this->extractor, $html);
@@ -140,7 +138,6 @@ class ArticleExtractorTest extends TestCase
     public function testDetectCharsetFromMetaReturnsNullWhenNotFound(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'detectCharsetFromMeta');
-        $method->setAccessible(true);
 
         $html = '<html><body>Simple ASCII text without meta tags</body></html>';
         $result = $method->invoke($this->extractor, $html);
@@ -165,7 +162,6 @@ class ArticleExtractorTest extends TestCase
     public function testConvertLineBreaksWithBrTag(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'convertLineBreaks');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, 'Hello<br>World');
 
@@ -175,7 +171,6 @@ class ArticleExtractorTest extends TestCase
     public function testConvertLineBreaksWithBrSelfClosing(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'convertLineBreaks');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, 'Hello<br />World');
 
@@ -185,7 +180,6 @@ class ArticleExtractorTest extends TestCase
     public function testConvertLineBreaksWithClosingBr(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'convertLineBreaks');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, 'Hello</br>World');
 
@@ -195,7 +189,6 @@ class ArticleExtractorTest extends TestCase
     public function testConvertLineBreaksWithHeadingTags(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'convertLineBreaks');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '<h1>Title</h1><p>Text</p>');
 
@@ -206,7 +199,6 @@ class ArticleExtractorTest extends TestCase
     public function testConvertLineBreaksWithMultipleBrs(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'convertLineBreaks');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, 'Line1<br>Line2<br />Line3<br>Line4');
 
@@ -220,7 +212,6 @@ class ArticleExtractorTest extends TestCase
     public function testPrepareInlineHtmlAddsSpaces(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'prepareInlineHtml');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '<p>Text</p>');
 
@@ -230,7 +221,6 @@ class ArticleExtractorTest extends TestCase
     public function testPrepareInlineHtmlWithNestedTags(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'prepareInlineHtml');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '<div><p>Text</p></div>');
 
@@ -244,7 +234,6 @@ class ArticleExtractorTest extends TestCase
     public function testProcessInlineLinkTrims(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'processInlineLink');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '  https://example.com  ');
 
@@ -258,7 +247,6 @@ class ArticleExtractorTest extends TestCase
     public function testBuildFilterTagsListWithEmptyInput(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'buildFilterTagsList');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '');
 
@@ -272,7 +260,6 @@ class ArticleExtractorTest extends TestCase
     public function testBuildFilterTagsListWithAdditionalTags(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'buildFilterTagsList');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '//nav!?!//footer');
 
@@ -286,7 +273,6 @@ class ArticleExtractorTest extends TestCase
     public function testBuildFilterTagsListRemovesTrailingSeparator(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'buildFilterTagsList');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '//nav!?!');
 
@@ -302,7 +288,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextRemovesExtraSpaces(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, 'Hello    World');
 
@@ -312,7 +297,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextRemovesTabs(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, "Hello\tWorld");
 
@@ -322,7 +306,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextRemovesCarriageReturns(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, "Hello\rWorld");
 
@@ -332,7 +315,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextNormalizesNewlines(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, "Para1\n\n\n\nPara2");
 
@@ -342,7 +324,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextTrims(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '  Hello World  ');
 
@@ -352,7 +333,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextComplexInput(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $input = "  \t\rHello\t\t  World\r\n\n\n\nNext  paragraph  \r\n  ";
         $result = $method->invoke($this->extractor, $input);
@@ -370,7 +350,6 @@ class ArticleExtractorTest extends TestCase
     public function testFormatErrorMessageContainsLinkAndTitle(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'formatErrorMessage');
-        $method->setAccessible(true);
 
         $item = [
             'link' => 'https://example.com/article',
@@ -391,7 +370,6 @@ class ArticleExtractorTest extends TestCase
         // markup — older callers rendered raw HTML; nothing does
         // any more.
         $method = new \ReflectionMethod(ArticleExtractor::class, 'formatErrorMessage');
-        $method->setAccessible(true);
 
         $item = ['link' => 'https://example.com', 'title' => 'Test'];
 
@@ -409,7 +387,6 @@ class ArticleExtractorTest extends TestCase
     public function testParseHtmlReturnsDomDocument(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'parseHtml');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '<html><body>Test</body></html>');
 
@@ -419,7 +396,6 @@ class ArticleExtractorTest extends TestCase
     public function testParseHtmlHandlesMalformedHtml(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'parseHtml');
-        $method->setAccessible(true);
 
         // Malformed HTML should not throw exception
         $result = $method->invoke($this->extractor, '<html><body><p>Unclosed');
@@ -430,7 +406,6 @@ class ArticleExtractorTest extends TestCase
     public function testParseHtmlSetsUtf8Encoding(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'parseHtml');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '<html><body>Test</body></html>');
 
@@ -440,7 +415,6 @@ class ArticleExtractorTest extends TestCase
     public function testParseHtmlPreservesUnicodeContent(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'parseHtml');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '<html><body>日本語テスト</body></html>');
 
@@ -485,7 +459,6 @@ class ArticleExtractorTest extends TestCase
     public function testExtractSingleWithInlineText(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'extractSingle');
-        $method->setAccessible(true);
 
         $item = [
             'link' => 'https://example.com',
@@ -506,7 +479,6 @@ class ArticleExtractorTest extends TestCase
     public function testExtractSingleReturnsNullForEmptyContent(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'extractSingle');
-        $method->setAccessible(true);
 
         $item = [
             'link' => '', // No link to avoid network call
@@ -527,7 +499,6 @@ class ArticleExtractorTest extends TestCase
     public function testExtractWithXPathSimpleSelector(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'extractWithXPath');
-        $method->setAccessible(true);
 
         $dom = new \DOMDocument();
         $dom->loadHTML('<html><body><p class="content">Test content</p></body></html>');
@@ -540,7 +511,6 @@ class ArticleExtractorTest extends TestCase
     public function testExtractWithXPathRemovesFilteredElements(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'extractWithXPath');
-        $method->setAccessible(true);
 
         $dom = new \DOMDocument();
         $dom->loadHTML('<html><body><p>Keep this<script>remove</script></p></body></html>');
@@ -554,7 +524,6 @@ class ArticleExtractorTest extends TestCase
     public function testExtractWithXPathMultipleSelectors(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'extractWithXPath');
-        $method->setAccessible(true);
 
         $dom = new \DOMDocument();
         $dom->loadHTML('<html><body><h1>Title</h1><p>Content</p></body></html>');
@@ -568,7 +537,6 @@ class ArticleExtractorTest extends TestCase
     public function testExtractWithXPathInvalidSelectorHandled(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'extractWithXPath');
-        $method->setAccessible(true);
 
         $dom = new \DOMDocument();
         $dom->loadHTML('<html><body><p>Test</p></body></html>');
@@ -587,7 +555,6 @@ class ArticleExtractorTest extends TestCase
     {
         // Test via reflection to avoid network calls
         $method = new \ReflectionMethod(ArticleExtractor::class, 'detectCharsetFromMeta');
-        $method->setAccessible(true);
 
         $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"></head></html>';
         $result = $method->invoke($this->extractor, $html);
@@ -607,7 +574,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextWithEmptyInput(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '');
 
@@ -617,7 +583,6 @@ class ArticleExtractorTest extends TestCase
     public function testCleanExtractedTextWithOnlyWhitespace(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'cleanExtractedText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, "  \t\n\r  ");
 
@@ -627,7 +592,6 @@ class ArticleExtractorTest extends TestCase
     public function testBuildFilterTagsListDefaultTags(): void
     {
         $method = new \ReflectionMethod(ArticleExtractor::class, 'buildFilterTagsList');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->extractor, '');
 

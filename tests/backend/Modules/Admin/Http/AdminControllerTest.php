@@ -48,7 +48,6 @@ class AdminControllerTest extends TestCase
     public function constructorSetsFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(AdminController::class, 'adminFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->facade, $reflection->getValue($this->controller));
     }
@@ -57,7 +56,6 @@ class AdminControllerTest extends TestCase
     public function constructorSetsTtsServiceProperty(): void
     {
         $reflection = new \ReflectionProperty(AdminController::class, 'ttsService');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->ttsService, $reflection->getValue($this->controller));
     }
@@ -66,7 +64,6 @@ class AdminControllerTest extends TestCase
     public function constructorSetsViewPathProperty(): void
     {
         $reflection = new \ReflectionProperty(AdminController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
         $this->assertStringEndsWith('/Views/', $viewPath);
@@ -661,7 +658,6 @@ class AdminControllerTest extends TestCase
     public function createDefaultFacadeReturnsAdminFacade(): void
     {
         $method = new \ReflectionMethod(AdminController::class, 'createDefaultFacade');
-        $method->setAccessible(true);
 
         // This will attempt to create real repositories which may fail without DB
         // but we can verify the method exists and is callable
@@ -672,7 +668,6 @@ class AdminControllerTest extends TestCase
     public function viewPathPointsToViewsDirectory(): void
     {
         $reflection = new \ReflectionProperty(AdminController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
 

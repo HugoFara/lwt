@@ -107,7 +107,6 @@ class ReviewControllerTest extends TestCase
     {
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('param');
-        $method->setAccessible(true);
         return $method->invoke($controller, $name, $default);
     }
 
@@ -540,7 +539,6 @@ class ReviewControllerTest extends TestCase
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($controller);
 
@@ -563,7 +561,6 @@ class ReviewControllerTest extends TestCase
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($controller);
 
@@ -583,7 +580,6 @@ class ReviewControllerTest extends TestCase
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($controller);
 
@@ -601,7 +597,6 @@ class ReviewControllerTest extends TestCase
         // Use reflection to test private method
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($controller);
 

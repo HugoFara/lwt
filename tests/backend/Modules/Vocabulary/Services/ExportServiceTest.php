@@ -657,7 +657,6 @@ class ExportServiceTest extends TestCase
     public function testFormatAnkiRowViaReflection(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatAnkiRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgRegexpWordCharacters' => 'a-zA-Z',
@@ -684,7 +683,6 @@ class ExportServiceTest extends TestCase
     public function testFormatAnkiRowWithRtlLanguage(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatAnkiRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgRegexpWordCharacters' => '\x{0600}-\x{06FF}',
@@ -708,7 +706,6 @@ class ExportServiceTest extends TestCase
     public function testFormatAnkiRowWithMecabRegex(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatAnkiRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgRegexpWordCharacters' => 'MECAB',
@@ -732,7 +729,6 @@ class ExportServiceTest extends TestCase
     public function testFormatTsvRowViaReflection(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatTsvRow');
-        $method->setAccessible(true);
 
         $record = [
             'WoText' => "test\tword",
@@ -758,7 +754,6 @@ class ExportServiceTest extends TestCase
     public function testFormatTsvRowWithMissingFields(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatTsvRow');
-        $method->setAccessible(true);
 
         $record = [
             'WoText' => 'test',
@@ -778,7 +773,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowViaReflection(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '%w\t%t\t%s\n',
@@ -805,7 +799,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowWithHtmlPlaceholders(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '$w\t$t',
@@ -831,7 +824,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowWithEscapeSequences(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '%w\\t%t\\n%r\\r%%',
@@ -858,7 +850,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowWithMissingTemplate(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'WoID' => '123',
@@ -874,7 +865,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowClozeFormats(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '$x\t$y',
@@ -902,7 +892,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowWithCMask(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '%c',
@@ -927,7 +916,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowWithDMask(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '%d',
@@ -952,7 +940,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowWithRtlLanguage(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '$w\t$s',
@@ -977,7 +964,6 @@ class ExportServiceTest extends TestCase
     public function testFormatFlexibleRowAllPlaceholders(): void
     {
         $method = new \ReflectionMethod(ExportService::class, 'formatFlexibleRow');
-        $method->setAccessible(true);
 
         $record = [
             'LgExportTemplate' => '%w|%t|%s|%r|%a|%k|%z|%l|%n',

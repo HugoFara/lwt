@@ -64,7 +64,6 @@ class SentenceServiceTest extends TestCase
     private function getConvertZwsToSpacingMethod(): ReflectionMethod
     {
         $method = new ReflectionMethod(SentenceService::class, 'convertZwsToSpacing');
-        $method->setAccessible(true);
         return $method;
     }
 
@@ -143,7 +142,6 @@ class SentenceServiceTest extends TestCase
     private function getExtractCenteredPortionMethod(): ReflectionMethod
     {
         $method = new ReflectionMethod(SentenceService::class, 'extractCenteredPortion');
-        $method->setAccessible(true);
         return $method;
     }
 
@@ -186,7 +184,6 @@ class SentenceServiceTest extends TestCase
     private function getExtractPortionAroundWordMethod(): ReflectionMethod
     {
         $method = new ReflectionMethod(SentenceService::class, 'extractPortionAroundWord');
-        $method->setAccessible(true);
         return $method;
     }
 

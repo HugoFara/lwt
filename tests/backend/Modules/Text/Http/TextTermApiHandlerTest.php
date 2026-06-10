@@ -53,7 +53,6 @@ class TextTermApiHandlerTest extends TestCase
     public function constructorSetsTextServiceProperty(): void
     {
         $reflection = new \ReflectionProperty(TextTermApiHandler::class, 'textService');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->textService, $reflection->getValue($this->handler));
     }
@@ -63,7 +62,6 @@ class TextTermApiHandlerTest extends TestCase
     {
         $handler = new TextTermApiHandler(null);
         $reflection = new \ReflectionProperty(TextTermApiHandler::class, 'textService');
-        $reflection->setAccessible(true);
 
         $this->assertInstanceOf(TextFacade::class, $reflection->getValue($handler));
     }

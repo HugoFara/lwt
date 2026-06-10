@@ -37,7 +37,6 @@ class ExpressionServiceTest extends TestCase
         $expressionService = new ExpressionService($customService);
 
         $reflection = new \ReflectionProperty(ExpressionService::class, 'textParsingService');
-        $reflection->setAccessible(true);
 
         $this->assertSame($customService, $reflection->getValue($expressionService));
     }
@@ -47,7 +46,6 @@ class ExpressionServiceTest extends TestCase
         $service = new ExpressionService(null);
 
         $reflection = new \ReflectionProperty(ExpressionService::class, 'textParsingService');
-        $reflection->setAccessible(true);
 
         $this->assertInstanceOf(TextParsingService::class, $reflection->getValue($service));
     }
@@ -209,7 +207,6 @@ class ExpressionServiceTest extends TestCase
         // Verify that the service has a TextParsingService dependency
         // which would be used for MeCab operations
         $reflection = new \ReflectionProperty(ExpressionService::class, 'textParsingService');
-        $reflection->setAccessible(true);
 
         $parsingService = $reflection->getValue($this->service);
 

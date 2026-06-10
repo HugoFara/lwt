@@ -156,7 +156,6 @@ class LanguageControllerTest extends TestCase
         // Use reflection to check private property
         $reflection = new \ReflectionClass($controller);
         $property = $reflection->getProperty('languageFacade');
-        $property->setAccessible(true);
         $service = $property->getValue($controller);
 
         $this->assertInstanceOf(LanguageFacade::class, $service);
@@ -191,7 +190,6 @@ class LanguageControllerTest extends TestCase
         // Get the service from the controller
         $reflection = new \ReflectionClass($controller);
         $property = $reflection->getProperty('languageFacade');
-        $property->setAccessible(true);
         $service = $property->getValue($controller);
 
         $languages = $service->getAllLanguages();
@@ -331,7 +329,6 @@ class LanguageControllerTest extends TestCase
         $controller = $this->createController();
         $reflection = new \ReflectionClass($controller);
         $property = $reflection->getProperty('languageFacade');
-        $property->setAccessible(true);
         $service = $property->getValue($controller);
 
         $lang = $service->getById($id);
@@ -351,7 +348,6 @@ class LanguageControllerTest extends TestCase
         $controller = $this->createController();
         $reflection = new \ReflectionClass($controller);
         $property = $reflection->getProperty('languageFacade');
-        $property->setAccessible(true);
         $service = $property->getValue($controller);
 
         $stats = $service->getLanguagesWithStats();

@@ -86,7 +86,14 @@ class StringUtils
         $result = '';
         for ($i = 0; $i < $length; $i++) {
             $char = mb_substr($string, $i, 1, 'UTF-8');
-            $ord = ord($char);
+            // $char may be multi-byte; ord() only reads byte 0 (PHP 8.5 deprecates
+            // passing a multi-byte string). $char[0] makes that explicit and keeps
+            // the existing first-byte behavior.
+            // TODO(php8.5): consider mb_ord($char, 'UTF-8') for true codepoints —
+            // it would also escape codepoints 123-164 per this method's documented
+            // contract, which the first-byte approach currently lets through. That
+            // is a deliberate behavior change to CSS class names; defer until vetted.
+            $ord = ord($char[0]);
             if (
                 ($ord < 48)
                 || ($ord > 57 && $ord < 65)

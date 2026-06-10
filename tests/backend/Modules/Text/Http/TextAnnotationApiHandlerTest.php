@@ -83,7 +83,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorReturnsOkForSuccess(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, ['success' => true]);
 
@@ -94,7 +93,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorReturnsParseAnnotationFailed(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -108,7 +106,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorReturnsLineOutOfRange(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -126,7 +123,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorReturnsParseLineFailed(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -140,7 +136,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorReturnsPunctuationTerm(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -156,7 +151,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorReturnsInsufficientColumns(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -172,7 +166,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorReturnsUnknownError(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -186,7 +179,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorHandlesMissingErrorKey(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, ['success' => false]);
 
@@ -197,7 +189,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorHandlesMissingOptionalFields(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -211,7 +202,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorHandlesMissingPositionForPunctuation(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,
@@ -225,7 +215,6 @@ class TextAnnotationApiHandlerTest extends TestCase
     public function formatAnnotationErrorHandlesMissingFoundForColumns(): void
     {
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, [
             'success' => false,

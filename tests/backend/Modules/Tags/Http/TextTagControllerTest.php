@@ -51,7 +51,6 @@ class TextTagControllerTest extends TestCase
     public function constructorSetsFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(TextTagController::class, 'facade');
-        $reflection->setAccessible(true);
 
         $facade = $reflection->getValue($this->controller);
 
@@ -66,7 +65,6 @@ class TextTagControllerTest extends TestCase
     public function pageTitleIsTextTags(): void
     {
         $reflection = new \ReflectionProperty(TextTagController::class, 'pageTitle');
-        $reflection->setAccessible(true);
 
         $this->assertSame('Text Tags', $reflection->getValue($this->controller));
     }
@@ -75,7 +73,6 @@ class TextTagControllerTest extends TestCase
     public function resourceNameIsTag(): void
     {
         $reflection = new \ReflectionProperty(TextTagController::class, 'resourceName');
-        $reflection->setAccessible(true);
 
         $this->assertSame('tag', $reflection->getValue($this->controller));
     }
@@ -88,7 +85,6 @@ class TextTagControllerTest extends TestCase
     public function getIdParameterNameReturnsT2ID(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'getIdParameterName');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
 
@@ -103,7 +99,6 @@ class TextTagControllerTest extends TestCase
     public function handleCreateReturnsSuccessMessage(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleCreate');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('create')
@@ -119,7 +114,6 @@ class TextTagControllerTest extends TestCase
     public function handleCreateReturnsErrorMessageOnFailure(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleCreate');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('create')
@@ -134,7 +128,6 @@ class TextTagControllerTest extends TestCase
     public function handleCreateReturnsUnknownErrorWhenNoErrorKey(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleCreate');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('create')
@@ -153,7 +146,6 @@ class TextTagControllerTest extends TestCase
     public function handleUpdateReturnsSuccessMessage(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleUpdate');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('update')
@@ -169,7 +161,6 @@ class TextTagControllerTest extends TestCase
     public function handleUpdateReturnsErrorMessageOnFailure(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleUpdate');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('update')
@@ -185,7 +176,6 @@ class TextTagControllerTest extends TestCase
     public function handleUpdateReturnsUnknownErrorWhenNoErrorKey(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleUpdate');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('update')
@@ -204,7 +194,6 @@ class TextTagControllerTest extends TestCase
     public function handleDeleteReturnsDeletedOnSuccess(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleDelete');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('delete')
@@ -220,7 +209,6 @@ class TextTagControllerTest extends TestCase
     public function handleDeleteReturnsZeroRowsOnFailure(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleDelete');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('delete')
@@ -240,7 +228,6 @@ class TextTagControllerTest extends TestCase
     public function handleBulkActionDeleteCallsFacade(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleBulkAction');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('deleteMultiple')
@@ -261,7 +248,6 @@ class TextTagControllerTest extends TestCase
     public function handleBulkActionDeleteWithSingleId(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleBulkAction');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('deleteMultiple')
@@ -281,7 +267,6 @@ class TextTagControllerTest extends TestCase
     public function handleBulkActionDeleteWithEmptyIds(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleBulkAction');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('deleteMultiple')
@@ -301,7 +286,6 @@ class TextTagControllerTest extends TestCase
     public function handleBulkActionUnknownActionDelegatesToParent(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'handleBulkAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'unknown_action', [1, 2]);
 
@@ -317,11 +301,9 @@ class TextTagControllerTest extends TestCase
     public function processAllActionDeleteAllCallsFacade(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'processAllAction');
-        $method->setAccessible(true);
 
         // Set currentQuery via reflection
         $queryProp = new \ReflectionProperty(TextTagController::class, 'currentQuery');
-        $queryProp->setAccessible(true);
         $queryProp->setValue($this->controller, 'search term');
 
         $this->facade->expects($this->once())
@@ -340,7 +322,6 @@ class TextTagControllerTest extends TestCase
     public function processAllActionDeleteAllWithEmptyQuery(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'processAllAction');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('deleteAll')
@@ -357,7 +338,6 @@ class TextTagControllerTest extends TestCase
     public function processAllActionUnknownActionDelegatesToParent(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'processAllAction');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'unknown');
 
@@ -373,7 +353,6 @@ class TextTagControllerTest extends TestCase
     public function renderEditFormWithNonExistentTagOutputsNotFound(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'renderEditForm');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('getById')
@@ -393,7 +372,6 @@ class TextTagControllerTest extends TestCase
     public function renderEditFormCallsGetById(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'renderEditForm');
-        $method->setAccessible(true);
 
         $this->facade->expects($this->once())
             ->method('getById')
@@ -512,7 +490,6 @@ class TextTagControllerTest extends TestCase
     public function defaultCurrentQueryIsEmpty(): void
     {
         $reflection = new \ReflectionProperty(TextTagController::class, 'currentQuery');
-        $reflection->setAccessible(true);
 
         $this->assertSame('', $reflection->getValue($this->controller));
     }
@@ -521,7 +498,6 @@ class TextTagControllerTest extends TestCase
     public function defaultCurrentSortIsOne(): void
     {
         $reflection = new \ReflectionProperty(TextTagController::class, 'currentSort');
-        $reflection->setAccessible(true);
 
         $this->assertSame(1, $reflection->getValue($this->controller));
     }
@@ -530,7 +506,6 @@ class TextTagControllerTest extends TestCase
     public function defaultCurrentPageIsOne(): void
     {
         $reflection = new \ReflectionProperty(TextTagController::class, 'currentPage');
-        $reflection->setAccessible(true);
 
         $this->assertSame(1, $reflection->getValue($this->controller));
     }
@@ -543,7 +518,6 @@ class TextTagControllerTest extends TestCase
     public function renderCreateFormUsesT2Prefix(): void
     {
         $method = new \ReflectionMethod(TextTagController::class, 'renderCreateForm');
-        $method->setAccessible(true);
 
         // We cannot fully invoke renderCreateForm because it includes a view file,
         // but we can verify the method exists and is callable
@@ -557,10 +531,8 @@ class TextTagControllerTest extends TestCase
         $termController = new TermTagController($this->facade);
 
         $termMethod = new \ReflectionMethod(TermTagController::class, 'getIdParameterName');
-        $termMethod->setAccessible(true);
 
         $textMethod = new \ReflectionMethod(TextTagController::class, 'getIdParameterName');
-        $textMethod->setAccessible(true);
 
         $termId = $termMethod->invoke($termController);
         $textId = $textMethod->invoke($this->controller);

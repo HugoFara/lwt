@@ -38,7 +38,6 @@ class TermTagServiceTest extends TestCase
     private function injectMockAssociation(TagAssociationInterface $mock): void
     {
         $ref = new \ReflectionProperty(TermTagService::class, 'association');
-        $ref->setAccessible(true);
         $ref->setValue(null, $mock);
     }
 
@@ -48,7 +47,6 @@ class TermTagServiceTest extends TestCase
     private function injectMockRepository(TagRepositoryInterface $mock): void
     {
         $ref = new \ReflectionProperty(TermTagService::class, 'repository');
-        $ref->setAccessible(true);
         $ref->setValue(null, $mock);
     }
 
@@ -56,11 +54,9 @@ class TermTagServiceTest extends TestCase
     {
         // Reset static state after each test
         $refAssoc = new \ReflectionProperty(TermTagService::class, 'association');
-        $refAssoc->setAccessible(true);
         $refAssoc->setValue(null, null);
 
         $refRepo = new \ReflectionProperty(TermTagService::class, 'repository');
-        $refRepo->setAccessible(true);
         $refRepo->setValue(null, null);
     }
 

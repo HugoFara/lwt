@@ -40,7 +40,6 @@ class SimpleImportServiceTest extends TestCase
         $service = new SimpleImportService($utilities);
 
         $prop = new ReflectionProperty(SimpleImportService::class, 'utilities');
-        $prop->setAccessible(true);
         $this->assertSame($utilities, $prop->getValue($service));
     }
 

@@ -59,7 +59,6 @@ class FeedLoadControllerTest extends TestCase
     public function constructorSetsFeedFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedLoadController::class, 'feedFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->feedFacade, $reflection->getValue($this->controller));
     }
@@ -68,7 +67,6 @@ class FeedLoadControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedLoadController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->languageFacade, $reflection->getValue($this->controller));
     }
@@ -77,7 +75,6 @@ class FeedLoadControllerTest extends TestCase
     public function constructorSetsViewPathProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedLoadController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
         $this->assertStringEndsWith('/Views/', $viewPath);
@@ -323,7 +320,6 @@ class FeedLoadControllerTest extends TestCase
             ->willReturn([]);
 
         $method = new \ReflectionMethod(FeedLoadController::class, 'showMultiLoadForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -344,7 +340,6 @@ class FeedLoadControllerTest extends TestCase
         $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
 
         $method = new \ReflectionMethod(FeedLoadController::class, 'showMultiLoadForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -367,7 +362,6 @@ class FeedLoadControllerTest extends TestCase
             ->willReturn([['LgID' => 3, 'LgName' => 'Spanish']]);
 
         $method = new \ReflectionMethod(FeedLoadController::class, 'showMultiLoadForm');
-        $method->setAccessible(true);
 
         ob_start();
         try {

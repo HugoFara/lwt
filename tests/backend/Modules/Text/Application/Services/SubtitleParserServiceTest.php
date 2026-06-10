@@ -768,7 +768,6 @@ VTT;
     public function stripVttTagsRemovesBoldTags(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'stripVttTags');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, '<b>Bold</b>');
 
@@ -779,7 +778,6 @@ VTT;
     public function stripVttTagsRemovesVoiceTagWithName(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'stripVttTags');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, '<v John>Hello</v>');
 
@@ -790,7 +788,6 @@ VTT;
     public function stripVttTagsRemovesLangTag(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'stripVttTags');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, '<lang fr>Bonjour</lang>');
 
@@ -801,7 +798,6 @@ VTT;
     public function stripVttTagsHandlesPlainText(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'stripVttTags');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, 'No tags here');
 
@@ -812,7 +808,6 @@ VTT;
     public function stripVttTagsHandlesEmptyString(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'stripVttTags');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, '');
 
@@ -827,7 +822,6 @@ VTT;
     public function cleanTextDecodesHtmlEntities(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'cleanText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, 'It&apos;s &amp; them');
 
@@ -838,7 +832,6 @@ VTT;
     public function cleanTextNormalizesSpaces(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'cleanText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, "multiple   spaces\there");
 
@@ -849,7 +842,6 @@ VTT;
     public function cleanTextCollapsesExcessiveNewlines(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'cleanText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, "para1\n\n\n\n\npara2");
 
@@ -860,7 +852,6 @@ VTT;
     public function cleanTextTrimsResult(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'cleanText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, "  text  ");
 
@@ -871,7 +862,6 @@ VTT;
     public function cleanTextTrimsEachLine(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'cleanText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, "  line1  \n  line2  ");
 
@@ -882,7 +872,6 @@ VTT;
     public function cleanTextHandlesEmptyString(): void
     {
         $method = new \ReflectionMethod(SubtitleParserService::class, 'cleanText');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->parser, '');
 

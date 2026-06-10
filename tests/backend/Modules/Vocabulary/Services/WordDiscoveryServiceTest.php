@@ -246,10 +246,8 @@ class WordDiscoveryServiceTest extends TestCase
         $service = new WordDiscoveryService(null, null);
 
         $contextReflection = new \ReflectionProperty(WordDiscoveryService::class, 'contextService');
-        $contextReflection->setAccessible(true);
 
         $linkingReflection = new \ReflectionProperty(WordDiscoveryService::class, 'linkingService');
-        $linkingReflection->setAccessible(true);
 
         $this->assertInstanceOf(
             \Lwt\Modules\Vocabulary\Application\Services\WordContextService::class,

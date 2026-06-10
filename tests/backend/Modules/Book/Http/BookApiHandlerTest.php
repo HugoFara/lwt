@@ -45,7 +45,6 @@ class BookApiHandlerTest extends TestCase
     public function constructorStoresBookFacade(): void
     {
         $reflection = new \ReflectionProperty(BookApiHandler::class, 'bookFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->bookFacade, $reflection->getValue($this->handler));
     }

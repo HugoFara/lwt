@@ -76,7 +76,6 @@ class ApiControllerTest extends TestCase
     {
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('param');
-        $method->setAccessible(true);
         return $method->invoke($controller, $name, $default);
     }
 
@@ -237,7 +236,6 @@ class ApiControllerTest extends TestCase
         // Use reflection to test isPost method
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('isPost');
-        $method->setAccessible(true);
 
         $this->assertFalse($method->invoke($controller));
     }
@@ -255,7 +253,6 @@ class ApiControllerTest extends TestCase
         // Use reflection to test isPost method
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('isPost');
-        $method->setAccessible(true);
 
         $this->assertTrue($method->invoke($controller));
     }

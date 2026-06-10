@@ -65,7 +65,6 @@ class FeedIndexControllerTest extends TestCase
     public function constructorSetsFeedFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedIndexController::class, 'feedFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->feedFacade, $reflection->getValue($this->controller));
     }
@@ -74,7 +73,6 @@ class FeedIndexControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedIndexController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->languageFacade, $reflection->getValue($this->controller));
     }
@@ -83,7 +81,6 @@ class FeedIndexControllerTest extends TestCase
     public function constructorSetsFlashServiceProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedIndexController::class, 'flashService');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->flashService, $reflection->getValue($this->controller));
     }
@@ -92,7 +89,6 @@ class FeedIndexControllerTest extends TestCase
     public function constructorSetsViewPathProperty(): void
     {
         $reflection = new \ReflectionProperty(FeedIndexController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
         $this->assertStringEndsWith('/Views/', $viewPath);
@@ -107,7 +103,6 @@ class FeedIndexControllerTest extends TestCase
         );
 
         $reflection = new \ReflectionProperty(FeedIndexController::class, 'flashService');
-        $reflection->setAccessible(true);
         $this->assertInstanceOf(FlashMessageService::class, $reflection->getValue($controller));
     }
 
@@ -190,7 +185,6 @@ class FeedIndexControllerTest extends TestCase
         $_REQUEST = ['marked_items' => []];
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame(0, $result['editText']);
@@ -208,7 +202,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn([]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame(0, $result['editText']);
@@ -269,7 +262,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         ob_start();
         $result = $method->invoke($this->controller);
@@ -316,7 +308,6 @@ class FeedIndexControllerTest extends TestCase
             ->with('http://example.com/1');
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         ob_start();
         $result = $method->invoke($this->controller);
@@ -356,7 +347,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 2, 'sentences' => 5, 'textitems' => 10]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         ob_start();
         $result = $method->invoke($this->controller);
@@ -411,7 +401,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         ob_start();
         $method->invoke($this->controller);
@@ -455,7 +444,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 1, 'sentences' => 3, 'textitems' => 7]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'createTextsFromFeed');
-        $method->setAccessible(true);
 
         ob_start();
         $result = $method->invoke($this->controller, $texts, $row, 'testtag', 10);
@@ -486,7 +474,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'createTextsFromFeed');
-        $method->setAccessible(true);
 
         ob_start();
         $method->invoke($this->controller, $texts, $row, 'tag', 10);
@@ -530,7 +517,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'createTextsFromFeed');
-        $method->setAccessible(true);
 
         ob_start();
         $method->invoke($this->controller, $texts, $row, 'my_tag', 10);
@@ -551,7 +537,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn([]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'displayFeedMessages');
-        $method->setAccessible(true);
 
         ob_start();
         $method->invoke($this->controller, '');
@@ -566,7 +551,6 @@ class FeedIndexControllerTest extends TestCase
         $this->flashService->method('getAndClear')->willReturn([]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'displayFeedMessages');
-        $method->setAccessible(true);
 
         // PageLayoutHelper::renderMessage is static and outputs HTML.
         // We test that a non-empty message triggers output.
@@ -611,7 +595,6 @@ class FeedIndexControllerTest extends TestCase
         $this->flashService->method('getAndClear')->willReturn([]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'displayFeedMessages');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -648,7 +631,6 @@ class FeedIndexControllerTest extends TestCase
         $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'renderFeedsIndex');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -684,7 +666,6 @@ class FeedIndexControllerTest extends TestCase
             ->method('getFeedLinks');
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'renderFeedsIndex');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -737,7 +718,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         ob_start();
         $method->invoke($this->controller);
@@ -775,7 +755,6 @@ class FeedIndexControllerTest extends TestCase
             ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         ob_start();
         $result = $method->invoke($this->controller);
@@ -793,7 +772,6 @@ class FeedIndexControllerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')->willReturn([]);
 
         $method = new \ReflectionMethod(FeedIndexController::class, 'processMarkedItems');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame(0, $result['editText']);

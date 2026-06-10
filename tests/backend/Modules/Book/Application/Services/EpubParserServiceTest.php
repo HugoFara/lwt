@@ -408,11 +408,9 @@ class EpubParserServiceTest extends TestCase
         $instance = $reflection->newInstanceWithoutConstructor();
 
         $filenameProp = $reflection->getProperty('filename');
-        $filenameProp->setAccessible(true);
         $filenameProp->setValue($instance, $filename);
 
         $bodyProp = $reflection->getProperty('body');
-        $bodyProp->setAccessible(true);
         $bodyProp->setValue($instance, $body);
 
         return $instance;

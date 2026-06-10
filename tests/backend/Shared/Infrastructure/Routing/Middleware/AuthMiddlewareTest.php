@@ -121,7 +121,6 @@ class AuthMiddlewareTest extends TestCase
         // Use reflection to test the private method
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('isApiRequest');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -139,7 +138,6 @@ class AuthMiddlewareTest extends TestCase
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('isApiRequest');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -158,7 +156,6 @@ class AuthMiddlewareTest extends TestCase
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('isApiRequest');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -177,7 +174,6 @@ class AuthMiddlewareTest extends TestCase
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('isApiRequest');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -194,7 +190,6 @@ class AuthMiddlewareTest extends TestCase
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('extractBearerToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -211,7 +206,6 @@ class AuthMiddlewareTest extends TestCase
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('extractBearerToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 
@@ -228,7 +222,6 @@ class AuthMiddlewareTest extends TestCase
 
         $reflection = new \ReflectionClass($middleware);
         $method = $reflection->getMethod('extractBearerToken');
-        $method->setAccessible(true);
 
         $result = $method->invoke($middleware);
 

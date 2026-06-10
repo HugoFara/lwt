@@ -108,7 +108,6 @@ class GoogleControllerTest extends TestCase
     public function constructorInjectsGoogleAuthService(): void
     {
         $reflection = new \ReflectionProperty(GoogleController::class, 'googleAuthService');
-        $reflection->setAccessible(true);
 
         $service = $reflection->getValue($this->controller);
 

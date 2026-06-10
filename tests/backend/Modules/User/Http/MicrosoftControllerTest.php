@@ -111,7 +111,6 @@ class MicrosoftControllerTest extends TestCase
             MicrosoftController::class,
             'microsoftAuthService'
         );
-        $reflection->setAccessible(true);
 
         $service = $reflection->getValue($this->controller);
 

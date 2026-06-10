@@ -53,7 +53,6 @@ class TextPositionApiHandlerTest extends TestCase
     public function constructorSetsDiscoveryServiceProperty(): void
     {
         $reflection = new \ReflectionProperty(TextPositionApiHandler::class, 'discoveryService');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->discoveryService, $reflection->getValue($this->handler));
     }
@@ -63,7 +62,6 @@ class TextPositionApiHandlerTest extends TestCase
     {
         $handler = new TextPositionApiHandler(null);
         $reflection = new \ReflectionProperty(TextPositionApiHandler::class, 'discoveryService');
-        $reflection->setAccessible(true);
 
         $this->assertInstanceOf(WordDiscoveryService::class, $reflection->getValue($handler));
     }

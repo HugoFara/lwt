@@ -81,7 +81,6 @@ class TermDisplayControllerTest extends TestCase
     public function constructorSetsFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(TermDisplayController::class, 'facade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->facade, $reflection->getValue($this->controller));
     }
@@ -90,7 +89,6 @@ class TermDisplayControllerTest extends TestCase
     public function constructorSetsCreateTermFromHoverProperty(): void
     {
         $reflection = new \ReflectionProperty(TermDisplayController::class, 'createTermFromHover');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->createTermFromHover, $reflection->getValue($this->controller));
     }
@@ -99,7 +97,6 @@ class TermDisplayControllerTest extends TestCase
     public function constructorSetsFindSimilarTermsProperty(): void
     {
         $reflection = new \ReflectionProperty(TermDisplayController::class, 'findSimilarTerms');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->findSimilarTerms, $reflection->getValue($this->controller));
     }
@@ -108,7 +105,6 @@ class TermDisplayControllerTest extends TestCase
     public function constructorSetsDictionaryAdapterProperty(): void
     {
         $reflection = new \ReflectionProperty(TermDisplayController::class, 'dictionaryAdapter');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->dictionaryAdapter, $reflection->getValue($this->controller));
     }
@@ -117,7 +113,6 @@ class TermDisplayControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(TermDisplayController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->languageFacade, $reflection->getValue($this->controller));
     }
@@ -386,7 +381,6 @@ class TermDisplayControllerTest extends TestCase
     public function getDictionaryLinksCallsAdapter(): void
     {
         $method = new \ReflectionMethod(TermDisplayController::class, 'getDictionaryLinks');
-        $method->setAccessible(true);
 
         $this->dictionaryAdapter->expects($this->once())
             ->method('createDictLinksInEditWin')
@@ -402,7 +396,6 @@ class TermDisplayControllerTest extends TestCase
     public function getDictionaryLinksDefaultOpenFirstIsFalse(): void
     {
         $method = new \ReflectionMethod(TermDisplayController::class, 'getDictionaryLinks');
-        $method->setAccessible(true);
 
         $params = $method->getParameters();
         $this->assertSame('openFirst', $params[3]->getName());
@@ -418,7 +411,6 @@ class TermDisplayControllerTest extends TestCase
     public function createFromHoverCallsUseCaseExecute(): void
     {
         $method = new \ReflectionMethod(TermDisplayController::class, 'createFromHover');
-        $method->setAccessible(true);
 
         $this->createTermFromHover->expects($this->once())
             ->method('shouldSetNoCacheHeaders')
@@ -439,7 +431,6 @@ class TermDisplayControllerTest extends TestCase
     public function createFromHoverUsesDefaultEmptyLanguageParams(): void
     {
         $method = new \ReflectionMethod(TermDisplayController::class, 'createFromHover');
-        $method->setAccessible(true);
 
         $params = $method->getParameters();
         $this->assertSame('sourceLang', $params[3]->getName());
@@ -485,7 +476,6 @@ class TermDisplayControllerTest extends TestCase
     public function viewPathPointsToModuleViews(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $path = $reflection->getValue($this->controller);
 
@@ -499,7 +489,6 @@ class TermDisplayControllerTest extends TestCase
         $this->controller->setViewPath('/tmp/views');
 
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $this->assertSame('/tmp/views/', $reflection->getValue($this->controller));
     }

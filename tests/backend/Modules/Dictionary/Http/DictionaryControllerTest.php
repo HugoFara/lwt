@@ -86,7 +86,6 @@ class DictionaryControllerTest extends TestCase
     public function constructorStoresDictionaryFacade(): void
     {
         $prop = new ReflectionProperty(DictionaryController::class, 'dictionaryFacade');
-        $prop->setAccessible(true);
 
         $this->assertSame($this->dictionaryFacade, $prop->getValue($this->controller));
     }
@@ -95,7 +94,6 @@ class DictionaryControllerTest extends TestCase
     public function constructorStoresLanguageFacade(): void
     {
         $prop = new ReflectionProperty(DictionaryController::class, 'languageFacade');
-        $prop->setAccessible(true);
 
         $this->assertSame($this->languageFacade, $prop->getValue($this->controller));
     }
@@ -226,7 +224,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'stardict');
 
@@ -243,7 +240,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'csv');
 
@@ -268,7 +264,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'csv');
 
@@ -290,7 +285,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'csv');
 
@@ -310,7 +304,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'tsv');
 
@@ -332,7 +325,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'json');
 
@@ -355,7 +347,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'json');
 
@@ -376,7 +367,6 @@ class DictionaryControllerTest extends TestCase
         $_POST = [];
 
         $method = new ReflectionMethod(DictionaryController::class, 'getImportOptions');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller, 'json');
 

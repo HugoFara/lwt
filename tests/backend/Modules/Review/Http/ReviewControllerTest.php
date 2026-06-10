@@ -78,7 +78,6 @@ class ReviewControllerTest extends TestCase
     {
         $_REQUEST = [];
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame('', $result);
@@ -89,7 +88,6 @@ class ReviewControllerTest extends TestCase
     {
         $_REQUEST = ['lang' => '5'];
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame('lang=5', $result);
@@ -100,7 +98,6 @@ class ReviewControllerTest extends TestCase
     {
         $_REQUEST = ['text' => '42'];
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame('text=42', $result);
@@ -113,7 +110,6 @@ class ReviewControllerTest extends TestCase
         $this->sessionManager->method('hasCriteria')->willReturn(true);
 
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame('selection=7', $result);
@@ -126,7 +122,6 @@ class ReviewControllerTest extends TestCase
         $this->sessionManager->method('hasCriteria')->willReturn(false);
 
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         // Should fall through to lang since selection has no criteria
@@ -140,7 +135,6 @@ class ReviewControllerTest extends TestCase
         $this->sessionManager->method('hasCriteria')->willReturn(true);
 
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame('selection=7', $result);
@@ -152,7 +146,6 @@ class ReviewControllerTest extends TestCase
         $_REQUEST = ['lang' => '3', 'text' => '10'];
 
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame('lang=3', $result);
@@ -171,7 +164,6 @@ class ReviewControllerTest extends TestCase
         // call getReviewProperty() and get empty string
         // We test the private method directly since testing redirect is complex
         $method = new \ReflectionMethod(ReviewController::class, 'getReviewProperty');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->controller);
         $this->assertSame('', $result);
@@ -385,7 +377,6 @@ class ReviewControllerTest extends TestCase
             ->method('getReviewIdentifier');
 
         $method = new \ReflectionMethod(ReviewController::class, 'renderReviewPage');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -418,7 +409,6 @@ class ReviewControllerTest extends TestCase
             ->method('getReviewSql');
 
         $method = new \ReflectionMethod(ReviewController::class, 'renderReviewPage');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -456,7 +446,6 @@ class ReviewControllerTest extends TestCase
         $this->reviewFacade->method('getLanguageIdFromReviewSql')->willReturn(null);
 
         $method = new \ReflectionMethod(ReviewController::class, 'renderReviewPage');
-        $method->setAccessible(true);
 
         ob_start();
         try {
@@ -496,7 +485,6 @@ class ReviewControllerTest extends TestCase
         $this->reviewFacade->method('getLanguageIdFromReviewSql')->willReturn(null);
 
         $method = new \ReflectionMethod(ReviewController::class, 'renderReviewPage');
-        $method->setAccessible(true);
 
         ob_start();
         try {

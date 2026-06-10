@@ -36,7 +36,6 @@ class SentenceServiceUnitTest extends TestCase
     private function invokePrivate(string $method, mixed ...$args): mixed
     {
         $ref = new ReflectionMethod(SentenceService::class, $method);
-        $ref->setAccessible(true);
         return $ref->invoke($this->service, ...$args);
     }
 
@@ -80,7 +79,6 @@ class SentenceServiceUnitTest extends TestCase
 
         $ref = new ReflectionClass(SentenceService::class);
         $prop = $ref->getProperty('textParsingService');
-        $prop->setAccessible(true);
 
         $this->assertSame($mock, $prop->getValue($service));
     }

@@ -307,6 +307,16 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **PHP 8.5 deprecation warnings**. Running under PHP 8.5 emitted 429 PHP
+  deprecations. The bulk (428) were redundant `ReflectionMethod`/
+  `ReflectionProperty::setAccessible(true)` calls in the test suite —
+  a no-op since PHP 8.1 and deprecated in 8.5; reflection can read and
+  invoke private members without them, so the calls were removed. The one
+  production case was `StringUtils::toClassName()` passing a (potentially
+  multi-byte) `mb_substr` character to `ord()`; switched to `ord($char[0])`
+  to make the existing first-byte behavior explicit. (A `TODO` flags a
+  possible later move to `mb_ord()` for true codepoints, which would be a
+  deliberate behavior change to generated CSS class names.)
 * **Bulk vocabulary actions and texts/archived-texts bulk-action 403'd
   on CSRF**: `submitExportForm` in `word_list_app.ts` and
   `handleMultiAction` in `texts_grouped_app.ts` /

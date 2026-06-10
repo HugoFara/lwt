@@ -51,7 +51,6 @@ class StarterVocabControllerTest extends TestCase
     public function constructorStoresLanguageFacade(): void
     {
         $ref = new \ReflectionProperty(StarterVocabController::class, 'languageFacade');
-        $ref->setAccessible(true);
         $this->assertSame($this->languageFacade, $ref->getValue($this->controller));
     }
 
@@ -59,7 +58,6 @@ class StarterVocabControllerTest extends TestCase
     public function constructorStoresFrequencyImportService(): void
     {
         $ref = new \ReflectionProperty(StarterVocabController::class, 'frequencyImportService');
-        $ref->setAccessible(true);
         $this->assertSame($this->frequencyImportService, $ref->getValue($this->controller));
     }
 
@@ -67,7 +65,6 @@ class StarterVocabControllerTest extends TestCase
     public function constructorStoresEnrichmentService(): void
     {
         $ref = new \ReflectionProperty(StarterVocabController::class, 'enrichmentService');
-        $ref->setAccessible(true);
         $this->assertSame($this->enrichmentService, $ref->getValue($this->controller));
     }
 

@@ -60,7 +60,6 @@ class TermStatusControllerTest extends TestCase
     public function constructorSetsFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(TermStatusController::class, 'facade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->facade, $reflection->getValue($this->controller));
     }
@@ -69,7 +68,6 @@ class TermStatusControllerTest extends TestCase
     public function constructorSetsCreateTermFromHoverProperty(): void
     {
         $reflection = new \ReflectionProperty(TermStatusController::class, 'createTermFromHover');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->createTermFromHover, $reflection->getValue($this->controller));
     }
@@ -283,7 +281,6 @@ class TermStatusControllerTest extends TestCase
     public function insertWordWithStatusAcceptsIntStatus(): void
     {
         $method = new \ReflectionMethod(TermStatusController::class, 'insertWordWithStatus');
-        $method->setAccessible(true);
 
         $params = $method->getParameters();
         $this->assertCount(2, $params);
@@ -300,7 +297,6 @@ class TermStatusControllerTest extends TestCase
     public function createFromHoverCallsExecuteOnUseCase(): void
     {
         $method = new \ReflectionMethod(TermStatusController::class, 'createFromHover');
-        $method->setAccessible(true);
 
         $this->createTermFromHover->expects($this->once())
             ->method('shouldSetNoCacheHeaders')
@@ -326,7 +322,6 @@ class TermStatusControllerTest extends TestCase
     public function createFromHoverPassesLanguageParams(): void
     {
         $method = new \ReflectionMethod(TermStatusController::class, 'createFromHover');
-        $method->setAccessible(true);
 
         $this->createTermFromHover->expects($this->once())
             ->method('shouldSetNoCacheHeaders')
@@ -348,7 +343,6 @@ class TermStatusControllerTest extends TestCase
     public function discoveryServiceIsNullByDefault(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'discoveryService');
-        $reflection->setAccessible(true);
 
         $this->assertNull($reflection->getValue($this->controller));
     }
@@ -357,7 +351,6 @@ class TermStatusControllerTest extends TestCase
     public function textStatisticsServiceIsNullByDefault(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'textStatisticsService');
-        $reflection->setAccessible(true);
 
         $this->assertNull($reflection->getValue($this->controller));
     }

@@ -401,7 +401,6 @@ class MySqlReviewRepositoryTest extends TestCase
     public function testGetFirstTranslationReturnsNullForEmpty(): void
     {
         $method = new ReflectionMethod(MySqlReviewRepository::class, 'getFirstTranslation');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->repository, '');
 
@@ -411,7 +410,6 @@ class MySqlReviewRepositoryTest extends TestCase
     public function testGetFirstTranslationReturnsNullForStar(): void
     {
         $method = new ReflectionMethod(MySqlReviewRepository::class, 'getFirstTranslation');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->repository, '*');
 
@@ -421,7 +419,6 @@ class MySqlReviewRepositoryTest extends TestCase
     public function testGetFirstTranslationReturnsSingleTranslation(): void
     {
         $method = new ReflectionMethod(MySqlReviewRepository::class, 'getFirstTranslation');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->repository, 'hello');
 
@@ -431,7 +428,6 @@ class MySqlReviewRepositoryTest extends TestCase
     public function testGetFirstTranslationReturnsFirstOfMultiple(): void
     {
         $method = new ReflectionMethod(MySqlReviewRepository::class, 'getFirstTranslation');
-        $method->setAccessible(true);
 
         // Assuming separators include semicolon
         $result = $method->invoke($this->repository, 'first; second; third');
@@ -442,7 +438,6 @@ class MySqlReviewRepositoryTest extends TestCase
     public function testGetFirstTranslationTrimsWhitespace(): void
     {
         $method = new ReflectionMethod(MySqlReviewRepository::class, 'getFirstTranslation');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->repository, '  hello  ');
 

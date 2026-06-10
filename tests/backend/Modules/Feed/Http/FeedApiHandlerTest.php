@@ -1005,7 +1005,6 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, $row);
 
@@ -1032,7 +1031,6 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, $row);
 
@@ -1058,7 +1056,6 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, $row);
 
@@ -1083,7 +1080,6 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, $row);
 
@@ -1107,7 +1103,6 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, $row);
 
@@ -1131,7 +1126,6 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, $row);
 
@@ -1154,7 +1148,6 @@ class FeedApiHandlerTest extends TestCase
         ];
 
         $method = new \ReflectionMethod(FeedApiHandler::class, 'formatArticleRecord');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->handler, $row);
 

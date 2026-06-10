@@ -40,7 +40,6 @@ class CompleteImportServiceTest extends TestCase
         $service = new CompleteImportService($utilities);
 
         $prop = new ReflectionProperty(CompleteImportService::class, 'utilities');
-        $prop->setAccessible(true);
         $this->assertSame($utilities, $prop->getValue($service));
     }
 

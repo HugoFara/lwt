@@ -54,7 +54,6 @@ class HomeControllerTest extends TestCase
     public function constructorSetsHomeFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(HomeController::class, 'homeFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->homeFacade, $reflection->getValue($this->controller));
     }
@@ -63,7 +62,6 @@ class HomeControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(HomeController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->languageFacade, $reflection->getValue($this->controller));
     }

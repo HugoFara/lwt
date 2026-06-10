@@ -51,7 +51,6 @@ class TermImportControllerTest extends TestCase
     public function constructorSetsLanguageFacadeProperty(): void
     {
         $reflection = new \ReflectionProperty(TermImportController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $facade = $reflection->getValue($this->controller);
 
@@ -64,7 +63,6 @@ class TermImportControllerTest extends TestCase
         $controller = new TermImportController(null);
 
         $reflection = new \ReflectionProperty(TermImportController::class, 'languageFacade');
-        $reflection->setAccessible(true);
 
         $facade = $reflection->getValue($controller);
 
@@ -242,7 +240,6 @@ class TermImportControllerTest extends TestCase
     public function viewPathPointsToVocabularyViews(): void
     {
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
 
@@ -272,7 +269,6 @@ class TermImportControllerTest extends TestCase
 
         foreach ($nullableServices as $serviceName) {
             $reflection = new \ReflectionProperty(VocabularyBaseController::class, $serviceName);
-            $reflection->setAccessible(true);
 
             $this->assertNull(
                 $reflection->getValue($this->controller),

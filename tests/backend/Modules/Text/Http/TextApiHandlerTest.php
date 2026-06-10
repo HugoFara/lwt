@@ -103,7 +103,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, ['success' => true]);
 
@@ -114,7 +113,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false,
@@ -128,7 +126,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false,
@@ -145,7 +142,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false,
@@ -159,7 +155,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false,
@@ -175,7 +170,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false,
@@ -191,7 +185,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false,
@@ -205,7 +198,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false
@@ -218,7 +210,6 @@ class TextApiHandlerTest extends TestCase
     {
         $annHandler = new TextAnnotationApiHandler();
         $method = new \ReflectionMethod(TextAnnotationApiHandler::class, 'formatAnnotationError');
-        $method->setAccessible(true);
 
         $result = $method->invoke($annHandler, [
             'success' => false,

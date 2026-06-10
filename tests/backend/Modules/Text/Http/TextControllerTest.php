@@ -90,15 +90,12 @@ class TextControllerTest extends TestCase
     public function constructorCreatesSubControllers(): void
     {
         $reflection = new \ReflectionProperty(TextController::class, 'readController');
-        $reflection->setAccessible(true);
         $this->assertInstanceOf(TextReadController::class, $reflection->getValue($this->controller));
 
         $reflection = new \ReflectionProperty(TextController::class, 'crudController');
-        $reflection->setAccessible(true);
         $this->assertInstanceOf(TextCrudController::class, $reflection->getValue($this->controller));
 
         $reflection = new \ReflectionProperty(TextController::class, 'archivedController');
-        $reflection->setAccessible(true);
         $this->assertInstanceOf(ArchivedTextController::class, $reflection->getValue($this->controller));
     }
 
@@ -107,7 +104,6 @@ class TextControllerTest extends TestCase
     {
         $controller = new TextController(null, null, null);
         $reflection = new \ReflectionProperty(TextController::class, 'readController');
-        $reflection->setAccessible(true);
 
         $this->assertInstanceOf(TextReadController::class, $reflection->getValue($controller));
     }

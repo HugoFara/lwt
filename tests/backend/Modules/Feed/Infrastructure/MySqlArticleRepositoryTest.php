@@ -30,7 +30,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testTableNameProperty(): void
     {
         $reflection = new \ReflectionProperty(MySqlArticleRepository::class, 'tableName');
-        $reflection->setAccessible(true);
 
         $this->assertSame('feed_links', $reflection->getValue($this->repository));
     }
@@ -38,7 +37,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testPrimaryKeyProperty(): void
     {
         $reflection = new \ReflectionProperty(MySqlArticleRepository::class, 'primaryKey');
-        $reflection->setAccessible(true);
 
         $this->assertSame('FlID', $reflection->getValue($this->repository));
     }
@@ -46,7 +44,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testColumnMapProperty(): void
     {
         $reflection = new \ReflectionProperty(MySqlArticleRepository::class, 'columnMap');
-        $reflection->setAccessible(true);
 
         $columnMap = $reflection->getValue($this->repository);
 
@@ -68,7 +65,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityCreatesArticle(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $row = [
             'FlID' => '123',
@@ -97,7 +93,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityWithNullOptionalFields(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $row = [
             'FlID' => '1',
@@ -121,7 +116,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityWithMissingOptionalFields(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $row = [
             'FlID' => '1',
@@ -142,7 +136,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityConvertsStringIdsToInt(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $row = [
             'FlID' => '999',
@@ -160,7 +153,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityWithUnicodeContent(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $row = [
             'FlID' => '1',
@@ -187,7 +179,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToRowConvertsArticleToArray(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToRow');
-        $method->setAccessible(true);
 
         $article = Article::reconstitute(
             123,
@@ -215,7 +206,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToRowDoesNotIncludeId(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToRow');
-        $method->setAccessible(true);
 
         $article = Article::reconstitute(123, 1, 'Title', 'link', '', '', '', '');
 
@@ -228,7 +218,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToRowWithEmptyOptionalFields(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToRow');
-        $method->setAccessible(true);
 
         $article = Article::reconstitute(1, 2, 'Title', 'link', '', '', '', '');
 
@@ -247,7 +236,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testGetEntityIdReturnsArticleId(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'getEntityId');
-        $method->setAccessible(true);
 
         $article = Article::reconstitute(999, 1, 'Title', 'link', '', '', '', '');
 
@@ -259,7 +247,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testGetEntityIdReturnsZeroForNewArticle(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'getEntityId');
-        $method->setAccessible(true);
 
         $article = Article::create(1, 'Title', 'link');
 
@@ -275,7 +262,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testSetEntityIdSetsArticleId(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'setEntityId');
-        $method->setAccessible(true);
 
         $article = Article::create(1, 'Title', 'link');
         $this->assertNull($article->id());
@@ -360,9 +346,7 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapRoundtrip(): void
     {
         $mapToEntity = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $mapToEntity->setAccessible(true);
         $mapToRow = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToRow');
-        $mapToRow->setAccessible(true);
 
         $originalRow = [
             'FlID' => '123',
@@ -395,7 +379,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityWithErrorMarkedLink(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $row = [
             'FlID' => '1',
@@ -417,7 +400,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityWithLongValues(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $longText = str_repeat('a', 10000);
         $row = [
@@ -440,7 +422,6 @@ class MySqlArticleRepositoryTest extends TestCase
     public function testMapToEntityWithSpecialCharacters(): void
     {
         $method = new \ReflectionMethod(MySqlArticleRepository::class, 'mapToEntity');
-        $method->setAccessible(true);
 
         $row = [
             'FlID' => '1',

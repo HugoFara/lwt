@@ -43,7 +43,6 @@ class BookControllerTest extends TestCase
     public function constructorStoresBookFacade(): void
     {
         $reflection = new \ReflectionProperty(BookController::class, 'bookFacade');
-        $reflection->setAccessible(true);
 
         $this->assertSame($this->bookFacade, $reflection->getValue($this->controller));
     }
@@ -52,7 +51,6 @@ class BookControllerTest extends TestCase
     public function constructorSetsViewPath(): void
     {
         $reflection = new \ReflectionProperty(BookController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
         $this->assertStringEndsWith('/Views/', $viewPath);
@@ -62,7 +60,6 @@ class BookControllerTest extends TestCase
     public function viewPathPointsToModuleViews(): void
     {
         $reflection = new \ReflectionProperty(BookController::class, 'viewPath');
-        $reflection->setAccessible(true);
 
         $viewPath = $reflection->getValue($this->controller);
         $normalizedPath = str_replace('\\', '/', $viewPath);
@@ -271,7 +268,6 @@ class BookControllerTest extends TestCase
     public function showImportResultAcceptsThreeParameters(): void
     {
         $method = new \ReflectionMethod(BookController::class, 'showImportResult');
-        $method->setAccessible(true);
         $params = $method->getParameters();
 
         $this->assertCount(3, $params);
@@ -284,7 +280,6 @@ class BookControllerTest extends TestCase
     public function showImportResultBookIdIsNullable(): void
     {
         $method = new \ReflectionMethod(BookController::class, 'showImportResult');
-        $method->setAccessible(true);
         $params = $method->getParameters();
 
         $this->assertTrue($params[2]->getType()->allowsNull());
@@ -336,7 +331,6 @@ class BookControllerTest extends TestCase
         $controller2 = new BookController($facade2);
 
         $reflection = new \ReflectionProperty(BookController::class, 'bookFacade');
-        $reflection->setAccessible(true);
 
         $this->assertNotSame(
             $reflection->getValue($controller1),

@@ -48,7 +48,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlReplacesIdPlaceholder(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, '/text/{id}/read', 42);
 
@@ -59,7 +58,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlAppendsIdWhenNoPlaceholder(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, '/text/read?id=', 42);
 
@@ -70,7 +68,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlHandlesEmptyBaseUrl(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, '', 99);
 
@@ -81,7 +78,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlReplacesFirstPlaceholderOnly(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         // str_replace replaces all occurrences
         $result = $method->invoke($this->service, '/text/{id}/compare/{id}', 7);
@@ -93,7 +89,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlWithLargeId(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, '/text/{id}', 999999);
 
@@ -104,7 +99,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlWithZeroId(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, '/text/{id}', 0);
 
@@ -115,7 +109,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlAppendsToSlashTerminatedUrl(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, '/texts/', 15);
 
@@ -126,7 +119,6 @@ class TextNavigationServiceTest extends TestCase
     public function buildNavigationUrlWithQueryStringBase(): void
     {
         $method = new \ReflectionMethod(TextNavigationService::class, 'buildNavigationUrl');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->service, '/reader?text=', 10);
 

@@ -153,7 +153,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('isPublicEndpoint');
-        $method->setAccessible(true);
 
         // Auth login/register should be public
         $this->assertTrue($method->invoke($this->api, 'auth/login'));
@@ -170,7 +169,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('parseQueryParams');
-        $method->setAccessible(true);
 
         $params = $method->invoke($this->api, '/api/v1/terms?language_id=1&status=5');
         $this->assertEquals(['language_id' => '1', 'status' => '5'], $params);
@@ -210,7 +208,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['unknown-endpoint'], []);
 
@@ -224,7 +221,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['version'], []);
 
@@ -238,7 +234,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['statuses'], []);
 
@@ -252,7 +247,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['languages'], []);
 
@@ -266,7 +260,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['languages', 'definitions'], []);
 
@@ -280,7 +273,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['languages', 'with-texts'], []);
 
@@ -294,7 +286,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['languages', 'with-archived-texts'], []);
 
@@ -308,7 +299,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['languages', '1'], []);
 
@@ -322,7 +312,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['languages', '1', 'stats'], []);
 
@@ -336,7 +325,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['review', 'next-word'], ['test_type' => 1]);
 
@@ -350,7 +338,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['review', 'tomorrow-count'], []);
 
@@ -364,7 +351,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['review', 'config'], []);
 
@@ -378,7 +364,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['review', 'table-words'], []);
 
@@ -392,7 +377,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke(
             $this->api,
@@ -411,7 +395,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke(
             $this->api,
@@ -430,7 +413,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke(
             $this->api,
@@ -449,7 +431,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['settings', 'theme-path'], ['path' => 'test']);
 
@@ -463,7 +444,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'POST', ['settings'], ['key' => 'test', 'value' => 'value']);
 
@@ -477,7 +457,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['tags'], []);
 
@@ -491,7 +470,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['terms', 'list'], []);
 
@@ -505,7 +483,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['terms', 'filter-options'], []);
 
@@ -519,7 +496,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['terms', 'imported'], []);
 
@@ -533,7 +509,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['terms', '1'], []);
 
@@ -547,7 +522,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'GET', ['word-families', 'stats'], ['language_id' => 1]);
 
@@ -561,7 +535,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'POST', ['unknown-endpoint'], []);
 
@@ -575,7 +548,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'PUT', ['unknown-endpoint'], []);
 
@@ -589,7 +561,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'DELETE', ['unknown-endpoint'], []);
 
@@ -603,7 +574,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('dispatch');
-        $method->setAccessible(true);
 
         $result = $method->invoke($this->api, 'PATCH', ['languages'], []);
 
@@ -619,7 +589,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('getRequestBody');
-        $method->setAccessible(true);
 
         // GET should return empty array
         $result = $method->invoke(null, 'GET');
@@ -633,7 +602,6 @@ class ApiV1RoutingTest extends TestCase
     {
         $reflection = new \ReflectionClass(ApiV1::class);
         $method = $reflection->getMethod('parseJsonBody');
-        $method->setAccessible(true);
 
         // When there's no input, should return empty array
         $result = $method->invoke(null);
