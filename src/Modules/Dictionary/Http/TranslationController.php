@@ -207,7 +207,7 @@ class TranslationController extends BaseController
         string $srcLang,
         string $tgtLang
     ): void {
-        $lgId = Settings::get('currentlangage');
+        $lgId = Settings::get('currentlanguage');
         $hasParentFrame = true; // Will be checked client-side
         ?>
         <h2 title="Translate with Google Translate">

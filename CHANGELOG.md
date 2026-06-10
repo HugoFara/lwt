@@ -313,6 +313,12 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Misspelled settings key in TTS / translation lookups**. Two reads in the
+  Dictionary module used `Settings::get('currentlangage')` (missing the `u`)
+  instead of the canonical `currentlanguage`, so they silently received an empty
+  value — breaking the current-language TTS voice lookup and the term-translation
+  header's language context. Corrected both
+  (`TranslationService::getCurrentLanguageTtsVoice`, `TranslationController`).
 * **PHP 8.5 deprecation warnings**. Running under PHP 8.5 emitted 429 PHP
   deprecations. The bulk (428) were redundant `ReflectionMethod`/
   `ReflectionProperty::setAccessible(true)` calls in the test suite —

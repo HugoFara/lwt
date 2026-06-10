@@ -210,7 +210,7 @@ class TranslationService
      */
     public function getCurrentLanguageTtsVoice(): ?string
     {
-        $lgId = Settings::get('currentlangage');
+        $lgId = Settings::get('currentlanguage');
 
         if (!$lgId) {
             return null;
