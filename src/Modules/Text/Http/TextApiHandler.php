@@ -25,8 +25,10 @@ namespace Lwt\Modules\Text\Http;
 use Lwt\Modules\Text\Application\Services\DifficultyEstimationService;
 use Lwt\Modules\Text\Application\Services\GdlImportService;
 use Lwt\Modules\Text\Application\Services\GutenbergSuggestionService;
+use Lwt\Modules\Book\Application\BookFacade;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Shared\Infrastructure\Container\Container;
+use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Http\GdlClient;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Shared\Http\ApiRoutableInterface;
@@ -278,8 +280,15 @@ class TextApiHandler implements ApiRoutableInterface
                 return Response::success($this->formatGetPrintItems($textId));
             } elseif ($frag2 === 'annotation') {
                 return Response::success($this->formatGetAnnotation($textId));
+            } elseif ($frag2 === 'book-context') {
+                return $this->formatGetBookContext($textId);
+            } elseif ($frag2 === 'audio') {
+                return $this->formatGetAudio($textId);
             }
-            return Response::error('Expected "words", "print-items", or "annotation"', 404);
+            return Response::error(
+                'Expected "words", "print-items", "annotation", "book-context", or "audio"',
+                404
+            );
         }
         return Response::error(
             'Expected "gutenberg-suggestions", "library-search", "library-preview", '
@@ -403,6 +412,56 @@ class TextApiHandler implements ApiRoutableInterface
         return $action === 'archive'
             ? Response::success($facade->archiveTexts($ids))
             : Response::success($facade->deleteTexts($ids));
+    }
+
+    /**
+     * Handle GET /texts/{id}/book-context — the reading screen's chapter nav.
+     *
+     * Returns the book/chapter context (titles, chapter index, prev/next text
+     * ids) so a shell-free client can render the prev/next navigation that the
+     * server otherwise bakes into read_desktop.php. The body is `{ "book": null }`
+     * when the text is standalone (not part of a book) — a normal state, not an
+     * error. The underlying query runs under QueryBuilder's per-user scope, so
+     * the context of another user's text is never returned.
+     */
+    private function formatGetBookContext(int $textId): JsonResponse
+    {
+        $facade = Container::getInstance()->getTyped(BookFacade::class);
+
+        return Response::success(['book' => $facade->getBookContextForText($textId)]);
+    }
+
+    /**
+     * Handle GET /texts/{id}/audio — the reading screen's media-player config.
+     *
+     * Returns the per-text audio source and saved position plus the global
+     * player settings, mirroring what MediaService bakes into the server-rendered
+     * player, so a shell-free client can render the player itself. A 404 is
+     * returned when the text does not exist or is not owned by the caller
+     * (getTextForReading is per-user scoped); a present text with no audio yields
+     * an empty `uri`.
+     */
+    private function formatGetAudio(int $textId): JsonResponse
+    {
+        $facade = Container::getInstance()->getTyped(TextFacade::class);
+        $header = $facade->getTextForReading($textId);
+        if ($header === null) {
+            return Response::error('Text not found', 404);
+        }
+
+        // Defaults mirror MediaService::renderHtml5AudioPlayer (5s skip, 1.0x).
+        $skip = Settings::get('currentplayerseconds');
+        $rate = Settings::get('currentplaybackrate');
+
+        return Response::success([
+            'uri' => trim((string) ($header['TxAudioURI'] ?? '')),
+            'position' => (float) ($header['TxAudioPosition'] ?? 0),
+            'playerSettings' => [
+                'repeatMode' => (bool) Settings::getZeroOrOne('currentplayerrepeatmode', 0),
+                'skipSeconds' => $skip === '' ? 5 : (int) $skip,
+                'playbackRate' => $rate === '' ? 10 : (int) $rate,
+            ],
+        ]);
     }
 
     // =========================================================================
