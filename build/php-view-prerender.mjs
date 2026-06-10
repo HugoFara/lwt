@@ -201,6 +201,15 @@ export function prerenderPhpView(absPath, warn = () => {}) {
     return '';
   });
 
+  // 8b. Rewrite `printFilePath("sounds/...")` to a bundled relative path. The
+  //     app build copies assets/sounds into dist-app/sounds, so the review
+  //     feedback `<audio>` sources resolve. Other printFilePath targets (e.g.
+  //     server-only CSS) are intentionally left for step 9 to strip.
+  html = html.replace(
+    /<\?php\s+(?:\\?[\w\\]+\\)?StringUtils::printFilePath\(\s*["'](sounds\/[\w.\-/]+)["']\s*\)\s*;?\s*\?>/g,
+    (_m, path) => './' + path
+  );
+
   // 9. Strip anything still left (page-header blocks, unhandled constructs).
   html = html.replace(/<\?(?:php|=)[\s\S]*?\?>/g, (m) => {
     const snippet = m.replace(/\s+/g, ' ').slice(0, 60);

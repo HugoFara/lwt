@@ -1,6 +1,7 @@
 import { defineConfig, type PluginOption } from 'vite';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
+import { cpSync, mkdirSync } from 'fs';
 // @ts-expect-error - plain .mjs build helper, no types
 import { prerenderPhpView } from './build/php-view-prerender.mjs';
 
@@ -46,6 +47,24 @@ function injectPrerenderedViews(): PluginOption {
   };
 }
 
+/**
+ * Copy the review feedback sounds into dist-app/sounds so the prerendered
+ * `<audio>` sources (rewritten to ./sounds/*.mp3) resolve in the bundle.
+ */
+function copyReviewSounds(): PluginOption {
+  return {
+    name: 'lwt-copy-review-sounds',
+    apply: 'build',
+    closeBundle() {
+      const dest = resolve(__dirname, 'dist-app/sounds');
+      mkdirSync(dest, { recursive: true });
+      for (const file of ['success.mp3', 'failure.mp3']) {
+        cpSync(resolve(__dirname, 'assets/sounds', file), resolve(dest, file));
+      }
+    }
+  };
+}
+
 export default defineConfig({
   root: resolve(__dirname, 'src/frontend/app'),
   // Relative asset URLs so pages work when served from the bundle root inside
@@ -65,7 +84,7 @@ export default defineConfig({
     }
   },
 
-  plugins: [injectPrerenderedViews()],
+  plugins: [injectPrerenderedViews(), copyReviewSounds()],
 
   build: {
     outDir: resolve(__dirname, 'dist-app'),
