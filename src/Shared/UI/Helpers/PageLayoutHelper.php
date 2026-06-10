@@ -104,34 +104,30 @@ class PageLayoutHelper
     }
 
     /**
-     * Generate the main navigation bar HTML using Alpine.js and Bulma.
+     * Assemble the navbar's dynamic, per-user data.
      *
-     * @param string $currentPage Optional identifier for the current page to highlight
+     * The navbar markup itself is now rendered client-side (see
+     * `navbar_renderer.ts`) so the same chrome can render in the bundled,
+     * shell-free client against a remote `/api/v1`. This method is the single
+     * server-side source of the data that markup needs — language list, current
+     * language, theme state and user/admin flags — and is exposed verbatim by
+     * `GET /api/v1/navbar`.
      *
-     * @return string HTML navbar element
+     * Labels are intentionally absent: they are resolved client-side via the
+     * i18n bundle (`t('navbar.*')`), so this payload stays locale-agnostic.
+     *
+     * @return array{
+     *     basePath: string,
+     *     logoUrl: string,
+     *     languages: array<int, array{id: int, name: string}>,
+     *     currentLanguageId: int,
+     *     isMultiUser: bool,
+     *     showAdminItems: bool,
+     *     theme: array{mode: string, counterpart: string, current: string, auto: bool}
+     * }
      */
-    public static function buildNavbar(string $currentPage = ''): string
+    public static function getNavbarData(): array
     {
-        $textsIcon = IconHelper::render('book-text', ['alt' => __('navbar.texts')]);
-        $termsIcon = IconHelper::render('spell-check', ['alt' => __('navbar.vocabulary')]);
-        $languagesIcon = IconHelper::render('languages', ['alt' => __('navbar.languages')]);
-
-        $isTexts = in_array($currentPage, ['texts', 'archived', 'text-tags', 'text-check', 'long-import', 'feeds']);
-        $isTerms = in_array($currentPage, ['terms', 'term-tags', 'term-import']);
-        $isLanguages = in_array($currentPage, ['languages', 'language-new', 'language-edit']);
-        $isAdmin = in_array($currentPage, ['backup', 'settings', 'tts', 'users']);
-        $isUser = in_array($currentPage, ['preferences', 'profile']);
-
-        $textsLinkClass = $isTexts ? ' is-active' : '';
-        $termsLinkClass = $isTerms ? ' is-active' : '';
-        $languagesLinkClass = $isLanguages ? ' is-active' : '';
-        $userActive = ($isUser || $isAdmin) ? ' is-active' : '';
-
-        $plusIcon = IconHelper::render('plus', ['alt' => __('navbar.add_new'), 'size' => 16]);
-
-        $base = UrlUtilities::getBasePath();
-        $logoUrl = UrlUtilities::url('/assets/images/lwt_icon_48.png');
-
         // Theme toggle: read current theme and determine mode/counterpart
         $themeDir = Settings::getWithDefault('set-theme-dir');
         $themeJsonPath = $themeDir . 'theme.json';
@@ -151,178 +147,42 @@ class PageLayoutHelper
             }
         }
         $isAutoTheme = ($themeDir === '' || $themeDir === 'themes/default/' || $themeDir === 'dist/themes/Default/');
-        $toggleIcon = $themeMode === 'dark' ? 'sun' : 'moon';
-        $toggleTitle = $themeMode === 'dark'
-            ? __('navbar.switch_to_light_mode')
-            : __('navbar.switch_to_dark_mode');
-        $toggleIconHtml = IconHelper::render($toggleIcon, ['alt' => $toggleTitle]);
-        $escapedCounterpart = htmlspecialchars($themeCounterpart, ENT_QUOTES, 'UTF-8');
-        $escapedThemeDir = htmlspecialchars($themeDir, ENT_QUOTES, 'UTF-8');
-        $autoThemeAttr = $isAutoTheme ? 'true' : 'false';
 
-        // User icon and profile/admin links
-        $userIcon = IconHelper::render('user', ['alt' => __('navbar.user')]);
         $isMultiUser = Globals::isMultiUserEnabled();
-        $profileLink = $isMultiUser
-            ? '<a class="navbar-item" href="' . $base . '/profile">' . __('navbar.profile') . '</a>'
-            : '';
-        $showAdminItems = !$isMultiUser || Globals::isCurrentUserAdmin();
-        $adminItemsHtml = '';
-        if ($showAdminItems) {
-            $databaseOps = __('navbar.database_operations');
-            $adminSettings = __('navbar.admin_settings');
-            $usersLabel = __('navbar.users');
-            $serverData = __('navbar.server_data');
-            $adminItemsHtml = <<<ADMIN
-                    <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/admin/backup">{$databaseOps}</a>
-                    <a class="navbar-item" href="{$base}/admin/settings">{$adminSettings}</a>
-                    <a class="navbar-item" href="{$base}/admin/users">{$usersLabel}</a>
-                    <a class="navbar-item" href="{$base}/admin/server-data">{$serverData}</a>
-ADMIN;
-        }
-
-        // Language selector data
         $langData = self::getLanguagesForNavbar();
-        $langOptions = '';
-        foreach ($langData['languages'] as $lang) {
-            $langId = $lang['id'];
-            $langName = htmlspecialchars($lang['name'], ENT_QUOTES, 'UTF-8');
-            $selected = ($langId === $langData['currentId']) ? ' selected' : '';
-            $langOptions .= '<option value="' . $langId . '"' . $selected . '>'
-                . $langName . '</option>';
-        }
-        $langSelectorHtml = '';
-        if ($langOptions !== '') {
-            $langSelectorHtml = <<<LANG
-            <div class="navbar-item">
-                <div class="field has-addons mb-0">
-                    <div class="control">
-                        <div class="select is-small">
-                            <select @change="switchLanguage(\$event)" data-current-lang="{$langData['currentId']}">
-                                {$langOptions}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-LANG;
-        }
 
-        $mainNav = __('navbar.main_navigation');
-        $menuLabel = __('navbar.menu');
-        $textsLabel = __('navbar.texts');
-        $newTextTitle = __('navbar.new_text_title');
-        $vocabularyLabel = __('navbar.vocabulary');
-        $newTermTitle = __('navbar.new_term_title');
-        $languagesLabel = __('navbar.languages');
-        $newLanguageTitle = __('navbar.new_language_title');
-        $statisticsTitle = __('navbar.statistics_title');
-        $userLabel = __('navbar.user');
-        $preferencesLabel = __('navbar.preferences');
-        $helpLabel = __('navbar.help');
-        // Logout must POST with a CSRF token; the navbar Alpine component's
-        // logout() method builds and submits a hidden form. The anchor keeps
-        // its visual style but its href is decorative — the click handler
-        // does the work.
-        $logoutLink = $isMultiUser
-            ? '<hr class="navbar-divider">'
-                . '<a class="navbar-item" href="' . $base . '/logout"'
-                . ' @click.prevent="logout()">' . __('navbar.logout') . '</a>'
-            : '';
+        return [
+            'basePath' => UrlUtilities::getBasePath(),
+            'logoUrl' => UrlUtilities::url('/assets/images/lwt_icon_48.png'),
+            'languages' => $langData['languages'],
+            'currentLanguageId' => $langData['currentId'],
+            'isMultiUser' => $isMultiUser,
+            'showAdminItems' => !$isMultiUser || Globals::isCurrentUserAdmin(),
+            'theme' => [
+                'mode' => $themeMode,
+                'counterpart' => $themeCounterpart,
+                'current' => $themeDir,
+                'auto' => $isAutoTheme,
+            ],
+        ];
+    }
 
-        return <<<HTML
-<nav class="navbar is-light" role="navigation" aria-label="{$mainNav}" x-data="navbar()">
-    <div class="navbar-brand">
-        <a class="navbar-item" href="{$base}/">
-            <img src="{$logoUrl}" alt="LWT" width="28" height="28">
-            <span class="ml-2 has-text-weight-semibold">LWT</span>
-        </a>
-
-        <a role="button" class="navbar-burger" aria-label="{$menuLabel}" aria-expanded="false"
-           :class="{ 'is-active': isOpen }" @click="toggle()">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
-    </div>
-
-    <div class="navbar-menu" :class="{ 'is-active': isOpen }">
-        <div class="navbar-start">
-            <div class="navbar-item">
-                <div class="buttons has-addons mb-0">
-                    <a class="button is-small{$textsLinkClass}" href="{$base}/texts">
-                        <span class="icon is-small">{$textsIcon}</span>
-                        <span>{$textsLabel}</span>
-                    </a>
-                    <a class="button is-small" href="{$base}/texts/new" title="{$newTextTitle}">
-                        <span class="icon is-small">{$plusIcon}</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="navbar-item">
-                <div class="buttons has-addons mb-0">
-                    <a class="button is-small{$termsLinkClass}" href="{$base}/words">
-                        <span class="icon is-small">{$termsIcon}</span>
-                        <span>{$vocabularyLabel}</span>
-                    </a>
-                    <a class="button is-small" href="{$base}/words/new" title="{$newTermTitle}">
-                        <span class="icon is-small">{$plusIcon}</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="navbar-item">
-                <div class="buttons has-addons mb-0">
-                    <a class="button is-small{$languagesLinkClass}" href="{$base}/languages">
-                        <span class="icon is-small">{$languagesIcon}</span>
-                        <span>{$languagesLabel}</span>
-                    </a>
-                    <a class="button is-small" href="{$base}/languages/new" title="{$newLanguageTitle}">
-                        <span class="icon is-small">{$plusIcon}</span>
-                    </a>
-                </div>
-            </div>
-
-            {$langSelectorHtml}
-
-            <a class="navbar-item" href="{$base}/profile/statistics" title="{$statisticsTitle}"
-               x-data="navbarStreak">
-                <span class="icon has-text-warning"><i data-lucide="flame"></i></span>
-                <span class="is-size-7 has-text-weight-semibold" x-show="streak > 0" x-text="streak" x-cloak></span>
-            </a>
-        </div>
-
-        <div class="navbar-end">
-            <a class="navbar-item" href="#" title="{$toggleTitle}"
-               x-data="themeToggle"
-               data-theme-mode="{$themeMode}"
-               data-theme-counterpart="{$escapedCounterpart}"
-               data-current-theme="{$escapedThemeDir}"
-               data-auto-theme="{$autoThemeAttr}">
-                {$toggleIconHtml}
-            </a>
-
-            <div class="navbar-item has-dropdown{$userActive}" :class="{ 'is-active': activeDropdown === 'user' }">
-                <a class="navbar-link" @click.prevent="toggleDropdown('user')">
-                    {$userIcon}
-                    <span class="ml-1">{$userLabel}</span>
-                </a>
-                <div class="navbar-dropdown is-right">
-                    <a class="navbar-item" href="{$base}/profile/preferences">{$preferencesLabel}</a>
-                    {$profileLink}
-                    {$adminItemsHtml}
-                    <hr class="navbar-divider">
-                    <a class="navbar-item" href="{$base}/docs/info.html" target="_blank">{$helpLabel}</a>
-                    {$logoutLink}
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-HTML;
+    /**
+     * Render the navbar mount point.
+     *
+     * The client (`mountNavbar()` in `navbar.ts`) fetches `GET /api/v1/navbar`,
+     * builds the markup with `navbar_renderer.ts` and hydrates this element. The
+     * `data-current-page` attribute carries the active-page hint that used to be
+     * a PHP parameter, so highlighting still works without server-rendered HTML.
+     *
+     * @param string $currentPage Optional identifier for the current page to highlight
+     *
+     * @return string HTML placeholder element
+     */
+    public static function buildNavbarPlaceholder(string $currentPage = ''): string
+    {
+        return '<div id="navbar-root" data-navbar-root data-current-page="'
+            . htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8') . '"></div>';
     }
 
     /**
@@ -832,7 +692,7 @@ HTML;
     {
         self::renderPageStartNobody($title);
         if ($close) {
-            echo self::buildNavbar($currentPage);
+            echo self::buildNavbarPlaceholder($currentPage);
         } else {
             echo '<div>';
             echo self::buildLogo();

@@ -10,7 +10,9 @@
 
 import Alpine from 'alpinejs';
 import { setLangAsync } from '@modules/language/stores/language_settings';
-import { getCsrfToken } from '@shared/api/client';
+import { getCsrfToken, apiGet } from '@shared/api/client';
+import { renderNavbar, type NavbarData as NavbarChromeData } from '@shared/components/navbar_renderer';
+import { initIconsIn } from '@shared/icons/lucide_icons';
 
 interface NavbarData {
   isOpen: boolean;
@@ -124,6 +126,37 @@ export function navbarData(): NavbarData {
  */
 export function initNavbarAlpine(): void {
   Alpine.data('navbar', navbarData);
+}
+
+/**
+ * Render and hydrate the global navbar into its placeholder.
+ *
+ * PageLayoutHelper::buildNavbarPlaceholder() emits an empty
+ * `<div id="navbar-root" data-current-page="…">`; this fetches the chrome data
+ * from GET /api/v1/navbar, builds the markup (navbar_renderer.ts) and hydrates
+ * it. Called from main.ts after Alpine.start() — so we hand the freshly injected
+ * subtree to Alpine.initTree (the navbar/themeToggle/navbarStreak components are
+ * already registered) and then realise its lucide icons.
+ *
+ * No-ops on pages without the placeholder (login, minimal headers).
+ */
+export async function mountNavbar(): Promise<void> {
+  const root = document.getElementById('navbar-root');
+  if (!root) {
+    return;
+  }
+  const currentPage = root.getAttribute('data-current-page') ?? '';
+  try {
+    const res = await apiGet<NavbarChromeData>('/navbar');
+    if (!res.data) {
+      return;
+    }
+    root.innerHTML = renderNavbar(res.data, currentPage);
+    Alpine.initTree(root);
+    initIconsIn(root);
+  } catch (error) {
+    console.error('Failed to load navbar:', error);
+  }
 }
 
 // Expose for global access

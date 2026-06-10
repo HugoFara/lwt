@@ -49,7 +49,7 @@ import '@shared/api/client';
 
 // Shared components (used on every page)
 import '@shared/components/modal';
-import '@shared/components/navbar';
+import { mountNavbar } from '@shared/components/navbar';
 import '@shared/components/navbar_streak';
 import '@shared/components/theme_toggle';
 import '@shared/components/footer';
@@ -162,6 +162,11 @@ Promise.all(loaders).then(async () => {
 
   // Start Alpine.js
   Alpine.start();
+
+  // Render the global navbar from GET /api/v1/navbar and hydrate it into its
+  // placeholder. Fire-and-forget: the rest of the page is already interactive,
+  // and pages without a #navbar-root (login, print headers) just no-op.
+  void mountNavbar();
 
   window.LWT_VITE_LOADED = true;
 

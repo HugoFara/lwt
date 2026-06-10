@@ -35,22 +35,36 @@ final class UiHelpersTest extends TestCase
     }
 
     /**
-     * Test PageLayoutHelper::buildNavbar() function
+     * Test PageLayoutHelper::buildNavbarPlaceholder() — the navbar is now
+     * client-rendered (navbar_renderer.ts) from this empty mount point.
      */
-    public function testQuickMenu(): void
+    public function testNavbarPlaceholder(): void
     {
-        $output = PageLayoutHelper::buildNavbar();
+        $output = PageLayoutHelper::buildNavbarPlaceholder('texts');
 
-        // Should output a nav element
-        $this->assertStringContainsString('<nav', $output);
-        $this->assertStringContainsString('class="navbar', $output);
-        $this->assertStringContainsString('role="navigation"', $output);
+        $this->assertStringContainsString('id="navbar-root"', $output);
+        $this->assertStringContainsString('data-navbar-root', $output);
+        $this->assertStringContainsString('data-current-page="texts"', $output);
+        // No server-rendered <nav> markup anymore.
+        $this->assertStringNotContainsString('<nav', $output);
+    }
 
-        // Should contain various menu sections
-        $this->assertStringContainsString('href="/"', $output);
-        $this->assertStringContainsString('href="/languages"', $output);
-        $this->assertStringContainsString('href="/texts"', $output);
-        $this->assertStringContainsString('href="/words"', $output);
+    /**
+     * Test PageLayoutHelper::getNavbarData() — the payload behind GET /api/v1/navbar.
+     */
+    public function testGetNavbarData(): void
+    {
+        $data = PageLayoutHelper::getNavbarData();
+
+        $this->assertArrayHasKey('basePath', $data);
+        $this->assertArrayHasKey('languages', $data);
+        $this->assertIsArray($data['languages']);
+        $this->assertArrayHasKey('currentLanguageId', $data);
+        $this->assertArrayHasKey('isMultiUser', $data);
+        $this->assertArrayHasKey('showAdminItems', $data);
+        $this->assertArrayHasKey('theme', $data);
+        $this->assertArrayHasKey('mode', $data['theme']);
+        $this->assertArrayHasKey('auto', $data['theme']);
     }
 
     /**

@@ -6,21 +6,12 @@
   <meta name="color-scheme" content="light dark" />
   <title>Lukaisu — Library</title>
   <meta name="lwt-modules" content="text,vocabulary" />
-  <style>
-    [x-cloak]{display:none !important}
-    .app-bar{display:flex;align-items:center;gap:.75rem;padding:.5rem 1rem;border-bottom:1px solid #dbdbdb}
-    .app-bar .app-bar-title{font-weight:700;margin-right:auto}
-    .app-bar select[hidden]{display:none}
-  </style>
+  <style>[x-cloak]{display:none !important}</style>
 </head>
 <body>
-  <nav class="app-bar">
-    <span class="app-bar-title">Library</span>
-    <div class="select is-small">
-      <select id="app-lang-select" aria-label="Language" hidden></select>
-    </div>
-    <a class="button is-small is-light" href="/connect">Switch server</a>
-  </nav>
+  <!-- Real navbar, hydrated from GET /api/v1/navbar (mountNavbar in main.ts).
+       The navbar's language switcher replaces the old per-page #app-lang-select. -->
+  <div id="navbar-root" data-navbar-root data-current-page="texts"></div>
   <section class="section pt-4">
     <!-- Body prerendered at build time from the server's text-list view. -->
     <!--LWT_VIEW:src/Modules/Text/Views/edit_list.php-->

@@ -28,7 +28,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 ?>
 <!-- Main navigation -->
-<?php echo PageLayoutHelper::buildNavbar(); ?>
+<?php echo PageLayoutHelper::buildNavbarPlaceholder(); ?>
 
 <!-- Review application root - all UI rendered by Alpine.js -->
 <div id="review-app">

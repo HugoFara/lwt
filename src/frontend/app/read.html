@@ -6,17 +6,12 @@
   <meta name="color-scheme" content="light dark" />
   <title>Lukaisu — Read</title>
   <meta name="lwt-modules" content="vocabulary,text,review,language" />
-  <style>
-    [x-cloak]{display:none !important}
-    .app-bar{display:flex;align-items:center;gap:.75rem;padding:.5rem 1rem;border-bottom:1px solid #dbdbdb}
-  </style>
+  <style>[x-cloak]{display:none !important}</style>
 </head>
 <body>
-  <nav class="app-bar">
-    <a class="button is-small is-light" href="/texts">&larr; Library</a>
-  </nav>
-  <!-- Body prerendered at build time from the server's reader view (toolbar,
-       audio player, word popover/modal, multi-word modal — all inlined). -->
+  <!-- Body prerendered at build time from the server's reader view (navbar
+       mount point, toolbar, audio player, word popover/modal, multi-word modal
+       — all inlined). The #navbar-root is hydrated from GET /api/v1/navbar. -->
   <!--LWT_VIEW:src/Modules/Text/Views/read_desktop.php-->
   <script type="module" src="./read.ts"></script>
 </body>

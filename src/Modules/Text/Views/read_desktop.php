@@ -41,7 +41,7 @@ assert(is_string($title));
 
 ?>
 <!-- Main navigation -->
-<?php echo PageLayoutHelper::buildNavbar('texts'); ?>
+<?php echo PageLayoutHelper::buildNavbarPlaceholder('texts'); ?>
 
 <div x-data="textReader" class="reading-page" x-cloak>
   <!-- Reading toolbar -->

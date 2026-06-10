@@ -60,6 +60,6 @@ assert(is_string($annotationLinkHtml));
     </div>
     <?php endif; ?>
     <div>
-        <?php echo PageLayoutHelper::buildNavbar(); ?>
+        <?php echo PageLayoutHelper::buildNavbarPlaceholder(); ?>
     </div>
 </div>

@@ -22,6 +22,7 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\I18n\Translator;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\Infrastructure\Http\Cors;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Modules\User\Http\UserApiHandler;
@@ -225,6 +226,13 @@ class ApiV1
 
             case 'i18n':
                 return $this->handleI18nGet($fragments, $params);
+
+            case 'navbar':
+                // Per-user navbar chrome data (language list, current language,
+                // theme, admin flags). The labels are not included — the client
+                // resolves them from the i18n bundle. Protected: the language
+                // list is user-scoped.
+                return Response::success(PageLayoutHelper::getNavbarData());
 
             case 'media-files':
                 // MediaService::searchMediaPaths recursively scans `media/`

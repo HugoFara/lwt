@@ -10,8 +10,10 @@
  * those specific views use into static HTML:
  *
  *   - `<?php require __DIR__ . '/partial.php'; ?>`  -> inline the partial
- *   - `PageLayoutHelper::buildNavbar(...)`          -> dropped (the bundle has
- *                                                       its own minimal nav)
+ *   - `PageLayoutHelper::buildNavbarPlaceholder(p)` -> the `#navbar-root` div,
+ *                                                       kept so the client
+ *                                                       hydrates the real navbar
+ *                                                       from GET /api/v1/navbar
  *   - `<?php if (...) : ?> ... <?php endif; ?>`      -> dropped (only the
  *                                                       optional source-link
  *                                                       block uses this)
@@ -162,10 +164,14 @@ export function prerenderPhpView(absPath, warn = () => {}) {
     }
   );
 
-  // 2. Drop the server navbar — the bundle supplies its own.
+  // 2. Keep the navbar mount point. The server renders an empty placeholder the
+  //    client hydrates from GET /api/v1/navbar; the bundle does exactly the
+  //    same, so emit the div (carrying its current-page hint) rather than the
+  //    PHP call, which step 9 would otherwise strip.
   html = html.replace(
-    /<\?php\s+echo\s+(?:\\?[\w\\]+\\)?PageLayoutHelper::buildNavbar\([^)]*\)\s*;?\s*\?>/g,
-    ''
+    /<\?php\s+echo\s+(?:\\?[\w\\]+\\)?PageLayoutHelper::buildNavbarPlaceholder\(\s*(?:'([^']*)')?\s*\)\s*;?\s*\?>/g,
+    (_m, page = '') =>
+      `<div id="navbar-root" data-navbar-root data-current-page="${escapeHtml(page ?? '')}"></div>`
   );
 
   // 3. Expand literal-array foreach blocks (audio skip-seconds).

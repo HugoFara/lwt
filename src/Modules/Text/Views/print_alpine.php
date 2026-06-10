@@ -111,7 +111,7 @@ $hasAnnotation = $viewData['hasAnnotation'];
                 </a>
             </div>
             <div>
-                <?php echo PageLayoutHelper::buildNavbar(); ?>
+                <?php echo PageLayoutHelper::buildNavbarPlaceholder(); ?>
             </div>
         </div>
 
