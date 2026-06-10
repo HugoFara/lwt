@@ -11,8 +11,11 @@ import {
   apiPost,
   apiPut,
   apiDelete,
+  apiPostForm,
   setApiServer,
-  getApiServer
+  getApiServer,
+  setAuthToken,
+  getAuthToken
 } from '../../../src/frontend/js/shared/api/client';
 
 describe('shared/api/client.ts — injectable API server', () => {
@@ -26,18 +29,24 @@ describe('shared/api/client.ts — injectable API server', () => {
       ok: true,
       text: () => Promise.resolve('{}')
     });
-    // Start each test from a clean, same-origin state.
+    // Start each test from a clean, same-origin, unauthenticated state.
     setApiServer(null);
+    setAuthToken(null);
     localStorage.clear();
   });
 
   afterEach(() => {
     // Never leak an override into other test files/suites.
     setApiServer(null);
+    setAuthToken(null);
     localStorage.clear();
     vi.restoreAllMocks();
     global.fetch = originalFetch;
   });
+
+  function calledHeaders(): Record<string, string> {
+    return (mockFetch.mock.calls[0][1].headers ?? {}) as Record<string, string>;
+  }
 
   function calledUrl(): string {
     return String(mockFetch.mock.calls[0][0]);
@@ -130,6 +139,62 @@ describe('shared/api/client.ts — injectable API server', () => {
       localStorage.setItem('lwt.apiServer', 'https://stored.example.org');
       await apiGet('/terms/1');
       expect(calledUrl()).toBe('https://stored.example.org/api/v1/terms/1');
+    });
+  });
+
+  describe('bearer token (Authorization header)', () => {
+    it('sends no Authorization header when unauthenticated', async () => {
+      await apiGet('/terms/1');
+      expect(calledHeaders().Authorization).toBeUndefined();
+      expect(getAuthToken()).toBe('');
+    });
+
+    it('attaches Bearer token to GET requests', async () => {
+      setAuthToken('tok-123');
+      await apiGet('/terms/1');
+      expect(calledHeaders().Authorization).toBe('Bearer tok-123');
+    });
+
+    it('attaches Bearer token to POST/PUT/DELETE requests', async () => {
+      setAuthToken('tok-123');
+      await apiPost('/terms', { text: 'hi' });
+      expect(calledHeaders().Authorization).toBe('Bearer tok-123');
+
+      vi.clearAllMocks();
+      mockFetch.mockResolvedValue({ ok: true, text: () => Promise.resolve('{}') });
+      await apiPut('/terms/1', { status: 3 });
+      expect(calledHeaders().Authorization).toBe('Bearer tok-123');
+
+      vi.clearAllMocks();
+      mockFetch.mockResolvedValue({ ok: true, text: () => Promise.resolve('{}') });
+      await apiDelete('/terms/1');
+      expect(calledHeaders().Authorization).toBe('Bearer tok-123');
+    });
+
+    it('attaches Bearer token to form posts alongside CSRF', async () => {
+      setAuthToken('tok-123');
+      await apiPostForm('/terms/1/status', { status: '3' });
+      expect(calledHeaders().Authorization).toBe('Bearer tok-123');
+    });
+
+    it('persists the token and clears it on reset', async () => {
+      setAuthToken('tok-123');
+      expect(localStorage.getItem('lwt.apiToken')).toBe('tok-123');
+      expect(getAuthToken()).toBe('tok-123');
+
+      setAuthToken(null);
+      expect(localStorage.getItem('lwt.apiToken')).toBeNull();
+      expect(getAuthToken()).toBe('');
+      await apiGet('/terms/1');
+      expect(calledHeaders().Authorization).toBeUndefined();
+    });
+
+    it('works together with a remote server', async () => {
+      setApiServer('https://remote.example.org');
+      setAuthToken('tok-123');
+      await apiGet('/terms/1');
+      expect(calledUrl()).toBe('https://remote.example.org/api/v1/terms/1');
+      expect(calledHeaders().Authorization).toBe('Bearer tok-123');
     });
   });
 });

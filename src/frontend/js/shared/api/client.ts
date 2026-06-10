@@ -151,6 +151,76 @@ function withCsrf(headers: Record<string, string>): Record<string, string> {
 }
 
 /**
+ * In-memory bearer token, set via {@link setAuthToken}. `null` means "consult
+ * localStorage"; '' is never stored (a reset clears it back to `null`).
+ */
+let authTokenOverride: string | null = null;
+
+/**
+ * Safely read the persisted bearer token. Returns '' when localStorage is
+ * unavailable.
+ */
+function readStoredAuthToken(): string {
+  try {
+    return localStorage.getItem('lwt.apiToken') || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * The bearer token the client currently sends, or '' when unauthenticated.
+ * Precedence: runtime value set via {@link setAuthToken} > localStorage
+ * (`lwt.apiToken`).
+ */
+export function getAuthToken(): string {
+  if (authTokenOverride !== null) {
+    return authTokenOverride;
+  }
+  return readStoredAuthToken();
+}
+
+/**
+ * Store (or clear) the API bearer token obtained from `POST /api/v1/auth/login`
+ * (or `/auth/register`, `/auth/refresh`). Persisted to localStorage so a
+ * packaged client stays signed in across launches. Pass `null`/'' to clear,
+ * e.g. on logout.
+ *
+ * When set, every request carries `Authorization: Bearer <token>`. This is how
+ * a cross-origin client authenticates, since cookies are not sent to a remote
+ * server (see {@link setApiServer}); same-origin callers can ignore it and keep
+ * using the session cookie.
+ */
+export function setAuthToken(token: string | null): void {
+  const normalized = (token || '').trim();
+  if (!normalized) {
+    authTokenOverride = null;
+    try {
+      localStorage.removeItem('lwt.apiToken');
+    } catch {
+      // localStorage unavailable: nothing persisted to clear.
+    }
+    return;
+  }
+  authTokenOverride = normalized;
+  try {
+    localStorage.setItem('lwt.apiToken', normalized);
+  } catch {
+    // localStorage unavailable: the in-memory token still applies this session.
+  }
+}
+
+/**
+ * Add the `Authorization: Bearer` header when a token is set. A no-op
+ * otherwise, so same-origin cookie-authenticated requests are unchanged.
+ */
+function withAuth(headers: Record<string, string>): Record<string, string> {
+  const token = getAuthToken();
+  if (!token) return headers;
+  return { ...headers, Authorization: `Bearer ${token}` };
+}
+
+/**
  * Get the default API configuration.
  * Lazily reads base path from meta tag.
  */
@@ -241,7 +311,7 @@ export async function apiGet<T>(
   try {
     const response = await fetch(buildUrl(endpoint, params), {
       method: 'GET',
-      headers: defaultConfig.defaultHeaders
+      headers: withAuth(defaultConfig.defaultHeaders ?? {})
     });
 
     if (!response.ok) {
@@ -277,7 +347,7 @@ export async function apiPost<T>(
   try {
     const response = await fetch(defaultConfig.baseUrl + endpoint, {
       method: 'POST',
-      headers: withCsrf(defaultConfig.defaultHeaders ?? {}),
+      headers: withAuth(withCsrf(defaultConfig.defaultHeaders ?? {})),
       body: JSON.stringify(body)
     });
 
@@ -314,7 +384,7 @@ export async function apiPut<T>(
   try {
     const response = await fetch(defaultConfig.baseUrl + endpoint, {
       method: 'PUT',
-      headers: withCsrf(defaultConfig.defaultHeaders ?? {}),
+      headers: withAuth(withCsrf(defaultConfig.defaultHeaders ?? {})),
       body: JSON.stringify(body)
     });
 
@@ -350,7 +420,7 @@ export async function apiDelete<T>(
   try {
     const options: RequestInit = {
       method: 'DELETE',
-      headers: withCsrf(defaultConfig.defaultHeaders ?? {})
+      headers: withAuth(withCsrf(defaultConfig.defaultHeaders ?? {}))
     };
     if (body) {
       options.body = JSON.stringify(body);
@@ -395,10 +465,10 @@ export async function apiPostForm<T>(
 
     const response = await fetch(defaultConfig.baseUrl + endpoint, {
       method: 'POST',
-      headers: withCsrf({
+      headers: withAuth(withCsrf({
         'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json'
-      }),
+      })),
       body: formData.toString()
     });
 
