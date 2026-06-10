@@ -566,9 +566,10 @@ function renderTermDetailsHtml(term: TermDetails): string {
     rows.push(`<tr><td class="lwt-label">Romaniz.:</td><td class="lwt-value">${escapeHtml(term.romanization)}</td></tr>`);
   }
 
-  // Sentence (format {term} markers)
+  // Sentence (format {term} markers). Escape first — term.sentence is the raw
+  // WoSentence from the API; only the {term} markers become trusted markup.
   if (term.sentence) {
-    const formattedSentence = term.sentence
+    const formattedSentence = escapeHtml(term.sentence)
       .replace(/\{([^}]+)\}/g, '<b>$1</b>');
     rows.push(`<tr><td class="lwt-label">Sentence:</td><td class="lwt-value">${formattedSentence}</td></tr>`);
   }

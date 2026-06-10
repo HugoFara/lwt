@@ -32,5 +32,5 @@ namespace Lwt\Views\Review;
     'dict2Uri' => $dict2Uri,
     'translateUri' => $translateUri,
     'langCode' => $langCode
-]); ?>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>

@@ -345,6 +345,30 @@ describe('translation_api.ts', () => {
       expect(translations?.innerHTML).toContain('(greeting)');
     });
 
+    it('escapes hostile Glosbe text and uses a data attribute, not inline onclick', () => {
+      // Payloads that try to break out of both the attribute and the element.
+      const data = {
+        tuc: [
+          { phrase: { text: '"><img src=x onerror=alert(1)>' } },
+          { meanings: [{ text: '"><svg onload=alert(2)>' }] },
+        ],
+        from: 'en',
+        dest: 'fr',
+        phrase: 'hello',
+      };
+
+      getTranslationFromGlosbeApi(data);
+
+      const container = document.getElementById('translations') as HTMLElement;
+      // No inline handler for the hostile text to break out of.
+      expect(container.innerHTML).not.toContain('onclick');
+      // The word is carried via the delegated 'add-translation' handler.
+      expect(container.innerHTML).toContain('data-action="add-translation"');
+      // The escaping must prevent the payload from becoming a live element with
+      // a script handler (attribute breakout via the embedded double quote).
+      expect(container.querySelector('img, svg, [onerror], [onload]')).toBeNull();
+    });
+
     it('displays message when no translations found', () => {
       const data = {
         tuc: [],

@@ -7,6 +7,7 @@
  */
 
 import { iconHtml } from '@shared/icons/icons';
+import { escapeHtml } from '@shared/utils/html_utils';
 
 // Type for the frame with form check
 interface LwtFormCheck {
@@ -136,19 +137,24 @@ export function getTranslationFromGlosbeApi(data: GlosbeResponse): void {
   try {
     data.tuc.forEach((rows: GlosbeTucEntry) => {
       if (rows.phrase) {
+        // Glosbe API text is third-party data; escape it and pass the word via a
+        // data attribute consumed by the delegated 'add-translation' handler
+        // (no inline onclick — CSP-safe and no string-literal breakout).
+        const phrase = rows.phrase.text;
         translationsEl.insertAdjacentHTML('beforeend',
-          '<span class="click" onclick="addTranslation(\'' +
-          rows.phrase.text + '\');">' +
+          '<span class="click" data-action="add-translation" data-word="' +
+          escapeHtml(phrase) + '">' +
           iconHtml('tick-button', { title: 'Copy', alt: 'Copy' }) +
-          ' &nbsp; ' + rows.phrase.text +
+          ' &nbsp; ' + escapeHtml(phrase) +
           '</span><br />'
         );
       } else if (rows.meanings) {
+        const meaning = '(' + rows.meanings[0].text + ')';
         translationsEl.insertAdjacentHTML('beforeend',
-          '<span class="click" onclick="addTranslation(' + "'(" +
-          rows.meanings[0].text + ")'" + ');">' +
+          '<span class="click" data-action="add-translation" data-word="' +
+          escapeHtml(meaning) + '">' +
           iconHtml('tick-button', { title: 'Copy', alt: 'Copy' }) +
-          ' &nbsp; ' + '(' + rows.meanings[0].text + ')' +
+          ' &nbsp; ' + escapeHtml(meaning) +
           '</span><br />'
         );
       }

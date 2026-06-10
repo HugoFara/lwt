@@ -145,10 +145,10 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
 <div x-data="statisticsApp()">
     <!-- Hidden data elements for Chart.js initialization -->
     <script type="application/json" id="statistics-intensity-data">
-    <?php echo json_encode(['languages' => $intensityChartData]); ?>
+    <?php echo json_encode(['languages' => $intensityChartData], JSON_HEX_TAG | JSON_HEX_AMP); ?>
     </script>
     <script type="application/json" id="statistics-frequency-data">
-    <?php echo json_encode(['totals' => $frequencyChartTotals]); ?>
+    <?php echo json_encode(['totals' => $frequencyChartTotals], JSON_HEX_TAG | JSON_HEX_AMP); ?>
     </script>
 
     <!-- Learning Intensity Section -->

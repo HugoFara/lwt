@@ -78,7 +78,7 @@ function renderHomeConfig(?array $lastTextInfo, string $base, int $textCount, in
     ];
     ?>
 <script type="application/json" id="home-warnings-config">
-    <?php echo json_encode($config, JSON_UNESCAPED_SLASHES); ?>
+    <?php echo json_encode($config, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
     <?php
 }

@@ -34,5 +34,5 @@ namespace Lwt\Views\Review;
     'testStatus' => $testStatus,
     'ajax' => $ajax,
     'waitTime' => $waitTime
-]); ?>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>

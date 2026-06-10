@@ -41,7 +41,7 @@ assert(is_array($languagePresetsArray));
  */
 ?>
 <script type="application/json" id="language-wizard-config">
-<?php echo json_encode(['languageDefs' => json_decode($languageDefsJson, true)]); ?>
+<?php echo json_encode(['languageDefs' => json_decode($languageDefsJson, true)], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 
 <section class="section py-5">

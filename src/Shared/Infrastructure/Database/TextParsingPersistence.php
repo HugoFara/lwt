@@ -220,7 +220,7 @@ class TextParsingPersistence
         }
         // JavaScript moved to src/frontend/js/texts/text_check_display.ts
         echo '<script type="application/json" id="text-check-words-config">';
-        echo json_encode(['words' => $wo, 'nonWords' => $nw]);
+        echo json_encode(['words' => $wo, 'nonWords' => $nw], JSON_HEX_TAG | JSON_HEX_AMP);
         echo '</script>';
     }
 
@@ -381,7 +381,7 @@ class TextParsingPersistence
             'multiWords' => $mw,
             'nonWords' => [], // Will be populated from text-check-words-config
             'rtlScript' => $rtlScript
-        ]);
+        ], JSON_HEX_TAG | JSON_HEX_AMP);
         echo '</script>';
     }
 

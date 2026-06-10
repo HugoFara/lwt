@@ -42,5 +42,5 @@ $timeData = [
 <?php echo json_encode([
     'reviewData' => $reviewData,
     'timeData' => $timeData
-]); ?>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>

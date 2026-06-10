@@ -95,7 +95,7 @@ $importMoreTitle = htmlspecialchars(__('language.form.import_more_entries'), ENT
     'targetLg' => $targetLg,
     'languageDefs' => LanguagePresets::getAll(),
     'allLanguages' => $allLanguages
-]); ?>
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 
 <?php

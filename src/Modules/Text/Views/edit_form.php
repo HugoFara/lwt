@@ -87,7 +87,7 @@ if (!$isNew) {
 
 ?>
 <script type="application/json" id="text-edit-config">
-<?php echo json_encode(['languageData' => $languageData]); ?>
+<?php echo json_encode(['languageData' => $languageData], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
 
 <?php if (!$isNew) : ?>
@@ -336,7 +336,7 @@ if (!$isNew) {
             <div x-show="fileTab === 'server'" x-cloak>
                 <div class="field">
                     <div class="control" id="mediaselect">
-                        <?php $mediaJson = json_encode($mediaPaths); ?>
+                        <?php $mediaJson = json_encode($mediaPaths, JSON_HEX_TAG | JSON_HEX_AMP); ?>
                         <?php $mediaBase = htmlspecialchars($mediaPaths['base_path'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
                         <p class="help mb-2">
                             <?php echo htmlspecialchars(

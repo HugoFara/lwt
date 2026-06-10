@@ -86,26 +86,30 @@ export function generateWordTooltipContent(element: HTMLElement): string {
 
   let title;
   if (element.classList.contains('mwsty')) {
-    title = "<p><b style='font-size:120%'>" + dataText + '</b></p>';
+    title = "<p><b style='font-size:120%'>" + escapeHtml(dataText) + '</b></p>';
   } else {
-    title = "<p><b style='font-size:120%'>" + element.textContent + '</b></p>';
+    title = "<p><b style='font-size:120%'>" + escapeHtml(element.textContent || '') + '</b></p>';
   }
 
   const roman = getAttr(element, 'data_rom');
   const transAttr = getAttr(element, 'data_trans');
-  let trans = transAttr.replace(re, '$1 ');
+  // Escape the translation before any markup is woven in — data_trans is raw
+  // user text decoded back from the attribute by getAttribute.
+  let trans = escapeHtml(transAttr.replace(re, '$1 '));
 
   const status = parseInt(getAttr(element, 'data_status') || '0', 10);
   const statname = getStatusName(status);
 
   if (roman !== '') {
-    title += '<p><b>Roman.</b>: ' + roman + '</p>';
+    title += '<p><b>Roman.</b>: ' + escapeHtml(roman) + '</p>';
   }
 
   if (trans !== '' && trans !== '*') {
     const annAttr = getAttr(element, 'data_ann');
     if (annAttr) {
-      const ann = annAttr;
+      // Escape the annotation too, so it matches consistently against the
+      // already-escaped `trans` and only our red <span> markup is inserted.
+      const ann = escapeHtml(annAttr);
       if (ann !== '' && ann !== '*') {
         const re2 = new RegExp(
           '(.*[' + delimiter + '][ ]{0,1}|^)(' +

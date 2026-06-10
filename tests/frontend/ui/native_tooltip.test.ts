@@ -60,6 +60,37 @@ describe('native_tooltip.ts', () => {
       expect(content).toContain('Learning');
     });
 
+    it('escapes hostile word, romanization, and translation data (XSS)', async () => {
+      const { generateWordTooltipContent } = await importNativeTooltip();
+
+      document.body.innerHTML = `
+        <span class="hword mwsty"
+              data_text=""
+              data_rom=""
+              data_trans=""
+              data_status="3"
+              data_ann=""></span>
+      `;
+      const element = document.querySelector('.hword') as HTMLElement;
+      element.setAttribute('data_text', '<img src=x onerror=alert(1)>');
+      element.setAttribute('data_rom', '<svg onload=alert(2)>');
+      element.setAttribute('data_trans', '<b onmouseover=alert(3)>tr</b>');
+
+      const content = generateWordTooltipContent(element);
+
+      // No raw HTML payload survives into the tooltip markup.
+      expect(content).not.toContain('<img src=x onerror');
+      expect(content).not.toContain('<svg onload');
+      expect(content).not.toContain('<b onmouseover');
+      expect(content).toContain('&lt;img');
+      expect(content).toContain('&lt;svg');
+
+      // Rendering the tooltip HTML must not create any live element.
+      const probe = document.createElement('div');
+      probe.innerHTML = content;
+      expect(probe.querySelector('img, svg, b[onmouseover]')).toBeNull();
+    });
+
     it('handles mwsty class for multiwords', async () => {
       const { generateWordTooltipContent } = await importNativeTooltip();
 

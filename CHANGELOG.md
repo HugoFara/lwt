@@ -30,6 +30,52 @@ ones are marked like "v1.0.0-fork".
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
 
+### Security (XSS hardening: JSON-into-`<script>` breakout + DOM sinks)
+
+* **`json_encode` into `<script type="application/json">` blocks without
+  `JSON_HEX_TAG | JSON_HEX_AMP`**. JSON does not escape `<`, `>`, or `/`
+  by default, so a `</script>` inside any user-controlled field closes
+  the config block early and lets following markup execute. The codebase
+  already standardises on `JSON_HEX_TAG | JSON_HEX_AMP` for these blocks;
+  a cluster of views had missed it. Brought the stragglers in line:
+  the text-edit config (carries the user-settable
+  `LgGoogleTranslateURI`), the language form and wizard, the home
+  dashboard warnings (last-read text title + language name), the user
+  statistics charts (language names), the three Review interaction/ajax/
+  status-change config blocks, the text-edit media selector, and the two
+  text-check config blocks in `TextParsingPersistence` (those were
+  already pre-escaped server-side, fixed for consistency so the invariant
+  greps clean). The previously-protected result views (save/delete/
+  set-status/etc.) were already correct and untouched.
+* **DOM XSS: term sentence rendered without escaping** in the word popup
+  (`word_popup_interface.ts`). `term.sentence` is the raw `WoSentence`
+  returned by the term-details API; the `{term}`→`<b>` formatter ran on
+  it directly while the adjacent romanization/translation/notes fields
+  were all escaped. A stored term sentence containing HTML (plantable via
+  CSV/ePub import) executed on popup. Now `escapeHtml` runs first, then
+  the `{term}` markers become trusted markup.
+* **DOM XSS: single-word tooltip built from raw attribute data**
+  (`native_tooltip.ts`). The multi-word branch already escaped its
+  fields, but the single-word branch concatenated `data_text`,
+  `data_rom`, and `data_trans` (decoded back to raw text by
+  `getAttribute`) straight into the tooltip HTML. Escaped all three; the
+  annotation highlight escapes consistently so only the controlled red
+  `<span>` is inserted.
+* **DOM XSS + CSP: Glosbe translations used inline `onclick` with
+  unescaped third-party text** (`translation_api.ts`). The API phrase/
+  meaning text was interpolated into `onclick="addTranslation('…')"` and
+  into element text without escaping — a string-literal breakout and a
+  stored/poisoned-response XSS. Switched to the existing delegated
+  `data-action="add-translation"` + `data-word` handler (no inline
+  handler, CSP-safe) with `escapeHtml` on both the attribute and the
+  visible text.
+* **Regression tests**: `translation_api.test.ts` adds a hostile-Glosbe
+  case asserting no `onclick`, the `data-action` handler is used, and an
+  attribute-breakout payload (`"><img onerror=…>`) produces no live
+  element. `native_tooltip.test.ts` adds a case feeding hostile
+  `data_text`/`data_rom`/`data_trans` and asserts the rendered tooltip
+  contains no live `<img>`/`<svg>`/event-handler element.
+
 ### Security — phase 7 (XSS hardening: kill `addslashes`-into-attribute pattern)
 
 * **Feed browse view embedded hostile RSS URLs into an Alpine
