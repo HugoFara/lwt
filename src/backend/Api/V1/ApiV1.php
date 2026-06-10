@@ -21,6 +21,7 @@ namespace Lwt\Api\V1;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
+use Lwt\Shared\Infrastructure\Http\Cors;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
@@ -378,6 +379,14 @@ class ApiV1
     public static function handleRequest(): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+        // Answer an allow-listed cross-origin preflight before the method gate
+        // (OPTIONS would otherwise 405), and decorate real responses with CORS
+        // headers. Both are no-ops unless CORS_ALLOWED_ORIGINS is configured.
+        if (Cors::handlePreflight($method)) {
+            return;
+        }
+        Cors::sendHeaders();
 
         if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE'])) {
             Response::error('Method Not Allowed', 405)->send();
