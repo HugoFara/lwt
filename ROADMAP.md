@@ -30,31 +30,30 @@ pay for the hard parts when demand proves them worth it.
 
 - **`lwt` stays the umbrella** for the project and the server. The original name
   is kept for everything technical.
-- **The mobile app carries its own, more evocative brand.** Working codename:
-  **`language-reader`** (placeholder — a better name TBD). The consumer-facing
-  client is where rebranding starts; the server stays LWT.
-- **Hard deadline on the real name:** the Android `applicationId` / package name
-  (e.g. `org.<brand>.app`) is **permanent once published** to F-Droid/Play —
-  changing it later means a new, separate app (lost installs, ratings, history).
-  So the final name must be locked **before Phase 2's first release**, not after.
-  The codename is fine until then.
-- Smooth the seam in client copy: a "Language Reader" app connects to "LWT
+- **The mobile app carries its own brand: Lukaisu.** Locked 2026-06
+  (`org.lukaisu.app`, `lukaisu.org` registered), replacing the old
+  `language-reader` codename. The consumer-facing client is where rebranding
+  starts; the server stays LWT. App repo: `../lukaisu/`.
+- **Name deadline — met.** The Android `applicationId` / package name is
+  **permanent once published** to F-Droid/Play, so it had to be locked before
+  Phase 2's first release. Done: `org.lukaisu.app` is committed in the app's
+  Capacitor config and is final.
+- Smooth the seam in client copy: the **Lukaisu** app connects to "LWT
   servers" — the server-URL config screen should make that relationship clear.
 
 ## Repository layout
 
 - **App de-coupling (Phases 0, 1, 3, 4) lives in this repo (`lwt/`).** It is the
   app evolving — not separable.
-- **The mobile client (Phase 2) gets its own repo** (e.g. `lwt-mobile`),
-  created *when Phase 2 starts*, not before. Rationale: F-Droid builds
-  reproducibly from a focused repo+tag (a thin Android project, not an Android
-  subfolder buried in a 138k-LOC PHP monorepo); separate toolchain and release
-  cadence; matches the workspace's one-repo-per-concern convention and the
-  standard server/client split.
+- **The mobile client (Phase 2) has its own repo: `Lukaisu` (`../lukaisu/`).**
+  Rationale: F-Droid builds reproducibly from a focused repo+tag (a thin Android
+  project, not an Android subfolder buried in a 138k-LOC PHP monorepo); separate
+  toolchain and release cadence; matches the workspace's one-repo-per-concern
+  convention and the standard server/client split.
 - **This roadmap stays in `lwt/`** — the published, version-controlled repo. The
   parent workspace folder is not a git repo, so a roadmap there would be an
-  untracked, unshareable file. When `lwt-mobile` exists it carries its own
-  build-focused roadmap; this file keeps the ecosystem strategy.
+  untracked, unshareable file. `lukaisu/ROADMAP.md` carries the build-focused
+  detail; this file keeps the ecosystem strategy.
 
 ## The keystone constraint
 
@@ -100,15 +99,19 @@ converting pages**. Three dependencies to sever + one real conversion:
       `@shared/api/client` resolves an injectable **absolute** server root and
       everything client-rendered already routes through it. (Listed here too
       because it's the gate the rest of Phase 1 depends on.)
-- [~] **Reading — content is shell-free; chrome isn't.** The word grid + state
+- [x] **Reading — content + chrome now shell-free.** The word grid + state
       render 100% client-side from `/api/v1/texts/{id}/words`
       (`TextTermApiHandler` → `word_store.ts` → `text_reader.ts`); offline
-      prototype at `shared/offline/offline-text-reader.ts`. Residual server-side
-      pieces are non-data **chrome**: the navbar, book-context nav, and media
-      player are PHP-rendered, and toolbar labels use `__e()`. None carry per-text
-      data; the i18n labels resolve client-side once the page boots from the i18n
-      API. Remaining for full shell-freeness (lower urgency): client book-context
-      + media-config (small new endpoints), client navbar.
+      prototype at `shared/offline/offline-text-reader.ts`. The reader's chrome
+      is now client-rendered too: **book-context nav** from
+      `GET /texts/{id}/book-context` (`book_nav_renderer.ts`) and the **audio
+      player** from `GET /texts/{id}/audio` (markup-only `audio_player.php` +
+      `audioPlayer` fetch), so `read_desktop.php` carries no per-text data and
+      `TextReadController` dropped the server-side book/media plumbing. Verified
+      live (book nav, audio reveal, no-regression plain read). Toolbar labels use
+      `__e()` but resolve via the client i18n `t()`. *Remaining (lower urgency,
+      not reader-specific):* the **global navbar** is still PHP-rendered — tracked
+      separately since it spans every page.
 - [x] **i18n → client (delivery mechanism).** Shipped: `GET /api/v1/i18n[/{locale}]`
       (public; `Translator::getAllTranslations()`) returns the flat
       "namespace.key" => string bundle, merging English fallback — the same shape
@@ -116,9 +119,11 @@ converting pages**. Three dependencies to sever + one real conversion:
       (fetch + localStorage cache) and `hydrateI18nFromCache()` (sync first-paint),
       so a shell-free client gets strings without a server-rendered page. The
       server-injected blob stays as the default for SSR pages (additive, no
-      breakage). *Remaining (Phase 2 client boot):* pick the locale on the client
-      and call these instead of relying on the blob; templates still calling
-      `__e()` resolve client-side once a page boots from the API path.
+      breakage). **Client boot wired:** `bootI18n()` (called from `main.ts`)
+      uses the blob when present, else hydrates from the localStorage cache and
+      refreshes from the API, persisting the resolved locale (`lwt.locale`) for
+      offline first-paint — so a bundled client now picks up strings on its own.
+      Templates still calling `__e()` resolve client-side via `t()`.
 - [x] **Review — verified shell-free.** The review SPA (`review_desktop.php` →
       `review_api.ts`) renders entirely from `/api/v1/review/*`
       (next-word/status/config/table-words/tomorrow-count all exist). Removed the
@@ -161,13 +166,19 @@ flows that run without a server-rendered page."
 
 ## Phase 2 — Capacitor client + own F-Droid repo
 
-- [ ] Thin **Capacitor** (or Tauri-mobile) shell using the **system WebView**
-      (no Chrome dependency).
-- [ ] **Server-URL config screen** as first-run + settings.
-- [ ] Reuse existing PWA assets; close the small gaps: add a **maskable icon**
-      (512px, safe-zone padding) and a manifest **`id`**.
+**The client now exists: `Lukaisu` (`../lukaisu/`, separate repo).** v0.1 is a
+working shell; the data/i18n de-coupling above makes a bundled (Model B) client
+the next achievable target. See `lukaisu/ROADMAP.md` for the build-side detail.
+
+- [x] Thin **Capacitor** shell using the **system WebView** (no Chrome
+      dependency) — Capacitor 8, Android platform committed.
+- [x] **Server-URL config screen** — native `GET /api/v1/version` probe, choice
+      persisted in native Preferences, then navigates the WebView to the server.
+- [ ] Reuse existing PWA assets; close the small gaps: real adaptive/maskable
+      launcher icons (replace placeholders) and a manifest **`id`** (Lukaisu v0.2).
 - [ ] Ship through **our own F-Droid repo first** (low bar, full control,
-      derisks the toolchain) before applying to the main catalog.
+      derisks the toolchain) before applying to the main catalog (Lukaisu v0.3:
+      release signing + reproducible-build hygiene + fastlane metadata).
 - [ ] Expect a "needs a server" note — acceptable for a self-hostable-service
       client.
 
