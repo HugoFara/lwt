@@ -14,6 +14,8 @@ import { renderText, updateWordStatusInDOM, type RenderSettings } from '../pages
 import { setupMultiWordSelection } from '../pages/reading/text_multiword_selection';
 import { TextsApi } from '@modules/text/api/texts_api';
 import { SettingsApi } from '@modules/admin/api/settings_api';
+import { renderBookNav } from '../pages/reading/book_nav_renderer';
+import { initIcons } from '@shared/icons/lucide_icons';
 
 /**
  * Text reader Alpine.js component interface.
@@ -63,6 +65,7 @@ export interface TextReaderData {
   getTextIdFromUrl(): number;
   updateWordDisplay(hex: string, status: number, wordId: number | null): void;
   setupEventListeners(): void;
+  loadBookNav(textId: number): Promise<void>;
 }
 
 /** Debounce timer for persisting reader settings. */
@@ -144,6 +147,10 @@ export function textReaderData(): TextReaderData {
         this.setupEventListeners();
 
         this.isLoading = false;
+
+        // Book/chapter nav is non-critical chrome — load it after the text is
+        // readable so a slow/missing response never blocks reading.
+        void this.loadBookNav(textId);
       } catch (err) {
         console.error('Error initializing text reader:', err);
         this.error = 'An error occurred while loading the text';
@@ -200,6 +207,24 @@ export function textReaderData(): TextReaderData {
       // Multi-word selection via native text selection
       // When user selects multiple words, the multi-word modal opens
       setupMultiWordSelection(container);
+    },
+
+    async loadBookNav(textId: number): Promise<void> {
+      const host = document.getElementById('book-context-nav');
+      if (!host) return;
+
+      try {
+        const res = await TextsApi.getBookContext(textId);
+        const html = renderBookNav(res.data?.book ?? null);
+        host.innerHTML = html;
+        if (html !== '') {
+          // Hydrate the lucide placeholders the renderer emitted.
+          initIcons();
+        }
+      } catch (err) {
+        // Non-critical chrome: a failure just leaves the nav empty.
+        console.error('Failed to load book navigation:', err);
+      }
     },
 
     handleWordClick(event: MouseEvent): void {

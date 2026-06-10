@@ -46,23 +46,6 @@ assert(is_int($audioPosition));
 assert(is_string($mediaPlayerHtml));
 // Note: $sourceUri is typed as string|null in file-level docblock
 
-// Book context for chapter navigation (optional)
-if (!isset($bookContext) || !is_array($bookContext)) {
-    $bookContext = null;
-}
-/**
- * @var array{
- *     bookId: int,
- *     bookTitle: string,
- *     chapterNum: int,
- *     totalChapters: int,
- *     chapterTitle: string,
- *     prevTextId: int|null,
- *     nextTextId: int|null,
- *     chapters: array<int, array{id: int, num: int, title: string}>
- * }|null $bookContext
- */
-
 ?>
 <!-- Main navigation -->
 <?php echo PageLayoutHelper::buildNavbar('texts'); ?>
@@ -237,107 +220,10 @@ if (!isset($bookContext) || !is_array($bookContext)) {
   </div>
   <?php endif; ?>
 
-  <!-- Chapter navigation (if part of a book) -->
-  <?php if ($bookContext !== null) : ?>
-        <?php
-        // Extract typed values for template use (types from docblock)
-        $bookId = $bookContext['bookId'];
-        $bookTitle = $bookContext['bookTitle'];
-        $chapterNum = $bookContext['chapterNum'];
-        $totalChapters = $bookContext['totalChapters'];
-        $chapterTitle = $bookContext['chapterTitle'];
-        $prevTextId = $bookContext['prevTextId'];
-        $nextTextId = $bookContext['nextTextId'];
-        /**
- * @var array<int, array{id: int, num: int, title: string}>
-*/
-        $chapters = $bookContext['chapters'];
-        ?>
-  <div class="box py-2 px-4 mb-0" style="border-radius: 0; background: #f5f5f5;">
-    <div class="level is-mobile">
-      <div class="level-left">
-        <div class="level-item">
-          <a href="/book/<?php echo $bookId; ?>" class="has-text-grey-dark" title="<?= __e('text.read.view_book') ?>">
-            <span class="icon is-small mr-1">
-              <i data-lucide="book-open" style="width:14px;height:14px"></i>
-            </span>
-            <strong><?php echo htmlspecialchars($bookTitle); ?></strong>
-          </a>
-          <span class="has-text-grey ml-2">
-            — Ch. <?php echo $chapterNum; ?>/<?php echo $totalChapters; ?>
-            <?php if ($chapterTitle !== '') : ?>
-              <em class="ml-1"><?php echo htmlspecialchars($chapterTitle); ?></em>
-            <?php endif; ?>
-          </span>
-        </div>
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <div class="buttons has-addons mb-0">
-            <!-- Previous chapter -->
-            <?php if ($prevTextId !== null) : ?>
-            <a href="/text/<?php echo $prevTextId; ?>/read"
-               class="button is-small" title="<?= __e('text.read.previous_chapter') ?>">
-              <span class="icon is-small">
-                <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
-              </span>
-              <span><?= __e('text.read.prev') ?></span>
-            </a>
-            <?php else : ?>
-            <button class="button is-small" disabled title="<?= __e('text.read.no_previous_chapter') ?>">
-              <span class="icon is-small">
-                <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
-              </span>
-              <span><?= __e('text.read.prev') ?></span>
-            </button>
-            <?php endif; ?>
-
-            <!-- Chapter dropdown -->
-            <div class="dropdown is-hoverable">
-              <div class="dropdown-trigger">
-                <button class="button is-small">
-                  <span>Ch. <?php echo $chapterNum; ?></span>
-                  <span class="icon is-small">
-                    <i data-lucide="chevron-down" style="width:14px;height:14px"></i>
-                  </span>
-                </button>
-              </div>
-              <div class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
-                <div class="dropdown-content">
-                  <?php foreach ($chapters as $chapter) : ?>
-                  <a href="/text/<?php echo $chapter['id']; ?>/read"
-                     class="dropdown-item <?php echo ($chapter['num'] === $chapterNum) ? 'is-active' : ''; ?>">
-                        <?php echo $chapter['num']; ?>.
-                        <?php echo htmlspecialchars($chapter['title'] ?: 'Chapter ' . $chapter['num']); ?>
-                  </a>
-                  <?php endforeach; ?>
-                </div>
-              </div>
-            </div>
-
-            <!-- Next chapter -->
-            <?php if ($nextTextId !== null) : ?>
-            <a href="/text/<?php echo $nextTextId; ?>/read"
-               class="button is-small" title="<?= __e('text.read.next_chapter') ?>">
-              <span><?= __e('text.read.next') ?></span>
-              <span class="icon is-small">
-                <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
-              </span>
-            </a>
-            <?php else : ?>
-            <button class="button is-small" disabled title="<?= __e('text.read.no_next_chapter') ?>">
-              <span><?= __e('text.read.next') ?></span>
-              <span class="icon is-small">
-                <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
-              </span>
-            </button>
-            <?php endif; ?>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <?php endif; ?>
+  <!-- Chapter navigation: client-rendered from /texts/{id}/book-context
+       (book_nav_renderer.ts) so the reader carries no server-rendered chrome.
+       Stays empty for a standalone text. -->
+  <div id="book-context-nav"></div>
 
   <!-- Loading state -->
   <div x-show="isLoading" class="has-text-centered py-6">

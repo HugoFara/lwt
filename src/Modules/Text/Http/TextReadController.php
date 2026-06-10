@@ -24,7 +24,6 @@ use Lwt\Modules\Text\Application\Services\TextNavigationService;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\Infrastructure\Http\RedirectResponse;
-use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Modules\Activity\Infrastructure\MySqlActivityRepository;
 
 /**
@@ -119,15 +118,8 @@ class TextReadController extends BaseController
         $audioPosition = (int) ($headerData['TxAudioPosition'] ?? 0);
         $sourceUri = (string) ($headerData['TxSourceURI'] ?? '');
 
-        $bookContext = null;
-        try {
-            $bookFacade = Container::getInstance()->getTyped(
-                \Lwt\Modules\Book\Application\BookFacade::class
-            );
-            $bookContext = $bookFacade->getBookContextForText($textId);
-        } catch (\Throwable $e) {
-            $bookContext = null;
-        }
+        // Book/chapter nav is fetched client-side from /texts/{id}/book-context
+        // (book_nav_renderer.ts), so it is no longer rendered server-side here.
 
         Settings::savePerUser('currenttext', $textId);
 

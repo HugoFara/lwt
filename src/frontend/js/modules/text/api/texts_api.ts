@@ -41,6 +41,49 @@ export interface TextReadingConfig {
 }
 
 /**
+ * One chapter entry for the reader's chapter dropdown.
+ */
+export interface BookChapter {
+  id: number;
+  num: number;
+  title: string;
+}
+
+/**
+ * Book/chapter context for the reading screen's navigation, as returned by
+ * GET /texts/{id}/book-context. Null when the text is standalone.
+ */
+export interface BookContext {
+  bookId: number;
+  bookTitle: string;
+  chapterNum: number;
+  chapterTitle: string | null;
+  totalChapters: number;
+  prevTextId: number | null;
+  nextTextId: number | null;
+  chapters: BookChapter[];
+}
+
+/** Envelope for GET /texts/{id}/book-context. */
+export interface BookContextResponse {
+  book: BookContext | null;
+}
+
+/** Player settings shared by GET /texts/{id}/audio. */
+export interface AudioPlayerSettings {
+  repeatMode: boolean;
+  skipSeconds: number;
+  playbackRate: number;
+}
+
+/** Audio metadata for the reader, as returned by GET /texts/{id}/audio. */
+export interface AudioInfo {
+  uri: string;
+  position: number;
+  playerSettings: AudioPlayerSettings;
+}
+
+/**
  * Multi-word expression reference data.
  */
 export interface MultiWordRef {
@@ -350,5 +393,25 @@ export const TextsApi = {
    */
   async getAnnotation(textId: number): Promise<ApiResponse<AnnotationResponse>> {
     return apiGet<AnnotationResponse>(`/texts/${textId}/annotation`);
+  },
+
+  /**
+   * Get the book/chapter context for the reader's chapter navigation.
+   *
+   * @param textId Text ID
+   * @returns Promise with `{ book }`; book is null for a standalone text
+   */
+  async getBookContext(textId: number): Promise<ApiResponse<BookContextResponse>> {
+    return apiGet<BookContextResponse>(`/texts/${textId}/book-context`);
+  },
+
+  /**
+   * Get the audio metadata + player settings for the reader's media player.
+   *
+   * @param textId Text ID
+   * @returns Promise with audio uri, saved position, and player settings
+   */
+  async getAudio(textId: number): Promise<ApiResponse<AudioInfo>> {
+    return apiGet<AudioInfo>(`/texts/${textId}/audio`);
   }
 };
