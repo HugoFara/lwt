@@ -195,6 +195,10 @@ export function renderNavbar(data: NavbarData, currentPage = ''): string {
     + '<div class="navbar-end">'
     + themeToggle(data)
     + userDropdown(data, currentPage)
-    + '</div></div></nav>'
+    + '</div></div>'
+    // Dimmed overlay behind the mobile left drawer; tapping it closes the menu.
+    // Kept inside <nav> so the click-outside handler treats it as "inside".
+    + '<div class="navbar-overlay" :class="{ \'is-active\': isOpen }" @click="close()"></div>'
+    + '</nav>'
   );
 }

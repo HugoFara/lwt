@@ -2384,16 +2384,52 @@ Navigation Bar Styles (Alpine.js + Bulma)
   color: var(--lwt-body-fg);
 }
 
-/* Mobile menu improvements */
+/* Mobile menu — left off-canvas drawer.
+   Bulma's default mobile menu is a full-width dropdown from the top, which
+   reads awkwardly on phones and in the Android app shell. Render it instead as
+   a left-sliding drawer with a dimmed overlay (a native-feeling side menu).
+   The drawer is always laid out and hidden via transform so it can animate;
+   the burger toggles `.is-active`, and the hardware Back button closes it
+   (history handling in navbar.ts). */
 @media screen and (max-width: 1023px) {
   .navbar-menu {
+    display: block;
+    position: fixed;
+    top: 3.25rem;
+    left: 0;
+    bottom: 0;
+    width: 82%;
+    max-width: 320px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background-color: var(--lwt-navbar-bg);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.2);
     padding: 0.5rem 0;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 40;
   }
 
   .navbar-menu.is-active {
-    display: block;
+    transform: translateX(0);
+  }
+
+  .navbar-overlay {
+    position: fixed;
+    top: 3.25rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease;
+    z-index: 39;
+  }
+
+  .navbar-overlay.is-active {
+    opacity: 1;
+    visibility: visible;
   }
 
   .navbar-item.has-dropdown .navbar-dropdown {
@@ -2407,6 +2443,13 @@ Navigation Bar Styles (Alpine.js + Bulma)
   }
 
   .navbar-divider {
+    display: none;
+  }
+}
+
+/* The overlay only exists for the mobile drawer; never show it on desktop. */
+@media screen and (min-width: 1024px) {
+  .navbar-overlay {
     display: none;
   }
 }
@@ -2934,6 +2977,33 @@ Settings Page - Collapsible Sections
 
   .word-popover__content {
     padding: 1rem 1.25rem;
+  }
+}
+
+/* Reading toolbar overflow guard (mobile / narrow WebViews).
+   The reader header is a `.level.is-mobile`, which Bulma keeps as a single
+   non-wrapping row even on phones. Its right-hand control group then overflows
+   the viewport horizontally. In a WebView that horizontal overflow expands the
+   *layout* viewport beyond the visible (visual) viewport, which (a) zooms the
+   page out and (b) makes the `position: fixed` word-popover bottom-drawer
+   anchor to the off-screen layout bottom instead of the visible bottom — so the
+   popover renders below the fold and word lookup appears to do nothing.
+   Letting the toolbar wrap keeps everything within the viewport. */
+@media screen and (max-width: 768px) {
+  .reading-page .level.is-mobile {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .reading-page .level.is-mobile > .level-left,
+  .reading-page .level.is-mobile > .level-right {
+    max-width: 100%;
+  }
+
+  /* Belt-and-suspenders: never let the reading page itself drive horizontal
+     overflow (which would re-expand the layout viewport). */
+  .reading-page {
+    overflow-x: clip;
   }
 }
 

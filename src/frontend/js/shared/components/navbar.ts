@@ -20,6 +20,7 @@ interface NavbarData {
 
   init(): void;
   toggle(): void;
+  open(): void;
   close(): void;
   toggleDropdown(name: string): void;
   closeDropdowns(): void;
@@ -51,18 +52,48 @@ export function navbarData(): NavbarData {
           this.close();
         }
       });
+
+      // Make the hardware/browser Back button close the mobile drawer instead
+      // of leaving the page. Opening the drawer pushes a history entry; Back
+      // pops it (popstate) and we just reflect that by closing. This is what
+      // stops Back from exiting the Android app shell while the menu is open.
+      window.addEventListener('popstate', () => {
+        if (this.isOpen) {
+          this.isOpen = false;
+          this.closeDropdowns();
+        }
+      });
     },
 
     toggle() {
-      this.isOpen = !this.isOpen;
-      if (!this.isOpen) {
-        this.closeDropdowns();
+      if (this.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
+    },
+
+    open() {
+      this.isOpen = true;
+      // Push a history entry so Back closes the drawer (see the popstate
+      // handler in init). Guard against stacking duplicates.
+      if (!(history.state && history.state.lwtNavbar)) {
+        history.pushState({ lwtNavbar: true }, '');
       }
     },
 
     close() {
-      this.isOpen = false;
-      this.closeDropdowns();
+      if (this.isOpen) {
+        this.isOpen = false;
+        this.closeDropdowns();
+        // Drop the history entry we pushed on open, if it's still current.
+        if (history.state && history.state.lwtNavbar) {
+          history.back();
+        }
+      } else {
+        // Desktop dropdowns can be open without the mobile drawer.
+        this.closeDropdowns();
+      }
     },
 
     toggleDropdown(name: string) {
@@ -78,7 +109,11 @@ export function navbarData(): NavbarData {
     },
 
     navigate(url: string) {
-      this.close();
+      // Full-page navigation discards our pushed history state, so close
+      // directly rather than via close() (which would race history.back()
+      // against the assignment below).
+      this.isOpen = false;
+      this.closeDropdowns();
       window.location.href = url;
     },
 
