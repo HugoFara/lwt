@@ -14,12 +14,86 @@ ones are marked like "v1.0.0-fork".
 
 ### Added
 
+* **Global Digital Library as a text source** ("Kids' Library"): browse and
+  search openly-licensed (CC-BY/CC-BY-SA) children's and early-grade readers —
+  including StoryWeaver content — directly on the New Text page, filling the
+  gap in easier texts that Gutenberg and Wikisource leave. A new `GdlClient`
+  talks to GDL's current WordPress JSON API (the legacy OPDS/`book-api` hosts
+  were decommissioned), and `GdlImportService` downloads each book's ePUB,
+  extracts the reading text via the Book module's parser, and rejects
+  image-only picture books with too little readable text. Difficulty tiers
+  come from GDL's per-book reading level. New endpoints
+  `GET /api/v1/texts/gdl-search` and `POST /api/v1/texts/extract-epub-url`.
+  The home page also shows GDL suggestions with **beginner-aware ordering**:
+  readers with a small vocabulary in the current language see the easy GDL
+  readers above the Gutenberg classics, advanced readers see them below
+  (`GET /api/v1/texts/reader-level`).
 * **StarDict dictionary uploads via archives** (#233): the import form now
   accepts `.zip`, `.tar.gz`, `.tar.bz2`, `.tar.xz`, and `.tgz` containing
   the StarDict triplet (`.ifo` + `.idx` + `.dict`/`.dict.dz`). FreeDict
   downloads import directly. Extraction is shared with the curated-import
   flow via a new `ArchiveExtractor` service (zip-bomb cap, path-traversal
   guard, automatic cleanup).
+* **Design proposal: single `data_hex` word identity** (#237). New developer
+  doc (`docs-src/developer/word-identity-data-hex.md`) proposing to replace the
+  reading-view `TERM<hex>` CSS class-as-index with a `data_hex` attribute
+  selected via `[data_hex]`, and to hash the identity token (retiring the legacy
+  `¤`/Latin-1 `toClassName` encoding flagged by the PHP 8.5 `ord()` deprecation).
+  Proposal only — implementation deferred until after the next release.
+* **Design proposal: term status model + FSRS scheduling** (#238). New developer
+  doc (`docs-src/developer/term-status-fsrs.md`) proposing to (1) make the word-status
+  model (1–5/98/99) a single source of truth — the scattered literals and ~6
+  duplicated frontend tables collapse onto the existing `TermStatus` value object —
+  and (2) align review scheduling with Anki/FSRS by separating display familiarity
+  from memory state (Stability/Difficulty/Retrievability, 4-grade reviews), deriving
+  the 1–5 reading colours from memory strength. Proposal only — implementation
+  deferred until after the next release.
+
+### Security (XSS hardening: JSON-into-`<script>` breakout + DOM sinks)
+
+* **`json_encode` into `<script type="application/json">` blocks without
+  `JSON_HEX_TAG | JSON_HEX_AMP`**. JSON does not escape `<`, `>`, or `/`
+  by default, so a `</script>` inside any user-controlled field closes
+  the config block early and lets following markup execute. The codebase
+  already standardises on `JSON_HEX_TAG | JSON_HEX_AMP` for these blocks;
+  a cluster of views had missed it. Brought the stragglers in line:
+  the text-edit config (carries the user-settable
+  `LgGoogleTranslateURI`), the language form and wizard, the home
+  dashboard warnings (last-read text title + language name), the user
+  statistics charts (language names), the three Review interaction/ajax/
+  status-change config blocks, the text-edit media selector, and the two
+  text-check config blocks in `TextParsingPersistence` (those were
+  already pre-escaped server-side, fixed for consistency so the invariant
+  greps clean). The previously-protected result views (save/delete/
+  set-status/etc.) were already correct and untouched.
+* **DOM XSS: term sentence rendered without escaping** in the word popup
+  (`word_popup_interface.ts`). `term.sentence` is the raw `WoSentence`
+  returned by the term-details API; the `{term}`→`<b>` formatter ran on
+  it directly while the adjacent romanization/translation/notes fields
+  were all escaped. A stored term sentence containing HTML (plantable via
+  CSV/ePub import) executed on popup. Now `escapeHtml` runs first, then
+  the `{term}` markers become trusted markup.
+* **DOM XSS: single-word tooltip built from raw attribute data**
+  (`native_tooltip.ts`). The multi-word branch already escaped its
+  fields, but the single-word branch concatenated `data_text`,
+  `data_rom`, and `data_trans` (decoded back to raw text by
+  `getAttribute`) straight into the tooltip HTML. Escaped all three; the
+  annotation highlight escapes consistently so only the controlled red
+  `<span>` is inserted.
+* **DOM XSS + CSP: Glosbe translations used inline `onclick` with
+  unescaped third-party text** (`translation_api.ts`). The API phrase/
+  meaning text was interpolated into `onclick="addTranslation('…')"` and
+  into element text without escaping — a string-literal breakout and a
+  stored/poisoned-response XSS. Switched to the existing delegated
+  `data-action="add-translation"` + `data-word` handler (no inline
+  handler, CSP-safe) with `escapeHtml` on both the attribute and the
+  visible text.
+* **Regression tests**: `translation_api.test.ts` adds a hostile-Glosbe
+  case asserting no `onclick`, the `data-action` handler is used, and an
+  attribute-breakout payload (`"><img onerror=…>`) produces no live
+  element. `native_tooltip.test.ts` adds a case feeding hostile
+  `data_text`/`data_rom`/`data_trans` and asserts the rendered tooltip
+  contains no live `<img>`/`<svg>`/event-handler element.
 
 ### Security — phase 7 (XSS hardening: kill `addslashes`-into-attribute pattern)
 
@@ -252,6 +326,22 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Misspelled settings key in TTS / translation lookups**. Two reads in the
+  Dictionary module used `Settings::get('currentlangage')` (missing the `u`)
+  instead of the canonical `currentlanguage`, so they silently received an empty
+  value — breaking the current-language TTS voice lookup and the term-translation
+  header's language context. Corrected both
+  (`TranslationService::getCurrentLanguageTtsVoice`, `TranslationController`).
+* **PHP 8.5 deprecation warnings**. Running under PHP 8.5 emitted 429 PHP
+  deprecations. The bulk (428) were redundant `ReflectionMethod`/
+  `ReflectionProperty::setAccessible(true)` calls in the test suite —
+  a no-op since PHP 8.1 and deprecated in 8.5; reflection can read and
+  invoke private members without them, so the calls were removed. The one
+  production case was `StringUtils::toClassName()` passing a (potentially
+  multi-byte) `mb_substr` character to `ord()`; switched to `ord($char[0])`
+  to make the existing first-byte behavior explicit. (A `TODO` flags a
+  possible later move to `mb_ord()` for true codepoints, which would be a
+  deliberate behavior change to generated CSS class names.)
 * **Bulk vocabulary actions and texts/archived-texts bulk-action 403'd
   on CSRF**: `submitExportForm` in `word_list_app.ts` and
   `handleMultiAction` in `texts_grouped_app.ts` /

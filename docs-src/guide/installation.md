@@ -23,7 +23,7 @@ Two main softwares can be used to set up a local server on your computer: XAMPP 
 
 1. Install XAMPP
    1. Go to <https://www.apachefriends.org/download.html>
-   2. Download "XAMPP for **Windows**". PHP **8.1 or higher** is required.
+   2. Download "XAMPP for **Windows**". PHP **8.2 or higher** is required.
    3. Open your Downloads folder and run the downloaded "xampp-windows-x64-xxx-installer.exe". Please install the components Apache, MySQL, PHP and phpMyAdmin into the folder C:\xampp.
 
 2. Get the [latest GitHub release](https://github.com/HugoFara/lwt/releases), unzip it.
@@ -131,7 +131,7 @@ The following instruction were tested on Raspbian Stretch.
       Note: you should be able to freely switch between MySQL and MariaDB.
 
    2. Check if everything is okay:
-      * ``php -v`` should show a PHP version equal or above to 8.1.0.
+      * ``php -v`` should show a PHP version equal or above to 8.2.0.
       * <http://localhost> should display a nice web page.
       * ``mysql -V`` should work.
 
@@ -267,4 +267,4 @@ Need more help? You can contact us through [GitHub](https://github.com/HugoFara/
 
 You can also consult the [FAQ](/guide/faq) section of the documentation.
 
-Please note that *PHP below version 8.1 is no longer supported*.
+Please note that *PHP below version 8.2 is no longer supported*.

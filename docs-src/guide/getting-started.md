@@ -4,7 +4,7 @@
 
 ## What is LWT?
 
-_Learning with Texts_ (LWT) is a tool for Language Learning by reading texts. It was originally published on SourceForge, but that project page is no longer available; a snapshot of the original code is preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
+_Learning with Texts_ (LWT) is a tool for Language Learning by reading texts. It was originally created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and published on [SourceForge](https://sourceforge.net/projects/learning-with-texts), where it is still available. This repository is a community-maintained fork; a snapshot of the original code is also preserved on its [`official` branch](https://github.com/HugoFara/lwt/tree/official).
 It is inspired by:
 
 * [Stephen Krashen's](http://sdkrashen.com) principles in Second Language Acquisition,
@@ -33,7 +33,7 @@ To run LWT, you'll need:
 
 ### Original Author: lang-learn-guy
 
-LWT was originally created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and hosted on SourceForge. That project page is no longer reachable, and we have no way to contact the original author. Unofficial re-uploads of the code exist elsewhere on GitHub, but we cannot vouch for them — treat any "only working version" claims with caution. Our own archive of the original, unmaintained code lives on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
+LWT was originally created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and is hosted on SourceForge at [sourceforge.net/projects/learning-with-texts](https://sourceforge.net/projects/learning-with-texts), where it remains available and maintained by its author (also on GitHub as [hapepo23/learning-with-texts](https://github.com/hapepo23/learning-with-texts)). This repository is an independent community fork; a snapshot of the original code is preserved on its [`official` branch](https://github.com/HugoFara/lwt/tree/official) for convenience.
 
 * I started this software application in 2010 as a hobby project for my personal learning (reading & listening to foreign texts, saving & reviewing new words and expressions).
 * In June 2011, I decided to publish the software in the hope that it will be useful to other language learners around the world.

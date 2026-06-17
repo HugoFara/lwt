@@ -1,13 +1,12 @@
 # Important Links
 
-* **Original Project Page**: the original project was hosted at [sourceforge.net/projects/learning-with-texts](http://sourceforge.net/projects/learning-with-texts/) by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/), but the SourceForge page is no longer available. A snapshot of the original, unmaintained code is preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
+* **Original Project Page**: the original LWT was created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and is hosted at [sourceforge.net/projects/learning-with-texts](https://sourceforge.net/projects/learning-with-texts/) (also on GitHub as [hapepo23/learning-with-texts](https://github.com/hapepo23/learning-with-texts)). A snapshot of the original code is also preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
 * **Download Page**:
   * [Latest release @ GitHub](https://github.com/HugoFara/lwt/releases/latest)
   * [Latest development version @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip)
-  * [Original unmaintained version](https://github.com/HugoFara/lwt/tree/official) (archived on the `official` branch of this repo)
+  * [Original version by its author](https://github.com/hapepo23/learning-with-texts) (also on [SourceForge](https://sourceforge.net/projects/learning-with-texts))
+  * [Snapshot of the original code](https://github.com/HugoFara/lwt/tree/official) (preserved on the `official` branch of this repo)
 * [**Community Maintained Version** @ GitHub](https://github.com/HugoFara/lwt)
-
-> **A note on third-party copies:** Since the SourceForge project went offline, unofficial copies of the original LWT source have appeared on GitHub. We cannot vouch for any of them — some make strong claims about being the "only working" version. The `official` branch of this repository is our own archival copy of lang-learn-guy's original code; if you need the historical version, we recommend using that.
 * **Documentation**: try either the [local link](/) or the [online documentation](https://hugofara.github.io/lwt/).
 
 ## LWT Online Demo - *try it out:*

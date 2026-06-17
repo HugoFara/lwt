@@ -42,7 +42,7 @@ features:
 **Learning with Texts (LWT)** is a tool for language learning inspired by [Stephen Krashen's](http://sdkrashen.com) principles of Second Language Acquisition, [LingQ](http://lingq.com), and ideas from [AJATT](http://www.alljapaneseallthetime.com) (All Japanese All The Time).
 
 This is the **community-maintained fork** that improves upon the original with:
-- Modern PHP 8.1+ support
+- Modern PHP 8.2+ support
 - Smaller database size
 - Better mobile experience
 - Active development

@@ -26,7 +26,7 @@
 Don't know where to start? LWT suggests books from [Project Gutenberg](https://www.gutenberg.org/) ranked by difficulty, plus curated news feeds in 19 languages. Already have a text you love? Paste it in and start reading. As you mark words, suggestions get smarter and new vocabulary is pre-enriched from [Wiktionary](https://www.wiktionary.org/).
 
 > [!IMPORTANT]
-> This is a **community-maintained fork** and a significant upgrade over the original LWT (first released in 2011). It brings an easy-to-use interface, text suggestions and reading statistics, modern PHP support (8.2–8.5), mobile support, and compatibility with the modern web. The original SourceForge project is no longer available; an archival snapshot of the original code is preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
+> This is a **community-maintained fork** and a significant upgrade over the original LWT, created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and first released in 2011. It brings an easy-to-use interface, text suggestions and reading statistics, modern PHP support (8.2–8.5), mobile support, and compatibility with the modern web. The original LWT is still available on [SourceForge](https://sourceforge.net/projects/learning-with-texts); a snapshot of its code is also preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
 
 ## Table of Contents
 
@@ -109,7 +109,7 @@ Unlike flashcard apps like [Anki](https://apps.ankiweb.net/), LWT keeps words co
 - **Smaller database** — Optimized schema reduces storage significantly
 - **Long expressions** — Save phrases up to 250 characters (was limited to 9)
 - **Better search** — Improved querying for words and texts
-- **Modern PHP** — Supports PHP 8.1, 8.2, 8.3, and 8.4
+- **Modern PHP** — Supports PHP 8.2, 8.3, 8.4, and 8.5
 
 ## Installation
 
@@ -157,7 +157,7 @@ chmod +x ./INSTALL.sh
 
 ### Manual Installation (Windows/macOS/Linux)
 
-1. Install prerequisites: PHP 8.1+, MySQL/MariaDB, a web server (Apache/Nginx)
+1. Install prerequisites: PHP 8.2+, MySQL/MariaDB, a web server (Apache/Nginx)
 2. Clone or download the repository
 3. Configure the database:
 
@@ -179,7 +179,7 @@ See the [Installation Guide](https://hugofara.github.io/lwt/guide/installation) 
 
 | Component | Version |
 | --- | --- |
-| PHP | 8.1, 8.2, 8.3, or 8.4 |
+| PHP | 8.2, 8.3, 8.4, or 8.5 |
 | MySQL/MariaDB | 5.7+ / 10.3+ |
 | PHP Extensions | mysqli, mbstring, dom, zip (for EPUB support) |
 
