@@ -245,6 +245,38 @@ namespace Lwt\Modules\User\Views;
                         <a class="is-size-7" @click="back()">Use a different server</a>
                     </p>
                 </div>
+
+                <!-- Step 3: one-time recovery code (after an email-less sign-up) -->
+                <div x-show="onRecoveryStep" x-cloak>
+                    <div class="has-text-centered mb-4">
+                        <span class="icon has-text-primary is-large"><i data-lucide="key"></i></span>
+                        <h2 class="title is-5 mt-2">Your recovery code</h2>
+                    </div>
+                    <div class="notification is-warning is-light">
+                        Save this code somewhere safe. It is the only way to recover your
+                        account if you forget your password, and it will not be shown again.
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <input
+                                type="text"
+                                class="input is-medium has-text-centered has-text-weight-semibold"
+                                style="font-family: monospace; letter-spacing: 0.1em;"
+                                x-model="recoveryCode"
+                                readonly
+                            >
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="control">
+                            <button type="button" class="button is-primary is-fullwidth"
+                                @click="continueAfterRecovery()">
+                                <span class="icon"><i data-lucide="check"></i></span>
+                                <span>I've saved it — continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

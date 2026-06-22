@@ -649,6 +649,12 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\User\\Http\\UserController@register',
         [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
     );
+    // One-time recovery code shown after an email-less sign-up or a code reset.
+    $router->register(
+        '/register/recovery-code',
+        'Lwt\\Modules\\User\\Http\\UserController@recoveryCodeShown',
+        'GET'
+    );
 
     // Logout - POST-only with CSRF so cross-site `<img src=/logout>` cannot
     // log the victim out. The controller handles a missing session gracefully.
@@ -676,6 +682,17 @@ function registerRoutes(Router $router): void
     $router->post(
         '/password/reset',
         'Lwt\\Modules\\User\\Http\\UserController@resetPassword',
+        [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
+    );
+    // Recovery-code reset (for accounts created without an email).
+    $router->register(
+        '/password/recover',
+        'Lwt\\Modules\\User\\Http\\UserController@recoverWithCodeForm',
+        'GET'
+    );
+    $router->post(
+        '/password/recover',
+        'Lwt\\Modules\\User\\Http\\UserController@recoverWithCode',
         [AuthRateLimitMiddleware::class, CsrfMiddleware::class]
     );
 

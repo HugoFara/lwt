@@ -32,6 +32,8 @@ use Lwt\Modules\User\Application\UseCases\Logout;
 use Lwt\Modules\User\Application\UseCases\Register;
 use Lwt\Modules\User\Application\UseCases\ChangePassword;
 use Lwt\Modules\User\Application\UseCases\RequestPasswordReset;
+use Lwt\Modules\User\Application\UseCases\GenerateRecoveryCode;
+use Lwt\Modules\User\Application\UseCases\ResetPasswordWithRecoveryCode;
 use Lwt\Modules\User\Application\UseCases\SaveUserPreferences;
 use Lwt\Modules\User\Application\UseCases\SendVerificationEmail;
 use Lwt\Modules\User\Application\UseCases\UpdateProfile;
@@ -81,6 +83,8 @@ class UserFacade
     private ?ValidateApiToken $validateApiTokenUseCase = null;
     private ?RequestPasswordReset $requestPasswordResetUseCase = null;
     private ?CompletePasswordReset $completePasswordResetUseCase = null;
+    private ?GenerateRecoveryCode $generateRecoveryCodeUseCase = null;
+    private ?ResetPasswordWithRecoveryCode $resetPasswordWithRecoveryCodeUseCase = null;
     private ?SendVerificationEmail $sendVerificationEmailUseCase = null;
     private ?VerifyEmail $verifyEmailUseCase = null;
     private ?UpdateProfile $updateProfileUseCase = null;
@@ -418,6 +422,40 @@ class UserFacade
     public function validatePasswordResetToken(string $token): bool
     {
         return $this->getCompletePasswordResetUseCase()->validateToken($token);
+    }
+
+    /**
+     * Issue a new one-time recovery code for a user and return the plaintext
+     * (to be shown to the user exactly once).
+     *
+     * @param User $user The user to issue a code for.
+     *
+     * @return string The plaintext recovery code.
+     */
+    public function generateRecoveryCode(User $user): string
+    {
+        return $this->getGenerateRecoveryCodeUseCase()->execute($user);
+    }
+
+    /**
+     * Reset a password using a username + one-time recovery code, returning a
+     * freshly rotated recovery code (shown once).
+     *
+     * @param string $username    The account username.
+     * @param string $code        The recovery code as typed by the user.
+     * @param string $newPassword The new password.
+     *
+     * @return string The new recovery code (plaintext).
+     *
+     * @throws \InvalidArgumentException On invalid username/code or weak password.
+     */
+    public function resetPasswordWithRecoveryCode(
+        string $username,
+        string $code,
+        string $newPassword
+    ): string {
+        return $this->getResetPasswordWithRecoveryCodeUseCase()
+            ->execute($username, $code, $newPassword);
     }
 
     // =========================================================================
@@ -811,6 +849,32 @@ class UserFacade
             );
         }
         return $this->completePasswordResetUseCase;
+    }
+
+    /**
+     * @return GenerateRecoveryCode
+     */
+    private function getGenerateRecoveryCodeUseCase(): GenerateRecoveryCode
+    {
+        if ($this->generateRecoveryCodeUseCase === null) {
+            $this->generateRecoveryCodeUseCase = new GenerateRecoveryCode($this->repository);
+        }
+        return $this->generateRecoveryCodeUseCase;
+    }
+
+    /**
+     * @return ResetPasswordWithRecoveryCode
+     */
+    private function getResetPasswordWithRecoveryCodeUseCase(): ResetPasswordWithRecoveryCode
+    {
+        if ($this->resetPasswordWithRecoveryCodeUseCase === null) {
+            $this->resetPasswordWithRecoveryCodeUseCase = new ResetPasswordWithRecoveryCode(
+                $this->repository,
+                null,
+                $this->passwordHasher
+            );
+        }
+        return $this->resetPasswordWithRecoveryCodeUseCase;
     }
 
     /**

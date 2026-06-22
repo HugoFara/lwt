@@ -65,7 +65,7 @@ class MySqlUserRepository implements UserRepositoryInterface
      */
     private function mapToEntity(array $row): User
     {
-        return User::reconstitute(
+        $user = User::reconstitute(
             (int) $row['UsID'],
             (string) $row['UsUsername'],
             ($row['UsEmail'] ?? null) !== null ? (string) $row['UsEmail'] : null,
@@ -87,6 +87,14 @@ class MySqlUserRepository implements UserRepositoryInterface
             (bool) ($row['UsIsActive'] ?? true),
             (string) ($row['UsRole'] ?? User::ROLE_USER)
         );
+
+        // Recovery code is hydrated separately so it stays out of the (already
+        // long) reconstitute() signature.
+        $user->setRecoveryCodeHash(
+            ($row['UsRecoveryCodeHash'] ?? null) !== null ? (string) $row['UsRecoveryCodeHash'] : null
+        );
+
+        return $user;
     }
 
     /**
@@ -119,6 +127,7 @@ class MySqlUserRepository implements UserRepositoryInterface
             'UsLastLogin' => $entity->lastLogin()?->format('Y-m-d H:i:s'),
             'UsIsActive' => $entity->isActive() ? 1 : 0,
             'UsRole' => $entity->role(),
+            'UsRecoveryCodeHash' => $entity->recoveryCodeHash(),
         ];
     }
 

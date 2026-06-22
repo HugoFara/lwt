@@ -181,12 +181,20 @@ class UserApiHandler implements ApiRoutableInterface
             // Generate API token for the new user
             $token = $this->userFacade->generateApiToken($user->id()->toInt());
 
-            return [
+            $response = [
                 'success' => true,
                 'token' => $token,
                 'expires_at' => $user->apiTokenExpires()?->format('c'),
                 'user' => $this->formatUserData($user)
             ];
+
+            // Email-less account: return a one-time recovery code for the client
+            // to show the user once (their only password-recovery channel).
+            if ($user->email() === null) {
+                $response['recovery_code'] = $this->userFacade->generateRecoveryCode($user);
+            }
+
+            return $response;
         } catch (\InvalidArgumentException $e) {
             return [
                 'success' => false,

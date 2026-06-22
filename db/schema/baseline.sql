@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     UsRememberTokenExpires datetime DEFAULT NULL,
     UsPasswordResetToken varchar(64) DEFAULT NULL,
     UsPasswordResetTokenExpires datetime DEFAULT NULL,
+    UsRecoveryCodeHash varchar(255) DEFAULT NULL,
     UsWordPressId int(10) unsigned DEFAULT NULL,
     UsGoogleId varchar(255) DEFAULT NULL,
     UsMicrosoftId varchar(255) DEFAULT NULL,

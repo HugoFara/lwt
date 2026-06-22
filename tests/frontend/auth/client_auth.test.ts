@@ -358,6 +358,30 @@ describe('modules/auth/client_auth.ts', () => {
       expect(c.onAuthenticated).toHaveBeenCalledOnce();
     });
 
+    it('shows the recovery code once for an email-less account', async () => {
+      mockFetch.mockResolvedValue(
+        okJson('{"success":true,"token":"new-acct","expires_at":null,'
+          + '"recovery_code":"AAAAA-BBBBB-CCCCC-DDDDD"}')
+      );
+      const c = clientAuthData();
+      c.onAuthenticated = vi.fn();
+      c.username = 'alice';
+      c.email = '';
+      c.password = 'secret123';
+      c.passwordConfirm = 'secret123';
+
+      await c.submitRegister(event);
+
+      // Token is stored, but the app shows the code first instead of entering.
+      expect(c.onRecoveryStep).toBe(true);
+      expect(c.recoveryCode).toBe('AAAAA-BBBBB-CCCCC-DDDDD');
+      expect(getAuthToken()).toBe('new-acct');
+      expect(c.onAuthenticated).not.toHaveBeenCalled();
+
+      c.continueAfterRecovery();
+      expect(c.onAuthenticated).toHaveBeenCalledOnce();
+    });
+
     it('surfaces a server-side validation error', async () => {
       mockFetch.mockResolvedValue(
         okJson('{"success":false,"error":"Username already taken"}')

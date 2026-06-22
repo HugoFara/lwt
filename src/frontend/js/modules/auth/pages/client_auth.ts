@@ -45,10 +45,12 @@ interface AuthResponse {
   token?: string;
   expires_at?: string | null;
   error?: string;
+  /** One-time recovery code, returned when registering without an email. */
+  recovery_code?: string;
 }
 
 interface ClientAuthData {
-  step: 'server' | 'login';
+  step: 'server' | 'login' | 'recovery';
   authMode: 'login' | 'register';
   serverUrl: string;
   username: string;
@@ -57,11 +59,14 @@ interface ClientAuthData {
   passwordConfirm: string;
   /** Honeypot field — bound to a hidden input; bots fill it, humans don't. */
   homepage: string;
+  /** One-time recovery code to show once after an email-less registration. */
+  recoveryCode: string;
   loading: boolean;
   error: string;
   homeUrl: string;
   readonly onServerStep: boolean;
   readonly onLoginStep: boolean;
+  readonly onRecoveryStep: boolean;
   readonly onLoginMode: boolean;
   readonly onRegisterMode: boolean;
   init(): void;
@@ -72,6 +77,7 @@ interface ClientAuthData {
   showLogin(): void;
   submitLogin(event: Event): Promise<void>;
   submitRegister(event: Event): Promise<void>;
+  continueAfterRecovery(): void;
   finishAuth(res: ApiResponse<AuthResponse>, fallbackError: string): void;
   onAuthenticated(): void;
 }
@@ -113,6 +119,7 @@ export function clientAuthData(): ClientAuthData {
     password: '',
     passwordConfirm: '',
     homepage: '',
+    recoveryCode: '',
     loading: false,
     error: '',
     homeUrl: '/',
@@ -125,6 +132,10 @@ export function clientAuthData(): ClientAuthData {
 
     get onLoginStep(): boolean {
       return this.step === 'login';
+    },
+
+    get onRecoveryStep(): boolean {
+      return this.step === 'recovery';
     },
 
     get onLoginMode(): boolean {
@@ -283,7 +294,26 @@ export function clientAuthData(): ClientAuthData {
         altcha
       });
       this.loading = false;
+
+      // Email-less account: the server returns a one-time recovery code. Store
+      // the token, then show the code once before entering the app.
+      const data = res.data;
+      if (!res.error && data && data.success === true && data.token && data.recovery_code) {
+        setAuthToken(data.token, data.expires_at ?? null);
+        this.password = '';
+        this.passwordConfirm = '';
+        this.recoveryCode = data.recovery_code;
+        this.step = 'recovery';
+        return;
+      }
+
       this.finishAuth(res, 'Registration failed.');
+    },
+
+    /** Leave the one-time recovery-code screen and enter the app. */
+    continueAfterRecovery(): void {
+      this.recoveryCode = '';
+      this.onAuthenticated();
     },
 
     /**

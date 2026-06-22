@@ -58,6 +58,13 @@ class User
     private string $role;
 
     /**
+     * Hashed one-time recovery code, for accounts registered without an email
+     * (their only password-recovery channel). Hydrated by the repository after
+     * reconstitution, so it is not a constructor parameter.
+     */
+    private ?string $recoveryCodeHash = null;
+
+    /**
      * Private constructor - use factory methods instead.
      */
     private function __construct(
@@ -508,6 +515,32 @@ class User
             return false;
         }
         return $this->passwordResetTokenExpires > new DateTimeImmutable();
+    }
+
+    /**
+     * The stored (hashed) one-time recovery code, or null if none is set.
+     */
+    public function recoveryCodeHash(): ?string
+    {
+        return $this->recoveryCodeHash;
+    }
+
+    /**
+     * Set (or clear) the stored hashed recovery code.
+     *
+     * @param string|null $hash Hashed recovery code, or null to clear it.
+     */
+    public function setRecoveryCodeHash(?string $hash): void
+    {
+        $this->recoveryCodeHash = $hash;
+    }
+
+    /**
+     * Whether this account has a recovery code on file.
+     */
+    public function hasRecoveryCode(): bool
+    {
+        return $this->recoveryCodeHash !== null;
     }
 
     /**

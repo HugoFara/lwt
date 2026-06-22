@@ -302,15 +302,24 @@ class UserController extends BaseController
             // username — the login view renders $_SESSION['auth_success'].
             $this->formData->clearEmail();
 
+            if (session_status() === PHP_SESSION_NONE) {
+                @session_start();
+            }
+
+            // Email-less account: issue a one-time recovery code (their only
+            // way back into a forgotten account) and show it once.
+            if ($user->email() === null) {
+                $_SESSION['lwt_recovery_code'] = $this->userFacade->generateRecoveryCode($user);
+                $_SESSION['lwt_recovery_context'] = 'register';
+                return $this->redirect('/register/recovery-code');
+            }
+
             $message = __('user.flash.register_success');
             if ($user->isAdmin()) {
                 $message .= ' ' . __('user.flash.register_admin_granted');
             }
             if (!$user->isEmailVerified()) {
                 $message .= ' ' . __('user.flash.register_verify_email');
-            }
-            if (session_status() === PHP_SESSION_NONE) {
-                @session_start();
             }
             $_SESSION['auth_success'] = $message;
             return $this->redirect('/login');
@@ -768,6 +777,109 @@ class UserController extends BaseController
         } catch (\InvalidArgumentException $e) {
             $this->flash->error($e->getMessage());
             $this->redirect('/password/reset?token=' . urlencode($token));
+        }
+    }
+
+    /**
+     * Show a freshly issued recovery code exactly once.
+     *
+     * GET /register/recovery-code
+     *
+     * The code is read from (and cleared out of) the session, so a refresh or a
+     * direct visit shows nothing and bounces to login.
+     *
+     * @return mixed Redirect response, or null after rendering.
+     */
+    public function recoveryCodeShown(): mixed
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            @session_start();
+        }
+        $recoveryCode = (string) ($_SESSION['lwt_recovery_code'] ?? '');
+        $recoveryContext = (string) ($_SESSION['lwt_recovery_context'] ?? 'register');
+        unset($_SESSION['lwt_recovery_code'], $_SESSION['lwt_recovery_context']);
+
+        if ($recoveryCode === '') {
+            return $this->redirect('/login');
+        }
+        if ($recoveryContext === '') {
+            $recoveryContext = 'register';
+        }
+
+        $this->render(__('user.recovery.page_title'), false);
+        require __DIR__ . '/../Views/recovery_code.php';
+        $this->endRender();
+
+        return null;
+    }
+
+    /**
+     * Show the "reset with recovery code" form.
+     *
+     * GET /password/recover
+     *
+     * @return mixed Redirect response, or null after rendering.
+     */
+    public function recoverWithCodeForm(): mixed
+    {
+        if (Globals::isAuthenticated()) {
+            return $this->redirect('/');
+        }
+
+        $errorMessages = $this->flash->getByTypeAndClear(FlashMessageService::TYPE_ERROR);
+        $error = !empty($errorMessages) ? $errorMessages[0]['message'] : null;
+        $username = $this->formData->getAndClearUsername();
+
+        $this->render(__('user.recovery.reset_page_title'), false);
+        require __DIR__ . '/../Views/recover_password.php';
+        $this->endRender();
+
+        return null;
+    }
+
+    /**
+     * Process the "reset with recovery code" form.
+     *
+     * POST /password/recover
+     *
+     * @return ResponseInterface
+     */
+    public function recoverWithCode(): ResponseInterface
+    {
+        if (!$this->isPost()) {
+            return $this->redirect('/password/recover');
+        }
+
+        $username = $this->post('username');
+        $code = $this->post('recovery_code');
+        $password = $this->post('password');
+        $passwordConfirm = $this->post('password_confirm');
+
+        $this->formData->setUsername($username);
+
+        if (empty($username) || empty($code) || empty($password)) {
+            $this->flash->error(__('user.flash.recover_missing_fields'));
+            return $this->redirect('/password/recover');
+        }
+
+        if ($password !== $passwordConfirm) {
+            $this->flash->error(__('user.flash.reset_passwords_mismatch'));
+            return $this->redirect('/password/recover');
+        }
+
+        try {
+            $newCode = $this->userFacade->resetPasswordWithRecoveryCode($username, $code, $password);
+
+            // Reset succeeded: show the rotated code once, then on to login.
+            if (session_status() === PHP_SESSION_NONE) {
+                @session_start();
+            }
+            $_SESSION['lwt_recovery_code'] = $newCode;
+            $_SESSION['lwt_recovery_context'] = 'reset';
+            return $this->redirect('/register/recovery-code');
+        } catch (\InvalidArgumentException $e) {
+            $this->flash->error($e->getMessage());
+            return $this->redirect('/password/recover');
         }
     }
 

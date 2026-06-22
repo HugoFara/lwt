@@ -193,6 +193,28 @@ class UserApiHandlerTest extends TestCase
         $this->assertEquals('api-token', $result['token']);
     }
 
+    public function testFormatRegisterReturnsRecoveryCodeForEmaillessAccount(): void
+    {
+        // An account created without an email gets a one-time recovery code in
+        // the response (its only password-recovery channel).
+        $user = $this->createMockUser(1, 'noemail', null);
+        $this->facade->method('register')->willReturn($user);
+        $this->facade->method('generateApiToken')->willReturn('tok');
+        $this->facade->expects($this->once())
+            ->method('generateRecoveryCode')
+            ->with($user)
+            ->willReturn('AAAAA-BBBBB-CCCCC-DDDDD');
+
+        $result = $this->handler->formatRegister([
+            'username' => 'noemail',
+            'password' => 'secret',
+            'password_confirm' => 'secret'
+        ]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame('AAAAA-BBBBB-CCCCC-DDDDD', $result['recovery_code']);
+    }
+
     public function testFormatRegisterRejectsMissingCaptcha(): void
     {
         // With the captcha enabled, a missing/invalid solution is rejected and

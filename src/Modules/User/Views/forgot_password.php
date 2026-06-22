@@ -108,6 +108,16 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
 
                     <hr>
 
+                    <!-- Recover with a one-time code (accounts created without an email) -->
+                    <p class="has-text-centered mb-2">
+                        <a href="/password/recover">
+                            <span class="icon-text">
+                                <span class="icon"><i data-lucide="key"></i></span>
+                                <span><?php echo $t('recovery.from_forgot_link'); ?></span>
+                            </span>
+                        </a>
+                    </p>
+
                     <!-- Back to login link -->
                     <p class="has-text-centered">
                         <a href="/login">
