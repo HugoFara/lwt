@@ -165,6 +165,16 @@ export default defineConfig({
           'is-hidden',
           'is-loading',
           'is-disabled',
+          // Bulma form-control icon positioning. These pair (e.g.
+          // `.control.has-icons-left .icon.is-left { left: 0 }`) to place an
+          // icon inside an input. The helper classes appear only in
+          // server-rendered PHP views, so a content-scan miss silently purges
+          // the positioning rule and the icon jumps to the right of the field.
+          // Safelist them so the layout never depends on the scan catching them.
+          'has-icons-left',
+          'has-icons-right',
+          'is-left',
+          'is-right',
           // Alpine.js visibility
           /^\[x-cloak\]$/,
           // Chart.js canvas
