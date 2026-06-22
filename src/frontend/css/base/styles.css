@@ -2335,6 +2335,21 @@ Statistics Page Styles
 Navigation Bar Styles (Alpine.js + Bulma)
 ***************************************************************/
 
+/* Device safe areas (notch / status / camera bar): pad the navbar so the
+   brand + burger sit below the status bar on edge-to-edge phones and in the
+   Android app shell, instead of being hidden under the camera bar. The
+   navbar's own background fills the inset, so the bar simply extends up behind
+   the status bar. Grow min-height too: with box-sizing: border-box, padding
+   alone would compress the bar's contents rather than push them down. Falls
+   back to 0 where there are no insets (desktop, non-notched), so nothing else
+   changes. Requires viewport-fit=cover (set in PageLayoutHelper head meta). */
+.navbar {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  min-height: calc(var(--bulma-navbar-height, 3.25rem) + env(safe-area-inset-top, 0px));
+}
+
 /* Main navbar styling */
 .navbar.is-light {
   background-color: var(--lwt-navbar-bg);
@@ -2395,7 +2410,9 @@ Navigation Bar Styles (Alpine.js + Bulma)
   .navbar-menu {
     display: block;
     position: fixed;
-    top: 3.25rem;
+    /* Start below the (safe-area-padded) navbar so the drawer doesn't slide
+       under the status/camera bar. */
+    top: calc(var(--bulma-navbar-height, 3.25rem) + env(safe-area-inset-top, 0px));
     left: 0;
     bottom: 0;
     width: 82%;
@@ -2405,6 +2422,10 @@ Navigation Bar Styles (Alpine.js + Bulma)
     background-color: var(--lwt-navbar-bg);
     box-shadow: 2px 0 16px rgba(0, 0, 0, 0.2);
     padding: 0.5rem 0;
+    /* Keep drawer items clear of a side notch (landscape) and the bottom
+       gesture bar. */
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
     transform: translateX(-100%);
     transition: transform 0.25s ease;
     z-index: 40;
@@ -2416,7 +2437,7 @@ Navigation Bar Styles (Alpine.js + Bulma)
 
   .navbar-overlay {
     position: fixed;
-    top: 3.25rem;
+    top: calc(var(--bulma-navbar-height, 3.25rem) + env(safe-area-inset-top, 0px));
     left: 0;
     right: 0;
     bottom: 0;

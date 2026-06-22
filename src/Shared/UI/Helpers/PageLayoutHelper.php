@@ -353,7 +353,7 @@ HTML;
 
         return <<<HTML
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="lwt-base-path" content="{$basePath}" />
 <meta name="csrf-token" content="{$csrfToken}" />
 <meta name="theme-color" content="#3273dc" />
