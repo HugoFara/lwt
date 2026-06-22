@@ -43,6 +43,16 @@ ones are marked like "v1.0.0-fork".
   from memory state (Stability/Difficulty/Retrievability, 4-grade reviews), deriving
   the 1–5 reading colours from memory strength. Proposal only — implementation
   deferred until after the next release.
+* **Optional email at registration**: the username is the unique identity, so
+  sign-up now needs only a username + password. Email becomes an optional
+  recovery channel.
+* **One-time recovery code** for accounts created without an email: shown once
+  at sign-up (and via the mobile client), with a new "reset with recovery code"
+  flow at `/password/recover` that rotates the code on use.
+* **Self-hosted ALTCHA proof-of-work captcha** on registration — a
+  privacy-friendly, dependency-free bot deterrent (no third-party service, no
+  user puzzle). Configurable via `ALTCHA_ENABLED` / `ALTCHA_HMAC_KEY`. Paired
+  with a hidden honeypot field and a submission-timing check.
 
 ### Security (XSS hardening: JSON-into-`<script>` breakout + DOM sinks)
 
@@ -321,6 +331,14 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Navbar hamburger hidden under the status/camera bar** on edge-to-edge
+  phones (and in the Android app shell). The navbar now respects the device
+  safe-area insets (`viewport-fit=cover` + `env(safe-area-inset-*)`), so the
+  burger and the mobile drawer sit below the status bar.
+* **Login/registration field icons appearing to the right of the input**
+  instead of inside it on the left. PurgeCSS was stripping Bulma's
+  `.icon.is-left`/`is-right` (used only in PHP views); these positional helpers
+  are now safelisted.
 * **Misspelled settings key in TTS / translation lookups**. Two reads in the
   Dictionary module used `Settings::get('currentlangage')` (missing the `u`)
   instead of the canonical `currentlanguage`, so they silently received an empty
