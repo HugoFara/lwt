@@ -43,6 +43,7 @@ if (isset($_SESSION['auth_success'])) {
         <div class="columns is-centered">
             <div class="column is-6-tablet is-5-desktop">
                 <div class="box">
+                    <?php echo \Lwt\Shared\UI\Helpers\PageLayoutHelper::languageSwitcher(); ?>
                     <!-- Logo/Title -->
                     <div class="has-text-centered mb-5">
                         <h1 class="title is-3">

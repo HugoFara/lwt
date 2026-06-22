@@ -704,6 +704,57 @@ HTML;
     }
 
     /**
+     * Build a compact UI-language switcher for the pre-login pages.
+     *
+     * A no-JS GET form (CSP-safe): a native-name `<select name="lang">` plus a
+     * submit button. Existing query parameters (e.g. a reset token) are carried
+     * across as hidden inputs so switching language never drops them. The
+     * `?lang=` is applied and persisted by TranslatorServiceProvider. Returns
+     * an empty string when only one locale is installed.
+     *
+     * @return string HTML for the switcher, or '' if not applicable.
+     */
+    public static function languageSwitcher(): string
+    {
+        $container = Container::getInstance();
+        if (!$container->has(Translator::class)) {
+            return '';
+        }
+        $translator = $container->getTyped(Translator::class);
+        $locales = $translator->getAvailableLocales();
+        if (count($locales) < 2) {
+            return '';
+        }
+        $options = SelectOptionsBuilder::forAppLanguages($locales, $translator->getLocale());
+
+        // Post back to the current path; carry other query params as hidden
+        // inputs (a GET form otherwise replaces the whole query string).
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $parsedPath = parse_url($uri, PHP_URL_PATH);
+        $path = is_string($parsedPath) && $parsedPath !== '' ? $parsedPath : '/';
+        $hidden = '';
+        foreach ($_GET as $key => $value) {
+            if ($key === 'lang' || !is_string($value)) {
+                continue;
+            }
+            $hidden .= '<input type="hidden" name="'
+                . htmlspecialchars((string) $key, ENT_QUOTES, 'UTF-8')
+                . '" value="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '">';
+        }
+
+        return '<form method="get" action="' . htmlspecialchars($path, ENT_QUOTES, 'UTF-8') . '"'
+            . ' class="field has-addons mb-4" style="justify-content: flex-end;">'
+            . $hidden
+            . '<div class="control"><div class="select is-small">'
+            . '<select name="lang" aria-label="Change language">' . $options . '</select>'
+            . '</div></div>'
+            . '<div class="control">'
+            . '<button type="submit" class="button is-small" aria-label="Change language">'
+            . '<span class="icon"><i data-lucide="globe"></i></span></button>'
+            . '</div></form>';
+    }
+
+    /**
      * Get the active locale code from the Translator service.
      *
      * @return string Locale code (e.g. "en", "es")

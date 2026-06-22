@@ -182,6 +182,12 @@ class UserController extends BaseController
                 $this->setRememberCookie($user->id()->toInt());
             }
 
+            // Drop any guest UI-language override so the account's own
+            // app_language preference governs once signed in.
+            if (isset($_COOKIE['lwt_lang']) && !headers_sent()) {
+                setcookie('lwt_lang', '', ['expires' => time() - 3600, 'path' => '/']);
+            }
+
             // Redirect to intended URL or home
             $redirectTo = $this->formData->getAndClearRedirectUrl('/');
             return $this->redirect($redirectTo);

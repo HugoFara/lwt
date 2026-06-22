@@ -60,13 +60,59 @@ class TranslatorServiceProvider implements ServiceProviderInterface
      */
     public function boot(Container $container): void
     {
+        $translator = $container->getTyped(Translator::class);
+
         try {
             $locale = Settings::getWithDefault('app_language');
             if ($locale !== '') {
-                $container->getTyped(Translator::class)->setLocale($locale);
+                $translator->setLocale($locale);
             }
         } catch (\Throwable $e) {
             // DB not available (e.g. wizard page) — stay with English
         }
+
+        // An explicit choice (the login-screen language switcher) overrides the
+        // configured app language. Works even when the DB is unavailable, so a
+        // guest can read the login/setup pages in their language.
+        $override = $this->resolveLocaleOverride($translator);
+        if ($override !== null) {
+            $translator->setLocale($override);
+        }
+    }
+
+    /**
+     * Resolve an explicit UI-language override from the request.
+     *
+     * Precedence: a `?lang=` query parameter (which is also persisted to the
+     * `lwt_lang` cookie) over an existing `lwt_lang` cookie. Both are validated
+     * against the available locales so only a real locale can be selected.
+     *
+     * @param Translator $translator Used to list the available locales.
+     *
+     * @return string|null The chosen locale, or null when none/invalid.
+     */
+    private function resolveLocaleOverride(Translator $translator): ?string
+    {
+        $available = $translator->getAvailableLocales();
+
+        $queryLang = $_GET['lang'] ?? null;
+        if (is_string($queryLang) && in_array($queryLang, $available, true)) {
+            // Persist for subsequent pages (a year), if headers allow.
+            if (!headers_sent()) {
+                setcookie('lwt_lang', $queryLang, [
+                    'expires' => time() + 31536000,
+                    'path' => '/',
+                    'samesite' => 'Lax',
+                ]);
+            }
+            return $queryLang;
+        }
+
+        $cookieLang = $_COOKIE['lwt_lang'] ?? null;
+        if (is_string($cookieLang) && in_array($cookieLang, $available, true)) {
+            return $cookieLang;
+        }
+
+        return null;
     }
 }
