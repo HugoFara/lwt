@@ -1012,6 +1012,12 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Dependency security bumps** closing twelve Dependabot advisories. PHP
+  runtime: `guzzlehttp/guzzle` 7.10.0 → 7.12.1, `guzzlehttp/psr7` 2.9.0 →
+  2.12.1 (cookie-domain, proxy-downgrade, and URI-host issues). JS build/test
+  toolchain (not shipped to users): `vite` → 8.0.16, `undici` → 7.28.0,
+  `form-data` → 4.0.6, `markdown-it` → 14.2.0, `esbuild` → 0.28.1. All within
+  existing version constraints; `composer audit` and `npm audit` both clean.
 * The archive-detect / extract / find-by-extension flow is now extracted
   into `DictionaryImportFileResolver` and shared by the curated import,
   legacy `/dictionaries/import`, and unified `/word/upload` routes. No
