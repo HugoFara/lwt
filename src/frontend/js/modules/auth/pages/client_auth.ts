@@ -33,6 +33,7 @@ import {
   probeAuthRequirement,
   type ApiResponse
 } from '@shared/api/client';
+import { solveAltcha } from '@shared/altcha/solve_altcha';
 import { url } from '@shared/utils/url';
 
 interface VersionResponse {
@@ -269,13 +270,17 @@ export function clientAuthData(): ClientAuthData {
       this.loading = true;
       this.error = '';
 
+      // Solve the proof-of-work captcha before submitting.
+      const altcha = await solveAltcha();
+
       const res = await apiPost<AuthResponse>('/auth/register', {
         username,
         email,
         password: this.password,
         password_confirm: this.passwordConfirm,
         // Honeypot — always empty for a real user; the server rejects if filled.
-        homepage: this.homepage
+        homepage: this.homepage,
+        altcha
       });
       this.loading = false;
       this.finishAuth(res, 'Registration failed.');

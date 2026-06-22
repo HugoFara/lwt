@@ -20,6 +20,7 @@ namespace Lwt\Modules\User\Http;
 use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Modules\User\Application\UserFacade;
+use Lwt\Modules\User\Application\Services\AltchaService;
 use Lwt\Modules\User\Infrastructure\MySqlUserRepository;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
@@ -52,13 +53,20 @@ class UserApiHandler implements ApiRoutableInterface
     private UserFacade $userFacade;
 
     /**
+     * ALTCHA proof-of-work captcha service.
+     */
+    private AltchaService $altcha;
+
+    /**
      * Create a new UserApiHandler.
      *
-     * @param UserFacade|null $userFacade User facade (optional for BC)
+     * @param UserFacade|null   $userFacade User facade (optional for BC)
+     * @param AltchaService|null $altcha    Captcha service (optional for BC)
      */
-    public function __construct(?UserFacade $userFacade = null)
+    public function __construct(?UserFacade $userFacade = null, ?AltchaService $altcha = null)
     {
         $this->userFacade = $userFacade ?? $this->createDefaultFacade();
+        $this->altcha = $altcha ?? AltchaService::fromEnvironment();
     }
 
     /**
@@ -130,6 +138,11 @@ class UserApiHandler implements ApiRoutableInterface
         // success so a bot can't distinguish the trap; no account is created.
         if ($honeypot !== '') {
             return ['success' => true];
+        }
+
+        // Proof-of-work captcha: the client must return a solved challenge.
+        if (!$this->altcha->verify((string)($params['altcha'] ?? ''))) {
+            return ['success' => false, 'error' => 'Captcha verification failed. Please try again.'];
         }
 
         // Validate required fields. Email is optional (the username is the
@@ -374,6 +387,12 @@ class UserApiHandler implements ApiRoutableInterface
         switch ($fragments[1] ?? '') {
             case 'me':
                 return Response::success($this->formatMe());
+            case 'altcha-challenge':
+                return Response::success(
+                    $this->altcha->isEnabled()
+                        ? $this->altcha->createChallenge()
+                        : ['enabled' => false]
+                );
             default:
                 return Response::error('Endpoint Not Found: auth/' . ($fragments[1] ?? ''), 404);
         }

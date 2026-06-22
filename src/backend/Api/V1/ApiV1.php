@@ -60,6 +60,7 @@ class ApiV1
     private const PUBLIC_ENDPOINTS = [
         'auth/login' => true,
         'auth/register' => true,
+        'auth/altcha-challenge' => true,
         'version' => true,
     ];
 

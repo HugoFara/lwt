@@ -350,7 +350,10 @@ describe('modules/auth/client_auth.ts', () => {
 
       await c.submitRegister(event);
 
-      expect(calledUrl()).toContain('/api/v1/auth/register');
+      // Registration first fetches a captcha challenge, then POSTs to register.
+      const urls = mockFetch.mock.calls.map((call) => String(call[0]));
+      expect(urls.some((u) => u.includes('/api/v1/auth/altcha-challenge'))).toBe(true);
+      expect(urls.some((u) => u.includes('/api/v1/auth/register'))).toBe(true);
       expect(getAuthToken()).toBe('new-acct');
       expect(c.onAuthenticated).toHaveBeenCalledOnce();
     });

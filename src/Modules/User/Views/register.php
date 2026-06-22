@@ -69,6 +69,9 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                             <input type="text" id="homepage" name="homepage"
                                 tabindex="-1" autocomplete="off" value="">
                         </div>
+                        <!-- Proof-of-work captcha solution, filled in by the
+                             register form component before the POST. -->
+                        <input type="hidden" id="altcha-solution" name="altcha" value="">
                         <div class="field">
                             <label class="label" for="username"><?php echo $t('register.username_label'); ?></label>
                             <div class="control has-icons-left has-icons-right">

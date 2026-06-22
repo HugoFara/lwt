@@ -8,6 +8,7 @@ use Lwt\Modules\User\Domain\User;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\User\Application\UserFacade;
+use Lwt\Modules\User\Application\Services\AltchaService;
 use Lwt\Shared\Domain\ValueObjects\UserId;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -28,7 +29,9 @@ class UserApiHandlerTest extends TestCase
     protected function setUp(): void
     {
         $this->facade = $this->createMock(UserFacade::class);
-        $this->handler = new UserApiHandler($this->facade);
+        // Disable the captcha for the general register tests so they don't need
+        // a solved challenge; the enabled path is covered explicitly below.
+        $this->handler = new UserApiHandler($this->facade, new AltchaService('test-key', false));
     }
 
     // =========================================================================
@@ -188,6 +191,23 @@ class UserApiHandlerTest extends TestCase
 
         $this->assertTrue($result['success']);
         $this->assertEquals('api-token', $result['token']);
+    }
+
+    public function testFormatRegisterRejectsMissingCaptcha(): void
+    {
+        // With the captcha enabled, a missing/invalid solution is rejected and
+        // no account is created.
+        $handler = new UserApiHandler($this->facade, new AltchaService('test-key', true));
+        $this->facade->expects($this->never())->method('register');
+
+        $result = $handler->formatRegister([
+            'username' => 'realuser',
+            'password' => 'secret',
+            'password_confirm' => 'secret'
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Captcha', $result['error']);
     }
 
     public function testFormatRegisterRejectsFilledHoneypot(): void

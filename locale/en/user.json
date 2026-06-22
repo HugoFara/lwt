@@ -111,6 +111,7 @@
     "flash.register_admin_granted": "You have been granted admin privileges as the first user.",
     "flash.register_verify_email": "Please check your email to verify your account.",
     "flash.register_failed": "Registration failed. Please try again.",
+    "flash.register_captcha_failed": "Could not verify you're human. Please reload the page and try again.",
     "flash.profile_missing_fields": "Please fill in all required fields",
     "flash.profile_updated_verify": "Profile updated. Please verify your new email address.",
     "flash.profile_updated": "Profile updated successfully.",

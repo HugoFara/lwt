@@ -34,6 +34,7 @@ class Endpoints
         'auth' => ['GET', 'POST'],
         'auth/login' => ['POST'],
         'auth/register' => ['POST'],
+        'auth/altcha-challenge' => ['GET'],
         'auth/refresh' => ['POST'],
         'auth/logout' => ['POST'],
         'auth/me' => ['GET'],

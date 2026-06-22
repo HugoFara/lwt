@@ -9,6 +9,7 @@
  */
 
 import Alpine from 'alpinejs';
+import { solveAltcha } from '@shared/altcha/solve_altcha';
 
 interface RegisterFormErrors {
   username: string;
@@ -27,7 +28,7 @@ interface RegisterFormData {
   validateEmail(value: string): void;
   validatePassword(): void;
   validatePasswordConfirm(): void;
-  submitForm(event: Event): void;
+  submitForm(event: Event): Promise<void>;
 }
 
 /**
@@ -99,7 +100,7 @@ export function registerFormData(): RegisterFormData {
       }
     },
 
-    submitForm(event: Event): void {
+    async submitForm(event: Event): Promise<void> {
       this.validatePassword();
       this.validatePasswordConfirm();
 
@@ -108,7 +109,26 @@ export function registerFormData(): RegisterFormData {
         return;
       }
 
+      // Solve the proof-of-work captcha before the POST, then submit the form
+      // natively (which doesn't re-fire this @submit handler).
+      event.preventDefault();
+      if (this.loading) {
+        return;
+      }
       this.loading = true;
+
+      const form = event.target as HTMLFormElement;
+      try {
+        const solution = await solveAltcha();
+        const field = form.querySelector<HTMLInputElement>('#altcha-solution');
+        if (field) {
+          field.value = solution;
+        }
+      } catch {
+        // If solving fails, submit anyway — the server rejects and shows a
+        // message, which is better than silently blocking the user here.
+      }
+      form.submit();
     }
   };
 }

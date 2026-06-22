@@ -7,6 +7,7 @@ namespace Lwt\Tests\Modules\User\Http;
 use Lwt\Modules\User\Domain\User;
 use Lwt\Modules\User\Http\UserController;
 use Lwt\Modules\User\Application\UserFacade;
+use Lwt\Modules\User\Application\Services\AltchaService;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use Lwt\Shared\Domain\ValueObjects\UserId;
 use Lwt\Shared\Infrastructure\Exception\AuthException;
@@ -38,7 +39,14 @@ class UserControllerTest extends TestCase
         $this->facade = $this->createMock(UserFacade::class);
         $this->flash = $this->createMock(FlashMessageService::class);
         $this->formData = $this->createMock(AuthFormDataManager::class);
-        $this->controller = new UserController($this->facade, $this->flash, $this->formData);
+        // Disable the captcha so register tests don't need a solved challenge;
+        // a dedicated test covers the enabled (rejection) path.
+        $this->controller = new UserController(
+            $this->facade,
+            $this->flash,
+            $this->formData,
+            new AltchaService('test-key', false)
+        );
     }
 
     protected function tearDown(): void
@@ -241,6 +249,31 @@ class UserControllerTest extends TestCase
             ->with('Passwords do not match');
 
         $this->controller->register();
+    }
+
+    public function testRegisterShowsErrorForFailedCaptcha(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['username'] = 'captchauser';
+        $_POST['email'] = '';
+        $_POST['password'] = 'password123';
+        $_POST['password_confirm'] = 'password123';
+        unset($_POST['altcha'], $_POST['homepage']);
+
+        // A controller with the captcha enabled but no solution provided.
+        $controller = new UserController(
+            $this->facade,
+            $this->flash,
+            $this->formData,
+            new AltchaService('test-key', true)
+        );
+
+        $this->facade->expects($this->never())->method('register');
+        $this->flash->expects($this->once())
+            ->method('error')
+            ->with("Could not verify you're human. Please reload the page and try again.");
+
+        $controller->register();
     }
 
     public function testRegisterCallsFacadeWithValidData(): void

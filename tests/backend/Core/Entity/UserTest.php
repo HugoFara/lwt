@@ -126,12 +126,15 @@ class UserTest extends TestCase
         User::create('test user', 'test@example.com', 'hashedpassword');
     }
 
-    public function testCreateUserRejectsEmptyEmail(): void
+    public function testCreateUserAllowsEmptyEmail(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Email cannot be empty');
+        // Email is optional (the username is the unique identity). A blank or
+        // null email is stored as NULL rather than rejected.
+        $fromBlank = User::create('testuser', '', 'hashedpassword');
+        $this->assertNull($fromBlank->email());
 
-        User::create('testuser', '', 'hashedpassword');
+        $fromNull = User::create('testuser2', null, 'hashedpassword');
+        $this->assertNull($fromNull->email());
     }
 
     public function testCreateUserRejectsInvalidEmail(): void

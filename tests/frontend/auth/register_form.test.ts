@@ -16,6 +16,12 @@ vi.mock('alpinejs', () => {
   };
 });
 
+// The captcha solver is exercised in its own test; here we stub it so
+// submitForm's flow can be tested without crypto/network.
+vi.mock('@shared/altcha/solve_altcha', () => ({
+  solveAltcha: vi.fn(async () => 'solved-altcha-payload')
+}));
+
 import { registerFormData } from '../../../src/frontend/js/modules/auth/pages/register_form';
 
 describe('auth/pages/register_form.ts', () => {
@@ -338,16 +344,22 @@ describe('auth/pages/register_form.ts', () => {
       expect(formData.loading).toBe(false);
     });
 
-    it('sets loading to true when form is valid', () => {
+    it('solves the captcha and submits the form when valid', async () => {
       const formData = registerFormData();
       formData.password = 'ValidPass1';
       formData.passwordConfirm = 'ValidPass1';
-      const mockEvent = { preventDefault: vi.fn() };
+      const field = { value: '' };
+      const form = { querySelector: vi.fn(() => field), submit: vi.fn() };
+      const mockEvent = { preventDefault: vi.fn(), target: form };
 
-      formData.submitForm(mockEvent as unknown as Event);
+      await formData.submitForm(mockEvent as unknown as Event);
 
-      expect(mockEvent.preventDefault).not.toHaveBeenCalled();
+      // Native POST is intercepted so the captcha can be solved first, then
+      // the form is submitted programmatically with the solution attached.
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(formData.loading).toBe(true);
+      expect(field.value).toBe('solved-altcha-payload');
+      expect(form.submit).toHaveBeenCalled();
     });
 
     it('validates password before submission', () => {

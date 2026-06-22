@@ -24,6 +24,7 @@ use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Admin\Application\Services\TtsService;
 use Lwt\Modules\Admin\Application\UseCases\Theme\GetAvailableThemes;
 use Lwt\Modules\User\Application\UserFacade;
+use Lwt\Modules\User\Application\Services\AltchaService;
 use Lwt\Modules\User\Infrastructure\AuthFormDataManager;
 use Lwt\Shared\Infrastructure\Http\FlashMessageService;
 use Lwt\Shared\Infrastructure\Http\ResponseInterface;
@@ -60,21 +61,29 @@ class UserController extends BaseController
     private AuthFormDataManager $formData;
 
     /**
+     * ALTCHA proof-of-work captcha service.
+     */
+    private AltchaService $altcha;
+
+    /**
      * Create a new UserController.
      *
      * @param UserFacade|null          $userFacade User facade (optional for BC)
      * @param FlashMessageService|null $flash      Flash message service
      * @param AuthFormDataManager|null $formData   Form data manager
+     * @param AltchaService|null       $altcha     Captcha service (optional for BC)
      */
     public function __construct(
         ?UserFacade $userFacade = null,
         ?FlashMessageService $flash = null,
-        ?AuthFormDataManager $formData = null
+        ?AuthFormDataManager $formData = null,
+        ?AltchaService $altcha = null
     ) {
         parent::__construct();
         $this->userFacade = $userFacade ?? $this->createDefaultFacade();
         $this->flash = $flash ?? new FlashMessageService();
         $this->formData = $formData ?? new AuthFormDataManager();
+        $this->altcha = $altcha ?? AltchaService::fromEnvironment();
     }
 
     /**
@@ -270,6 +279,12 @@ class UserController extends BaseController
         // Password confirmation
         if ($password !== $passwordConfirm) {
             $this->flash->error(__('user.flash.register_passwords_mismatch'));
+            return $this->redirect('/register');
+        }
+
+        // Proof-of-work captcha: the browser must return a solved challenge.
+        if (!$this->altcha->verify($this->post('altcha'))) {
+            $this->flash->error(__('user.flash.register_captcha_failed'));
             return $this->redirect('/register');
         }
 
