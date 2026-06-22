@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS _migrations (
 CREATE TABLE IF NOT EXISTS users (
     UsID int(10) unsigned NOT NULL AUTO_INCREMENT,
     UsUsername varchar(100) NOT NULL,
-    UsEmail varchar(255) NOT NULL,
+    UsEmail varchar(255) DEFAULT NULL,
     UsPasswordHash varchar(255) DEFAULT NULL,
     UsApiToken varchar(64) DEFAULT NULL,
     UsApiTokenExpires datetime DEFAULT NULL,

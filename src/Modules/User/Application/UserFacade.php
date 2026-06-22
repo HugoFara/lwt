@@ -125,16 +125,16 @@ class UserFacade
     /**
      * Register a new user.
      *
-     * @param string $username Username
-     * @param string $email    Email address
-     * @param string $password Plain-text password
+     * @param string      $username Username
+     * @param string|null $email    Email address (optional)
+     * @param string      $password Plain-text password
      *
      * @return User The created user
      *
      * @throws \InvalidArgumentException If validation fails
      * @throws \RuntimeException If registration fails
      */
-    public function register(string $username, string $email, string $password): User
+    public function register(string $username, ?string $email, string $password): User
     {
         return $this->getRegisterUseCase()->execute($username, $email, $password);
     }

@@ -124,13 +124,18 @@ class UserApiHandler implements ApiRoutableInterface
         $email = trim((string)($params['email'] ?? ''));
         $password = (string)($params['password'] ?? '');
         $passwordConfirm = (string)($params['password_confirm'] ?? '');
+        $honeypot = trim((string)($params['homepage'] ?? ''));
 
-        // Validate required fields
+        // Honeypot: a human never fills this hidden field. Report a generic
+        // success so a bot can't distinguish the trap; no account is created.
+        if ($honeypot !== '') {
+            return ['success' => true];
+        }
+
+        // Validate required fields. Email is optional (the username is the
+        // unique identity); it is only a recovery/verification channel.
         if (empty($username)) {
             return ['success' => false, 'error' => 'Username is required'];
-        }
-        if (empty($email)) {
-            return ['success' => false, 'error' => 'Email is required'];
         }
         if (empty($password)) {
             return ['success' => false, 'error' => 'Password is required'];
@@ -141,8 +146,8 @@ class UserApiHandler implements ApiRoutableInterface
             return ['success' => false, 'error' => 'Passwords do not match'];
         }
 
-        // Validate email format
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        // Validate email format only when one was supplied
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['success' => false, 'error' => 'Invalid email format'];
         }
 
@@ -264,7 +269,7 @@ class UserApiHandler implements ApiRoutableInterface
      *
      * @param User $user The user entity
      *
-     * @return array{id: int, username: string, email: string, role: string,
+     * @return array{id: int, username: string, email: string|null, role: string,
      *               created: string, last_login: ?string, has_wordpress: bool}
      */
     private function formatUserData(User $user): array

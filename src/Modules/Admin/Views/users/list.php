@@ -161,7 +161,7 @@ $sortLink = function (string $column, string $label) use ($base, $sort, $dir, $s
                     <td>
                         <strong><?php echo htmlspecialchars($user->username(), ENT_QUOTES, 'UTF-8'); ?></strong>
                     </td>
-                    <td><?php echo htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php echo htmlspecialchars($user->email() ?? '—', ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>
                         <?php if ($isAdmin) : ?>
                             <span class="tag is-info"><?= __('admin.users_role_admin') ?></span>

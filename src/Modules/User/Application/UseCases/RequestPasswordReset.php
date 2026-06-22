@@ -90,6 +90,13 @@ class RequestPasswordReset
             return true;
         }
 
+        $recipient = $user->email();
+        if ($recipient === null) {
+            // Account registered without an email — no reset channel here.
+            // (Email-less accounts recover via their one-time recovery code.)
+            return true;
+        }
+
         // Generate plaintext token and hash for storage
         $plaintextToken = $this->tokenHasher->generate(32);
         $hashedToken = $this->tokenHasher->hash($plaintextToken);
@@ -102,7 +109,7 @@ class RequestPasswordReset
         // Send email with plaintext token
         try {
             $this->emailService->sendPasswordResetEmail(
-                $user->email(),
+                $recipient,
                 $user->username(),
                 $plaintextToken,
                 $expires

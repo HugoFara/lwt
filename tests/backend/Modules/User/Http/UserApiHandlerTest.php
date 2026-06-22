@@ -167,16 +167,44 @@ class UserApiHandlerTest extends TestCase
         $this->assertEquals('Username is required', $result['error']);
     }
 
-    public function testFormatRegisterReturnsErrorForMissingEmail(): void
+    public function testFormatRegisterAllowsMissingEmail(): void
     {
+        // Email is optional now (the username is the unique identity). A missing
+        // email must not be rejected; registration proceeds with an empty email.
+        $user = $this->createMockUser(1, 'testuser', null);
+
+        $this->facade->method('register')
+            ->with('testuser', '', 'secret')
+            ->willReturn($user);
+        $this->facade->method('generateApiToken')
+            ->with(1)
+            ->willReturn('api-token');
+
         $result = $this->handler->formatRegister([
             'username' => 'testuser',
             'password' => 'secret',
             'password_confirm' => 'secret'
         ]);
 
-        $this->assertFalse($result['success']);
-        $this->assertEquals('Email is required', $result['error']);
+        $this->assertTrue($result['success']);
+        $this->assertEquals('api-token', $result['token']);
+    }
+
+    public function testFormatRegisterRejectsFilledHoneypot(): void
+    {
+        // A filled honeypot is reported as a generic success (so a bot can't
+        // tell), and register() is never called — no account is created.
+        $this->facade->expects($this->never())->method('register');
+
+        $result = $this->handler->formatRegister([
+            'username' => 'botuser',
+            'password' => 'secret',
+            'password_confirm' => 'secret',
+            'homepage' => 'http://spam.example'
+        ]);
+
+        $this->assertTrue($result['success']);
+        $this->assertArrayNotHasKey('token', $result);
     }
 
     public function testFormatRegisterReturnsErrorForMissingPassword(): void
@@ -757,7 +785,7 @@ class UserApiHandlerTest extends TestCase
      *
      * @return User&MockObject
      */
-    private function createMockUser(int $id, string $username, string $email): User
+    private function createMockUser(int $id, string $username, ?string $email): User
     {
         $userId = UserId::fromInt($id);
         $created = new \DateTimeImmutable('2024-01-01');

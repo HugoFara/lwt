@@ -139,12 +139,12 @@ describe('auth/pages/register_form.ts', () => {
   // ===========================================================================
 
   describe('validateEmail', () => {
-    it('sets error when email is empty', () => {
+    it('accepts an empty email (email is optional)', () => {
       const formData = registerFormData();
 
       formData.validateEmail('');
 
-      expect(formData.errors.email).toBe('Email is required');
+      expect(formData.errors.email).toBe('');
     });
 
     it('sets error for invalid email format', () => {

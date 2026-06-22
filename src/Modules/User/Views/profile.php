@@ -29,7 +29,7 @@ assert(isset($error) && (is_string($error) || $error === null));
 assert(isset($success) && (is_string($success) || $success === null));
 
 $escapedUsername = htmlspecialchars($user->username(), ENT_QUOTES, 'UTF-8');
-$escapedEmail = htmlspecialchars($user->email(), ENT_QUOTES, 'UTF-8');
+$escapedEmail = htmlspecialchars($user->email() ?? '', ENT_QUOTES, 'UTF-8');
 
 $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
 ?>

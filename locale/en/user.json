@@ -19,6 +19,8 @@
     "register.username_placeholder": "Choose a username",
     "register.username_help": "3-100 characters, letters, numbers, underscores, and hyphens only",
     "register.email_label": "Email",
+    "register.email_label_optional": "Email (optional)",
+    "register.email_help_optional": "Only used to recover a forgotten password. Skip it if you prefer — but without one you won't be able to reset your password, so keep your password safe or add an email later in your profile.",
     "register.email_placeholder": "Enter your email address",
     "register.password_label": "Password",
     "register.password_placeholder": "Create a password",

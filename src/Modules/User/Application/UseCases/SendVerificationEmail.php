@@ -65,6 +65,13 @@ class SendVerificationEmail
             return true;
         }
 
+        // No email on file (email is optional at registration): nothing to
+        // send and nothing to verify. Treat as a no-op success.
+        $email = $user->email();
+        if ($email === null) {
+            return true;
+        }
+
         // When email is disabled, auto-verify
         if (!$this->emailService->isEnabled()) {
             $user->markEmailVerified();
@@ -84,7 +91,7 @@ class SendVerificationEmail
         // Send email with plaintext token (non-blocking — failure doesn't prevent registration)
         try {
             $this->emailService->sendVerificationEmail(
-                $user->email(),
+                $email,
                 $user->username(),
                 $plaintextToken,
                 $expires

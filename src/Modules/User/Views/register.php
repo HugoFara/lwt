@@ -60,6 +60,15 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                     <!-- Registration form -->
                     <form method="POST" action="/register" x-data="registerForm()" @submit="submitForm($event)">
                         <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
+                        <!-- Honeypot: hidden from people (off-screen, not
+                             tabbable, autocomplete off); bots that fill it are
+                             silently rejected server-side. Not translated on
+                             purpose — it must look like a real field to a bot. -->
+                        <div class="lwt-hp" aria-hidden="true">
+                            <label for="homepage">Leave this field empty</label>
+                            <input type="text" id="homepage" name="homepage"
+                                tabindex="-1" autocomplete="off" value="">
+                        </div>
                         <div class="field">
                             <label class="label" for="username"><?php echo $t('register.username_label'); ?></label>
                             <div class="control has-icons-left has-icons-right">
@@ -92,7 +101,7 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                         </div>
 
                         <div class="field">
-                            <label class="label" for="email"><?php echo $t('register.email_label'); ?></label>
+                            <label class="label" for="email"><?php echo $t('register.email_label_optional'); ?></label>
                             <div class="control has-icons-left has-icons-right">
                                 <input
                                     type="email"
@@ -102,7 +111,6 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                                     :class="{ 'is-danger': errors.email }"
                                     placeholder="<?php echo $t('register.email_placeholder'); ?>"
                                     value="<?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>"
-                                    required
                                     @blur="validateEmail($event.target.value)"
                                 >
                                 <span class="icon is-small is-left">
@@ -113,6 +121,9 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                                 </span>
                             </div>
                             <p class="help is-danger" x-show="errors.email" x-text="errors.email"></p>
+                            <p class="help" x-show="!errors.email">
+                                <?php echo $t('register.email_help_optional'); ?>
+                            </p>
                         </div>
 
                         <div class="field">

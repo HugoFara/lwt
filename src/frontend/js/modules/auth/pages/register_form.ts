@@ -65,9 +65,9 @@ export function registerFormData(): RegisterFormData {
     },
 
     validateEmail(value: string): void {
-      if (!value) {
-        this.errors.email = 'Email is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      // Email is optional (the username is the unique identity). Only validate
+      // the format when the user actually typed something.
+      if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         this.errors.email = 'Please enter a valid email address';
       } else {
         this.errors.email = '';

@@ -69,16 +69,16 @@ class Register
     /**
      * Execute the registration.
      *
-     * @param string $username Username
-     * @param string $email    Email address
-     * @param string $password Plain-text password
+     * @param string      $username Username
+     * @param string|null $email    Email address (optional)
+     * @param string      $password Plain-text password
      *
      * @return User The created user
      *
      * @throws \InvalidArgumentException If validation fails
      * @throws \RuntimeException If registration fails
      */
-    public function execute(string $username, string $email, string $password): User
+    public function execute(string $username, ?string $email, string $password): User
     {
         // Validate password strength
         $validation = $this->passwordHasher->validateStrength($password);
@@ -86,13 +86,18 @@ class Register
             throw new \InvalidArgumentException(implode('. ', $validation['errors']));
         }
 
+        // Email is optional: username is the unique identity. Normalise a blank
+        // email to null so it is stored as NULL rather than an empty string.
+        $email = $email !== null ? trim($email) : '';
+        $email = $email !== '' ? $email : null;
+
         // Check if username already exists
         if ($this->repository->findByUsername($username) !== null) {
             throw new \InvalidArgumentException('Username is already taken');
         }
 
-        // Check if email already exists
-        if ($this->repository->findByEmail($email) !== null) {
+        // Check if email already exists (only when one was supplied)
+        if ($email !== null && $this->repository->findByEmail($email) !== null) {
             throw new \InvalidArgumentException('Email is already registered');
         }
 

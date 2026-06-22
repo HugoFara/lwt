@@ -54,6 +54,8 @@ interface ClientAuthData {
   email: string;
   password: string;
   passwordConfirm: string;
+  /** Honeypot field — bound to a hidden input; bots fill it, humans don't. */
+  homepage: string;
   loading: boolean;
   error: string;
   homeUrl: string;
@@ -109,6 +111,7 @@ export function clientAuthData(): ClientAuthData {
     email: '',
     password: '',
     passwordConfirm: '',
+    homepage: '',
     loading: false,
     error: '',
     homeUrl: '/',
@@ -253,8 +256,9 @@ export function clientAuthData(): ClientAuthData {
 
       const username = this.username.trim();
       const email = this.email.trim();
-      if (username === '' || email === '' || this.password === '') {
-        this.error = 'Enter a username, email, and password.';
+      // Email is optional — the username is the unique identity.
+      if (username === '' || this.password === '') {
+        this.error = 'Enter a username and password.';
         return;
       }
       if (this.password !== this.passwordConfirm) {
@@ -269,7 +273,9 @@ export function clientAuthData(): ClientAuthData {
         username,
         email,
         password: this.password,
-        password_confirm: this.passwordConfirm
+        password_confirm: this.passwordConfirm,
+        // Honeypot — always empty for a real user; the server rejects if filled.
+        homepage: this.homepage
       });
       this.loading = false;
       this.finishAuth(res, 'Registration failed.');

@@ -131,6 +131,52 @@ class RegisterTest extends TestCase
         $this->useCase->execute('newuser', 'existing@example.com', 'ValidPass123!');
     }
 
+    public function testExecuteCreatesUserWithoutEmail(): void
+    {
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+
+        $this->repository->expects($this->once())
+            ->method('findByUsername')
+            ->with('noemailuser')
+            ->willReturn(null);
+
+        // Email uniqueness must NOT be checked when no email is supplied.
+        $this->repository->expects($this->never())
+            ->method('findByEmail');
+
+        $this->passwordHasher->method('hash')->willReturn('hashed_password');
+
+        $this->repository->expects($this->once())
+            ->method('save')
+            ->with($this->isInstanceOf(User::class));
+
+        $result = $this->useCase->execute('noemailuser', null, 'ValidPass123!');
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertSame('noemailuser', $result->username());
+        $this->assertNull($result->email());
+    }
+
+    public function testExecuteTreatsBlankEmailAsNone(): void
+    {
+        $this->passwordHasher->method('validateStrength')
+            ->willReturn(['valid' => true, 'errors' => []]);
+
+        $this->repository->method('findByUsername')->willReturn(null);
+
+        // A whitespace-only email is normalised to NULL, so no lookup happens.
+        $this->repository->expects($this->never())
+            ->method('findByEmail');
+
+        $this->passwordHasher->method('hash')->willReturn('hashed_password');
+        $this->repository->expects($this->once())->method('save');
+
+        $result = $this->useCase->execute('blankemail', '   ', 'ValidPass123!');
+
+        $this->assertNull($result->email());
+    }
+
     public function testExecuteChecksPasswordStrengthFirst(): void
     {
         $this->passwordHasher->expects($this->once())

@@ -38,7 +38,7 @@ class User
 
     private UserId $id;
     private string $username;
-    private string $email;
+    private ?string $email;
     private ?string $passwordHash;
     private ?string $apiToken;
     private ?DateTimeImmutable $apiTokenExpires;
@@ -63,7 +63,7 @@ class User
     private function __construct(
         UserId $id,
         string $username,
-        string $email,
+        ?string $email,
         ?string $passwordHash,
         ?string $apiToken,
         ?DateTimeImmutable $apiTokenExpires,
@@ -117,19 +117,24 @@ class User
      */
     public static function create(
         string $username,
-        string $email,
+        ?string $email,
         string $passwordHash
     ): self {
         $trimmedUsername = trim($username);
-        $trimmedEmail = trim($email);
+        $trimmedEmail = $email !== null ? trim($email) : '';
 
         self::validateUsername($trimmedUsername);
-        self::validateEmail($trimmedEmail);
+        // Email is optional (username is the unique identity). Validate only
+        // when one is supplied; an empty email is stored as NULL so multiple
+        // email-less accounts don't collide on the UsEmail unique key.
+        if ($trimmedEmail !== '') {
+            self::validateEmail($trimmedEmail);
+        }
 
         return new self(
             UserId::new(),
             $trimmedUsername,
-            strtolower($trimmedEmail),
+            $trimmedEmail !== '' ? strtolower($trimmedEmail) : null,
             $passwordHash,
             null,
             null,
@@ -328,7 +333,7 @@ class User
     public static function reconstitute(
         int $id,
         string $username,
-        string $email,
+        ?string $email,
         ?string $passwordHash,
         ?string $apiToken,
         ?DateTimeImmutable $apiTokenExpires,
@@ -856,7 +861,7 @@ class User
         return $this->username;
     }
 
-    public function email(): string
+    public function email(): ?string
     {
         return $this->email;
     }

@@ -68,7 +68,7 @@ class MySqlUserRepository implements UserRepositoryInterface
         return User::reconstitute(
             (int) $row['UsID'],
             (string) $row['UsUsername'],
-            (string) $row['UsEmail'],
+            ($row['UsEmail'] ?? null) !== null ? (string) $row['UsEmail'] : null,
             $row['UsPasswordHash'] !== null ? (string) $row['UsPasswordHash'] : null,
             $row['UsApiToken'] !== null ? (string) $row['UsApiToken'] : null,
             $this->parseNullableDateTime($this->getNullableString($row['UsApiTokenExpires'] ?? null)),

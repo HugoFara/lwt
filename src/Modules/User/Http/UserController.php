@@ -210,6 +210,13 @@ class UserController extends BaseController
         $username = $this->formData->getAndClearUsername();
         $email = $this->formData->getAndClearEmail();
 
+        // Stamp when the form was served, so the POST handler can reject
+        // near-instant submissions (a cheap bot signal — see register()).
+        if (session_status() === PHP_SESSION_NONE) {
+            @session_start();
+        }
+        $_SESSION['register_form_time'] = time();
+
         $this->render(__('user.register.page_title'), false);
         require __DIR__ . '/../Views/register.php';
         $this->endRender();
@@ -235,6 +242,15 @@ class UserController extends BaseController
             return $this->redirect('/login');
         }
 
+        // Bot traps (cheap first line; the captcha is the real gate). A filled
+        // honeypot or a near-instant submission is almost certainly a bot, so
+        // pretend it worked — redirecting to /login wastes the bot's effort
+        // without revealing the trap, and no account is created.
+        if ($this->looksLikeBotSubmission()) {
+            unset($_SESSION['register_form_time']);
+            return $this->redirect('/login');
+        }
+
         $username = $this->post('username');
         $email = $this->post('email');
         $password = $this->post('password');
@@ -244,8 +260,9 @@ class UserController extends BaseController
         $this->formData->setUsername($username);
         $this->formData->setEmail($email);
 
-        // Basic validation
-        if (empty($username) || empty($email) || empty($password)) {
+        // Basic validation. Email is optional (the username is the unique
+        // identity); it is only kept as a recovery/verification channel.
+        if (empty($username) || empty($password)) {
             $this->flash->error(__('user.flash.register_missing_fields'));
             return $this->redirect('/register');
         }
@@ -289,6 +306,30 @@ class UserController extends BaseController
             $this->flash->error(__('user.flash.register_failed'));
             return $this->redirect('/register');
         }
+    }
+
+    /** Minimum plausible seconds between serving and submitting the form. */
+    private const MIN_REGISTER_SECONDS = 2;
+
+    /**
+     * Cheap, no-friction bot heuristics for the registration POST.
+     *
+     * - Honeypot: the form carries a `homepage` field hidden off-screen with
+     *   tabindex=-1 and autocomplete=off; a human never fills it, naive bots do.
+     * - Timing: a form submitted within {@see self::MIN_REGISTER_SECONDS} of
+     *   being served was almost certainly auto-filled. Only enforced when a
+     *   render timestamp exists, so a lost session can't false-positive.
+     *
+     * The real gate is the proof-of-work captcha; this just turns away the
+     * cheapest bots for free.
+     */
+    private function looksLikeBotSubmission(): bool
+    {
+        if (trim($this->post('homepage')) !== '') {
+            return true;
+        }
+        $formTime = (int) ($_SESSION['register_form_time'] ?? 0);
+        return $formTime > 0 && (time() - $formTime) < self::MIN_REGISTER_SECONDS;
     }
 
     /**

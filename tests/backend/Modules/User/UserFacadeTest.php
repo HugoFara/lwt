@@ -296,13 +296,15 @@ class UserFacadeTest extends TestCase
         $this->facade->register('', 'test@example.com', 'Pass123!');
     }
 
-    public function testRegisterThrowsForEmptyEmail(): void
+    public function testRegisterAllowsEmptyEmail(): void
     {
         $this->skipIfNoUsersTable();
 
-        $this->expectException(InvalidArgumentException::class);
+        // Email is optional: an empty email is normalised to NULL, so the
+        // account is created with no email on file (the username is unique).
+        $user = $this->facade->register('testuser_' . uniqid(), '', 'Pass123!');
 
-        $this->facade->register('testuser_' . uniqid(), '', 'Pass123!');
+        $this->assertNull($user->email());
     }
 
     // ===== logout() tests =====

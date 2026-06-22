@@ -2335,6 +2335,18 @@ Statistics Page Styles
 Navigation Bar Styles (Alpine.js + Bulma)
 ***************************************************************/
 
+/* Honeypot field wrapper: visually removed and taken out of the a11y tree,
+   but still submitted. A real user never sees or fills it; bots that auto-fill
+   every field trip it and are rejected server-side. Avoid display:none, which
+   some bots skip. */
+.lwt-hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 /* Device safe areas (notch / status / camera bar): pad the navbar so the
    brand + burger sit below the status bar on edge-to-edge phones and in the
    Android app shell, instead of being hidden under the camera bar. The

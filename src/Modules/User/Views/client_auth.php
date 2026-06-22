@@ -145,6 +145,13 @@ namespace Lwt\Modules\User\Views;
 
                     <!-- Create an account -->
                     <form @submit="submitRegister($event)" x-show="onRegisterMode">
+                        <!-- Honeypot: hidden from people; bots that fill it are
+                             rejected server-side. -->
+                        <div class="lwt-hp" aria-hidden="true">
+                            <label for="reg-homepage">Leave this field empty</label>
+                            <input type="text" id="reg-homepage" x-model="homepage"
+                                tabindex="-1" autocomplete="off">
+                        </div>
                         <div class="field">
                             <label class="label" for="reg-username">Username</label>
                             <div class="control has-icons-left">
@@ -163,7 +170,8 @@ namespace Lwt\Modules\User\Views;
                         </div>
 
                         <div class="field">
-                            <label class="label" for="reg-email">Email</label>
+                            <label class="label" for="reg-email">Email
+                                <span class="has-text-grey is-size-7">(optional)</span></label>
                             <div class="control has-icons-left">
                                 <input
                                     type="email"
@@ -171,12 +179,12 @@ namespace Lwt\Modules\User\Views;
                                     class="input"
                                     x-model="email"
                                     autocomplete="email"
-                                    required
                                 >
                                 <span class="icon is-small is-left">
                                     <i data-lucide="mail"></i>
                                 </span>
                             </div>
+                            <p class="help">Only used to recover a forgotten password. Leave blank to skip.</p>
                         </div>
 
                         <div class="field">
