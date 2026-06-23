@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 namespace Lwt\Api\V1;
 
+use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\I18n\Translator;
 use Lwt\Shared\Infrastructure\Container\Container;
@@ -49,9 +50,6 @@ use Lwt\Modules\Text\Http\WhisperApiHandler;
  */
 class ApiV1
 {
-    private const VERSION = "3.0.2";
-    private const RELEASE_DATE = "2026-04-05";
-
     /**
      * Endpoints that do not require authentication.
      *
@@ -216,8 +214,11 @@ class ApiV1
         switch ($resource) {
             case 'version':
                 return Response::success([
-                    "version" => self::VERSION,
-                    "release_date" => self::RELEASE_DATE
+                    // Source from ApplicationInfo (single source of truth) so this
+                    // never drifts behind the app version again. Strip the "-fork"
+                    // suffix to keep the value bare semver (X.Y.Z) for API clients.
+                    "version" => \explode('-', ApplicationInfo::getRawVersion())[0],
+                    "release_date" => ApplicationInfo::getReleaseDate()
                 ]);
 
             case 'statuses':
