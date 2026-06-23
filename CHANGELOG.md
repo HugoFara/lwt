@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.2.0-fork] - 2026-06-23
+
 ### Added
 
 * **Global Digital Library as a text source** ("Kids' Library"): browse and
