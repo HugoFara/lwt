@@ -21,14 +21,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # For platform support change, change here and below
+        # For platform support change, change here and below.
+        # Only platforms published by the composer base image are buildable
+        # (it has no arm/v5 or mips64le manifest — those legs fail with
+        # "no match for platform in manifest", see HugoFara/lwt release CI).
         platform:
           - linux/amd64
           - linux/386
-          - linux/arm/v5
           - linux/arm/v7
           - linux/arm64
-          - linux/mips64le
           - linux/ppc64le
           - linux/s390x
     steps:
