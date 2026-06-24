@@ -2,7 +2,7 @@
 
 * **IMPORTANT: The WordPress feature is a legacy function no longer maintained. Use at your own risk!**
 
-lang-learn-guy:
+hapepo23:
 > I CANNOT give any support for this feature, NOR can I help you with any WordPress problems!
 **USE AT YOUR OWN RISK!**
 

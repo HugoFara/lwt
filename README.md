@@ -26,7 +26,15 @@
 Don't know where to start? LWT suggests books from [Project Gutenberg](https://www.gutenberg.org/) ranked by difficulty, plus curated news feeds in 19 languages. Already have a text you love? Paste it in and start reading. As you mark words, suggestions get smarter and new vocabulary is pre-enriched from [Wiktionary](https://www.wiktionary.org/).
 
 > [!IMPORTANT]
-> This is a **community-maintained fork** and a significant upgrade over the original LWT, created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and first released in 2011. It brings an easy-to-use interface, text suggestions and reading statistics, modern PHP support (8.2–8.5), mobile support, and compatibility with the modern web. The original LWT is still available on [SourceForge](https://sourceforge.net/projects/learning-with-texts); a snapshot of its code is also preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
+> This is a **community-maintained fork** and a significant upgrade over the original LWT, created by [hapepo23](https://sourceforge.net/u/hapepo23/) and first released in 2011. It brings an easy-to-use interface, text suggestions and reading statistics, modern PHP support (8.2–8.5), mobile support, and compatibility with the modern web. The original LWT is still available on [SourceForge](https://sourceforge.net/projects/learning-with-texts); a snapshot of its code is also preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
+
+> [!TIP]
+> **There's a mobile app now: [Lukaisu](https://github.com/lukaisu/lukaisu).** A
+> new **local-first** Android client (heading to F-Droid) for learning by
+> reading. It works fully offline with an on-device database; connecting a server
+> is optional and adds Chinese/Japanese word-splitting, text-to-speech,
+> transcription, and online text discovery. LWT 3.1+ servers are compatible, so
+> you can read your existing library on your phone.
 
 ## Table of Contents
 

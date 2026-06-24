@@ -1,6 +1,6 @@
 # Important Links
 
-* **Original Project Page**: the original LWT was created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and is hosted at [sourceforge.net/projects/learning-with-texts](https://sourceforge.net/projects/learning-with-texts/) (also on GitHub as [hapepo23/learning-with-texts](https://github.com/hapepo23/learning-with-texts)). A snapshot of the original code is also preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
+* **Original Project Page**: the original LWT was created by [hapepo23](https://sourceforge.net/u/hapepo23/) and is hosted at [sourceforge.net/projects/learning-with-texts](https://sourceforge.net/projects/learning-with-texts/) (also on GitHub as [hapepo23/learning-with-texts](https://github.com/hapepo23/learning-with-texts)). A snapshot of the original code is also preserved on the [`official` branch](https://github.com/HugoFara/lwt/tree/official) of this repository.
 * **Download Page**:
   * [Latest release @ GitHub](https://github.com/HugoFara/lwt/releases/latest)
   * [Latest development version @ GitHub](https://github.com/HugoFara/lwt/archive/refs/heads/main.zip)

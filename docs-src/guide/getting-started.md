@@ -4,7 +4,7 @@
 
 ## What is LWT?
 
-_Learning with Texts_ (LWT) is a tool for Language Learning by reading texts. It was originally created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and published on [SourceForge](https://sourceforge.net/projects/learning-with-texts), where it is still available. This repository is a community-maintained fork; a snapshot of the original code is also preserved on its [`official` branch](https://github.com/HugoFara/lwt/tree/official).
+_Learning with Texts_ (LWT) is a tool for Language Learning by reading texts. It was originally created by [hapepo23](https://sourceforge.net/u/hapepo23/) and published on [SourceForge](https://sourceforge.net/projects/learning-with-texts), where it is still available. This repository is a community-maintained fork; a snapshot of the original code is also preserved on its [`official` branch](https://github.com/HugoFara/lwt/tree/official).
 It is inspired by:
 
 * [Stephen Krashen's](http://sdkrashen.com) principles in Second Language Acquisition,
@@ -31,9 +31,9 @@ To run LWT, you'll need:
 
 ## History
 
-### Original Author: lang-learn-guy
+### Original Author: hapepo23
 
-LWT was originally created by [lang-learn-guy](https://sourceforge.net/u/lang-learn-guy/) and is hosted on SourceForge at [sourceforge.net/projects/learning-with-texts](https://sourceforge.net/projects/learning-with-texts), where it remains available and maintained by its author (also on GitHub as [hapepo23/learning-with-texts](https://github.com/hapepo23/learning-with-texts)). This repository is an independent community fork; a snapshot of the original code is preserved on its [`official` branch](https://github.com/HugoFara/lwt/tree/official) for convenience.
+LWT was originally created by [hapepo23](https://sourceforge.net/u/hapepo23/) and is hosted on SourceForge at [sourceforge.net/projects/learning-with-texts](https://sourceforge.net/projects/learning-with-texts), where it remains available and maintained by its author (also on GitHub as [hapepo23/learning-with-texts](https://github.com/hapepo23/learning-with-texts)). This repository is an independent community fork; a snapshot of the original code is preserved on its [`official` branch](https://github.com/HugoFara/lwt/tree/official) for convenience.
 
 * I started this software application in 2010 as a hobby project for my personal learning (reading & listening to foreign texts, saving & reviewing new words and expressions).
 * In June 2011, I decided to publish the software in the hope that it will be useful to other language learners around the world.
@@ -45,7 +45,7 @@ LWT was originally created by [lang-learn-guy](https://sourceforge.net/u/lang-le
 
 ### Community Version: [HugoFara](https://github.com/HugoFara) (GitHub version maintainer)
 
-I started using LWT in 2021, and continued its development almost instantly. I felt that the core idea was very good, but its implementation seemed unadapted, and the code was quite obfuscated. While I do not have any official responsibility to LWT (we don't have any kind of official agreement with lang-learn-guy), I am the the _de facto_ maintainer of the community version. I dedicated myself to the following points (see the [GitHub post](https://github.com/HugoFara/lwt/discussions/6)):
+I started using LWT in 2021, and continued its development almost instantly. I felt that the core idea was very good, but its implementation seemed unadapted, and the code was quite obfuscated. While I do not have any official responsibility to LWT (we don't have any kind of official agreement with hapepo23), I am the the _de facto_ maintainer of the community version. I dedicated myself to the following points (see the [GitHub post](https://github.com/HugoFara/lwt/discussions/6)):
 
 * Make LWT Open Source: document and refactor code
 * Meet the HTML5 standards: the interface was relying on deprecated systems like frames, making it difficult to use on small screens.
