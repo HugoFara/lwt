@@ -337,8 +337,4 @@ LWT is a non-profitable piece of software, so we won't have much time or money t
 
 Either go to the forum of the [official LWT version](https://sourceforge.net/p/learning-with-texts/discussion/), or come and [discuss on the community version](https://github.com/HugoFara/lwt/discussions).
 
-### Support on OpenCollective
-
-LWT is hosted on OpenCollective, you can support the development of the app at <https://opencollective.com/lwt-community>.
-
 Thanks for your interest in contributing!
