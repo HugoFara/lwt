@@ -196,6 +196,43 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString('https://valid.example.com', $result);
     }
 
+    // ===== buildContentSecurityPolicy() tests via reflection =====
+
+    public function testCspAddsUpgradeInsecureRequestsOverHttps(): void
+    {
+        $_SERVER['HTTPS'] = 'on';
+        $method = new ReflectionMethod(SecurityHeaders::class, 'buildContentSecurityPolicy');
+
+        $policy = $method->invoke(null);
+
+        $this->assertStringContainsString('upgrade-insecure-requests', $policy);
+    }
+
+    public function testCspAddsUpgradeInsecureRequestsBehindHttpsProxy(): void
+    {
+        unset($_SERVER['HTTPS']);
+        $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
+        $method = new ReflectionMethod(SecurityHeaders::class, 'buildContentSecurityPolicy');
+
+        $policy = $method->invoke(null);
+
+        $this->assertStringContainsString('upgrade-insecure-requests', $policy);
+    }
+
+    public function testCspOmitsUpgradeInsecureRequestsOverHttp(): void
+    {
+        unset($_SERVER['HTTPS'], $_SERVER['HTTP_X_FORWARDED_PROTO']);
+        $_SERVER['SERVER_PORT'] = 80;
+        $method = new ReflectionMethod(SecurityHeaders::class, 'buildContentSecurityPolicy');
+
+        $policy = $method->invoke(null);
+
+        $this->assertStringNotContainsString('upgrade-insecure-requests', $policy);
+        // Core directives are still present regardless of scheme.
+        $this->assertStringContainsString("default-src 'self'", $policy);
+        $this->assertStringContainsString("script-src 'self'", $policy);
+    }
+
     // ===== reset() tests =====
 
     public function testResetAllowsHeadersToBeResent(): void

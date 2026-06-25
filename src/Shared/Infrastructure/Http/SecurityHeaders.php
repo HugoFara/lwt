@@ -109,12 +109,24 @@ class SecurityHeaders
      * - Connect: self + api.github.com (for release checks)
      * - Media: configurable via CSP_MEDIA_SOURCES env var (default: self + blob)
      * - Frame ancestors: self (alternative to X-Frame-Options)
+     * - Upgrade insecure requests: only over HTTPS, to auto-upgrade any
+     *   http:// subresource (e.g. behind a TLS-terminating reverse proxy)
      *
      * @return void
      */
     public static function sendContentSecurityPolicy(): void
     {
-        $policy = implode('; ', [
+        header('Content-Security-Policy: ' . self::buildContentSecurityPolicy());
+    }
+
+    /**
+     * Build the Content-Security-Policy header value.
+     *
+     * @return string The complete policy string (directives joined by '; ')
+     */
+    private static function buildContentSecurityPolicy(): string
+    {
+        $directives = [
             "default-src 'self'",
             // Scripts: self only (Alpine.js uses CSP-compatible build, no inline JS)
             "script-src 'self'",
@@ -138,9 +150,19 @@ class SecurityHeaders
             "form-action 'self'",
             // Base URI: self only (prevents base tag injection)
             "base-uri 'self'",
-        ]);
+        ];
 
-        header("Content-Security-Policy: {$policy}");
+        // When the page is served over HTTPS, transparently upgrade any
+        // http:// subresource to https:// instead of letting the browser
+        // block it as mixed content. This shields installs behind a
+        // TLS-terminating reverse proxy that doesn't propagate the scheme
+        // (see issue #240). Only emitted on secure connections so plain-HTTP
+        // dev (e.g. http://localhost:8000) isn't forced to upgrade and break.
+        if (self::isSecureConnection()) {
+            $directives[] = 'upgrade-insecure-requests';
+        }
+
+        return implode('; ', $directives);
     }
 
     /**

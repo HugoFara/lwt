@@ -7,6 +7,16 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Fixed
+
+* **Mixed-content asset blocking behind a TLS-terminating reverse proxy**
+  (#240): the Content-Security-Policy now emits `upgrade-insecure-requests` on
+  HTTPS connections, so any stray `http://` subresource is transparently
+  upgraded to `https://` instead of being blocked as mixed content. This is
+  what left the language-picker (and other) scripts unloaded on installs whose
+  proxy doesn't propagate the scheme. The directive is omitted over plain HTTP
+  so local development (e.g. `http://localhost:8000`) isn't forced to upgrade.
+
 ## [3.2.0-fork] - 2026-06-23
 
 ### Added
