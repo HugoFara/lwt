@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Core\Utils;
 
 use Lwt\Shared\Infrastructure\Database\SqlFileParser;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -51,5 +52,44 @@ final class SqlFileParserTest extends TestCase
         // Should return empty array
         $this->assertIsArray($result);
         $this->assertEmpty($result);
+    }
+
+    /**
+     * Statements must be split regardless of the file's line endings.
+     *
+     * Regression test for a CRLF schema file producing a single un-split blob
+     * that mysqli rejects with error 1064 on a Linux host (issue #241).
+     */
+    #[DataProvider('lineEndingProvider')]
+    public function testParseFileSplitsStatementsForAnyLineEnding(string $eol): void
+    {
+        $sqlContent = "-- Test SQL file" . $eol .
+                      "CREATE TABLE a (id INT);" . $eol .
+                      "CREATE TABLE b (id INT);" . $eol .
+                      "INSERT INTO a VALUES (1);";
+
+        $tempFile = sys_get_temp_dir() . '/test_sql_' . uniqid() . '.sql';
+        file_put_contents($tempFile, $sqlContent);
+
+        $queries = SqlFileParser::parseFile($tempFile);
+        unlink($tempFile);
+
+        // Each statement must come back individually, not concatenated.
+        $this->assertSame(
+            ['CREATE TABLE a (id INT)', 'CREATE TABLE b (id INT)', 'INSERT INTO a VALUES (1)'],
+            $queries
+        );
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function lineEndingProvider(): array
+    {
+        return [
+            'LF (Unix)' => ["\n"],
+            'CRLF (Windows)' => ["\r\n"],
+            'CR (classic Mac)' => ["\r"],
+        ];
     }
 }
