@@ -7,8 +7,18 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.2.1-fork] - 2026-06-30
+
 ### Fixed
 
+* **Database error on first boot with CRLF schema files** (#241): a fresh
+  install could fail to start with "Internal Server Error - A database error
+  occurred." (MySQL error 1064) while applying `db/schema/baseline.sql`.
+  `SqlFileParser` split statements on `';' . PHP_EOL` — which is `";\n"` on a
+  Linux host — so a schema file with Windows (CRLF) line endings was never
+  split, and the whole file was sent to MySQL as a single multi-statement
+  query that it rejected. The parser now normalizes CRLF/CR to LF before
+  splitting, so parsing no longer depends on the file's origin OS.
 * **Mixed-content asset blocking behind a TLS-terminating reverse proxy**
   (#240): the Content-Security-Policy now emits `upgrade-insecure-requests` on
   HTTPS connections, so any stray `http://` subresource is transparently
