@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Admin\Infrastructure;
 
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 
 /**
  * MySQL repository for statistics queries.
@@ -123,7 +124,7 @@ class MySqlStatisticsRepository
                 $changed = (int) ($record['Changed'] ?? 0);
                 $value = (int) ($record['value'] ?? 0);
 
-                if ($status == 5 || $status == 99) {
+                if (TermStatus::isKnownValue($status)) {
                     if (!isset($termKnown[$lgId][$changed])) {
                         $termKnown[$lgId][$changed] = 0;
                     }

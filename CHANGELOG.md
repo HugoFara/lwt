@@ -9,6 +9,20 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Word-status model is now a single source of truth** (#238, Phase 1): the
+  `TermStatus` value object is promoted to the authoritative model — it owns the
+  abbreviation, CSS class, light-theme colour, display order and predicates, and
+  exposes `TermStatus::definitions()` (the one ordered status table). The scattered
+  `[1,2,3,4,5,98,99]` literals and `=== 5 || === 99` / `=== 98` checks across the
+  Review, Vocabulary and Admin modules now call `TermStatus::isValid()` /
+  `values()` / `isKnownValue()` / `isIgnoredValue()`, and `TermStatusService` /
+  `StatusHelper` delegate to the VO instead of redefining the tables. The model is
+  exposed once to the frontend via `GET /api/v1/settings/status-definitions`, and
+  the duplicated TypeScript status tables (`text_status_chart.ts`,
+  `texts_grouped_app.ts`, `html_utils.ts`, `term_edit_modal.ts`, the `app_data.ts`
+  proxy) now resolve from a single `shared/stores/statuses.ts`. No behaviour or
+  wire-format change; the per-status scheduling formulas are untouched (they belong
+  to the proposed Phase 2, FSRS-aligned scheduling).
 * **Single `data_hex` word identity in the reading view** (#237): every word
   occurrence now carries its term identity solely as a `data_hex` attribute,
   and the redundant `TERM<hex>` CSS class has been dropped. The token is now a

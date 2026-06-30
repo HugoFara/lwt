@@ -21,6 +21,7 @@ namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Api\V1\Response;
 use Lwt\Modules\Vocabulary\Application\Services\LemmaService;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
@@ -179,7 +180,7 @@ class WordFamilyApiHandler implements ApiRoutableInterface
      */
     public function updateWordFamilyStatus(int $langId, string $lemmaLc, int $status): array
     {
-        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+        if (!TermStatus::isValid($status)) {
             return ['success' => false, 'error' => 'Invalid status'];
         }
 
@@ -211,7 +212,7 @@ class WordFamilyApiHandler implements ApiRoutableInterface
      */
     public function applyFamilyUpdate(array $termIds, int $status): array
     {
-        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+        if (!TermStatus::isValid($status)) {
             return ['success' => false, 'count' => 0];
         }
 

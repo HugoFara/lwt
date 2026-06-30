@@ -192,6 +192,29 @@ class AdminApiHandlerTest extends TestCase
         $this->assertStringContainsString('nonexistent', $data['error']);
     }
 
+    #[Test]
+    public function routeGetStatusDefinitionsReturnsAllStatuses(): void
+    {
+        $response = $this->handler->routeGet(
+            ['settings', 'status-definitions'],
+            []
+        );
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame(200, $response->getStatusCode());
+
+        $data = $response->getData();
+        $this->assertIsArray($data);
+        $this->assertArrayHasKey('statuses', $data);
+        $this->assertCount(7, $data['statuses']);
+
+        $first = $data['statuses'][0];
+        foreach (['value', 'name', 'abbr', 'cssClass', 'colour', 'order'] as $key) {
+            $this->assertArrayHasKey($key, $first);
+        }
+        $this->assertSame([1, 2, 3, 4, 5, 99, 98], array_column($data['statuses'], 'value'));
+    }
+
     // =========================================================================
     // routePost tests
     // =========================================================================

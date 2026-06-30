@@ -20,6 +20,7 @@ namespace Lwt\Modules\Review\Application\UseCases;
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewSession;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 
 /**
  * Use case for submitting an answer during review.
@@ -209,7 +210,7 @@ class SubmitAnswer
      */
     private function isValidStatus(int $status): bool
     {
-        return in_array($status, [1, 2, 3, 4, 5, 98, 99], true);
+        return TermStatus::isValid($status);
     }
 
     /**

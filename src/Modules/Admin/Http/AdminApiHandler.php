@@ -22,6 +22,7 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Modules\Admin\Domain\SettingDefinitions;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
@@ -47,6 +48,11 @@ class AdminApiHandler implements ApiRoutableInterface
 
         if ($frag1 === 'theme-path') {
             return Response::success($this->formatThemePath((string) ($params['path'] ?? '')));
+        }
+        if ($frag1 === 'status-definitions') {
+            // Single source of truth for the word-status model, consumed by
+            // the frontend status store. See TermStatus::definitions().
+            return Response::success(['statuses' => TermStatus::definitions()]);
         }
         return Response::error('Endpoint Not Found: ' . $frag1, 404);
     }

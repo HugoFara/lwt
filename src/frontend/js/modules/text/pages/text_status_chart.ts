@@ -13,6 +13,7 @@
 import { onDomReady } from '@shared/utils/dom_ready';
 import type { Chart as ChartType } from 'chart.js';
 import { loadChartJs } from '@shared/utils/chart_loader';
+import { STATUS_DISPLAY_ORDER, statusLabel } from '@shared/stores/statuses';
 
 /**
  * Status colors matching LWT's existing barchart CSS styles.
@@ -26,20 +27,6 @@ const STATUS_COLORS: Record<number, string> = {
   5: '#9f9',      // Learned 5 - green
   98: '#aaa',     // Ignored - gray
   99: '#999'      // Well Known - dark gray
-};
-
-/**
- * Status labels for tooltips.
- */
-const STATUS_LABELS: Record<number, string> = {
-  0: 'Unknown',
-  1: 'Learning (1)',
-  2: 'Learning (2)',
-  3: 'Learning (3)',
-  4: 'Learning (4)',
-  5: 'Learned (5)',
-  98: 'Ignored',
-  99: 'Well Known'
 };
 
 /**
@@ -57,9 +44,9 @@ const STATUS_DESCRIPTIONS: Record<number, string> = {
 };
 
 /**
- * Status order for chart segments.
+ * Status order for chart segments (Unknown, Learning 1-5, Well Known, Ignored).
  */
-const STATUS_ORDER = [0, 1, 2, 3, 4, 5, 99, 98];
+const STATUS_ORDER = STATUS_DISPLAY_ORDER;
 
 /**
  * Map of text ID to Chart instance for cleanup/updates.
@@ -120,7 +107,7 @@ export async function createTextStatusChart(
 
   // Create datasets for each status
   const datasets = STATUS_ORDER.map(status => ({
-    label: STATUS_LABELS[status],
+    label: statusLabel(status),
     data: [statusData[status] || 0],
     backgroundColor: STATUS_COLORS[status],
     borderWidth: 0,
