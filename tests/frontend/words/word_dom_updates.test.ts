@@ -157,8 +157,8 @@ describe('word_dom_updates.ts', () => {
   describe('updateNewWordInDOM', () => {
     it('updates elements with matching hex class', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0">hello</span>
-        <span class="TERM48454c4c4f status0">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
       `;
 
       const params: WordUpdateParams = {
@@ -172,7 +172,7 @@ describe('word_dom_updates.ts', () => {
 
       updateNewWordInDOM(params);
 
-      const elements = document.querySelectorAll('.TERM48454c4c4f');
+      const elements = document.querySelectorAll('[data_hex="48454c4c4f"]');
       elements.forEach(el => {
         expect(el.classList.contains('status0')).toBe(false);
         expect(el.classList.contains('status2')).toBe(true);
@@ -184,7 +184,7 @@ describe('word_dom_updates.ts', () => {
 
     it('does nothing when hex is not provided', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
       `;
 
       const params: WordUpdateParams = {
@@ -197,12 +197,12 @@ describe('word_dom_updates.ts', () => {
 
       updateNewWordInDOM(params);
 
-      expect(document.querySelector('.TERM48454c4c4f')!.classList.contains('status0')).toBe(true);
+      expect(document.querySelector('[data_hex="48454c4c4f"]')!.classList.contains('status0')).toBe(true);
     });
 
     it('sets title attribute with generated tooltip', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
       `;
 
       const params: WordUpdateParams = {
@@ -217,7 +217,7 @@ describe('word_dom_updates.ts', () => {
       updateNewWordInDOM(params);
 
       // generateTooltip returns formatted tooltip string
-      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('hello|bonjour|bɔ̃ʒuʁ|2');
+      expect(document.querySelector('[data_hex="48454c4c4f"]')!.getAttribute('title')).toBe('hello|bonjour|bɔ̃ʒuʁ|2');
     });
   });
 
@@ -349,13 +349,13 @@ describe('word_dom_updates.ts', () => {
     it('marks word as well-known (status 99)', () => {
       document.body.innerHTML = `
         <div id="frame-l">
-          <span class="TERM48454c4c4f status0">hello</span>
+          <span class="status0" data_hex="48454c4c4f">hello</span>
         </div>
       `;
 
       markWordWellKnownInDOM(111, '48454c4c4f', 'hello');
 
-      const element = document.querySelector('.TERM48454c4c4f')!;
+      const element = document.querySelector('[data_hex="48454c4c4f"]')!;
       expect(element.classList.contains('status0')).toBe(false);
       expect(element.classList.contains('status99')).toBe(true);
       expect(element.classList.contains('word111')).toBe(true);
@@ -365,12 +365,12 @@ describe('word_dom_updates.ts', () => {
 
     it('does nothing when frame-l does not exist', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
       `;
 
       markWordWellKnownInDOM(111, '48454c4c4f', 'hello');
 
-      expect(document.querySelector('.TERM48454c4c4f')!.classList.contains('status0')).toBe(true);
+      expect(document.querySelector('[data_hex="48454c4c4f"]')!.classList.contains('status0')).toBe(true);
     });
   });
 
@@ -382,13 +382,13 @@ describe('word_dom_updates.ts', () => {
     it('marks word as ignored (status 98)', () => {
       document.body.innerHTML = `
         <div id="frame-l">
-          <span class="TERM48454c4c4f status0">hello</span>
+          <span class="status0" data_hex="48454c4c4f">hello</span>
         </div>
       `;
 
       markWordIgnoredInDOM(222, '48454c4c4f', 'hello');
 
-      const element = document.querySelector('.TERM48454c4c4f')!;
+      const element = document.querySelector('[data_hex="48454c4c4f"]')!;
       expect(element.classList.contains('status0')).toBe(false);
       expect(element.classList.contains('status98')).toBe(true);
       expect(element.classList.contains('word222')).toBe(true);
@@ -461,7 +461,7 @@ describe('word_dom_updates.ts', () => {
   describe('updateBulkWordInDOM', () => {
     it('updates word from bulk translate', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
       `;
 
       const term: BulkWordUpdateParams = {
@@ -474,7 +474,7 @@ describe('word_dom_updates.ts', () => {
 
       updateBulkWordInDOM(term, true);
 
-      const element = document.querySelector('.TERM48454c4c4f')!;
+      const element = document.querySelector('[data_hex="48454c4c4f"]')!;
       expect(element.classList.contains('status0')).toBe(false);
       expect(element.classList.contains('status3')).toBe(true);
       expect(element.classList.contains('word555')).toBe(true);
@@ -484,7 +484,7 @@ describe('word_dom_updates.ts', () => {
 
     it('sets empty title when useTooltip is false', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0" title="old title">hello</span>
+        <span class="status0" data_hex="48454c4c4f" title="old title">hello</span>
       `;
 
       const term: BulkWordUpdateParams = {
@@ -497,7 +497,7 @@ describe('word_dom_updates.ts', () => {
 
       updateBulkWordInDOM(term, false);
 
-      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('');
+      expect(document.querySelector('[data_hex="48454c4c4f"]')!.getAttribute('title')).toBe('');
     });
   });
 
@@ -508,12 +508,12 @@ describe('word_dom_updates.ts', () => {
   describe('updateHoverSaveInDOM', () => {
     it('updates word after hover save operation', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
       `;
 
       updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
 
-      const element = document.querySelector('.TERM48454c4c4f')!;
+      const element = document.querySelector('[data_hex="48454c4c4f"]')!;
       expect(element.classList.contains('status0')).toBe(false);
       expect(element.classList.contains('status1')).toBe(true);
       expect(element.classList.contains('word666')).toBe(true);
@@ -523,13 +523,13 @@ describe('word_dom_updates.ts', () => {
 
     it('sets title with generated tooltip', () => {
       document.body.innerHTML = `
-        <span class="TERM48454c4c4f status0">hello</span>
+        <span class="status0" data_hex="48454c4c4f">hello</span>
       `;
 
       updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
 
       // Title is set with formatted tooltip
-      expect(document.querySelector('.TERM48454c4c4f')!.getAttribute('title')).toBe('hello|quick trans||1');
+      expect(document.querySelector('[data_hex="48454c4c4f"]')!.getAttribute('title')).toBe('hello|quick trans||1');
     });
   });
 

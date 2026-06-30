@@ -87,7 +87,7 @@ export function updateNewWordInDOM(params: WordUpdateParams): void {
   const context = getParentContext();
   const title = generateTooltip(text, translation, romanization, status);
 
-  context.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+  context.querySelectorAll<HTMLElement>(`[data_hex="${hex}"]`).forEach(el => {
     el.classList.remove('status0');
     el.classList.add(`word${wid}`, `status${status}`);
     el.setAttribute('data_trans', translation);
@@ -189,7 +189,7 @@ export function markWordWellKnownInDOM(wid: number, hex: string, term: string): 
 
   const title = createWordTooltip(term, '*', '', '99');
 
-  frameL.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+  frameL.querySelectorAll<HTMLElement>(`[data_hex="${hex}"]`).forEach(el => {
     el.classList.remove('status0');
     el.classList.add('status99', `word${wid}`);
     el.setAttribute('data_status', '99');
@@ -211,7 +211,7 @@ export function markWordIgnoredInDOM(wid: number, hex: string, term: string): vo
 
   const title = createWordTooltip(term, '*', '', '98');
 
-  frameL.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+  frameL.querySelectorAll<HTMLElement>(`[data_hex="${hex}"]`).forEach(el => {
     el.classList.remove('status0');
     el.classList.add('status98', `word${wid}`);
     el.setAttribute('data_status', '98');
@@ -306,7 +306,7 @@ export interface BulkWordUpdateParams {
 export function updateBulkWordInDOM(term: BulkWordUpdateParams, useTooltip: boolean): void {
   const context = getParentContext();
 
-  context.querySelectorAll<HTMLElement>(`.TERM${term.hex}`).forEach(el => {
+  context.querySelectorAll<HTMLElement>(`[data_hex="${term.hex}"]`).forEach(el => {
     el.classList.remove('status0');
     el.classList.add(`status${term.WoStatus}`, `word${term.WoID}`);
     el.setAttribute('data_wid', String(term.WoID));
@@ -345,7 +345,7 @@ export function updateHoverSaveInDOM(
   const context = getParentContext();
   const title = createWordTooltip(wordRaw, translation, '', String(status));
 
-  context.querySelectorAll<HTMLElement>(`.TERM${hex}`).forEach(el => {
+  context.querySelectorAll<HTMLElement>(`[data_hex="${hex}"]`).forEach(el => {
     el.classList.remove('status0');
     el.classList.add(`status${status}`, `word${wid}`);
     el.setAttribute('data_status', String(status));

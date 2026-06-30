@@ -391,8 +391,8 @@ describe('word_result_init.ts', () => {
 
     it('initializes from all wellknown result config', () => {
       document.body.innerHTML = `
-        <span class="TERMabc status0">word1</span>
-        <span class="TERMdef status0">word2</span>
+        <span class="status0" data_hex="abc">word1</span>
+        <span class="status0" data_hex="def">word2</span>
         <script data-lwt-all-wellknown-config type="application/json">
           {
             "words": [
@@ -412,7 +412,7 @@ describe('word_result_init.ts', () => {
 
     it('updates word elements with new status', () => {
       document.body.innerHTML = `
-        <span class="TERMabc status0" data_status="0">word</span>
+        <span class="status0" data_hex="abc" data_status="0">word</span>
         <script data-lwt-all-wellknown-config type="application/json">
           {
             "words": [
@@ -426,7 +426,7 @@ describe('word_result_init.ts', () => {
 
       autoInitWordResults();
 
-      const wordEl = document.querySelector('.TERMabc');
+      const wordEl = document.querySelector('[data_hex="abc"]');
       expect(wordEl?.classList.contains('status99')).toBe(true);
       expect(wordEl?.classList.contains('word1')).toBe(true);
       expect(wordEl?.getAttribute('data_status')).toBe('99');
@@ -441,7 +441,7 @@ describe('word_result_init.ts', () => {
   describe('hover save result config', () => {
     it('initializes from hover save result config', () => {
       document.body.innerHTML = `
-        <span class="TERMabc status0">word</span>
+        <span class="status0" data_hex="abc">word</span>
         <script data-lwt-hover-save-result-config type="application/json">
           {
             "wid": 123,
@@ -456,7 +456,7 @@ describe('word_result_init.ts', () => {
 
       autoInitWordResults();
 
-      const wordEl = document.querySelector('.TERMabc');
+      const wordEl = document.querySelector('[data_hex="abc"]');
       expect(wordEl?.classList.contains('status1')).toBe(true);
       expect(wordEl?.classList.contains('word123')).toBe(true);
       expect(updateLearnStatus).toHaveBeenCalledWith('5 words');

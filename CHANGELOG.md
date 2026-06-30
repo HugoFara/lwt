@@ -7,6 +7,19 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Changed
+
+* **Single `data_hex` word identity in the reading view** (#237): every word
+  occurrence now carries its term identity solely as a `data_hex` attribute,
+  and the redundant `TERM<hex>` CSS class has been dropped. The token is now a
+  short SHA-256-derived hex string (`StringUtils::toClassName()`) — pure
+  `[0-9a-f]`, so it is selector-safe and the occurrence-lookup regexes become
+  correct by construction. This replaces the original 2011 `¤`/hex encoder
+  whose per-byte vs. per-codepoint confusion PHP 8.5 surfaced by deprecating
+  `ord()` on multi-byte strings. There is no API wire-format change (the `hex`
+  field keeps its role, recomputed identically on the PHP and JS sides) and no
+  styling change (the `TERM` class carried no CSS rules).
+
 ## [3.2.1-fork] - 2026-06-30
 
 ### Fixed

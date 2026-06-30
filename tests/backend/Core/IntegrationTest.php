@@ -227,16 +227,26 @@ class IntegrationTest extends TestCase
 
     public function testStrToClassName(): void
     {
-        $this->assertEquals('hello', StringUtils::toClassName('hello'));
-        $this->assertEquals('test123', StringUtils::toClassName('test123'));
+        // The identity token is a 16-char (64-bit) lowercase-hex prefix of sha256.
+        $hello = StringUtils::toClassName('hello');
+        $this->assertSame(substr(hash('sha256', 'hello'), 0, 16), $hello);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{16}$/', $hello);
 
-        // Space (ASCII 32) is outside allowed range, converted to ¤20
-        $this->assertEquals('hello¤20world', StringUtils::toClassName('hello world'));
+        // Deterministic: the same input always yields the same token.
+        $this->assertSame($hello, StringUtils::toClassName('hello'));
 
-        // Non-ASCII should be converted to hex with ¤ prefix
-        $result = StringUtils::toClassName('hello 世界');
-        $this->assertStringStartsWith('hello', $result);
-        $this->assertStringContainsString('¤', $result);
+        // Distinct inputs yield distinct tokens.
+        $this->assertNotSame($hello, StringUtils::toClassName('test123'));
+
+        // Spaces and non-ASCII stay pure hex — selector-safe, no escaping needed.
+        $this->assertMatchesRegularExpression(
+            '/^[0-9a-f]{16}$/',
+            StringUtils::toClassName('hello world')
+        );
+        $this->assertMatchesRegularExpression(
+            '/^[0-9a-f]{16}$/',
+            StringUtils::toClassName('hello 世界')
+        );
     }
 
     public function testReplTabNl(): void

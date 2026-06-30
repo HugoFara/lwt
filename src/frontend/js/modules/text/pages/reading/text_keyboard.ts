@@ -273,8 +273,7 @@ export function handleTextKeydown(e: KeyboardEvent): boolean {
   const wid = getAttrElement(curr, 'data_wid');
   const ord = getAttrElement(curr, 'data_order');
   const stat = getAttrElement(curr, 'data_status');
-  const hex = getAttrElement(curr, 'data_hex') ||
-    curr.className.match(/TERM([a-f0-9]+)/)?.[1] || '';
+  const hex = getAttrElement(curr, 'data_hex') || '';
   const txt = curr.classList.contains('mwsty')
     ? getAttrElement(curr, 'data_text')
     : (curr.textContent || '');
