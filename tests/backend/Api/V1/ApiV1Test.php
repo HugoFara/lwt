@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Api\V1;
 
 use Lwt\Api\V1\ApiV1;
+use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Container\CoreServiceProvider;
@@ -137,21 +138,44 @@ class ApiV1Test extends TestCase
     }
 
     /**
-     * Test VERSION constant exists.
+     * The `version` endpoint must source its version from ApplicationInfo
+     * (the single source of truth), not a local constant that drifts.
+     *
+     * Regression guard: ApiV1 used to carry a hardcoded `VERSION = "3.0.2"`
+     * that was never bumped, so the API misreported the version through 3.1.x
+     * and 3.2.0. It now reads from ApplicationInfo and strips the `-fork`
+     * suffix to serve bare semver to clients.
      */
-    public function testVersionConstantExists(): void
+    public function testVersionSourcedFromApplicationInfo(): void
     {
+        // ApiV1 must not reintroduce its own version constant.
         $reflection = new \ReflectionClass(ApiV1::class);
-        $this->assertTrue($reflection->hasConstant('VERSION'));
+        $this->assertFalse(
+            $reflection->hasConstant('VERSION'),
+            'ApiV1 should source its version from ApplicationInfo, not a local constant'
+        );
+
+        // The value the endpoint serves is bare semver (X.Y.Z, no "-fork").
+        $apiVersion = \explode('-', ApplicationInfo::getRawVersion())[0];
+        $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $apiVersion);
     }
 
     /**
-     * Test RELEASE_DATE constant exists.
+     * The `version` endpoint must source its release date from ApplicationInfo,
+     * not a local constant.
      */
-    public function testReleaseDateConstantExists(): void
+    public function testReleaseDateSourcedFromApplicationInfo(): void
     {
         $reflection = new \ReflectionClass(ApiV1::class);
-        $this->assertTrue($reflection->hasConstant('RELEASE_DATE'));
+        $this->assertFalse(
+            $reflection->hasConstant('RELEASE_DATE'),
+            'ApiV1 should source its release date from ApplicationInfo, not a local constant'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}$/',
+            ApplicationInfo::getReleaseDate()
+        );
     }
 
     /**
