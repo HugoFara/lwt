@@ -19,6 +19,8 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Review\Domain;
 
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
+
 /**
  * Entity representing a word being reviewed.
  *
@@ -135,7 +137,7 @@ final class ReviewWord
      */
     public function isLearning(): bool
     {
-        return $this->status >= 1 && $this->status <= 5;
+        return TermStatus::isLearningValue($this->status);
     }
 
     /**
@@ -145,7 +147,7 @@ final class ReviewWord
      */
     public function isWellKnown(): bool
     {
-        return $this->status === 99;
+        return $this->status === TermStatus::WELL_KNOWN;
     }
 
     /**
@@ -155,7 +157,7 @@ final class ReviewWord
      */
     public function isIgnored(): bool
     {
-        return $this->status === 98;
+        return TermStatus::isIgnoredValue($this->status);
     }
 
     /**

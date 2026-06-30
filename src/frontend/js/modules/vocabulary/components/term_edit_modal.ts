@@ -16,17 +16,7 @@ import {
   type TermUpdateFullRequest
 } from '@modules/vocabulary/api/terms_api';
 import { escapeHtml } from '@shared/utils/html_utils';
-
-/** Status definitions for the form */
-const STATUSES = [
-  { value: 1, label: 'Learning (1)' },
-  { value: 2, label: 'Learning (2)' },
-  { value: 3, label: 'Learning (3)' },
-  { value: 4, label: 'Learning (4)' },
-  { value: 5, label: 'Learned' },
-  { value: 99, label: 'Well Known' },
-  { value: 98, label: 'Ignored' }
-];
+import { getStatusDefinitions } from '@shared/stores/statuses';
 
 /** Current form context */
 let currentContext: {
@@ -45,7 +35,7 @@ function renderForm(data: TermForEditResponse): string {
   const lang = data.language;
   const translation = term.translation === '*' ? '' : term.translation;
 
-  const statusOptions = STATUSES.map(s =>
+  const statusOptions = getStatusDefinitions().map(s =>
     `<option value="${s.value}"${term.status === s.value ? ' selected' : ''}>${escapeHtml(s.label)}</option>`
   ).join('');
 

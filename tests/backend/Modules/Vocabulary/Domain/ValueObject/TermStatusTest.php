@@ -404,4 +404,158 @@ class TermStatusTest extends TestCase
         $original->decrease();
         $this->assertEquals(3, $original->toInt());
     }
+
+    // ===== Static helper Tests =====
+
+    #[DataProvider('validStatusProvider')]
+    public function testIsValidReturnsTrueForValidStatuses(int $value): void
+    {
+        $this->assertTrue(TermStatus::isValid($value));
+    }
+
+    #[DataProvider('invalidStatusProvider')]
+    public function testIsValidReturnsFalseForInvalidStatuses(int $value): void
+    {
+        $this->assertFalse(TermStatus::isValid($value));
+    }
+
+    public function testValuesReturnsAllSevenInCanonicalOrder(): void
+    {
+        $this->assertSame([1, 2, 3, 4, 5, 99, 98], TermStatus::values());
+    }
+
+    public function testIsKnownValue(): void
+    {
+        $this->assertTrue(TermStatus::isKnownValue(5));
+        $this->assertTrue(TermStatus::isKnownValue(99));
+        $this->assertFalse(TermStatus::isKnownValue(1));
+        $this->assertFalse(TermStatus::isKnownValue(98));
+        // Safe on invalid input (does not throw)
+        $this->assertFalse(TermStatus::isKnownValue(0));
+        $this->assertFalse(TermStatus::isKnownValue(42));
+    }
+
+    public function testIsIgnoredValue(): void
+    {
+        $this->assertTrue(TermStatus::isIgnoredValue(98));
+        $this->assertFalse(TermStatus::isIgnoredValue(99));
+        $this->assertFalse(TermStatus::isIgnoredValue(5));
+        $this->assertFalse(TermStatus::isIgnoredValue(0));
+    }
+
+    public function testIsLearningValue(): void
+    {
+        foreach ([1, 2, 3, 4, 5] as $value) {
+            $this->assertTrue(TermStatus::isLearningValue($value));
+        }
+        $this->assertFalse(TermStatus::isLearningValue(98));
+        $this->assertFalse(TermStatus::isLearningValue(99));
+        $this->assertFalse(TermStatus::isLearningValue(0));
+        $this->assertFalse(TermStatus::isLearningValue(6));
+    }
+
+    // ===== Display-metadata Tests =====
+
+    #[DataProvider('abbreviationProvider')]
+    public function testAbbreviation(int $value, string $expected): void
+    {
+        $this->assertSame($expected, TermStatus::fromInt($value)->abbreviation());
+    }
+
+    public static function abbreviationProvider(): array
+    {
+        return [
+            [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'],
+            // 98/99 fall back to the full name in display code.
+            [98, ''], [99, ''],
+        ];
+    }
+
+    #[DataProvider('cssClassProvider')]
+    public function testCssClass(int $value, string $expected): void
+    {
+        $this->assertSame($expected, TermStatus::fromInt($value)->cssClass());
+    }
+
+    public static function cssClassProvider(): array
+    {
+        return [
+            [1, 'status1'], [2, 'status2'], [3, 'status3'], [4, 'status4'],
+            [5, 'status5'], [98, 'status98'], [99, 'status99'],
+        ];
+    }
+
+    #[DataProvider('validStatusProvider')]
+    public function testColourHexIsValidHex(int $value): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/^#[0-9A-Fa-f]{6}$/',
+            TermStatus::fromInt($value)->colourHex()
+        );
+    }
+
+    public function testOrderFollowsCanonicalSequence(): void
+    {
+        $this->assertSame(1, TermStatus::fromInt(1)->order());
+        $this->assertSame(5, TermStatus::fromInt(5)->order());
+        // Well-known precedes ignored in display order.
+        $this->assertSame(6, TermStatus::fromInt(99)->order());
+        $this->assertSame(7, TermStatus::fromInt(98)->order());
+    }
+
+    #[DataProvider('displayNameProvider')]
+    public function testDisplayName(int $value, string $expected): void
+    {
+        $this->assertSame($expected, TermStatus::fromInt($value)->displayName());
+    }
+
+    public static function displayNameProvider(): array
+    {
+        // Localized names; learning stages 1-4 all read "Learning".
+        return [
+            [1, 'Learning'], [2, 'Learning'], [3, 'Learning'], [4, 'Learning'],
+            [5, 'Learned'], [98, 'Ignored'], [99, 'Well Known'],
+        ];
+    }
+
+    // ===== definitions() Tests =====
+
+    public function testDefinitionsReturnsAllSevenInOrder(): void
+    {
+        $definitions = TermStatus::definitions();
+        $this->assertCount(7, $definitions);
+        $this->assertSame(
+            [1, 2, 3, 4, 5, 99, 98],
+            array_column($definitions, 'value')
+        );
+    }
+
+    public function testDefinitionsEntriesHaveCompleteShape(): void
+    {
+        foreach (TermStatus::definitions() as $definition) {
+            foreach (
+                ['value', 'name', 'abbr', 'cssClass', 'colour',
+                'order', 'isKnown', 'isLearning', 'isIgnored'] as $key
+            ) {
+                $this->assertArrayHasKey($key, $definition);
+            }
+            $this->assertIsString($definition['name']);
+            $this->assertMatchesRegularExpression('/^status\d+$/', $definition['cssClass']);
+            $this->assertMatchesRegularExpression('/^#[0-9A-Fa-f]{6}$/', $definition['colour']);
+        }
+    }
+
+    public function testDefinitionsClassificationFlagsAreConsistent(): void
+    {
+        $byValue = [];
+        foreach (TermStatus::definitions() as $definition) {
+            $byValue[$definition['value']] = $definition;
+        }
+        $this->assertTrue($byValue[5]['isKnown']);
+        $this->assertTrue($byValue[99]['isKnown']);
+        $this->assertFalse($byValue[1]['isKnown']);
+        $this->assertTrue($byValue[98]['isIgnored']);
+        $this->assertTrue($byValue[1]['isLearning']);
+        $this->assertFalse($byValue[98]['isLearning']);
+    }
 }

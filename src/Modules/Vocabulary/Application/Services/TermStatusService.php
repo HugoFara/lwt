@@ -82,39 +82,24 @@ class TermStatusService
     /**
      * Return an associative array of all possible statuses.
      *
-     * Names are localized via the i18n translator (common.status_*).
-     * Abbreviations are language-neutral: "1".."5" for learning levels,
-     * empty string for 98/99 — display code should fall back to the
-     * full localized name when the abbreviation is empty.
+     * Thin adapter over {@see TermStatus::definitions()} (the single source
+     * of truth): names are localized via the i18n translator, abbreviations
+     * are language-neutral ("1".."5" for learning levels, empty for 98/99 —
+     * display code falls back to the full name when the abbreviation is empty).
      *
      * @return array<int, array{abbr: string, name: string}>
      *         Keys are 1, 2, 3, 4, 5, 98, 99.
      */
     public static function getStatuses(): array
     {
-        $learning  = self::translateStatus('common.status_learning', 'Learning');
-        $learned   = self::translateStatus('common.status_learned', 'Learned');
-        $wellKnown = self::translateStatus('common.status_well_known', 'Well Known');
-        $ignored   = self::translateStatus('common.status_ignored', 'Ignored');
-        return [
-            TermStatus::NEW         => ["abbr" => "1", "name" => $learning],
-            TermStatus::LEARNING_2  => ["abbr" => "2", "name" => $learning],
-            TermStatus::LEARNING_3  => ["abbr" => "3", "name" => $learning],
-            TermStatus::LEARNING_4  => ["abbr" => "4", "name" => $learning],
-            TermStatus::LEARNED     => ["abbr" => "5", "name" => $learned],
-            TermStatus::WELL_KNOWN  => ["abbr" => "",  "name" => $wellKnown],
-            TermStatus::IGNORED     => ["abbr" => "",  "name" => $ignored],
-        ];
-    }
-
-    /**
-     * Resolve a status translation key, falling back to the English label
-     * when the translator is unavailable (e.g. during a Container reset).
-     */
-    private static function translateStatus(string $key, string $fallback): string
-    {
-        $value = __($key);
-        return ($value === $key) ? $fallback : $value;
+        $statuses = [];
+        foreach (TermStatus::definitions() as $definition) {
+            $statuses[$definition['value']] = [
+                'abbr' => $definition['abbr'],
+                'name' => $definition['name'],
+            ];
+        }
+        return $statuses;
     }
 
     /**
@@ -147,7 +132,7 @@ class TermStatusService
      */
     public static function isValidStatus(int $status): bool
     {
-        return isset(self::getStatuses()[$status]);
+        return TermStatus::isValid($status);
     }
 
     /**
@@ -225,16 +210,9 @@ class TermStatusService
      */
     public static function getStatusColor(int $status): string
     {
-        return match ($status) {
-            TermStatus::NEW => 'status1',
-            TermStatus::LEARNING_2 => 'status2',
-            TermStatus::LEARNING_3 => 'status3',
-            TermStatus::LEARNING_4 => 'status4',
-            TermStatus::LEARNED => 'status5',
-            TermStatus::IGNORED => 'status98',
-            TermStatus::WELL_KNOWN => 'status99',
-            default => 'status0',
-        };
+        return TermStatus::isValid($status)
+            ? TermStatus::fromInt($status)->cssClass()
+            : 'status0';
     }
 
     /**
@@ -290,7 +268,7 @@ class TermStatusService
      */
     public static function isLearningStatus(int $status): bool
     {
-        return $status >= 1 && $status <= 5;
+        return TermStatus::isLearningValue($status);
     }
 
     /**
@@ -302,7 +280,7 @@ class TermStatusService
      */
     public static function isKnownStatus(int $status): bool
     {
-        return $status === TermStatus::LEARNED || $status === TermStatus::WELL_KNOWN;
+        return TermStatus::isKnownValue($status);
     }
 
     /**
@@ -314,6 +292,6 @@ class TermStatusService
      */
     public static function isIgnoredStatus(int $status): bool
     {
-        return $status === TermStatus::IGNORED;
+        return TermStatus::isIgnoredValue($status);
     }
 }

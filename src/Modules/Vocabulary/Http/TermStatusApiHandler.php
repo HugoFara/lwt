@@ -261,7 +261,7 @@ class TermStatusApiHandler
      */
     public function updateWordStatus(int $wid, int $currstatus): ?string
     {
-        if (($currstatus >= 1 && $currstatus <= 5) || $currstatus == 99 || $currstatus == 98) {
+        if (TermStatusService::isValidStatus($currstatus)) {
             $m1 = $this->setWordStatus($wid, $currstatus);
             if ($m1 == 1) {
                 /** @var int|null $fetchedStatus */

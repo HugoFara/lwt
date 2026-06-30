@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Modules\Vocabulary\Domain\Term;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Modules\Vocabulary\Infrastructure\MySqlTermRepository;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
@@ -191,7 +192,7 @@ class WordFamilyService
         );
 
         $terms = [];
-        $statusCounts = array_fill_keys([1, 2, 3, 4, 5, 98, 99], 0);
+        $statusCounts = array_fill_keys(TermStatus::values(), 0);
         $totalOccurrences = 0;
 
         foreach ($members as $member) {
@@ -283,14 +284,14 @@ class WordFamilyService
             'stats' => [
                 'formCount' => 1,
                 'statusCounts' => array_merge(
-                    array_fill_keys([1, 2, 3, 4, 5, 98, 99], 0),
+                    array_fill_keys(TermStatus::values(), 0),
                     [$status => 1]
                 ),
                 'averageStatus' => $status <= 5 ? (float) $status : 0.0,
                 'totalOccurrences' => $occurrences,
-                'knownCount' => $status === 5 || $status === 99 ? 1 : 0,
+                'knownCount' => TermStatus::isKnownValue($status) ? 1 : 0,
                 'learningCount' => $status >= 1 && $status <= 4 ? 1 : 0,
-                'ignoredCount' => $status === 98 ? 1 : 0,
+                'ignoredCount' => TermStatus::isIgnoredValue($status) ? 1 : 0,
             ],
         ];
     }
@@ -322,7 +323,7 @@ class WordFamilyService
      */
     public function updateWordFamilyStatus(int $languageId, string $lemmaLc, int $status): int
     {
-        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+        if (!TermStatus::isValid($status)) {
             return 0;
         }
 
@@ -484,7 +485,7 @@ class WordFamilyService
 
         // Find family members with lower status (for "known" updates)
         // or higher status (for "learning" updates)
-        if ($newStatus === 99 || $newStatus === 5) {
+        if (TermStatus::isKnownValue($newStatus)) {
             // Marked as known - suggest updating forms with lower status
             $bindings = [$languageId, $lemmaLc, $termId];
             $affected = Connection::preparedFetchAll(
@@ -539,7 +540,7 @@ class WordFamilyService
      */
     public function bulkUpdateTermStatus(array $termIds, int $status): int
     {
-        if (empty($termIds) || !in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+        if (empty($termIds) || !TermStatus::isValid($status)) {
             return 0;
         }
 

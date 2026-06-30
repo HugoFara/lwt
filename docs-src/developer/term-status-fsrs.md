@@ -5,11 +5,14 @@ description: Centralize the scattered word-status model into a single source of 
 
 # Proposal: Term Status Model + FSRS Scheduling
 
-**Status:** Proposed — deferred until after the next release. Larger than a cleanup;
-the FSRS part is an architectural change worth landing on its own.
+**Status:** **Phase 1 implemented** (#238). Phase 2 (FSRS scheduling) remains
+proposed — deferred, and gated on the product decisions in
+[Trade-offs & open questions](#trade-offs-open-questions). The FSRS part is an
+architectural change worth landing on its own.
 Tracked in [issue #238](https://github.com/HugoFara/lwt/issues/238).
 
-A design proposal, not shipped work.
+Phase 1 (status as a single source of truth) is shipped; the rest is a design
+proposal, not shipped work.
 
 ## Problem
 
@@ -43,18 +46,45 @@ So two distinct concerns are conflated in one integer: **how familiar a word is*
 2. **Align scheduling with Anki/FSRS** by separating *display familiarity* from
    *memory state*, replacing the Leitner score formulas with a principled scheduler.
 
-## Phase 1 — Status as a single source of truth
+## Phase 1 — Status as a single source of truth ✅ implemented
 
-- Promote `TermStatus` (value object) to the authoritative model: hold `value`,
-  `label`, `abbreviation`, `cssClass`, `colourHex`, `order`, and predicates
-  (`isKnown()`, `isIgnored()`, `isLearning()`). Fold `TermStatusService`'s scattered
-  helpers and `StatusHelper`'s magic-range arithmetic into it.
-- Replace the 11+ PHP literal arrays / inline comparisons with the value object.
-- Expose it **once** to the frontend (bootstrap payload or
-  `GET /api/v1/settings/status-definitions`); delete the ~6 duplicated TS tables in
-  favour of a single `shared/stores/statuses.ts`.
+This stands alone and was worth doing regardless of Phase 2.
 
-This stands alone and is worth doing regardless of Phase 2.
+### What shipped
+
+- **`TermStatus` is now the authoritative model.** It holds the abbreviation, CSS
+  class, light-theme colour, order and predicates, and exposes
+  `TermStatus::definitions()` — the single ordered table of `value / name / abbr /
+  cssClass / colour / order / isKnown / isLearning / isIgnored`. `isValid()`,
+  `values()` and `isKnownValue()/isIgnoredValue()/isLearningValue()` (non-throwing,
+  safe on unvalidated input) round it out.
+- **`TermStatusService` and `StatusHelper` delegate to the VO.** `getStatuses()`,
+  `getStatusColor()`, `isValidStatus()` and the `is{Learning,Known,Ignored}Status()`
+  helpers are now thin adapters; the duplicated name/abbr/colour tables are gone.
+  (The scheduling members — `SCORE_FORMULA_*`, `calculateScore()`,
+  `makeScoreRandomInsertUpdate()` — were left untouched; they are Phase 2.)
+- **The scattered literals are gone.** `in_array($status, [1,2,3,4,5,98,99])`,
+  `array_fill_keys([1,2,3,4,5,98,99], …)` and `=== 5 || === 99` / `=== 98` checks
+  across the Review, Vocabulary and Admin modules now call `TermStatus::isValid()`,
+  `TermStatus::values()` and `isKnownValue()/isIgnoredValue()`.
+- **Exposed once to the frontend** via `GET /api/v1/settings/status-definitions`
+  (returns `TermStatus::definitions()`).
+- **One frontend store.** `shared/stores/statuses.ts` is the single TS source for
+  status labels/abbr/order/class (localized through the shared `common.status_*`
+  i18n keys, so PHP and TS resolve identical text). The duplicated `STATUS_LABELS` /
+  `STATUS_ORDER` tables in `text_status_chart.ts`, `texts_grouped_app.ts` and
+  `html_utils.ts`, the `term_edit_modal.ts` option list, and the `app_data.ts`
+  `statuses` proxy now all resolve from it.
+
+### Deliberately left for a follow-up
+
+- The two Chart.js **colour palettes** (`statistics_charts.ts`,
+  `text_status_chart.ts`) diverge from each other and from the CSS
+  `--lwt-status*` variables; unifying them is a *visual* change, kept out of this
+  cleanup. The reading view itself already single-sources its colours from CSS.
+- `word_popover.ts` / `multi_word_modal.ts` keep their local status lists — those
+  encode popover-specific *presentation* (Bulma button colours, short `Known` /
+  `Ignore` badges) rather than the status model.
 
 ## Phase 2 — FSRS-aligned scheduling
 

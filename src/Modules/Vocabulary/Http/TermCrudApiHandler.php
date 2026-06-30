@@ -648,7 +648,7 @@ class TermCrudApiHandler
         $status = (int) ($data['status'] ?? 1);
 
         // Validate status
-        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+        if (!TermStatusService::isValidStatus($status)) {
             return ['error' => 'Status must be 1-5, 98, or 99'];
         }
 
@@ -767,7 +767,7 @@ class TermCrudApiHandler
         $status = (int) ($data['status'] ?? $existing['WoStatus']);
 
         // Validate status
-        if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+        if (!TermStatusService::isValidStatus($status)) {
             return ['error' => 'Status must be 1-5, 98, or 99'];
         }
 

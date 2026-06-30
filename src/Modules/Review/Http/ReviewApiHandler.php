@@ -26,6 +26,7 @@ use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
+use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
@@ -447,7 +448,7 @@ class ReviewApiHandler implements ApiRoutableInterface
     {
         if ($status !== null) {
             // Explicit status - validate it
-            if (!in_array($status, [1, 2, 3, 4, 5, 98, 99])) {
+            if (!TermStatus::isValid($status)) {
                 return ['error' => 'Invalid status value'];
             }
             $result = $this->reviewFacade->submitAnswer($wordId, $status);

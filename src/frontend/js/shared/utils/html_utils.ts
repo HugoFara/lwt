@@ -6,6 +6,8 @@
  * @since   2.10.0-fork Extracted from pgm.ts
  */
 
+import { STATUS_DISPLAY_ORDER, statusLabel } from '@shared/stores/statuses';
+
 /**
  * Replace html characters with encodings
  *
@@ -76,25 +78,6 @@ export function renderTags(tagList: string): string {
 }
 
 /**
- * Status labels for tooltips.
- */
-const STATUS_LABELS: Record<number, string> = {
-  0: 'Unknown',
-  1: 'Learning (1)',
-  2: 'Learning (2)',
-  3: 'Learning (3)',
-  4: 'Learning (4)',
-  5: 'Learned (5)',
-  98: 'Ignored',
-  99: 'Well Known'
-};
-
-/**
- * Order of statuses in the chart (left to right).
- */
-const STATUS_ORDER = [0, 1, 2, 3, 4, 5, 99, 98];
-
-/**
  * Statistics data from the API.
  */
 interface StatsData {
@@ -121,7 +104,7 @@ export function renderStatusBarChart(stats: StatsData | null | undefined): strin
   // Build segments for each status
   const segments: string[] = [];
 
-  for (const status of STATUS_ORDER) {
+  for (const status of STATUS_DISPLAY_ORDER) {
     let count: number;
     if (status === 0) {
       count = unknown;
@@ -131,7 +114,7 @@ export function renderStatusBarChart(stats: StatsData | null | undefined): strin
 
     if (count > 0) {
       const percent = (count / total) * 100;
-      const label = STATUS_LABELS[status];
+      const label = statusLabel(status);
       segments.push(
         `<div class="status-segment bc${status}" ` +
         `style="width: ${percent.toFixed(2)}%" ` +
