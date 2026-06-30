@@ -36,35 +36,36 @@ class SqlFileParser
      */
     public static function parseFile(string $filename): array
     {
-        $handle = @fopen($filename, 'r');
-        if ($handle === false) {
+        $content = @file_get_contents($filename);
+        if ($content === false) {
             return array();
         }
+        // Normalize line endings up front so statement splitting does not depend
+        // on the file's origin OS. A CRLF/CR file (e.g. committed from Windows or
+        // baked into an image) must parse the same as an LF file on a Linux host,
+        // where PHP_EOL is "\n" and would never match a ";\r\n" boundary.
+        $content = str_replace(["\r\n", "\r"], "\n", $content);
+
         $queries_list = array();
         $curr_content = '';
-        while ($stream = fgets($handle)) {
+        foreach (explode("\n", $content) as $line) {
             // Skip comments
-            if (str_starts_with($stream, '-- ')) {
+            if (str_starts_with($line, '-- ')) {
                 continue;
             }
-            // Add stream to accumulator
-            $curr_content .= $stream;
-            // Get queries
-            $queries = explode(';' . PHP_EOL, $curr_content);
-            // Replace line by remainders of the last element (incomplete line)
+            // Add line (with its newline restored) to the accumulator
+            $curr_content .= $line . "\n";
+            // Pull out every complete statement, keep the trailing remainder
+            $queries = explode(";\n", $curr_content);
             $curr_content = array_pop($queries);
             foreach ($queries as $query) {
                 $queries_list[] = trim($query);
             }
         }
         // Add final query if there's any remaining content
-        if (!empty(trim($curr_content))) {
+        if (trim($curr_content) !== '') {
             $queries_list[] = trim($curr_content);
         }
-        if (!feof($handle)) {
-            // Throw error
-        }
-        fclose($handle);
         return $queries_list;
     }
 }
