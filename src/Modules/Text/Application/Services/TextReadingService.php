@@ -83,10 +83,10 @@ class TextReadingService
                         [
                             $hidetag, "click", "mword", ($showAll ? 'mwsty' : 'wsty'),
                             "order" . $ti2Order,
-                            'word' . $woId, 'status' . $woStatus,
-                            'TERM' . StringUtils::toClassName($tiTextLC)
+                            'word' . $woId, 'status' . $woStatus
                         ]
                     ),
+                    'data_hex' => StringUtils::toClassName($tiTextLC),
                     'data_pos' => $currcharcount,
                     'data_order' => $ti2Order,
                     'data_wid' => $woId,
@@ -129,10 +129,10 @@ class TextReadingService
                         " ",
                         [
                             $hidetag, "click", "word", "wsty", "word" . $woId,
-                            'status' . $woStatus,
-                            'TERM' . StringUtils::toClassName($tiTextLC)
+                            'status' . $woStatus
                         ]
                     ),
+                    'data_hex' => StringUtils::toClassName($tiTextLC),
                     'data_pos' => $currcharcount,
                     'data_order' => $ti2Order,
                     'data_wid' => $woId,
@@ -152,10 +152,10 @@ class TextReadingService
                     'class' => implode(
                         " ",
                         [
-                            $hidetag, "click", "word", "wsty", "status0",
-                            "TERM" . StringUtils::toClassName($tiTextLC)
+                            $hidetag, "click", "word", "wsty", "status0"
                         ]
                     ),
+                    'data_hex' => StringUtils::toClassName($tiTextLC),
                     'data_pos' => $currcharcount,
                     'data_order' => $ti2Order,
                     'data_trans' => '',

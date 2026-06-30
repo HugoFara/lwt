@@ -111,9 +111,6 @@ function buildWordClasses(word: WordData, showAll: boolean): string {
   // Status class
   classes.push(`status${word.status}`);
 
-  // TERM class for hex lookup
-  classes.push(`TERM${word.hex}`);
-
   return classes.join(' ');
 }
 
@@ -429,7 +426,7 @@ export function updateWordStatusInDOM(
   newWordId: number | null = null,
   container: Element = document.body
 ): void {
-  const selector = `.TERM${hex}`;
+  const selector = `[data_hex="${hex}"]`;
   const elements = container.querySelectorAll<HTMLElement>(selector);
 
   elements.forEach(el => {
@@ -462,7 +459,7 @@ export function updateWordTranslationInDOM(
   romanization: string,
   container: Element = document.body
 ): void {
-  const selector = `.TERM${hex}`;
+  const selector = `[data_hex="${hex}"]`;
   const elements = container.querySelectorAll<HTMLElement>(selector);
 
   elements.forEach(el => {

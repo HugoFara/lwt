@@ -68,44 +68,22 @@ class StringUtils
     }
 
     /**
-     * Escape a string for use as a CSS class name.
+     * Derive an opaque identity token for a term's lowercase text.
      *
-     * Escapes everything to "¤xx" (where xx is hex) except:
-     * - 0-9 (ASCII 48-57)
-     * - a-z (ASCII 97-122)
-     * - A-Z (ASCII 65-90)
-     * - Unicode characters >= 165 (hex 00A5)
+     * Used in the reading view as the `data_hex` attribute so every occurrence of
+     * the same term can be restyled in one pass when its status changes. The token
+     * is computed per render and never stored or reversed back to text, so a short
+     * one-way hash is sufficient. A pure `[0-9a-f]` hash is also selector-safe — no
+     * `CSS.escape` needed — and is recomputed identically on both the PHP and JS
+     * sides, so the API `hex` field keeps its exact role.
      *
-     * @param string $string String to escape
+     * @param string $string String to derive the token from (typically WoTextLC)
      *
-     * @return string CSS-safe class name
+     * @return string 16-character (64-bit) lowercase hex token
      */
     public static function toClassName(string $string): string
     {
-        $length = mb_strlen($string, 'UTF-8');
-        $result = '';
-        for ($i = 0; $i < $length; $i++) {
-            $char = mb_substr($string, $i, 1, 'UTF-8');
-            // $char may be multi-byte; ord() only reads byte 0 (PHP 8.5 deprecates
-            // passing a multi-byte string). $char[0] makes that explicit and keeps
-            // the existing first-byte behavior.
-            // TODO(php8.5): consider mb_ord($char, 'UTF-8') for true codepoints —
-            // it would also escape codepoints 123-164 per this method's documented
-            // contract, which the first-byte approach currently lets through. That
-            // is a deliberate behavior change to CSS class names; defer until vetted.
-            $ord = ord($char[0]);
-            if (
-                ($ord < 48)
-                || ($ord > 57 && $ord < 65)
-                || ($ord > 90 && $ord < 97)
-                || ($ord > 122 && $ord < 165)
-            ) {
-                $result .= '¤' . self::toHex($char);
-            } else {
-                $result .= $char;
-            }
-        }
-        return $result;
+        return substr(hash('sha256', $string), 0, 16);
     }
 
     /**

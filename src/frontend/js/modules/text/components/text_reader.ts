@@ -238,7 +238,7 @@ export function textReaderData(): TextReaderData {
       event.stopPropagation();
 
       // Get word data from element (use getAttribute for underscore attributes)
-      const hex = wordEl.getAttribute('data_hex') || wordEl.className.match(/TERM([0-9A-F]+)/)?.[1] || '';
+      const hex = wordEl.getAttribute('data_hex') || '';
       const position = parseInt(wordEl.getAttribute('data_order') || wordEl.getAttribute('data_pos') || '0', 10);
 
       if (!hex) return;

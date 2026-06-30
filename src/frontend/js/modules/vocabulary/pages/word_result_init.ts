@@ -222,7 +222,7 @@ function initHoverSaveResult(config: HoverSaveResultConfig): void {
   // Always generate tooltips (jQuery UI tooltips removed, now using native)
   const title = createWordTooltip(config.wordRaw, config.translation, '', String(config.status));
 
-  context.querySelectorAll<HTMLElement>(`.TERM${config.hex}`).forEach(el => {
+  context.querySelectorAll<HTMLElement>(`[data_hex="${config.hex}"]`).forEach(el => {
     el.classList.remove('status0');
     el.classList.add(`status${config.status}`, `word${config.wid}`);
     el.setAttribute('data_status', String(config.status));
@@ -248,7 +248,7 @@ function initAllWellKnownResult(config: AllWellKnownConfig): void {
       title = createWordTooltip(word.term, '*', '', String(word.status));
     }
 
-    context.querySelectorAll<HTMLElement>(`.TERM${word.hex}`).forEach(el => {
+    context.querySelectorAll<HTMLElement>(`[data_hex="${word.hex}"]`).forEach(el => {
       el.classList.remove('status0');
       el.classList.add(`status${word.status}`, `word${word.wid}`);
       el.setAttribute('data_status', String(word.status));

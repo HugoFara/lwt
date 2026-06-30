@@ -5,12 +5,10 @@ description: Replace the reading-view TERM<hex> CSS class-as-index with a data_h
 
 # Proposal: `data_hex` Word Identity
 
-**Status:** Proposed — deferred until after the next release (a major feature lands
-first; this is a broad cross-cutting refactor we don't want to collide with it).
+**Status:** Implemented (#237), on the post-3.2.1 development line.
 Tracked in [issue #237](https://github.com/HugoFara/lwt/issues/237).
 
-A design proposal, not shipped work. It records the agreed approach so it isn't lost
-between releases.
+This document records the design and rationale of the change as it was carried out.
 
 ## Problem
 
@@ -73,28 +71,31 @@ keeps its exact role, just a hash string. So there is **no wire-format ripple** 
 The only thing given up is human readability of the token in devtools
 (`data_hex="3a7f9c2e1b0d4f88"` instead of a mostly-readable string) — accepted.
 
-## Scope sketch
-
-When picked up post-release:
+## What changed
 
 - **PHP token:** `src/Shared/Infrastructure/Utilities/StringUtils.php::toClassName()`
-  → hash. Keep `toHex()` (independent, tested utility).
-- **PHP emit (5 spans, 2 files):** drop `'TERM' . toClassName(...)` from the `class`
-  and add `'data_hex' => toClassName(...)` in
+  → `substr(hash('sha256', $s), 0, 16)`. `toHex()` kept (independent, tested utility).
+- **PHP emit (5 spans, 2 files):** dropped `'TERM' . toClassName(...)` from the `class`
+  and added `'data_hex' => toClassName(...)` in
   `Modules/Text/Application/Services/TextReadingService.php` (×3) and
-  `Modules/Vocabulary/Application/Services/ExpressionService.php` (×2).
-- **JS emit:** remove the `TERM${word.hex}` push in
-  `modules/text/pages/reading/text_renderer.ts` (`data_hex` is already emitted).
-- **JS selectors (~9):** `.TERM${hex}` → `[data_hex="${hex}"]` in
-  `modules/vocabulary/services/word_dom_updates.ts`,
-  `modules/vocabulary/pages/word_result_init.ts`, and `text_renderer.ts`.
-- **JS extractors (4):** read `data_hex` instead of parsing the class in
-  `text_reader.ts`, `text_keyboard.ts`, `word_actions.ts`, `text_events.ts`.
-- **Tests:** update `toClassName` assertions in
-  `tests/backend/Core/IntegrationTest.php` and `tests/backend/Core/Text/TextProcessingTest.php`
-  (assert hash shape, not the old `¤` output); migrate frontend fixtures from
+  `Modules/Vocabulary/Application/Services/ExpressionService.php` (×2). The
+  server-rendered spans previously carried the token *only* as the class, so this
+  is an add-`data_hex` change, not just a drop.
+- **JS emit:** removed the `TERM${word.hex}` push in
+  `modules/text/pages/reading/text_renderer.ts` (`data_hex` was already emitted).
+- **JS selectors (9):** `.TERM${hex}` → `[data_hex="${hex}"]` in
+  `modules/vocabulary/services/word_dom_updates.ts` (×5),
+  `modules/vocabulary/pages/word_result_init.ts` (×2), and `text_renderer.ts` (×2).
+- **JS extractors (2):** dropped the `TERM([0-9A-Fa-f]+)` class-regex fallback and now
+  read `data_hex` directly in `text_reader.ts` and `text_keyboard.ts`. (The
+  `word_actions.ts` / `text_events.ts` extractors named in the original proposal had
+  already been refactored away by the time this landed.)
+- **Tests:** rewrote the `toClassName` assertions in
+  `tests/backend/Core/IntegrationTest.php` to assert the hash shape (16-char lowercase
+  hex) instead of the old `¤` output; migrated the frontend fixtures from
   `class="… TERM<x>"` + `.TERM<x>` to `data_hex="<x>"` + `[data_hex="<x>"]`
-  (`tests/frontend/reading/*`, `tests/frontend/words/*`, `tests/frontend/texts/text_reader.test.ts`).
+  (`tests/frontend/reading/*`, `tests/frontend/words/*`, `tests/frontend/texts/text_reader.test.ts`)
+  and removed the now-obsolete class-name-fallback extractor test.
 
 ### Out of scope
 

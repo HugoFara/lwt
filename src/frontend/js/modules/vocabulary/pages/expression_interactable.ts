@@ -18,6 +18,7 @@ import { getTextId } from '@modules/text/stores/text_config';
  */
 interface TermAttrs {
   class: string;
+  data_hex: string;
   data_trans: string;
   data_rom: string;
   data_code: number;

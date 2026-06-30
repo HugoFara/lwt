@@ -99,11 +99,11 @@ describe('reading/text_renderer.ts', () => {
       expect(result).toContain('status3');
     });
 
-    it('includes hex class', () => {
+    it('includes hex as the data_hex attribute', () => {
       const word = createWordData({ hex: 'abc123' });
       const result = renderWord(word, defaultSettings);
 
-      expect(result).toContain('TERMabc123');
+      expect(result).toContain('data_hex="abc123"');
     });
 
     it('includes word ID class when present', () => {
@@ -259,8 +259,8 @@ describe('reading/text_renderer.ts', () => {
 
   describe('updateWordStatusInDOM', () => {
     it('updates status class on matching elements', () => {
-      document.body.innerHTML = '<span class="TERM123 status0">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span class="status0" data_hex="123">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordStatusInDOM('123', 3);
 
@@ -269,8 +269,8 @@ describe('reading/text_renderer.ts', () => {
     });
 
     it('updates data_status attribute', () => {
-      document.body.innerHTML = '<span class="TERM123 status0" data_status="0">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span class="status0" data_hex="123" data_status="0">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordStatusInDOM('123', 5);
 
@@ -279,21 +279,21 @@ describe('reading/text_renderer.ts', () => {
 
     it('updates multiple matching elements', () => {
       document.body.innerHTML = `
-        <span class="TERM123 status0">word1</span>
-        <span class="TERM123 status0">word2</span>
+        <span class="status0" data_hex="123">word1</span>
+        <span class="status0" data_hex="123">word2</span>
       `;
 
       updateWordStatusInDOM('123', 2);
 
-      const elements = document.querySelectorAll('.TERM123');
+      const elements = document.querySelectorAll('[data_hex="123"]');
       elements.forEach(el => {
         expect(el.classList.contains('status2')).toBe(true);
       });
     });
 
     it('adds word ID class when provided', () => {
-      document.body.innerHTML = '<span class="TERM123 status0">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span class="status0" data_hex="123">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordStatusInDOM('123', 1, 456);
 
@@ -301,8 +301,8 @@ describe('reading/text_renderer.ts', () => {
     });
 
     it('sets data_wid when word ID provided', () => {
-      document.body.innerHTML = '<span class="TERM123 status0">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span class="status0" data_hex="123">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordStatusInDOM('123', 1, 789);
 
@@ -310,8 +310,8 @@ describe('reading/text_renderer.ts', () => {
     });
 
     it('removes data_wid when word ID is 0', () => {
-      document.body.innerHTML = '<span class="TERM123 status1" data_wid="123">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span class="status1" data_hex="123" data_wid="123">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordStatusInDOM('123', 0, 0);
 
@@ -320,15 +320,15 @@ describe('reading/text_renderer.ts', () => {
 
     it('uses custom container when provided', () => {
       const container = document.createElement('div');
-      container.innerHTML = '<span class="TERM123 status0">word</span>';
+      container.innerHTML = '<span class="status0" data_hex="123">word</span>';
       document.body.appendChild(container);
 
-      document.body.innerHTML += '<span class="TERM123 status0">outside</span>';
+      document.body.innerHTML += '<span class="status0" data_hex="123">outside</span>';
 
       updateWordStatusInDOM('123', 4, null, container);
 
-      const insideEl = container.querySelector('.TERM123') as HTMLElement;
-      const outsideEl = document.body.querySelector(':scope > .TERM123') as HTMLElement;
+      const insideEl = container.querySelector('[data_hex="123"]') as HTMLElement;
+      const outsideEl = document.body.querySelector(':scope > [data_hex="123"]') as HTMLElement;
 
       expect(insideEl.classList.contains('status4')).toBe(true);
       expect(outsideEl.classList.contains('status0')).toBe(true);
@@ -341,8 +341,8 @@ describe('reading/text_renderer.ts', () => {
 
   describe('updateWordTranslationInDOM', () => {
     it('sets data_trans attribute', () => {
-      document.body.innerHTML = '<span class="TERM123">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span data_hex="123">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordTranslationInDOM('123', 'translation', '');
 
@@ -350,8 +350,8 @@ describe('reading/text_renderer.ts', () => {
     });
 
     it('sets data_rom attribute', () => {
-      document.body.innerHTML = '<span class="TERM123">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span data_hex="123">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordTranslationInDOM('123', '', 'romanization');
 
@@ -359,8 +359,8 @@ describe('reading/text_renderer.ts', () => {
     });
 
     it('removes data_trans when empty', () => {
-      document.body.innerHTML = '<span class="TERM123" data_trans="old">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span data_hex="123" data_trans="old">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordTranslationInDOM('123', '', '');
 
@@ -368,8 +368,8 @@ describe('reading/text_renderer.ts', () => {
     });
 
     it('removes data_rom when empty', () => {
-      document.body.innerHTML = '<span class="TERM123" data_rom="old">word</span>';
-      const element = document.querySelector('.TERM123') as HTMLElement;
+      document.body.innerHTML = '<span data_hex="123" data_rom="old">word</span>';
+      const element = document.querySelector('[data_hex="123"]') as HTMLElement;
 
       updateWordTranslationInDOM('123', '', '');
 
@@ -378,13 +378,13 @@ describe('reading/text_renderer.ts', () => {
 
     it('updates multiple elements', () => {
       document.body.innerHTML = `
-        <span class="TERM123">word1</span>
-        <span class="TERM123">word2</span>
+        <span data_hex="123">word1</span>
+        <span data_hex="123">word2</span>
       `;
 
       updateWordTranslationInDOM('123', 'new trans', 'new rom');
 
-      const elements = document.querySelectorAll('.TERM123');
+      const elements = document.querySelectorAll('[data_hex="123"]');
       elements.forEach(el => {
         expect(el.getAttribute('data_trans')).toBe('new trans');
         expect(el.getAttribute('data_rom')).toBe('new rom');
@@ -393,12 +393,12 @@ describe('reading/text_renderer.ts', () => {
 
     it('uses custom container when provided', () => {
       const container = document.createElement('div');
-      container.innerHTML = '<span class="TERM123">word</span>';
+      container.innerHTML = '<span data_hex="123">word</span>';
       document.body.appendChild(container);
 
       updateWordTranslationInDOM('123', 'trans', 'rom', container);
 
-      const el = container.querySelector('.TERM123') as HTMLElement;
+      const el = container.querySelector('[data_hex="123"]') as HTMLElement;
       expect(el.getAttribute('data_trans')).toBe('trans');
     });
   });

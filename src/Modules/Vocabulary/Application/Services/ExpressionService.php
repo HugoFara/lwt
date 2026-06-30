@@ -368,7 +368,8 @@ class ExpressionService
 
         $woStatus = (int)($record["WoStatus"] ?? 1);
         $attrs = [
-            "class" => "click mword {$showType}wsty TERM$hex word$wid status" . $woStatus,
+            "class" => "click mword {$showType}wsty word$wid status" . $woStatus,
+            "data_hex" => $hex,
             "data_trans" => (string)($record["WoTranslation"] ?? ''),
             "data_rom" => (string)($record["WoRomanization"] ?? ''),
             "data_code" => $len,
@@ -410,7 +411,8 @@ class ExpressionService
 
         $woStatus = (int)($record["WoStatus"] ?? 1);
         $attrs = [
-            "class" => "click mword {$showType}wsty TERM$hex word$wid status" . $woStatus,
+            "class" => "click mword {$showType}wsty word$wid status" . $woStatus,
+            "data_hex" => $hex,
             "data_trans" => (string)($record["WoTranslation"] ?? ''),
             "data_rom" => (string)($record["WoRomanization"] ?? ''),
             "data_code" => $len,
