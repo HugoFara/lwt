@@ -20,6 +20,7 @@ namespace Lwt\Modules\Vocabulary\Application\Services;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\DB;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\ScratchTables;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Tags\Application\TagsFacade;
@@ -131,6 +132,10 @@ class CompleteImportService
      */
     private function initTempTables(): void
     {
+        // Per-connection scratch table for the import rows (was a persistent
+        // shared table; see ScratchTables for why it is now TEMPORARY).
+        ScratchTables::ensureWords();
+        Connection::execute("DELETE FROM temp_words");
         Connection::execute(
             "CREATE TEMPORARY TABLE IF NOT EXISTS numbers(
                 n tinyint(3) unsigned NOT NULL
@@ -646,8 +651,11 @@ class CompleteImportService
      */
     private function cleanupTempTables(): void
     {
-        Connection::execute("DROP TABLE IF EXISTS numbers");
-        QueryBuilder::table('temp_words')->truncate();
+        // DROP TEMPORARY (not DROP TABLE / TRUNCATE): the former does not
+        // implicitly commit, so it is safe to call inside the import transaction.
+        // Both tables are recreated by initTempTables() on the next import.
+        Connection::execute("DROP TEMPORARY TABLE IF EXISTS numbers");
+        Connection::execute("DROP TEMPORARY TABLE IF EXISTS temp_words");
     }
 
     /**
@@ -662,6 +670,10 @@ class CompleteImportService
      */
     public function importTagsOnly(array $fields, string $tabType, string $fileName, bool $ignoreFirst): void
     {
+        // Create the per-connection scratch tables (temp_words + numbers) before
+        // loading the tag rows into temp_words below.
+        $this->initTempTables();
+
         $columns = '';
         $tlField = $fields["tl"];
         for ($j = 1; $j <= $tlField; $j++) {
@@ -735,15 +747,6 @@ class CompleteImportService
                 Connection::preparedExecute($sql, $params);
             }
         }
-
-        // Create numbers table and insert tags
-        Connection::execute(
-            "CREATE TEMPORARY TABLE IF NOT EXISTS numbers(
-                n tinyint(3) unsigned NOT NULL
-            )"
-        );
-        Connection::execute("INSERT IGNORE INTO numbers(n) VALUES ('1'),('2'),('3'),
-            ('4'),('5'),('6'),('7'),('8'),('9')");
 
         // Stamp TgUsID so the imported tags are owned by the caller —
         // see handleTagsImport() for context. Without this the rows

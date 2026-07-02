@@ -25,6 +25,7 @@ use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
+use Lwt\Shared\Infrastructure\Database\ScratchTables;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 
 /**
@@ -152,8 +153,13 @@ class ParsingCoordinator
     ): void {
         $lid = $language->id()->toInt();
 
-        // Clear temporary table
-        QueryBuilder::table('temp_word_occurrences')->truncate();
+        // Create (per connection) and clear the scratch table. See ScratchTables.
+        // NOTE: this class duplicates the parsing pipeline in TextParsing /
+        // TextParsingPersistence and is not currently wired to any route; unlike
+        // that path it never populates `tempexprs`, so its multi-word branch reads
+        // an empty table. Unifying the two implementations is Phase 2.
+        ScratchTables::ensureWordOccurrences();
+        QueryBuilder::table('temp_word_occurrences')->delete();
 
         // Get next sentence ID
         $dbname = Globals::getDatabaseName();
@@ -290,6 +296,11 @@ class ParsingCoordinator
 
         // Insert text items
         if ($hasmultiword) {
+            // Ensure the scratch table exists before reading it. This class does
+            // not populate tempexprs (see the note in saveToDatabase), and it is
+            // now a per-connection TEMPORARY table, so without this the SELECT
+            // below would fail with "table doesn't exist".
+            ScratchTables::ensureExpressions();
             // Build SQL and bindings in lockstep so that the two user-scope
             // injections inside the UNION land in left-to-right placeholder
             // order. Pre-bundling all six values up-front and appending the

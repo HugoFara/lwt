@@ -89,7 +89,7 @@ class TextParsing
         TextParsingPersistence::displayStatistics($lid, $rtlScript, !empty($wl));
 
         // Clean up
-        QueryBuilder::table('temp_word_occurrences')->truncate();
+        QueryBuilder::table('temp_word_occurrences')->delete();
     }
 
     /**
@@ -138,7 +138,7 @@ class TextParsing
         TextParsingPersistence::registerSentencesTextItems($textId, $lid, !empty($wl));
 
         // Clean up
-        QueryBuilder::table('temp_word_occurrences')->truncate();
+        QueryBuilder::table('temp_word_occurrences')->delete();
     }
 
     /**
@@ -218,7 +218,7 @@ class TextParsing
             : 100.0;
 
         // Clean up temp_word_occurrences
-        QueryBuilder::table('temp_word_occurrences')->truncate();
+        QueryBuilder::table('temp_word_occurrences')->delete();
 
         return [
             'sentences' => $sentenceCount,
@@ -255,7 +255,11 @@ class TextParsing
         $termchar = (string)$record['LgRegexpWordCharacters'];
         $replace = explode("|", (string) $record['LgCharacterSubstitutions']);
         $text = Escaping::prepareTextdata($text);
-        QueryBuilder::table('temp_word_occurrences')->truncate();
+        // Create the per-connection scratch table (if needed) and clear it.
+        // DELETE (not TRUNCATE): TRUNCATE recreates the tablespace, which crashed
+        // on Windows with InnoDB error 194 and implicitly commits transactions.
+        ScratchTables::ensureWordOccurrences();
+        QueryBuilder::table('temp_word_occurrences')->delete();
 
         // because of sentence special characters
         $text = str_replace(array('}', '{'), array(']', '['), $text);

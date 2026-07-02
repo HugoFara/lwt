@@ -112,23 +112,12 @@ CREATE TABLE IF NOT EXISTS word_occurrences (
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS temp_word_occurrences (
-    TiCount smallint(5) unsigned NOT NULL,
-    TiSeID mediumint(8) unsigned NOT NULL,
-    TiOrder smallint(5) unsigned NOT NULL,
-    TiWordCount tinyint(3) unsigned NOT NULL,
-    TiText varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS temp_words (
-    WoText varchar(250) DEFAULT NULL,
-    WoTextLC varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-    WoTranslation varchar(500) NOT NULL DEFAULT '*',
-    WoRomanization varchar(100) DEFAULT NULL,
-    WoSentence varchar(1000) DEFAULT NULL,
-    WoTaglist varchar(255) DEFAULT NULL,
-    PRIMARY KEY(WoTextLC)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- The parse/import scratch tables (temp_word_occurrences, temp_words, tempexprs)
+-- are no longer persistent shared tables. They are created per database
+-- connection as CREATE TEMPORARY TABLE at runtime (see
+-- src/Shared/Infrastructure/Database/ScratchTables.php). This avoids InnoDB
+-- "Tablespace is missing" (error 194) crashes on TRUNCATE and isolates
+-- concurrent parses/imports from each other. See issue #247.
 
 CREATE TABLE IF NOT EXISTS texts (
     TxID smallint(5) unsigned NOT NULL AUTO_INCREMENT,

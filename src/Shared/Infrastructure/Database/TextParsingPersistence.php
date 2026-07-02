@@ -261,36 +261,50 @@ class TextParsingPersistence
         // The pre-computed TiSeID may not match actual AUTO_INCREMENT values,
         // so we update temp_word_occurrences to use the actual SeID from inserted sentences.
         // ROW_NUMBER() maps TiSeID rank to SeOrder, which we JOIN to get SeID.
+        // Materialise the TiSeID->rank mapping in its own temporary table first.
+        // temp_word_occurrences is now a TEMPORARY table, and MySQL/MariaDB cannot
+        // open a temporary table twice in the same statement ("Can't reopen table"),
+        // so the mapping cannot be an inline self-subquery of the UPDATE.
+        Connection::execute("DROP TEMPORARY TABLE IF EXISTS temp_seid_map");
+        Connection::execute(
+            "CREATE TEMPORARY TABLE temp_seid_map AS
+            SELECT TiSeID AS old_seid,
+                   ROW_NUMBER() OVER (ORDER BY TiSeID) AS rn
+            FROM temp_word_occurrences
+            GROUP BY TiSeID"
+        );
         Connection::preparedExecute(
             "UPDATE temp_word_occurrences t
-            JOIN (
-                SELECT TiSeID AS old_seid,
-                       ROW_NUMBER() OVER (ORDER BY TiSeID) AS rn
-                FROM temp_word_occurrences
-                GROUP BY TiSeID
-            ) mapping ON t.TiSeID = mapping.old_seid
+            JOIN temp_seid_map mapping ON t.TiSeID = mapping.old_seid
             JOIN sentences s ON s.SeOrder = mapping.rn AND s.SeTxID = ?
             SET t.TiSeID = s.SeID",
             [$tid]
         );
+        Connection::execute("DROP TEMPORARY TABLE IF EXISTS temp_seid_map");
 
         // STEP 1.6: Also update tempexprs.sent if multiword expressions exist.
         // tempexprs was populated before sentences were inserted, so its `sent`
         // field also needs to be aligned with actual SeID values.
         if ($hasmultiword) {
+            // Same "can't reopen a temporary table" constraint as STEP 1.5:
+            // materialise the sent->rank mapping before the self-referencing UPDATE.
+            Connection::execute("DROP TEMPORARY TABLE IF EXISTS temp_sent_map");
+            Connection::execute(
+                "CREATE TEMPORARY TABLE temp_sent_map AS
+                SELECT sent AS old_sent,
+                       ROW_NUMBER() OVER (ORDER BY sent) AS rn
+                FROM tempexprs
+                WHERE sent IS NOT NULL
+                GROUP BY sent"
+            );
             Connection::preparedExecute(
                 "UPDATE tempexprs e
-                JOIN (
-                    SELECT sent AS old_sent,
-                           ROW_NUMBER() OVER (ORDER BY sent) AS rn
-                    FROM tempexprs
-                    WHERE sent IS NOT NULL
-                    GROUP BY sent
-                ) mapping ON e.sent = mapping.old_sent
+                JOIN temp_sent_map mapping ON e.sent = mapping.old_sent
                 JOIN sentences s ON s.SeOrder = mapping.rn AND s.SeTxID = ?
                 SET e.sent = s.SeID",
                 [$tid]
             );
+            Connection::execute("DROP TEMPORARY TABLE IF EXISTS temp_sent_map");
         }
 
         // STEP 2: Insert text items. TiSeID and tempexprs.sent now equal actual SeID.
@@ -444,23 +458,15 @@ class TextParsingPersistence
                 n tinyint(3) unsigned NOT NULL
             );"
         );
-        Connection::execute("TRUNCATE TABLE numbers");
+        Connection::execute("DELETE FROM numbers");
         Connection::query(
             "INSERT IGNORE INTO numbers(n) VALUES (" .
             implode('),(', $wl) .
             ');'
         );
-        // Store garbage
-        Connection::query(
-            "CREATE TABLE IF NOT EXISTS tempexprs (
-                sent mediumint unsigned,
-                word varchar(250),
-                lword varchar(250),
-                TiOrder smallint unsigned,
-                n tinyint(3) unsigned NOT NULL
-            )"
-        );
-        Connection::execute("TRUNCATE TABLE tempexprs");
+        // Store garbage (per-connection temporary table)
+        ScratchTables::ensureExpressions();
+        Connection::execute("DELETE FROM tempexprs");
         Connection::query(
             "INSERT IGNORE INTO tempexprs
             (sent, word, lword, TiOrder, n)
