@@ -128,34 +128,41 @@ class JapaneseTextParserTest extends TestCase
     }
 
     // =========================================================================
-    // parseJapanese (split-only mode id=-2)
+    // buildTokensFromMecab (pure MeCab-output -> tokens, no binary needed)
     // =========================================================================
 
     #[Test]
-    public function parseJapaneseWithIdMinus2ReturnsArrayOfSentences(): void
+    public function buildTokensFromMecabProducesExpectedTokens(): void
     {
-        $result = JapaneseTextParser::parseJapanese('Some text', -2);
+        // Captured MeCab output for "東京は大きいです。" in the parser's
+        // "-F %m\t%t\t%h" format, terminated with the EOP sentence marker.
+        $mecabed = "東京\t2\t46\nは\t6\t16\n大きい\t2\t10\n"
+            . "です\t6\t25\n。\t3\t7\nEOP\t3\t7\n";
 
-        $this->assertIsArray($result);
-        $this->assertNotEmpty($result);
+        $tokens = JapaneseTextParser::buildTokensFromMecab($mecabed);
+
+        $this->assertCount(5, $tokens);
+        $this->assertSame(
+            ['東京', 'は', '大きい', 'です', '。'],
+            array_map(fn($t) => $t->text, $tokens)
+        );
+        // Punctuation is a non-word; the rest are words.
+        $this->assertSame([1, 1, 1, 1, 0], array_map(fn($t) => $t->wordCount, $tokens));
+        // All in the first sentence (the trailing EOP order group is dropped).
+        foreach ($tokens as $t) {
+            $this->assertSame(1, $t->sentence);
+        }
+        // Global order is strictly increasing.
+        $orders = array_map(fn($t) => $t->order, $tokens);
+        $sorted = $orders;
+        sort($sorted);
+        $this->assertSame($sorted, $orders);
     }
 
     #[Test]
-    public function parseJapaneseWithIdMinus2MatchesSplitMethod(): void
+    public function buildTokensFromMecabHandlesEmptyOutput(): void
     {
-        $text = "Line A\nLine B";
-        $splitResult = JapaneseTextParser::splitJapaneseSentences($text);
-        $parseResult = JapaneseTextParser::parseJapanese($text, -2);
-
-        $this->assertSame($splitResult, $parseResult);
-    }
-
-    #[Test]
-    public function parseJapaneseWithIdMinus2DoesNotReturnNull(): void
-    {
-        $result = JapaneseTextParser::parseJapanese('test', -2);
-
-        $this->assertNotNull($result);
+        $this->assertSame([], JapaneseTextParser::buildTokensFromMecab(''));
     }
 
     // =========================================================================
@@ -203,33 +210,5 @@ class JapaneseTextParserTest extends TestCase
         $output = ob_get_clean();
 
         $this->assertStringContainsString('Word1 Word2', $output);
-    }
-
-    // =========================================================================
-    // parseJapanese / parseJapaneseToDatabase (requires MeCab + DB)
-    // =========================================================================
-
-    #[Test]
-    public function parseJapaneseWithIdMinus1RequiresMecab(): void
-    {
-        $this->markTestSkipped(
-            'MeCab installation required for display preview mode'
-        );
-    }
-
-    #[Test]
-    public function parseJapaneseWithPositiveIdRequiresMecabAndDatabase(): void
-    {
-        $this->markTestSkipped(
-            'MeCab installation and database connection required for save mode'
-        );
-    }
-
-    #[Test]
-    public function parseJapaneseToDatabaseRequiresMecabAndDatabase(): void
-    {
-        $this->markTestSkipped(
-            'MeCab installation and database connection required'
-        );
     }
 }

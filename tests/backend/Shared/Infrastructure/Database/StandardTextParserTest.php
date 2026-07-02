@@ -288,20 +288,4 @@ class StandardTextParserTest extends TestCase
     {
         $this->markTestSkipped('Database connection required');
     }
-
-    // =========================================================================
-    // parseStandard / parseStandardToDatabase (requires DB)
-    // =========================================================================
-
-    #[Test]
-    public function parseStandardRequiresDatabase(): void
-    {
-        $this->markTestSkipped('Database connection required');
-    }
-
-    #[Test]
-    public function parseStandardToDatabaseRequiresDatabase(): void
-    {
-        $this->markTestSkipped('Database connection required');
-    }
 }
