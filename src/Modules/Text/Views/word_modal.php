@@ -24,7 +24,7 @@ namespace Lwt\Views\Text;
 ?>
 <div x-data="wordModal" x-cloak>
   <div
-    class="modal"
+    class="modal reading-modal"
     :class="{ 'is-active': isOpen }"
     role="dialog"
     aria-modal="true"
@@ -214,160 +214,197 @@ namespace Lwt\Views\Text;
               </div>
             </div>
 
-            <!-- Translation -->
-            <div class="field">
-              <label class="label is-small">
-                <?= __e('text.modal.translation') ?> <span class="has-text-danger">*</span>
-              </label>
-              <div class="control">
-                <textarea
-                  class="textarea"
-                  :class="{ 'is-danger': hasFieldError('translation') }"
-                  x-model="translation"
-                  @blur="validateField('translation')"
-                  rows="2"
-                  placeholder="<?= __e('text.modal.translation_placeholder') ?>"
-                ></textarea>
-              </div>
-              <template x-if="hasFieldError('translation')">
-                <p class="help is-danger" x-text="getFieldError('translation')"></p>
-              </template>
+            <!-- Section tabs — one section visible at a time keeps the sheet
+                 short enough to leave the reading text visible behind it. -->
+            <div class="tabs is-boxed is-small is-fullwidth mb-3">
+              <ul>
+                <li :class="{ 'is-active': activeTab === 'translate' }">
+                  <a @click.prevent="setActiveTab('translate')">
+                    <span><?= __e('text.modal.translation') ?></span>
+                    <template x-if="tabHasError('translate')"><span class="tag is-danger is-small ml-1"></span></template>
+                  </a>
+                </li>
+                <li :class="{ 'is-active': activeTab === 'example' }">
+                  <a @click.prevent="setActiveTab('example')">
+                    <span><?= __e('text.modal.example_sentence') ?></span>
+                    <template x-if="tabHasError('example')"><span class="tag is-danger is-small ml-1"></span></template>
+                  </a>
+                </li>
+                <li :class="{ 'is-active': activeTab === 'notes' }">
+                  <a @click.prevent="setActiveTab('notes')">
+                    <span><?= __e('text.modal.notes') ?></span>
+                    <template x-if="tabHasError('notes')"><span class="tag is-danger is-small ml-1"></span></template>
+                  </a>
+                </li>
+                <li :class="{ 'is-active': activeTab === 'tags' }">
+                  <a @click.prevent="setActiveTab('tags')">
+                    <span><?= __e('text.modal.tags') ?></span>
+                  </a>
+                </li>
+              </ul>
             </div>
 
-            <!-- Romanization (if enabled for language) -->
-            <template x-if="showRomanization">
-              <div class="field">
-                <label class="label is-small"><?= __e('text.modal.romanization') ?></label>
-                <div class="control">
-                  <input
-                    class="input"
-                    :class="{ 'is-danger': hasFieldError('romanization') }"
-                    type="text"
-                    x-model="romanization"
-                    @blur="validateField('romanization')"
-                    placeholder="<?= __e('text.modal.romanization_placeholder') ?>"
-                  >
+            <!-- Translation tab: translation, romanization, status, similar terms -->
+            <template x-if="activeTab === 'translate'">
+              <div>
+                <div class="field">
+                  <label class="label is-small">
+                    <?= __e('text.modal.translation') ?> <span class="has-text-danger">*</span>
+                  </label>
+                  <div class="control">
+                    <textarea
+                      class="textarea"
+                      :class="{ 'is-danger': hasFieldError('translation') }"
+                      x-model="translation"
+                      @blur="validateField('translation')"
+                      rows="2"
+                      placeholder="<?= __e('text.modal.translation_placeholder') ?>"
+                    ></textarea>
+                  </div>
+                  <template x-if="hasFieldError('translation')">
+                    <p class="help is-danger" x-text="getFieldError('translation')"></p>
+                  </template>
                 </div>
-                <template x-if="hasFieldError('romanization')">
-                  <p class="help is-danger" x-text="getFieldError('romanization')"></p>
+
+                <template x-if="showRomanization">
+                  <div class="field">
+                    <label class="label is-small"><?= __e('text.modal.romanization') ?></label>
+                    <div class="control">
+                      <input
+                        class="input"
+                        :class="{ 'is-danger': hasFieldError('romanization') }"
+                        type="text"
+                        x-model="romanization"
+                        @blur="validateField('romanization')"
+                        placeholder="<?= __e('text.modal.romanization_placeholder') ?>"
+                      >
+                    </div>
+                    <template x-if="hasFieldError('romanization')">
+                      <p class="help is-danger" x-text="getFieldError('romanization')"></p>
+                    </template>
+                  </div>
+                </template>
+
+                <div class="field">
+                  <label class="label is-small"><?= __e('text.modal.status') ?></label>
+                  <div class="buttons are-small">
+                    <template x-for="s in statuses" :key="s.value">
+                      <button
+                        type="button"
+                        class="button"
+                        :class="getStatusButtonClass(s.value)"
+                        @click="setFormStatus(s.value)"
+                        x-text="s.abbr"
+                      ></button>
+                    </template>
+                  </div>
+                </div>
+
+                <template x-if="hasSimilarTerms">
+                  <div class="field">
+                    <label class="label is-small"><?= __e('text.modal.similar_terms') ?></label>
+                    <div class="is-size-7">
+                      <template x-for="term in formSimilarTerms" :key="term.id">
+                        <div class="is-flex is-justify-content-space-between is-align-items-center py-1"
+                             style="border-bottom: 1px solid #f0f0f0;">
+                          <div>
+                            <span class="has-text-weight-semibold" x-text="term.text"></span>
+                            <span class="has-text-grey" x-text="getSimilarTermDisplay(term)"></span>
+                          </div>
+                          <button
+                            type="button"
+                            class="button is-small is-ghost"
+                            @click="copyFromSimilar(term)"
+                            title="Copy translation"
+                            x-show="term.translation"
+                          >
+                            <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('copy', ['size' => 12]); ?>
+                          </button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
                 </template>
               </div>
             </template>
 
-            <!-- Sentence -->
-            <div class="field">
-              <label class="label is-small"><?= __e('text.modal.example_sentence') ?></label>
-              <div class="control">
-                <textarea
-                  class="textarea"
-                  :class="{ 'is-danger': hasFieldError('sentence') }"
-                  x-model="sentence"
-                  @blur="validateField('sentence')"
-                  rows="2"
-                  placeholder="<?= __e('text.modal.sentence_placeholder') ?>"
-                ></textarea>
+            <!-- Example tab -->
+            <template x-if="activeTab === 'example'">
+              <div class="field">
+                <label class="label is-small"><?= __e('text.modal.example_sentence') ?></label>
+                <div class="control">
+                  <textarea
+                    class="textarea"
+                    :class="{ 'is-danger': hasFieldError('sentence') }"
+                    x-model="sentence"
+                    @blur="validateField('sentence')"
+                    rows="3"
+                    placeholder="<?= __e('text.modal.sentence_placeholder') ?>"
+                  ></textarea>
+                </div>
+                <template x-if="hasFieldError('sentence')">
+                  <p class="help is-danger" x-text="getFieldError('sentence')"></p>
+                </template>
+                <p class="help"><?= __e('text.modal.sentence_help') ?></p>
               </div>
-              <template x-if="hasFieldError('sentence')">
-                <p class="help is-danger" x-text="getFieldError('sentence')"></p>
-              </template>
-              <p class="help"><?= __e('text.modal.sentence_help') ?></p>
-            </div>
+            </template>
 
-            <!-- Notes -->
-            <div class="field">
-              <label class="label is-small"><?= __e('text.modal.notes') ?></label>
-              <div class="control">
-                <textarea
-                  class="textarea"
-                  :class="{ 'is-danger': hasFieldError('notes') }"
-                  x-model="notes"
-                  @blur="validateField('notes')"
-                  rows="2"
-                  placeholder="<?= __e('text.modal.notes_placeholder') ?>"
-                ></textarea>
-              </div>
-              <template x-if="hasFieldError('notes')">
-                <p class="help is-danger" x-text="getFieldError('notes')"></p>
-              </template>
-            </div>
-
-            <!-- Status -->
-            <div class="field">
-              <label class="label is-small"><?= __e('text.modal.status') ?></label>
-              <div class="buttons are-small">
-                <template x-for="s in statuses" :key="s.value">
-                  <button
-                    type="button"
-                    class="button"
-                    :class="getStatusButtonClass(s.value)"
-                    @click="setFormStatus(s.value)"
-                    x-text="s.abbr"
-                  ></button>
+            <!-- Notes tab -->
+            <template x-if="activeTab === 'notes'">
+              <div class="field">
+                <label class="label is-small"><?= __e('text.modal.notes') ?></label>
+                <div class="control">
+                  <textarea
+                    class="textarea"
+                    :class="{ 'is-danger': hasFieldError('notes') }"
+                    x-model="notes"
+                    @blur="validateField('notes')"
+                    rows="3"
+                    placeholder="<?= __e('text.modal.notes_placeholder') ?>"
+                  ></textarea>
+                </div>
+                <template x-if="hasFieldError('notes')">
+                  <p class="help is-danger" x-text="getFieldError('notes')"></p>
                 </template>
               </div>
-            </div>
+            </template>
 
-            <!-- Tags -->
-            <div class="field">
-              <label class="label is-small"><?= __e('text.modal.tags') ?></label>
-              <div class="control">
-                <!-- Current tags -->
-                <div class="tags mb-2" x-show="hasTags">
-                  <template x-for="tag in formTags" :key="tag">
-                    <span class="tag is-info is-light">
-                      <span x-text="tag"></span>
-                      <button type="button" class="delete is-small" @click="removeTag(tag)"></button>
-                    </span>
-                  </template>
-                </div>
-                <!-- Tag input with autocomplete -->
-                <div class="dropdown" :class="{ 'is-active': showTagSuggestions }">
-                  <div class="dropdown-trigger" style="width: 100%;">
-                    <input
-                      class="input is-small"
-                      type="text"
-                      x-model="tagInput"
-                      @input="filterTags"
-                      @keydown.enter.prevent="addTag(tagInput)"
-                      @blur="hideTagSuggestions"
-                      placeholder="<?= __e('text.modal.add_tag') ?>"
-                    >
-                  </div>
-                  <div class="dropdown-menu" role="menu" style="width: 100%;">
-                    <div class="dropdown-content">
-                      <template x-for="tag in filteredTags" :key="tag">
-                        <a href="#" class="dropdown-item"
-                           @mousedown.prevent="selectTagSuggestion(tag)" x-text="tag"></a>
-                      </template>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Similar Terms -->
-            <template x-if="hasSimilarTerms">
+            <!-- Tags tab -->
+            <template x-if="activeTab === 'tags'">
               <div class="field">
-                <label class="label is-small"><?= __e('text.modal.similar_terms') ?></label>
-                <div class="is-size-7">
-                  <template x-for="term in formSimilarTerms" :key="term.id">
-                    <div class="is-flex is-justify-content-space-between is-align-items-center py-1"
-                         style="border-bottom: 1px solid #f0f0f0;">
-                      <div>
-                        <span class="has-text-weight-semibold" x-text="term.text"></span>
-                        <span class="has-text-grey" x-text="getSimilarTermDisplay(term)"></span>
-                      </div>
-                      <button
-                        type="button"
-                        class="button is-small is-ghost"
-                        @click="copyFromSimilar(term)"
-                        title="Copy translation"
-                        x-show="term.translation"
+                <label class="label is-small"><?= __e('text.modal.tags') ?></label>
+                <div class="control">
+                  <!-- Current tags -->
+                  <div class="tags mb-2" x-show="hasTags">
+                    <template x-for="tag in formTags" :key="tag">
+                      <span class="tag is-info is-light">
+                        <span x-text="tag"></span>
+                        <button type="button" class="delete is-small" @click="removeTag(tag)"></button>
+                      </span>
+                    </template>
+                  </div>
+                  <!-- Tag input with autocomplete -->
+                  <div class="dropdown" :class="{ 'is-active': showTagSuggestions }">
+                    <div class="dropdown-trigger" style="width: 100%;">
+                      <input
+                        class="input is-small"
+                        type="text"
+                        x-model="tagInput"
+                        @input="filterTags"
+                        @keydown.enter.prevent="addTag(tagInput)"
+                        @blur="hideTagSuggestions"
+                        placeholder="<?= __e('text.modal.add_tag') ?>"
                       >
-                        <?php echo \Lwt\Shared\UI\Helpers\IconHelper::render('copy', ['size' => 12]); ?>
-                      </button>
                     </div>
-                  </template>
+                    <div class="dropdown-menu" role="menu" style="width: 100%;">
+                      <div class="dropdown-content">
+                        <template x-for="tag in filteredTags" :key="tag">
+                          <a href="#" class="dropdown-item"
+                             @mousedown.prevent="selectTagSuggestion(tag)" x-text="tag"></a>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </template>

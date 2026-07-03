@@ -3040,6 +3040,33 @@ Settings Page - Collapsible Sections
   }
 }
 
+/* Word edit / multi-word modal — keep reading visible behind it.
+   These reuse Bulma's `.modal`/`.modal-card` but, like `.word-popover` above,
+   must stay non-blocking: the opaque `.modal-background` and near-fullscreen
+   `.modal-card` otherwise cover the whole viewport and hide the text the
+   reader was just looking at. Drop the dimming and, on mobile, cap the card
+   to a bottom sheet so the top of the reading area stays visible. The edit
+   form itself is tabbed (one section at a time) precisely to fit this cap
+   without needing to scroll. */
+.reading-modal .modal-background {
+  background-color: transparent;
+}
+
+@media screen and (max-width: 768px) {
+  .reading-modal .modal-card {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 50vh;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+  }
+}
+
 /* Dark theme overrides for word popover */
 @media (prefers-color-scheme: dark) {
   .word-popover__translation {

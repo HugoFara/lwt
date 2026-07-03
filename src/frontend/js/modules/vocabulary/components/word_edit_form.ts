@@ -30,6 +30,14 @@ interface StatusInfo {
 type FormDataField = 'translation' | 'romanization' | 'sentence' | 'notes';
 
 /**
+ * Edit-form section shown at a time. Splitting the form into tabs (one
+ * section visible at once) keeps the modal short enough to leave the
+ * reading text visible behind it — see word_modal.php / styles.css
+ * `.reading-modal`.
+ */
+export type FormTab = 'translate' | 'example' | 'notes' | 'tags';
+
+/**
  * Status definitions matching word_modal.ts. Computed lazily so translations are loaded.
  */
 function buildStatuses(): StatusInfo[] {
@@ -65,6 +73,13 @@ export interface WordEditFormData {
   readonly isNewWord: boolean;
   readonly showRomanization: boolean;
   readonly statuses: StatusInfo[];
+
+  // Section tabs — only one is shown at a time (issue: modal was hiding the
+  // reading text). Resets to 'translate' each time the form remounts, since
+  // it lives inside the parent's `x-if="viewMode === 'edit'"` template.
+  activeTab: FormTab;
+  setActiveTab(tab: FormTab): void;
+  tabHasError(tab: FormTab): boolean;
 
   // CSP-safe proxy properties for x-model (avoids nested property assignments)
   translation: string;
@@ -113,6 +128,26 @@ export interface WordEditFormData {
  */
 export function wordEditFormData(): WordEditFormData {
   return {
+    // Section tabs
+    activeTab: 'translate' as FormTab,
+
+    setActiveTab(tab: FormTab): void {
+      this.activeTab = tab;
+    },
+
+    tabHasError(tab: FormTab): boolean {
+      switch (tab) {
+        case 'translate':
+          return this.hasFieldError('translation') || this.hasFieldError('romanization');
+        case 'example':
+          return this.hasFieldError('sentence');
+        case 'notes':
+          return this.hasFieldError('notes');
+        case 'tags':
+          return false;
+      }
+    },
+
     // Tag input state
     tagInput: '',
     showTagSuggestions: false,
@@ -249,7 +284,15 @@ export function wordEditFormData(): WordEditFormData {
     async save(): Promise<void> {
       const result = await this.formStore.save();
 
-      if (result.success && result.hex) {
+      if (!result.success) {
+        // Jump to the first tab holding the invalid field so it's visible.
+        const tabs: FormTab[] = ['translate', 'example', 'notes'];
+        const firstBadTab = tabs.find(tab => this.tabHasError(tab));
+        if (firstBadTab) this.activeTab = firstBadTab;
+        return;
+      }
+
+      if (result.hex) {
         const hex = result.hex;
         const status = this.formStore.formData.status;
         const translation = this.formStore.formData.translation;

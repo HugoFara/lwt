@@ -35,6 +35,14 @@ const mockFormStore = {
     tags: [] as string[]
   },
   allTags: ['tag1', 'tag2', 'tag3', 'news', 'sports'],
+  errors: {
+    lemma: null,
+    translation: null,
+    romanization: null,
+    sentence: null,
+    notes: null,
+    general: null
+  } as Record<string, string | null>,
   shouldCloseModal: false,
   shouldReturnToInfo: false,
   validateField: vi.fn(),
@@ -71,6 +79,14 @@ describe('word_edit_form.ts', () => {
     mockFormStore.showRomanization = false;
     mockFormStore.formData.tags = [];
     mockFormStore.allTags = ['tag1', 'tag2', 'tag3', 'news', 'sports'];
+    mockFormStore.errors = {
+      lemma: null,
+      translation: null,
+      romanization: null,
+      sentence: null,
+      notes: null,
+      general: null
+    };
     mockFormStore.shouldCloseModal = false;
     mockFormStore.shouldReturnToInfo = false;
   });
@@ -269,6 +285,73 @@ describe('word_edit_form.ts', () => {
 
       expect(mockWordStore.updateWordInStore).not.toHaveBeenCalled();
       expect(updateWordStatusInDOM).not.toHaveBeenCalled();
+    });
+
+    it('jumps to the tab holding the invalid field on failure', async () => {
+      mockFormStore.save.mockResolvedValue({ success: false, error: 'Error' });
+      mockFormStore.errors.sentence = 'Sentence must be 1000 characters or less';
+
+      const component = wordEditFormData();
+      component.activeTab = 'tags';
+      await component.save();
+
+      expect(component.activeTab).toBe('example');
+    });
+
+    it('leaves activeTab untouched when save fails with no field errors', async () => {
+      mockFormStore.save.mockResolvedValue({ success: false, error: 'Failed to save term' });
+
+      const component = wordEditFormData();
+      component.activeTab = 'tags';
+      await component.save();
+
+      expect(component.activeTab).toBe('tags');
+    });
+  });
+
+  // ===========================================================================
+  // Tab Tests
+  // ===========================================================================
+
+  describe('tabs', () => {
+    it('defaults activeTab to translate', () => {
+      const component = wordEditFormData();
+      expect(component.activeTab).toBe('translate');
+    });
+
+    it('setActiveTab switches the active tab', () => {
+      const component = wordEditFormData();
+      component.setActiveTab('notes');
+      expect(component.activeTab).toBe('notes');
+    });
+
+    it('tabHasError reports translation/romanization errors on the translate tab', () => {
+      const component = wordEditFormData();
+      expect(component.tabHasError('translate')).toBe(false);
+
+      mockFormStore.errors.translation = 'Translation must be 500 characters or less';
+      expect(component.tabHasError('translate')).toBe(true);
+
+      mockFormStore.errors.translation = null;
+      mockFormStore.errors.romanization = 'Romanization must be 100 characters or less';
+      expect(component.tabHasError('translate')).toBe(true);
+    });
+
+    it('tabHasError reports sentence errors on the example tab', () => {
+      const component = wordEditFormData();
+      mockFormStore.errors.sentence = 'Sentence must be 1000 characters or less';
+      expect(component.tabHasError('example')).toBe(true);
+    });
+
+    it('tabHasError reports notes errors on the notes tab', () => {
+      const component = wordEditFormData();
+      mockFormStore.errors.notes = 'Notes must be 1000 characters or less';
+      expect(component.tabHasError('notes')).toBe(true);
+    });
+
+    it('tabHasError is always false for the tags tab', () => {
+      const component = wordEditFormData();
+      expect(component.tabHasError('tags')).toBe(false);
     });
   });
 
