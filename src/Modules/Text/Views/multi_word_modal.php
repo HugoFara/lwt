@@ -22,7 +22,8 @@ namespace Lwt\Views\Text;
 
 ?>
 <div x-data="multiWordModal" x-cloak>
-  <div class="modal reading-modal" :class="{ 'is-active': isOpen }" role="dialog" aria-modal="true" aria-labelledby="multi-word-modal-title">
+  <div class="modal reading-modal" :class="{ 'is-active': isOpen }"
+       role="dialog" aria-modal="true" aria-labelledby="multi-word-modal-title">
     <div class="modal-background" @click="close"></div>
     <div class="modal-card" style="max-width: 500px;">
       <header class="modal-card-head py-3">

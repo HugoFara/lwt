@@ -221,7 +221,9 @@ namespace Lwt\Views\Text;
                 <li :class="{ 'is-active': activeTab === 'translate' }">
                   <a @click.prevent="setActiveTab('translate')">
                     <span><?= __e('text.modal.translation') ?></span>
-                    <template x-if="tabHasError('translate')"><span class="tag is-danger is-small ml-1"></span></template>
+                    <template x-if="tabHasError('translate')">
+                      <span class="tag is-danger is-small ml-1"></span>
+                    </template>
                   </a>
                 </li>
                 <li :class="{ 'is-active': activeTab === 'example' }">
