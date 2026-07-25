@@ -83,6 +83,108 @@ class Restore
     }
 
     /**
+     * Read a backup stream and split it into individual SQL statements.
+     *
+     * Statement boundaries are matched platform-independently. LWT always
+     * writes ";\n", but this used to split on ';' . PHP_EOL, which is
+     * ";\r\n" on a Windows host and therefore never matched: every
+     * statement piled up in the accumulator and the caller received an
+     * empty list, dropped every table and replayed nothing (issue #249).
+     * Line endings are now normalised exactly as
+     * SqlFileParser::parseFile() does, so a dump restores identically
+     * regardless of which OS wrote it or reads it.
+     *
+     * The handle is always closed before returning.
+     *
+     * @param resource $handle Backup file handle (may be a gzopen handle)
+     * @param string   $title  File title, used in error messages
+     *
+     * @return array{queries: list<string>, error: string|null}
+     *
+     * @since 3.2.2-fork Extracted from restoreFile() and made EOL-agnostic
+     */
+    private static function parseBackupStream($handle, string $title): array
+    {
+        $queries_list = [];
+        $curr_content = '';
+        $start = true;
+        $bytesRead = 0;
+        $error = null;
+
+        while ($stream = fgets($handle)) {
+            // Gzip-bomb defense: cap the total decompressed bytes we
+            // pull off the handle. A 1 GB SQL dump is more than any
+            // real LWT install produces; anything bigger is almost
+            // certainly malicious or a runaway.
+            $bytesRead += strlen($stream);
+            if ($bytesRead > self::MAX_DECOMPRESSED_BYTES) {
+                $error = "Error: $title Restore file exceeds the "
+                    . intdiv(self::MAX_DECOMPRESSED_BYTES, 1024 * 1024)
+                    . " MB decompressed-size limit (likely a gzip bomb).";
+                break;
+            }
+
+            // Normalise line endings before anything is matched against
+            // them. formatValueForSqlOutput() escapes CR inside values via
+            // mysqli_real_escape_string, so a raw CR in a dump is only ever
+            // a line terminator and is safe to rewrite.
+            $stream = str_replace(["\r\n", "\r"], "\n", $stream);
+
+            // Check file header
+            if ($start) {
+                if (
+                    !str_starts_with($stream, "-- lwt-backup-")
+                    && !str_starts_with($stream, "-- lwt-exp_version-backup-")
+                ) {
+                    $error = "Error: Invalid $title Restore file " .
+                    "(possibly not created by LWT backup)";
+                    break;
+                }
+                $start = false;
+                continue;
+            }
+            // Skip comments (lines starting with "-- " or lines that are just "--")
+            $trimmedLine = trim($stream);
+            if (str_starts_with($stream, '-- ') || $trimmedLine === '--') {
+                continue;
+            }
+            // Add stream to accumulator
+            $curr_content .= $stream;
+            // Get queries
+            $queries = explode(";\n", $curr_content);
+            // Replace line by remainders of the last element (incomplete line)
+            $curr_content = array_pop($queries);
+
+            foreach ($queries as $query) {
+                $queries_list[] = trim($query);
+            }
+        }
+
+        $reachedEof = feof($handle);
+        fclose($handle);
+
+        if ($error !== null) {
+            return ['queries' => [], 'error' => $error];
+        }
+
+        if (!$reachedEof) {
+            return [
+                'queries' => [],
+                'error' => "Error: cannot read the end of the $title file!",
+            ];
+        }
+
+        // Flush a trailing statement that is not followed by a newline, so a
+        // dump whose final line lacks its EOL still restores completely.
+        $tail = trim(rtrim(trim($curr_content), ';'));
+        if ($tail !== '') {
+            $queries_list[] = $tail;
+        }
+
+        return ['queries' => $queries_list, 'error' => null];
+    }
+
+    /**
      * Restore the database from a file.
      *
      * @param resource $handle       Backup file handle
@@ -96,6 +198,9 @@ class Restore
      * @since 2.7.0-fork $handle should be an *uncompressed* file.
      * @since 2.9.1-fork It can read SQL with more or less than one instruction a line
      * @since 3.0.0 Added SQL validation for security hardening
+     * @since 3.2.2-fork Refuses to drop anything when the dump yields no
+     *        statements; replays with FK checks suspended so FK-carrying
+     *        CREATE TABLEs no longer fail on dependency order
      */
     public static function restoreFile($handle, string $title, bool $validateSql = true): string
     {
@@ -122,63 +227,14 @@ class Restore
             "inserts" => 0,
             "creates" => 0
         ];
-        $start = true;
-        $curr_content = '';
-        $queries_list = [];
-        $bytesRead = 0;
 
-        while ($stream = fgets($handle)) {
-            // Gzip-bomb defense: cap the total decompressed bytes we
-            // pull off the handle. A 1 GB SQL dump is more than any
-            // real LWT install produces; anything bigger is almost
-            // certainly malicious or a runaway.
-            $bytesRead += strlen($stream);
-            if ($bytesRead > self::MAX_DECOMPRESSED_BYTES) {
-                $message = "Error: $title Restore file exceeds the "
-                    . intdiv(self::MAX_DECOMPRESSED_BYTES, 1024 * 1024)
-                    . " MB decompressed-size limit (likely a gzip bomb).";
-                $install_status["errors"] = 1;
-                $hasErrors = true;
-                break;
-            }
-            // Check file header
-            if ($start) {
-                if (
-                    !str_starts_with($stream, "-- lwt-backup-")
-                    && !str_starts_with($stream, "-- lwt-exp_version-backup-")
-                ) {
-                    $message = "Error: Invalid $title Restore file " .
-                    "(possibly not created by LWT backup)";
-                    $install_status["errors"] = 1;
-                    $hasErrors = true;
-                    break;
-                }
-                $start = false;
-                continue;
-            }
-            // Skip comments (lines starting with "-- " or lines that are just "--")
-            $trimmedLine = trim($stream);
-            if (str_starts_with($stream, '-- ') || $trimmedLine === '--') {
-                continue;
-            }
-            // Add stream to accumulator
-            $curr_content .= $stream;
-            // Get queries
-            $queries = explode(';' . PHP_EOL, $curr_content);
-            // Replace line by remainders of the last element (incomplete line)
-            $curr_content = array_pop($queries);
-
-            foreach ($queries as $query) {
-                $queries_list[] = trim($query);
-            }
-        }
-
-        if (!feof($handle) && !$hasErrors) {
-            $message = "Error: cannot read the end of the demo file!";
+        $parsed = self::parseBackupStream($handle, $title);
+        $queries_list = $parsed['queries'];
+        if ($parsed['error'] !== null) {
+            $message = $parsed['error'];
             $install_status["errors"] = 1;
             $hasErrors = true;
         }
-        fclose($handle);
 
         // Validate all queries before executing any (security hardening)
         if ($validateSql && !$hasErrors) {
@@ -196,6 +252,18 @@ class Restore
             }
         }
 
+        // A dump that yielded no statements must never reach
+        // dropAllLwtTables(): dropping every table and then replaying nothing
+        // leaves the install empty with no way back. That is exactly what the
+        // PHP_EOL statement split did on Windows (issue #249) — silently, and
+        // while reporting success. Refuse instead, so any future parser bug
+        // costs an error message rather than the user's data.
+        if (!$hasErrors && $queries_list === []) {
+            $message = "Error: $title Restore file contains no SQL statements";
+            $install_status["errors"] = 1;
+            $hasErrors = true;
+        }
+
         // Drop all existing tables first to ensure a clean slate
         // This prevents issues with partial state from previous attempts
         if (!$hasErrors) {
@@ -205,32 +273,46 @@ class Restore
         // Now run all queries
         $connection = Globals::getDbConnection();
         if (!$hasErrors && $connection !== null) {
-            foreach ($queries_list as $query) {
-                $sql_line = trim(
-                    str_replace("\r", "", str_replace("\n", "", $query))
-                );
-                if ($sql_line != "") {
-                    if (!str_starts_with($query, '-- ')) {
-                        $res = mysqli_query(
-                            $connection,
-                            $query
-                        );
-                        $install_status["queries"]++;
-                        if ($res == false) {
-                            $install_status["errors"]++;
-                            $hasErrors = true;
-                        } else {
-                            $install_status["successes"]++;
-                            if (str_starts_with($query, "INSERT INTO")) {
-                                $install_status["inserts"]++;
-                            } elseif (str_starts_with($query, "DROP TABLE")) {
-                                $install_status["drops"]++;
-                            } elseif (str_starts_with($query, "CREATE TABLE")) {
-                                $install_status["creates"]++;
+            // A dump's CREATE TABLE statements are taken from SHOW CREATE
+            // TABLE, so they carry their FOREIGN KEY clauses — but they are
+            // emitted in backup-table order, not dependency order (feed_links
+            // references news_feeds yet is created before it). With FK checks
+            // on, every such CREATE fails with errno 1215 and the restore
+            // leaves the install in pieces. dropAllLwtTables() restores checks
+            // to 1 on the way out, so they have to be suspended again here for
+            // the replay; the constraints are enforced again afterwards, once
+            // every table exists.
+            Connection::execute("SET FOREIGN_KEY_CHECKS = 0");
+            try {
+                foreach ($queries_list as $query) {
+                    $sql_line = trim(
+                        str_replace("\r", "", str_replace("\n", "", $query))
+                    );
+                    if ($sql_line != "") {
+                        if (!str_starts_with($query, '-- ')) {
+                            $res = mysqli_query(
+                                $connection,
+                                $query
+                            );
+                            $install_status["queries"]++;
+                            if ($res == false) {
+                                $install_status["errors"]++;
+                                $hasErrors = true;
+                            } else {
+                                $install_status["successes"]++;
+                                if (str_starts_with($query, "INSERT INTO")) {
+                                    $install_status["inserts"]++;
+                                } elseif (str_starts_with($query, "DROP TABLE")) {
+                                    $install_status["drops"]++;
+                                } elseif (str_starts_with($query, "CREATE TABLE")) {
+                                    $install_status["creates"]++;
+                                }
                             }
                         }
                     }
                 }
+            } finally {
+                Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
             }
         }
 

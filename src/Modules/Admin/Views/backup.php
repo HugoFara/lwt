@@ -192,7 +192,7 @@ $uploadMaxFilesize = ini_get('upload_max_filesize');
                     <div class="file has-name is-fullwidth">
                         <label class="file-label">
                             <input class="file-input" type="file" name="thefile"
-                                   @change="fileName = $event.target.files[0]?.name || ''"
+                                   @change="selectFile($event)"
                                    accept=".sql,.gz,.sql.gz">
                             <span class="file-cta">
                                 <span class="file-icon">
