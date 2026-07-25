@@ -25,9 +25,13 @@ declare(strict_types=1);
 namespace Lwt\Tests;
 
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Database\SqlFileParser;
 
 // Load environment configuration
 require_once __DIR__ . '/../src/Shared/Infrastructure/Bootstrap/EnvLoader.php';
+// Autoloader for SqlFileParser, so migrations are split into statements exactly
+// the way Migrations::update() splits them in production.
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // Parse command line arguments
 $drop = in_array('--drop', $argv ?? []);
@@ -249,27 +253,78 @@ if ($migrationFiles === false) {
 }
 sort($migrationFiles);
 
-// The baseline schema already includes all table structures from migrations.
-// We need to:
-// 1. Mark most migrations as "applied" (since baseline incorporates their changes)
-// 2. Actually run specific migrations that need explicit execution:
-//    - FK migration (adds inter-table foreign keys)
-//    - Column defaults migration (mysqli_multi_query doesn't handle DEFAULT '' correctly)
-$fkMigration = '20251221_120000_add_inter_table_foreign_keys.sql';
+// Production (Migrations::checkAndUpdate) applies baseline.sql and then runs
+// every pending migration in order, tolerating per-statement failures. This
+// script has to do the same, or the test database drifts from what users
+// actually have.
+//
+// It used to mark migrations as applied without running them, on the premise
+// that "the baseline already includes all table structures". That premise is
+// false for anything added after the baseline was last regenerated — `books`,
+// `local_dictionaries` and `local_dictionary_entries` are all absent from it —
+// so those tables never existed here while their migrations were recorded as
+// applied. Every test touching them then skipped silently, locally and on CI.
+//
+// Skipping the FK migration also left languages.LgID as tinyint(3), because
+// that migration is what widens it to int(11); the manual FK list below never
+// carried the type changes. Any later migration with an FK to languages(LgID)
+// then failed with errno 150 ("Foreign key constraint is incorrectly formed"),
+// which is not suppressed by FOREIGN_KEY_CHECKS=0.
 $columnDefaultsMigration = '20260107_120000_add_language_column_defaults.sql';
+$fkMigration = '20251221_120000_add_inter_table_foreign_keys.sql';
 
-output("Marking migrations as applied (baseline includes these changes)...\n", $quiet);
+// Only pending migrations are run, as in production: this script is also
+// invoked non-destructively before each integration run, and re-executing
+// every migration each time would be both slow and unsafe for any migration
+// that moves data rather than just shaping schema.
+$alreadyApplied = [];
+$result = mysqli_query($conn, "SELECT filename FROM _migrations");
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $alreadyApplied[] = $row['filename'];
+    }
+    mysqli_free_result($result);
+}
+
+output("Applying migrations...\n", $quiet);
+mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 0");
+$migrationsRun = 0;
+$statementFailures = 0;
 foreach ($migrationFiles as $migrationFile) {
     $filename = basename($migrationFile);
 
-    // Skip migrations that need to be run explicitly
-    if ($filename === $fkMigration || $filename === $columnDefaultsMigration) {
+    // Applied explicitly further down: applying baseline.sql through
+    // mysqli_multi_query drops the DEFAULT '' clauses this migration relies on.
+    if ($filename === $columnDefaultsMigration) {
         continue;
+    }
+
+    if (in_array($filename, $alreadyApplied, true)) {
+        continue;
+    }
+
+    foreach (SqlFileParser::parseFile($migrationFile) as $statement) {
+        if (trim($statement) === '') {
+            continue;
+        }
+        if (!@mysqli_query($conn, $statement)) {
+            // Match production, which logs a failed statement and carries on:
+            // legacy migrations reference tables the modern baseline no longer
+            // has, and those failures are expected.
+            $statementFailures++;
+        }
     }
 
     $escapedFilename = mysqli_real_escape_string($conn, $filename);
     mysqli_query($conn, "INSERT IGNORE INTO _migrations (filename, applied_at) VALUES ('$escapedFilename', NOW())");
+    $migrationsRun++;
 }
+mysqli_query($conn, "SET FOREIGN_KEY_CHECKS = 1");
+output(
+    "Ran $migrationsRun migration(s)"
+    . ($statementFailures > 0 ? " ($statementFailures statement(s) skipped)" : '') . ".\n",
+    $quiet
+);
 
 // Get applied migrations (to check if FK migration was already applied)
 $appliedMigrations = [];
@@ -281,77 +336,155 @@ if ($result) {
     mysqli_free_result($result);
 }
 
-// Apply FK constraints directly (baseline has matching column types)
-// The FK migration file modifies column types which breaks fresh installs
-// So we apply FK constraints directly here
+// Complete the inter-table foreign keys.
+//
+// The FK migration above only gets us part of the way: it was written against
+// the legacy `textitems2` table, which the modern baseline creates as
+// `word_occurrences`, so its statements for that table fail and the FKs the
+// integration tests rely on never appear. The list below names the modern
+// tables. It runs unconditionally because adding an existing constraint is
+// reported as a duplicate and ignored, so it is safe to re-apply.
 $appliedCount = 0;
-if (!in_array($fkMigration, $appliedMigrations)) {
-    output("Applying foreign key constraints...\n", $quiet);
+output("Applying foreign key constraints...\n", $quiet);
 
-    // FK constraints to add (baseline already has matching column types)
-    $fkConstraints = [
-        // Language references
-        "ALTER TABLE texts ADD CONSTRAINT fk_texts_language " .
-            "FOREIGN KEY (TxLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
-        "ALTER TABLE words ADD CONSTRAINT fk_words_language " .
-            "FOREIGN KEY (WoLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
-        "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_language " .
-            "FOREIGN KEY (SeLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
-        "ALTER TABLE news_feeds ADD CONSTRAINT fk_news_feeds_language " .
-            "FOREIGN KEY (NfLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
-        // Text references
-        "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_text " .
-            "FOREIGN KEY (SeTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
-        "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_text " .
-            "FOREIGN KEY (Ti2TxID) REFERENCES texts(TxID) ON DELETE CASCADE",
-        "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text " .
-            "FOREIGN KEY (TtTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
-        // Sentence reference
-        "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_sentence " .
-            "FOREIGN KEY (Ti2SeID) REFERENCES sentences(SeID) ON DELETE CASCADE",
-        // Word reference (SET NULL for unknown words)
-        "ALTER TABLE word_occurrences MODIFY COLUMN Ti2WoID mediumint(8) unsigned DEFAULT NULL",
-        "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_word " .
-            "FOREIGN KEY (Ti2WoID) REFERENCES words(WoID) ON DELETE SET NULL",
-        // Word tags
-        "ALTER TABLE word_tag_map ADD CONSTRAINT fk_word_tag_map_word " .
-            "FOREIGN KEY (WtWoID) REFERENCES words(WoID) ON DELETE CASCADE",
-        "ALTER TABLE word_tag_map ADD CONSTRAINT fk_word_tag_map_tag " .
-            "FOREIGN KEY (WtTgID) REFERENCES tags(TgID) ON DELETE CASCADE",
-        // Text tags
-        "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text_tag " .
-            "FOREIGN KEY (TtT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
-        // Feed links
-        "ALTER TABLE feed_links ADD CONSTRAINT fk_feed_links_newsfeed " .
-            "FOREIGN KEY (FlNfID) REFERENCES news_feeds(NfID) ON DELETE CASCADE",
-    ];
+// Widen the referencing columns first. The FK migration widens the
+// referenced keys (languages.LgID, texts.TxID, words.WoID, sentences.SeID,
+// tags.TgID) to int(11), but its statements for `textitems2` and
+// `newsfeeds` no-op against a modern baseline that names those tables
+// `word_occurrences` and `news_feeds`. Their columns are left at the
+// baseline's narrower widths, and an FK between mismatched integer types
+// fails with errno 150. These MODIFYs finish the job under the new names.
+$columnWidening = [
+    "ALTER TABLE news_feeds MODIFY COLUMN NfID int(11) unsigned NOT NULL AUTO_INCREMENT",
+    "ALTER TABLE news_feeds MODIFY COLUMN NfLgID int(11) unsigned NOT NULL",
+    "ALTER TABLE feed_links MODIFY COLUMN FlNfID int(11) unsigned NOT NULL",
+    "ALTER TABLE word_occurrences MODIFY COLUMN Ti2TxID int(11) unsigned NOT NULL",
+    "ALTER TABLE word_occurrences MODIFY COLUMN Ti2SeID int(11) unsigned NOT NULL",
+    "ALTER TABLE word_occurrences MODIFY COLUMN Ti2WoID int(11) unsigned DEFAULT NULL",
+    "ALTER TABLE word_tag_map MODIFY COLUMN WtWoID int(11) unsigned NOT NULL",
+    "ALTER TABLE word_tag_map MODIFY COLUMN WtTgID int(11) unsigned NOT NULL",
+    "ALTER TABLE text_tags MODIFY COLUMN T2ID int(11) unsigned NOT NULL AUTO_INCREMENT",
+    "ALTER TABLE text_tag_map MODIFY COLUMN TtTxID int(11) unsigned NOT NULL",
+    "ALTER TABLE text_tag_map MODIFY COLUMN TtT2ID int(11) unsigned NOT NULL",
+];
+foreach ($columnWidening as $sql) {
+    @mysqli_query($conn, $sql);
+}
 
-    $fkCount = 0;
-    $fkErrors = 0;
-    foreach ($fkConstraints as $sql) {
-        if (@mysqli_query($conn, $sql)) {
-            $fkCount++;
-        } else {
-            $error = mysqli_error($conn);
-            // Ignore "duplicate key" errors (constraint already exists)
-            if (strpos($error, 'Duplicate') === false && strpos($error, 'already exists') === false) {
-                $fkErrors++;
-                if (!$quiet) {
-                    fwrite(STDERR, "  Warning: " . $error . "\n");
-                }
+// FK constraints to add (column types now match on both sides)
+$fkConstraints = [
+    // Language references
+    "ALTER TABLE texts ADD CONSTRAINT fk_texts_language " .
+        "FOREIGN KEY (TxLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
+    "ALTER TABLE words ADD CONSTRAINT fk_words_language " .
+        "FOREIGN KEY (WoLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
+    "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_language " .
+        "FOREIGN KEY (SeLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
+    "ALTER TABLE news_feeds ADD CONSTRAINT fk_news_feeds_language " .
+        "FOREIGN KEY (NfLgID) REFERENCES languages(LgID) ON DELETE CASCADE",
+    // Text references
+    "ALTER TABLE sentences ADD CONSTRAINT fk_sentences_text " .
+        "FOREIGN KEY (SeTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
+    "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_text " .
+        "FOREIGN KEY (Ti2TxID) REFERENCES texts(TxID) ON DELETE CASCADE",
+    "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text " .
+        "FOREIGN KEY (TtTxID) REFERENCES texts(TxID) ON DELETE CASCADE",
+    // Sentence reference
+    "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_sentence " .
+        "FOREIGN KEY (Ti2SeID) REFERENCES sentences(SeID) ON DELETE CASCADE",
+    // Word reference (SET NULL for unknown words)
+    // (Ti2WoID is made nullable and widened to match words.WoID in the
+    // column-widening step above.)
+    "ALTER TABLE word_occurrences ADD CONSTRAINT fk_word_occurrences_word " .
+        "FOREIGN KEY (Ti2WoID) REFERENCES words(WoID) ON DELETE SET NULL",
+    // Word tags
+    "ALTER TABLE word_tag_map ADD CONSTRAINT fk_word_tag_map_word " .
+        "FOREIGN KEY (WtWoID) REFERENCES words(WoID) ON DELETE CASCADE",
+    "ALTER TABLE word_tag_map ADD CONSTRAINT fk_word_tag_map_tag " .
+        "FOREIGN KEY (WtTgID) REFERENCES tags(TgID) ON DELETE CASCADE",
+    // Text tags
+    "ALTER TABLE text_tag_map ADD CONSTRAINT fk_text_tag_map_text_tag " .
+        "FOREIGN KEY (TtT2ID) REFERENCES text_tags(T2ID) ON DELETE CASCADE",
+    // Feed links
+    "ALTER TABLE feed_links ADD CONSTRAINT fk_feed_links_newsfeed " .
+        "FOREIGN KEY (FlNfID) REFERENCES news_feeds(NfID) ON DELETE CASCADE",
+];
+
+// Constraints already on the database are left alone. This script also runs
+// non-destructively before each integration run, when the database holds
+// rows from a previous suite; re-adding an existing constraint would then
+// fail against test data that predates it (an orphaned word_tag_map row is
+// enough) and silently leave the constraint dropped.
+$existingConstraints = [];
+$constraintRows = mysqli_query(
+    $conn,
+    "SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+     WHERE TABLE_SCHEMA = '$testDbName' AND CONSTRAINT_TYPE = 'FOREIGN KEY'"
+);
+if ($constraintRows) {
+    while ($row = mysqli_fetch_assoc($constraintRows)) {
+        $existingConstraints[] = (string) $row['CONSTRAINT_NAME'];
+    }
+    mysqli_free_result($constraintRows);
+}
+
+// Clear rows that would violate a constraint before adding it. The main
+// suite drops every foreign key (Migrations::dropAllForeignKeys, reached
+// through the restore and migration paths) and can leave children behind
+// whose parent is gone. This script also runs non-destructively before an
+// integration run, so without this the constraint cannot be re-added and
+// the cascade tests that depend on it fail — or, as before, skip in
+// silence.
+$orphanCleanup = [
+    "DELETE c FROM word_tag_map c LEFT JOIN words p ON c.WtWoID = p.WoID WHERE p.WoID IS NULL",
+    "DELETE c FROM word_tag_map c LEFT JOIN tags p ON c.WtTgID = p.TgID WHERE p.TgID IS NULL",
+    "DELETE c FROM text_tag_map c LEFT JOIN texts p ON c.TtTxID = p.TxID WHERE p.TxID IS NULL",
+    "DELETE c FROM text_tag_map c LEFT JOIN text_tags p ON c.TtT2ID = p.T2ID WHERE p.T2ID IS NULL",
+    "DELETE c FROM word_occurrences c LEFT JOIN texts p ON c.Ti2TxID = p.TxID WHERE p.TxID IS NULL",
+    "DELETE c FROM word_occurrences c LEFT JOIN sentences p ON c.Ti2SeID = p.SeID WHERE p.SeID IS NULL",
+    "UPDATE word_occurrences c LEFT JOIN words p ON c.Ti2WoID = p.WoID
+        SET c.Ti2WoID = NULL WHERE c.Ti2WoID IS NOT NULL AND p.WoID IS NULL",
+    "DELETE c FROM sentences c LEFT JOIN texts p ON c.SeTxID = p.TxID WHERE p.TxID IS NULL",
+    "DELETE c FROM feed_links c LEFT JOIN news_feeds p ON c.FlNfID = p.NfID WHERE p.NfID IS NULL",
+    "DELETE c FROM texts c LEFT JOIN languages p ON c.TxLgID = p.LgID WHERE p.LgID IS NULL",
+    "DELETE c FROM words c LEFT JOIN languages p ON c.WoLgID = p.LgID WHERE p.LgID IS NULL",
+    "DELETE c FROM sentences c LEFT JOIN languages p ON c.SeLgID = p.LgID WHERE p.LgID IS NULL",
+    "DELETE c FROM news_feeds c LEFT JOIN languages p ON c.NfLgID = p.LgID WHERE p.LgID IS NULL",
+];
+foreach ($orphanCleanup as $sql) {
+    @mysqli_query($conn, $sql);
+}
+
+$fkCount = 0;
+$fkErrors = 0;
+foreach ($fkConstraints as $sql) {
+    if (
+        preg_match('/ADD CONSTRAINT (\w+)/', $sql, $match) === 1
+        && in_array($match[1], $existingConstraints, true)
+    ) {
+        continue;
+    }
+
+    if (@mysqli_query($conn, $sql)) {
+        $fkCount++;
+    } else {
+        $error = mysqli_error($conn);
+        // Ignore "duplicate key" errors (constraint already exists)
+        if (strpos($error, 'Duplicate') === false && strpos($error, 'already exists') === false) {
+            $fkErrors++;
+            if (!$quiet) {
+                fwrite(STDERR, "  Warning: " . $error . "\n");
             }
         }
     }
-
-    // Record migration as applied
-    $escapedFilename = mysqli_real_escape_string($conn, $fkMigration);
-    mysqli_query($conn, "INSERT IGNORE INTO _migrations (filename, applied_at) VALUES ('$escapedFilename', NOW())");
-
-    output("Applied $fkCount FK constraint(s)" . ($fkErrors > 0 ? " ($fkErrors warnings)" : "") . ".\n", $quiet);
-    $appliedCount = 1;
-} else {
-    output("FK constraints already applied.\n", $quiet);
 }
+
+// Record migration as applied
+$escapedFilename = mysqli_real_escape_string($conn, $fkMigration);
+mysqli_query($conn, "INSERT IGNORE INTO _migrations (filename, applied_at) VALUES ('$escapedFilename', NOW())");
+
+output("Applied $fkCount FK constraint(s)" . ($fkErrors > 0 ? " ($fkErrors warnings)" : "") . ".\n", $quiet);
+$appliedCount = 1;
 
 // Apply column defaults migration (mysqli_multi_query doesn't handle DEFAULT '' correctly in baseline.sql)
 if (!in_array($columnDefaultsMigration, $appliedMigrations)) {
