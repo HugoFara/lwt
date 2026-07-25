@@ -159,6 +159,50 @@ class JapaneseTextParserTest extends TestCase
         $this->assertSame($sorted, $orders);
     }
 
+    /**
+     * MeCab's line terminator comes from MeCab, not from the host PHP runs on,
+     * so splitting on PHP_EOL made this method host-dependent. Whenever the
+     * output's terminator is not the one being split on, the whole output stays
+     * a single line and every token collapses — on Windows
+     * (PHP_EOL === "\r\n") an LF-terminated output produced zero tokens, which
+     * is what failed the Windows CI jobs. Every terminator must now yield the
+     * same tokens on every platform.
+     *
+     * The CR-only case reproduces that failure mode on a Linux host, where
+     * PHP_EOL is "\n": before the fix it yielded 0 tokens instead of 5.
+     */
+    #[Test]
+    public function buildTokensFromMecabIsIndependentOfLineEndings(): void
+    {
+        $lines = [
+            "東京\t2\t46",
+            "は\t6\t16",
+            "大きい\t2\t10",
+            "です\t6\t25",
+            "。\t3\t7",
+            "EOP\t3\t7",
+        ];
+
+        $flatten = fn(array $tokens) => array_map(
+            fn($t) => [$t->text, $t->wordCount, $t->sentence, $t->order],
+            $tokens
+        );
+
+        $lf = JapaneseTextParser::buildTokensFromMecab(implode("\n", $lines) . "\n");
+        $this->assertCount(5, $lf);
+
+        foreach (["\r\n" => 'CRLF', "\r" => 'CR-only'] as $eol => $label) {
+            $tokens = JapaneseTextParser::buildTokensFromMecab(implode($eol, $lines) . $eol);
+
+            $this->assertCount(5, $tokens, "$label output should tokenize");
+            $this->assertSame(
+                $flatten($lf),
+                $flatten($tokens),
+                "$label output should tokenize identically to LF"
+            );
+        }
+    }
+
     #[Test]
     public function buildTokensFromMecabHandlesEmptyOutput(): void
     {

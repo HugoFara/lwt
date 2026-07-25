@@ -136,7 +136,12 @@ class JapaneseTextParser
         if ($separator === false) {
             $separator = "\t";
         }
-        foreach (explode(PHP_EOL, $mecabed) as $line) {
+        // MeCab's line terminator comes from MeCab, not from the host PHP runs
+        // on, so splitting on PHP_EOL broke this everywhere PHP_EOL is not
+        // "\n": on Windows the whole output stayed a single line and every
+        // token collapsed into one. Normalise first, then split on "\n".
+        $mecabed = str_replace(["\r\n", "\r"], "\n", $mecabed);
+        foreach (explode("\n", $mecabed) as $line) {
             if (trim($line) == "") {
                 continue;
             }
