@@ -37,7 +37,6 @@ function injectPrerenderedViews(): PluginOption {
           (_m, rel: string) => {
             const abs = resolve(__dirname, rel);
             return prerenderPhpView(abs, (msg: string) =>
-              // eslint-disable-next-line no-console
               console.warn(`[prerender] ${rel}: ${msg}`)
             );
           }
