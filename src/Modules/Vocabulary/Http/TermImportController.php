@@ -434,7 +434,8 @@ class TermImportController extends VocabularyBaseController
 
             $dictId = $this->dictionaryFacade->create($langId, $dictName, $format);
             $entries = $importer->parse($importPath, $options);
-            $count = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
+            $importResult = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
+            $count = $importResult['added'];
 
             // Create vocabulary terms (status 1) from dictionary entries
             $vocabCreated = $this->dictionaryFacade->createVocabularyFromEntries($dictId, $langId);
@@ -445,11 +446,17 @@ class TermImportController extends VocabularyBaseController
             $vocabMsg = $vocabCreated > 0
                 ? ' and ' . number_format($vocabCreated) . ' vocabulary terms'
                 : '';
+            // Report dropped entries rather than let the count silently differ
+            // from the source dictionary's own total.
+            $skippedMsg = $importResult['skipped'] > 0
+                ? ' ' . number_format($importResult['skipped'])
+                    . ' entries were skipped because their headword was too long.'
+                : '';
             echo '<div class="notification is-success">' .
                 '<button class="delete" aria-label="close"></button>' .
                 'Dictionary <strong>' . htmlspecialchars($dictName, ENT_QUOTES, 'UTF-8') .
                 '</strong> created with ' . number_format($count) . ' entries' .
-                $vocabMsg . '.</div>';
+                $vocabMsg . '.' . $skippedMsg . '</div>';
         } catch (RuntimeException $e) {
             echo '<div class="notification is-danger">' .
                 '<button class="delete" aria-label="close"></button>' .

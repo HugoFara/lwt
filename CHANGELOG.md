@@ -9,6 +9,22 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **One over-long headword aborted a whole dictionary import** (#250):
+  importing FreeDict German-English failed with "Data too long for column
+  'LeTerm' at row 670" and no entries usable. `LeTerm` is `VARCHAR(250)`, and
+  exactly one of that dictionary's 517,534 entries has a 293-character headword
+  (the Lord's Prayer, stored as a single entry). Under `STRICT_ALL_TABLES` an
+  over-long value fails the entire multi-row `INSERT`, so that one entry
+  discarded its whole 1000-row batch and ended the import — losing the other
+  517,533 entries. Entries whose headword cannot be stored are now skipped and
+  counted instead of aborting the run, and the count is reported alongside the
+  import total so the result is not silently lossy. 250 characters is also LWT's
+  own term length (`words.WoText`), so a longer headword could never have become
+  a usable term. `LeReading` and `LePartOfSpeech` are descriptive metadata and
+  are truncated rather than costing the entry. This applies to every import path
+  — curated, uploaded file, and API — not just the curated one. A failed import
+  now also drops its half-filled dictionary, which previously stayed behind with
+  however many rows had already been inserted.
 * **Japanese (MeCab) parsing produced no tokens on Windows**: both MeCab output
   readers split their lines on `PHP_EOL`, but a subprocess's line terminator
   comes from MeCab, not from the host PHP runs on. Wherever the two disagree —

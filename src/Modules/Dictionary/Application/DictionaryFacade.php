@@ -173,9 +173,10 @@ class DictionaryFacade
      * @param iterable<array{term: string, definition: string, reading?: ?string, pos?: ?string}> $entries
      *        Entries to add
      *
-     * @return int Number of entries added
+     * @return array{added: int, skipped: int} Entries inserted, and entries
+     *         skipped for an unstorable headword
      */
-    public function addEntriesBatch(int $dictId, iterable $entries): int
+    public function addEntriesBatch(int $dictId, iterable $entries): array
     {
         return $this->dictionaryService->addEntriesBatch($dictId, $entries);
     }

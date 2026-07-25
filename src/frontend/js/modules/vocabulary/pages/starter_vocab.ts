@@ -54,6 +54,8 @@ interface CuratedImportResponse {
   success: boolean;
   dictId?: number;
   imported?: number;
+  /** Entries dropped because their headword exceeded the term column. */
+  skipped?: number;
   error?: string;
 }
 
@@ -232,9 +234,15 @@ Alpine.data('starterVocab', () => {
         };
 
         if (result.success) {
+          const skipped = result.skipped ?? 0;
+          // Say so when entries were dropped, rather than reporting a count
+          // that silently differs from the dictionary's own entry total.
+          const skippedNote = skipped > 0
+            ? ` (${skipped} skipped: headword too long)`
+            : '';
           this.dictMessages.push({
             success: true,
-            text: `${source.name}: imported ${result.imported ?? 0} entries.`,
+            text: `${source.name}: imported ${result.imported ?? 0} entries.${skippedNote}`,
           });
         } else {
           this.dictMessages.push({
