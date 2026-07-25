@@ -555,7 +555,7 @@ class DictionaryFacadeTest extends TestCase
 
         $result = $this->facade->addEntriesBatch($dictId, $entries);
 
-        $this->assertSame(3, $result);
+        $this->assertSame(['added' => 3, 'skipped' => 0], $result);
 
         // Cleanup
         $this->facade->delete($dictId);
@@ -889,5 +889,63 @@ class DictionaryFacadeTest extends TestCase
         // Cleanup
         $this->facade->delete($dict1Id);
         $this->facade->delete($dict2Id);
+    }
+
+    // ===== Over-long headwords (issue #250) =====
+
+    /**
+     * An entry whose headword exceeds LeTerm must not take its batch-mates
+     * down with it. Under STRICT_ALL_TABLES the over-long value used to fail
+     * the whole multi-row INSERT, which aborted the entire import — one
+     * 293-character headword cost all 517,534 FreeDict entries.
+     */
+    public function testAddEntriesBatchSkipsOverLongTermAndKeepsTheRest(): void
+    {
+        $this->skipIfNoLanguage();
+
+        $dictId = $this->facade->create(
+            self::$testLanguageId,
+            'Test Dict Overlong ' . uniqid()
+        );
+
+        $good1 = 'shortterm1' . uniqid();
+        $good2 = 'shortterm2' . uniqid();
+
+        $result = $this->facade->addEntriesBatch($dictId, [
+            ['term' => $good1, 'definition' => 'first'],
+            ['term' => str_repeat('x', 251), 'definition' => 'unstorable headword'],
+            ['term' => $good2, 'definition' => 'second'],
+        ]);
+
+        $this->assertSame(2, $result['added'], 'Both storable entries should be inserted');
+        $this->assertSame(1, $result['skipped'], 'The over-long headword should be skipped');
+
+        // The neighbours really are queryable, not merely counted.
+        $this->assertNotEmpty($this->facade->lookup(self::$testLanguageId, $good1));
+        $this->assertNotEmpty($this->facade->lookup(self::$testLanguageId, $good2));
+
+        // And the over-long headword is genuinely absent from the table.
+        $this->assertSame(2, $this->service->getEntryCount($dictId));
+
+        $this->facade->delete($dictId);
+    }
+
+    public function testAddEntriesBatchReportsZeroSkippedWhenAllEntriesFit(): void
+    {
+        $this->skipIfNoLanguage();
+
+        $dictId = $this->facade->create(
+            self::$testLanguageId,
+            'Test Dict NoSkip ' . uniqid()
+        );
+
+        $result = $this->facade->addEntriesBatch($dictId, [
+            ['term' => 'fitsfine' . uniqid(), 'definition' => 'ok'],
+        ]);
+
+        $this->assertSame(1, $result['added']);
+        $this->assertSame(0, $result['skipped']);
+
+        $this->facade->delete($dictId);
     }
 }

@@ -184,7 +184,8 @@ class DictionaryController extends BaseController
             // Perform import
             /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             $entries = $importer->parse($importPath, $options);
-            $count = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
+            $result = $this->dictionaryFacade->addEntriesBatch($dictId, $entries);
+            $count = $result['added'];
 
             $this->redirect("/dictionaries?lang=$langId&message=imported_$count");
         } catch (RuntimeException $e) {

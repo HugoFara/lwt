@@ -159,7 +159,9 @@ class DictionaryApiHandler implements ApiRoutableInterface
      *                    - format: string (required, e.g. 'stardict')
      *                    - name: string (required)
      *
-     * @return array{success: bool, dictId?: int, imported?: int, vocabCreated?: int, error?: string}
+     * @return array{success: bool, dictId?: int, imported?: int, skipped?: int,
+     *         vocabCreated?: int, error?: string} `skipped` counts entries
+     *         whose headword was too long to store
      */
     public function importCurated(array $data): array
     {
@@ -307,7 +309,8 @@ class DictionaryApiHandler implements ApiRoutableInterface
      *                       - format: string (csv, json, stardict)
      *                       - options: array (format-specific options)
      *
-     * @return array{success: bool, imported?: int, error?: string}
+     * @return array{success: bool, imported?: int, skipped?: int, error?: string}
+     *         `skipped` counts entries whose headword was too long to store
      */
     public function importFile(int $dictId, array $data): array
     {
@@ -339,11 +342,12 @@ class DictionaryApiHandler implements ApiRoutableInterface
 
             /** @psalm-suppress UndefinedClass Psalm incorrectly resolves namespace */
             $entries = $importer->parse($filePath, $options);
-            $count = $this->facade->addEntriesBatch($dictId, $entries);
+            $result = $this->facade->addEntriesBatch($dictId, $entries);
 
             return [
                 'success' => true,
-                'imported' => $count,
+                'imported' => $result['added'],
+                'skipped' => $result['skipped'],
             ];
         } catch (RuntimeException $e) {
             return ['success' => false, 'error' => $e->getMessage()];

@@ -63,7 +63,9 @@ class CuratedDictImportService
      * @param string $format     Dictionary format (stardict, csv)
      * @param string $name       Dictionary name
      *
-     * @return array{success: bool, dictId?: int, imported?: int, vocabCreated?: int, error?: string}
+     * @return array{success: bool, dictId?: int, imported?: int, skipped?: int,
+     *         vocabCreated?: int, error?: string} `skipped` counts entries
+     *         whose headword was too long to store
      */
     public function importFromUrl(
         int $languageId,
@@ -77,6 +79,7 @@ class CuratedDictImportService
         }
 
         $tempFiles = [];
+        $dictId = null;
 
         try {
             // Increase time limit for large downloads
@@ -108,7 +111,8 @@ class CuratedDictImportService
             // Create dictionary record and import entries
             $dictId = $this->facade->create($languageId, $name, $format);
             $entries = $importer->parse($importFile);
-            $count = $this->facade->addEntriesBatch($dictId, $entries);
+            $result = $this->facade->addEntriesBatch($dictId, $entries);
+            $count = $result['added'];
 
             if ($count === 0) {
                 // Clean up empty dictionary
@@ -126,9 +130,21 @@ class CuratedDictImportService
                 'success' => true,
                 'dictId' => $dictId,
                 'imported' => $count,
+                'skipped' => $result['skipped'],
                 'vocabCreated' => $vocabCreated,
             ];
         } catch (RuntimeException $e) {
+            // Drop the half-filled dictionary. Without this a failure part-way
+            // through leaves the record plus however many entries had already
+            // been inserted (for a large dictionary, hundreds of thousands of
+            // rows) with nothing in the UI explaining where they came from.
+            if ($dictId !== null) {
+                try {
+                    $this->facade->delete($dictId);
+                } catch (RuntimeException $cleanupError) {
+                    // Keep the original failure as the reported error.
+                }
+            }
             return ['success' => false, 'error' => $e->getMessage()];
         } finally {
             $this->cleanup(...$tempFiles);

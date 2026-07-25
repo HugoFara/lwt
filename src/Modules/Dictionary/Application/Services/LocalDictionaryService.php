@@ -45,6 +45,29 @@ class LocalDictionaryService
     private const BATCH_SIZE = 1000;
 
     /**
+     * Character capacity of `LeTerm` / `LeTermLc` (both VARCHAR(250)).
+     *
+     * Entries with a longer headword are skipped rather than allowed to abort
+     * the import: under STRICT_ALL_TABLES an over-long value fails the whole
+     * multi-row INSERT, so a single bad entry used to lose every other entry in
+     * its batch and end the import (issue #250 — one 293-character headword in
+     * FreeDict German-English killed all 517,534 entries). 250 is also LWT's
+     * own term length (`words.WoText`), so a longer headword could not become a
+     * usable term anyway.
+     */
+    private const MAX_TERM_LENGTH = 250;
+
+    /**
+     * Character capacity of `LeReading` (VARCHAR(250)).
+     */
+    private const MAX_READING_LENGTH = 250;
+
+    /**
+     * Character capacity of `LePartOfSpeech` (VARCHAR(50)).
+     */
+    private const MAX_POS_LENGTH = 50;
+
+    /**
      * Create a new local dictionary.
      *
      * @param int         $languageId   Language ID
@@ -282,45 +305,55 @@ class LocalDictionaryService
     /**
      * Add multiple entries to a dictionary in batches.
      *
+     * Entries whose headword exceeds the column's capacity are skipped and
+     * counted rather than inserted. Under STRICT_ALL_TABLES an over-long value
+     * aborts the entire multi-row INSERT, so without this a single oversized
+     * headword discarded its whole batch and ended the import (issue #250).
+     * `reading` and `pos` are descriptive metadata, so those are truncated
+     * instead — losing a part-of-speech label beats losing the entry.
+     *
      * @param int $dictId Dictionary ID
      * @param iterable<array{term: string, definition: string, reading?: ?string, pos?: ?string}> $entries
      *        Entries to add
      *
-     * @return int Number of entries added
+     * @return array{added: int, skipped: int} Entries inserted, and entries
+     *         skipped for an unstorable headword
+     *
+     * @since 3.2.2-fork Returns a count pair and skips unstorable headwords
      */
-    public function addEntriesBatch(int $dictId, iterable $entries): int
+    public function addEntriesBatch(int $dictId, iterable $entries): array
     {
         $this->assertOwnsDictionary($dictId);
 
         $batch = [];
-        $count = 0;
+        $added = 0;
+        $skipped = 0;
 
         foreach ($entries as $entry) {
-            $batch[] = [
-                'LeLdID' => $dictId,
-                'LeTerm' => $entry['term'],
-                'LeTermLc' => mb_strtolower($entry['term'], 'UTF-8'),
-                'LeDefinition' => $entry['definition'],
-                'LeReading' => $entry['reading'] ?? null,
-                'LePartOfSpeech' => $entry['pos'] ?? null,
-            ];
+            $row = self::buildRow($dictId, $entry);
+            if ($row === null) {
+                $skipped++;
+                continue;
+            }
+
+            $batch[] = $row;
 
             if (count($batch) >= self::BATCH_SIZE) {
                 $this->insertBatch($batch);
-                $count += count($batch);
+                $added += count($batch);
                 $batch = [];
             }
         }
 
         if (!empty($batch)) {
             $this->insertBatch($batch);
-            $count += count($batch);
+            $added += count($batch);
         }
 
         // Update entry count
         $this->updateEntryCount($dictId);
 
-        return $count;
+        return ['added' => $added, 'skipped' => $skipped];
     }
 
     /**
@@ -608,6 +641,56 @@ class LocalDictionaryService
             new DateTimeImmutable((string) $record['LdCreated']),
             $record['LdUsID'] !== null ? (int) $record['LdUsID'] : null
         );
+    }
+
+    /**
+     * Build an insertable row from a parsed dictionary entry.
+     *
+     * @param int                                                                       $dictId Dictionary ID
+     * @param array{term: string, definition: string, reading?: ?string, pos?: ?string} $entry  Parsed entry
+     *
+     * @return array<string, string|int|null>|null The row, or null when the
+     *         headword cannot be stored and the entry has to be skipped
+     */
+    private static function buildRow(int $dictId, array $entry): ?array
+    {
+        $term = $entry['term'];
+        $termLc = mb_strtolower($term, 'UTF-8');
+
+        // Lowercasing can lengthen a string (e.g. 'İ' becomes two code points),
+        // so both columns have to be checked, not just the incoming term.
+        if (
+            mb_strlen($term, 'UTF-8') > self::MAX_TERM_LENGTH
+            || mb_strlen($termLc, 'UTF-8') > self::MAX_TERM_LENGTH
+        ) {
+            return null;
+        }
+
+        return [
+            'LeLdID' => $dictId,
+            'LeTerm' => $term,
+            'LeTermLc' => $termLc,
+            'LeDefinition' => $entry['definition'],
+            'LeReading' => self::clip($entry['reading'] ?? null, self::MAX_READING_LENGTH),
+            'LePartOfSpeech' => self::clip($entry['pos'] ?? null, self::MAX_POS_LENGTH),
+        ];
+    }
+
+    /**
+     * Truncate an optional metadata value to a column's character capacity.
+     *
+     * @param string|null $value     Value to clip, or null
+     * @param int         $maxLength Maximum characters the column accepts
+     *
+     * @return string|null The value, shortened if it was over-long
+     */
+    private static function clip(?string $value, int $maxLength): ?string
+    {
+        if ($value === null || mb_strlen($value, 'UTF-8') <= $maxLength) {
+            return $value;
+        }
+
+        return mb_substr($value, 0, $maxLength, 'UTF-8');
     }
 
     /**
