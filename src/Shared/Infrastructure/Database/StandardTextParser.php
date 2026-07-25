@@ -189,23 +189,21 @@ class StandardTextParser
     }
 
     /**
-     * Parse standard text and insert into temp_word_occurrences.
+     * Build the tab-delimited token blob from preprocessed text.
      *
-     * @param string $text         Preprocessed text
+     * Produces one line per token as "<wordcount>\t<term>", where a term
+     * ending in "\r" marks the end of a sentence. This is the same
+     * serialization the old LOAD DATA path consumed; parseBlob() turns it
+     * into ParsedToken objects.
+     *
+     * @param string $text         Text after word-splitting transformations
      * @param string $termchar     Word character regex
      * @param string $removeSpaces Space removal setting
-     * @param bool   $useMaxSeID   Whether to query for max sentence ID
      *
-     * @return void
-     *
-     * @psalm-suppress MixedArgument
+     * @return string
      */
-    public static function parseStandardToDatabase(
-        string $text,
-        string $termchar,
-        string $removeSpaces,
-        bool $useMaxSeID
-    ): void {
+    private static function buildTokenBlob(string $text, string $termchar, string $removeSpaces): string
+    {
         $qc = self::quoteChars();
         $replaced = preg_replace(
             array(
@@ -225,136 +223,120 @@ class StandardTextParser
             str_replace(array("\t", "\n\n"), array("\n", ""), $text)
         );
         $text = trim($replaced ?? $text);
-        $text = StringUtils::removeSpaces(
+        return StringUtils::removeSpaces(
             preg_replace("/(\n|^)(?!1\t)/u", "\n0\t", $text) ?? $text,
             $removeSpaces
         );
-
-        // It is faster to write to a file and let SQL do its magic, but may run into
-        // security restrictions
-        $use_local_infile = in_array(
-            Connection::fetchValue("SELECT @@GLOBAL.local_infile as value"),
-            array(1, '1', 'ON')
-        );
-        // For database mode, we use a positive ID placeholder (1) since saveWithSql
-        // only checks if id > 0 for sentence ID calculation
-        $idForSql = $useMaxSeID ? 1 : 0;
-        if ($use_local_infile) {
-            TextParsingPersistence::saveWithSql($text, $idForSql);
-        } else {
-            $order = 0;
-            $sid = 1;
-            if ($useMaxSeID) {
-                // Get next auto-increment value from table status
-                // This is more reliable than MAX(SeID)+1 when there are gaps
-                $dbname = Globals::getDatabaseName();
-                $sentencesTable = Globals::table('sentences');
-                $sid = (int)Connection::preparedFetchValue(
-                    "SELECT AUTO_INCREMENT as value FROM information_schema.TABLES
-                     WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
-                    [$dbname, $sentencesTable]
-                );
-                // Fall back to MAX+1 if AUTO_INCREMENT is not available
-                if ($sid <= 0) {
-                    $sid = (int)Connection::fetchValue(
-                        "SELECT IFNULL(MAX(`SeID`)+1,1) as value FROM sentences"
-                        . UserScopedQuery::forTable('sentences')
-                    );
-                }
-            }
-            $count = 0;
-            $rows = array();
-            foreach (explode("\n", $text) as $line) {
-                if (trim($line) == "") {
-                    continue;
-                }
-                list($word_count, $term) = explode("\t", $line);
-                $tiSeID = $sid; // TiSeID
-                $tiCount = $count + 1; // TiCount
-                $count += mb_strlen($term);
-                if (str_ends_with($term, "\r")) {
-                    $term = str_replace("\r", '', $term);
-                    $sid++;
-                    $count = 0;
-                }
-                $tiOrder = ++$order; // TiOrder
-                $tiWordCount = (int)$word_count; // TiWordCount
-                $rows[] = array($tiSeID, $tiCount, $tiOrder, $term, $tiWordCount);
-            }
-
-            // Build multi-row INSERT with prepared statement
-            if (!empty($rows)) {
-                $placeholders = array();
-                $flatParams = array();
-                foreach ($rows as $row) {
-                    $placeholders[] = "(?, ?, ?, ?, ?)";
-                    $flatParams = array_merge($flatParams, $row);
-                }
-
-                Connection::preparedExecute(
-                    "INSERT INTO temp_word_occurrences (
-                        TiSeID, TiCount, TiOrder, TiText, TiWordCount
-                    ) VALUES " . implode(',', $placeholders),
-                    $flatParams
-                );
-            }
-        }
     }
 
     /**
-     * Parse a text using the default tools. It is a not-japanese text.
+     * Turn the token blob into ParsedToken objects.
      *
-     * @param string $text Text to parse
-     * @param int    $id   Text ID. If $id == -2, only split the text.
-     * @param int    $lid  Language ID.
+     * Replicates the semantics of the former LOAD DATA `SET` clause: each line
+     * is "<wordcount>\t<term>"; a term ending with "\r" ends the current
+     * sentence (that token still belongs to the current sentence, the next one
+     * starts a new sentence). Order is a global 1-based counter.
      *
-     * @return null|string[] If $id == -2 return a splitted version of the text.
+     * Unlike the old saveWithSqlFallback(), this does NOT trim the line, so the
+     * "\r" sentence markers and trailing-space tokens are preserved (that bug
+     * caused LOAD-DATA-less installs to parse every text as one sentence).
      *
-     * @psalm-return non-empty-list<string>|null
+     * @param string $blob Token blob from buildTokenBlob()
      *
-     * @internal Use TextParsing::splitIntoSentences(), parseAndDisplayPreview(), or parseAndSave() instead.
+     * @return ParsedToken[]
      */
-    public static function parseStandard(string $text, int $id, int $lid): ?array
+    private static function parseBlob(string $blob): array
+    {
+        $tokens = [];
+        $sentence = 1;
+        $order = 0;
+        foreach (explode("\n", $blob) as $line) {
+            $tab = strpos($line, "\t");
+            if ($tab === false) {
+                // Blank or malformed line (e.g. a stray empty line): no token.
+                continue;
+            }
+            $wordCount = (int) substr($line, 0, $tab);
+            $term = substr($line, $tab + 1);
+            $sentenceEnd = str_ends_with($term, "\r");
+            if ($sentenceEnd) {
+                $term = str_replace("\r", '', $term);
+            }
+            $order++;
+            $tokens[] = new ParsedToken($sentence, $order, $wordCount, $term);
+            if ($sentenceEnd) {
+                $sentence++;
+            }
+        }
+        return $tokens;
+    }
+
+    /**
+     * Tokenize a (character-substituted) standard text into ParsedToken objects.
+     *
+     * @param string $text Preprocessed text (character substitutions applied)
+     * @param int    $lid  Language ID
+     *
+     * @return ParsedToken[]
+     */
+    public static function tokenize(string $text, int $lid): array
     {
         $settings = self::getLanguageSettings($lid);
-
-        // Return null if language not found
         if ($settings === null) {
-            return null;
+            return [];
         }
-
-        // Apply initial transformations (paragraph markers, trim, collapse spaces)
-        $text = self::applyInitialTransformations(
-            $text,
-            $settings['splitEachChar']
-        );
-
-        // Preview mode - display HTML BEFORE word splitting
-        if ($id == -1) {
-            self::displayStandardPreview($text, (bool)$settings['rtlScript']);
-        }
-
-        // Apply word-splitting transformations
+        $text = self::applyInitialTransformations($text, $settings['splitEachChar']);
         $text = self::applyWordSplitting(
             $text,
             $settings['splitSentence'],
             $settings['noSentenceEnd'],
             $settings['termchar']
         );
+        $blob = self::buildTokenBlob($text, $settings['termchar'], $settings['removeSpaces']);
+        return self::parseBlob($blob);
+    }
 
-        // Split-only mode
-        if ($id == -2) {
-            return self::splitStandardSentences($text, $settings['removeSpaces']);
+    /**
+     * Split a (character-substituted) standard text into sentences only.
+     *
+     * @param string $text Preprocessed text (character substitutions applied)
+     * @param int    $lid  Language ID
+     *
+     * @return string[]
+     *
+     * @psalm-return non-empty-list<string>
+     */
+    public static function splitSentences(string $text, int $lid): array
+    {
+        $settings = self::getLanguageSettings($lid);
+        if ($settings === null) {
+            return [''];
         }
-
-        // Database insertion (for both preview mode -1 and actual save mode > 0)
-        self::parseStandardToDatabase(
+        $text = self::applyInitialTransformations($text, $settings['splitEachChar']);
+        $text = self::applyWordSplitting(
             $text,
-            $settings['termchar'],
-            $settings['removeSpaces'],
-            $id > 0
+            $settings['splitSentence'],
+            $settings['noSentenceEnd'],
+            $settings['termchar']
         );
+        return self::splitStandardSentences($text, $settings['removeSpaces']);
+    }
 
-        return null;
+    /**
+     * Echo the preview HTML for a (character-substituted) standard text.
+     *
+     * @param string $text Preprocessed text (character substitutions applied)
+     * @param int    $lid  Language ID
+     *
+     * @return void
+     */
+    public static function echoPreview(string $text, int $lid): void
+    {
+        $settings = self::getLanguageSettings($lid);
+        if ($settings === null) {
+            return;
+        }
+        $text = self::applyInitialTransformations($text, $settings['splitEachChar']);
+        self::displayStandardPreview($text, (bool)$settings['rtlScript']);
     }
 }

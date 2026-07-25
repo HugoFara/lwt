@@ -216,7 +216,12 @@ class MecabParser implements ParserInterface
         $termType = 0;
         $lastNodeType = 0;
 
-        $lines = explode(PHP_EOL, $mecabOutput);
+        // MeCab's line terminator comes from MeCab, not from the host PHP runs
+        // on, so splitting on PHP_EOL broke this everywhere PHP_EOL is not
+        // "\n": on Windows the whole output stayed a single line and every
+        // token collapsed into one. Normalise first, then split on "\n".
+        $mecabOutput = str_replace(["\r\n", "\r"], "\n", $mecabOutput);
+        $lines = explode("\n", $mecabOutput);
         $previousTokenIndex = -1;
 
         foreach ($lines as $line) {

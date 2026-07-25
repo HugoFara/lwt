@@ -47,7 +47,6 @@ use Lwt\Modules\Language\Infrastructure\NlpServiceHandler;
 // Parser Infrastructure
 use Lwt\Modules\Language\Infrastructure\Parser\ExternalParserLoader;
 use Lwt\Modules\Language\Infrastructure\Parser\ParserRegistry;
-use Lwt\Modules\Language\Application\Services\ParsingCoordinator;
 
 /**
  * Service provider for the Language module.
@@ -82,12 +81,6 @@ class LanguageServiceProvider implements ServiceProviderInterface
         $container->singleton(ParserRegistry::class, function (Container $c) {
             return new ParserRegistry(
                 $c->getTyped(ExternalParserLoader::class)
-            );
-        });
-
-        $container->singleton(ParsingCoordinator::class, function (Container $c) {
-            return new ParsingCoordinator(
-                $c->getTyped(ParserRegistry::class)
             );
         });
 

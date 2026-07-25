@@ -7,6 +7,20 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Fixed
+
+* **Japanese (MeCab) parsing produced no tokens on Windows**: both MeCab output
+  readers split their lines on `PHP_EOL`, but a subprocess's line terminator
+  comes from MeCab, not from the host PHP runs on. Wherever the two disagree —
+  notably Windows, where `PHP_EOL` is `"\r\n"` while the output ends lines with
+  `"\n"` — the entire output stayed a single line and every token collapsed into
+  one, yielding zero usable tokens. Both
+  `JapaneseTextParser::buildTokensFromMecab()` and
+  `MecabParser::parseMecabOutput()` now normalize line endings before splitting,
+  the same way `SqlFileParser` does since #241. This is what failed the Windows
+  PHPUnit jobs. Verified end-to-end against MeCab 0.996 and covered by tests
+  that assert LF, CRLF and CR-only output tokenize identically.
+
 ### Changed
 
 * **Word-status model is now a single source of truth** (#238, Phase 1): the
