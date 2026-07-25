@@ -67,6 +67,29 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Dependency security bumps** clearing all eight open Dependabot alerts
+  (two high, six moderate) plus two more that `npm audit` reports — ten
+  advisories across five packages, all fixed within existing version
+  constraints. PHP runtime: `guzzlehttp/guzzle` 7.12.1 → 7.15.1 (five
+  advisories: proxy-authorization headers sent to origin servers, URI
+  fragments disclosed in redirect `Referer` headers, unbounded response
+  cookies, host-only cookie scope not preserved, and cookie disclosure via
+  IP-address domains) and `guzzlehttp/psr7` 2.12.1 → 2.13.0 (host confusion
+  via weak URI host validation, CVE-2026-59882). Both reach LWT through
+  `league/oauth2-google`, so these affect the running application, not just
+  the toolchain. JS build/test toolchain (not shipped to users):
+  `brace-expansion` → 5.0.8 (two denial-of-service advisories),
+  `linkify-it` → 5.0.2 and `postcss` → 8.5.23. The `brace-expansion` override
+  floor moves from `>=5.0.6` to `>=5.0.8`, since the newer advisory covers
+  versions up to 5.0.7. `composer audit` and `npm audit` are both clean.
+* **Routine dependency refresh** alongside the security bumps, all inside the
+  declared ranges: `phpmailer/phpmailer` 7.1.1, `league/commonmark` 2.8.3,
+  `thenetworg/oauth2-azure` 2.2.6, `phpunit/phpunit` 11.5.56, plus Symfony and
+  amphp transitives; on the JS side `vite` 8.1.5, `vitest` 4.1.10, `eslint`
+  10.8.0, `cypress` 15.19.0, `lucide` 1.26.0, `@alpinejs/csp` 3.15.12,
+  `typescript-eslint` 8.65.0, `prettier` 3.9.6 and `vue` 3.5.40. Held back at
+  their current majors: `typescript` (6 → 7), `purgecss` (4 → 8) and
+  `@types/node` (25 → 26).
 * **Word-status model is now a single source of truth** (#238, Phase 1): the
   `TermStatus` value object is promoted to the authoritative model — it owns the
   abbreviation, CSS class, light-theme colour, display order and predicates, and
