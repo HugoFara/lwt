@@ -51,6 +51,7 @@ describe('backup_manager.ts', () => {
       expect(state).toHaveProperty('restoring');
       expect(state).toHaveProperty('emptying');
       expect(state).toHaveProperty('confirmEmpty');
+      expect(state).toHaveProperty('selectFile');
     });
 
     it('returns a fresh state on each call', () => {
@@ -62,6 +63,100 @@ describe('backup_manager.ts', () => {
 
       expect(state2.fileName).toBe('');
       expect(state2.restoring).toBe(false);
+    });
+  });
+
+  // ===========================================================================
+  // selectFile Tests (issue #249)
+  // ===========================================================================
+
+  describe('selectFile', () => {
+    /**
+     * Build a file input whose `files` list holds the given names, the way a
+     * browser presents it to a change handler.
+     */
+    function inputWithFiles(names: string[]): HTMLInputElement {
+      const input = document.createElement('input');
+      input.type = 'file';
+      Object.defineProperty(input, 'files', {
+        value: names.map((name) => new File(['x'], name)),
+        configurable: true
+      });
+      document.body.appendChild(input);
+      return input;
+    }
+
+    it('records the chosen file name', () => {
+      const state = backupManager();
+      const input = inputWithFiles(['LWT 7-8-26.gz']);
+
+      state.selectFile({ target: input } as unknown as Event);
+
+      expect(state.fileName).toBe('LWT 7-8-26.gz');
+    });
+
+    it('clears the name when the selection is emptied', () => {
+      const state = backupManager();
+      state.fileName = 'previous.sql';
+      const input = inputWithFiles([]);
+
+      state.selectFile({ target: input } as unknown as Event);
+
+      expect(state.fileName).toBe('');
+    });
+
+    it('handles an event with no target without throwing', () => {
+      const state = backupManager();
+
+      expect(() => state.selectFile({ target: null } as unknown as Event)).not.toThrow();
+      expect(state.fileName).toBe('');
+    });
+
+    it('handles an input with a null files list', () => {
+      const state = backupManager();
+      const input = document.createElement('input');
+      input.type = 'file';
+      Object.defineProperty(input, 'files', { value: null, configurable: true });
+
+      state.selectFile({ target: input } as unknown as Event);
+
+      expect(state.fileName).toBe('');
+    });
+
+    it('is evaluable by the CSP Alpine build, unlike an inline optional chain', async () => {
+      // The regression this guards: `@change="fileName = $event.target
+      // .files[0]?.name || ''"` throws "CSP Parser Error: Unexpected token"
+      // in @alpinejs/csp, so the filename never appeared and the restore
+      // button stayed disabled. A method call parses fine.
+      const Alpine = (await import('alpinejs')).default;
+      const captured: string[] = [];
+      const origWarn = console.warn;
+      const origError = console.error;
+      console.warn = (...a: unknown[]) => { captured.push(a.map(String).join(' ')); };
+      console.error = (...a: unknown[]) => { captured.push(a.map(String).join(' ')); };
+
+      Alpine.data('backupManagerCspCheck', backupManager);
+      document.body.innerHTML = `
+        <div x-data="backupManagerCspCheck">
+          <input id="csp-file" type="file" @change="selectFile($event)">
+          <span id="csp-name" x-text="fileName || 'NO FILE'"></span>
+        </div>`;
+      Alpine.start();
+      await new Promise((resolve) => setTimeout(resolve, 30));
+
+      const input = document.getElementById('csp-file') as HTMLInputElement;
+      Object.defineProperty(input, 'files', {
+        value: [new File(['x'], 'backup.sql.gz')],
+        configurable: true
+      });
+      input.dispatchEvent(new Event('change'));
+      await new Promise((resolve) => setTimeout(resolve, 30));
+
+      console.warn = origWarn;
+      console.error = origError;
+
+      expect(captured.join('\n')).not.toContain('CSP Parser Error');
+      expect(document.getElementById('csp-name')?.textContent).toBe('backup.sql.gz');
     });
   });
 

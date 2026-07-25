@@ -16,6 +16,7 @@ interface BackupManagerState {
   restoring: boolean;
   emptying: boolean;
   confirmEmpty: boolean;
+  selectFile(event: Event): void;
 }
 
 /**
@@ -27,7 +28,22 @@ export function backupManager(): BackupManagerState {
     fileName: '',
     restoring: false,
     emptying: false,
-    confirmEmpty: false
+    confirmEmpty: false,
+
+    /**
+     * Record the chosen backup file's name from a file-input change event.
+     *
+     * This lives here rather than inline in the view because @alpinejs/csp
+     * cannot parse optional chaining: the previous inline handler,
+     * `fileName = $event.target.files[0]?.name || ''`, threw a CSP parser
+     * error on every change, so the filename never appeared and the submit
+     * button stayed disabled forever (issue #249).
+     */
+    selectFile(event: Event): void {
+      const input = event.target as HTMLInputElement | null;
+      const file = input && input.files ? input.files[0] : null;
+      this.fileName = file ? file.name : '';
+    }
   };
 }
 

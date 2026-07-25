@@ -190,7 +190,7 @@ class AdminFacade
      * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData
      *        Validated file data from InputValidator::getUploadedFile()
      *
-     * @return array{success: bool, error: ?string}
+     * @return array{success: bool, error: ?string, message?: string}
      */
     public function restoreFromUpload(?array $fileData): array
     {

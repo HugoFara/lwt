@@ -131,7 +131,13 @@ class AdminController extends BaseController
             $result = $this->adminFacade->restoreFromUpload(
                 InputValidator::getUploadedFile('thefile')
             );
-            $message = $result['success'] ? 'Database restored' : ($result['error'] ?? 'Restore failed');
+            // Show the restore's own report rather than a flat "Database
+            // restored": its query/record counts are the only signal an admin
+            // has that the dump actually replayed. A restore that parsed zero
+            // statements used to look identical to a real one here (#249).
+            $message = $result['success']
+                ? ($result['message'] ?? 'Database restored')
+                : ($result['error'] ?? 'Restore failed');
         } elseif ($this->hasParam('backup')) {
             $this->adminFacade->downloadBackup();
             // downloadBackup exits, so we never reach here

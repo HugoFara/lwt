@@ -55,7 +55,10 @@ class RestoreFromUpload
      * @param array{name: string, type: string, tmp_name: string, error: int, size: int}|null $fileData
      *        Validated file data from InputValidator::getUploadedFile()
      *
-     * @return array{success: bool, error: ?string}
+     * @return array{success: bool, error: ?string, message?: string}
+     *         On success, `message` carries the restore's own report (query
+     *         and record counts), which the caller should show verbatim
+     *         rather than substituting a generic "restored" string.
      */
     public function execute(?array $fileData): array
     {
@@ -97,6 +100,6 @@ class RestoreFromUpload
         if (str_starts_with($message, 'Error:')) {
             return ['success' => false, 'error' => $message];
         }
-        return ['success' => true, 'error' => null];
+        return ['success' => true, 'error' => null, 'message' => $message];
     }
 }

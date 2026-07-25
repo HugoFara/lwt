@@ -20,6 +20,34 @@ ones are marked like "v1.0.0-fork".
   the same way `SqlFileParser` does since #241. This is what failed the Windows
   PHPUnit jobs. Verified end-to-end against MeCab 0.996 and covered by tests
   that assert LF, CRLF and CR-only output tokenize identically.
+* **Restoring a backup wiped the database and reported success** (#249): on a
+  Windows host, "Restore from Backup" emptied the install and restored nothing,
+  while the page still said "Database restored". `Restore::restoreFile` split
+  the dump into statements on `';' . PHP_EOL` — `";\r\n"` on Windows — but LWT
+  always writes `";\n"`, so the split never matched, every statement piled up
+  in the accumulator and the statement list came back empty. The restore then
+  dropped every table and replayed nothing. This is the same defect fixed in
+  `SqlFileParser` for #241; the restore path was missed. Line endings are now
+  normalized before splitting, so a dump restores identically regardless of
+  which OS wrote or reads it. Three further hardening changes make the failure
+  non-destructive if it ever recurs: a dump that parses to zero statements is
+  refused *before* any table is dropped, the restore's own report (query and
+  record counts) is shown verbatim instead of a flat "Database restored", and a
+  final statement not followed by a newline is no longer discarded.
+* **Restore left the database in pieces when foreign keys were enabled**
+  (#249): a dump's `CREATE TABLE` statements come from `SHOW CREATE TABLE`, so
+  they carry their `FOREIGN KEY` clauses, but they are replayed in backup-table
+  order rather than dependency order (`feed_links` references `news_feeds` yet
+  is created before it). With foreign-key checks on, every such statement
+  failed with errno 1215 — on a 12-table backup, 11 of 12 `CREATE TABLE`s were
+  lost. Checks are now suspended for the replay and enforced again once every
+  table exists.
+* **Choosing a restore file did nothing** (#249): the file field stayed empty
+  and the "Restore from Backup" button stayed disabled, because the inline
+  `@change` handler used optional chaining
+  (`$event.target.files[0]?.name || ''`), which `@alpinejs/csp` cannot parse —
+  it threw "CSP Parser Error: Unexpected token" on every selection. The handler
+  moved into the `backupManager` component as `selectFile()`.
 
 ### Changed
 

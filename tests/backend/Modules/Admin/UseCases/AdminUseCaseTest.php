@@ -375,6 +375,72 @@ class AdminUseCaseTest extends TestCase
         Globals::setBackupRestoreEnabled(null);
     }
 
+    public function testRestoreFromUploadCarriesTheRestoreReportOnSuccess(): void
+    {
+        // The controller shows this message verbatim. Dropping it in favour of
+        // a flat "Database restored" made a restore that replayed zero
+        // statements indistinguishable from a real one (issue #249), so the
+        // counts have to survive the use case.
+        Globals::setBackupRestoreEnabled(true);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'lwt_test_');
+        $gz = gzopen($tmpFile, 'w');
+        gzwrite($gz, "-- lwt-backup-2026-07-08.sql.gz\n");
+        gzclose($gz);
+
+        $report = 'Success: Database restored - 412 queries - 412 successful '
+            . '(37/37 tables dropped/created, 340 records added), 0 failed.';
+        $repo = $this->createMock(BackupRepositoryInterface::class);
+        $repo->method('restoreFromHandle')->willReturn($report);
+
+        $useCase = new RestoreFromUpload($repo);
+        $result = $useCase->execute([
+            'name' => 'backup.sql.gz',
+            'type' => 'application/gzip',
+            'tmp_name' => $tmpFile,
+            'error' => 0,
+            'size' => filesize($tmpFile),
+        ]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame($report, $result['message']);
+
+        @unlink($tmpFile);
+        Globals::setBackupRestoreEnabled(null);
+    }
+
+    public function testRestoreFromUploadSurfacesTheNoStatementsRefusalAsFailure(): void
+    {
+        // Restore::restoreFile refuses a dump that parsed to zero statements
+        // rather than dropping every table and replaying nothing (issue #249).
+        // The refusal must reach the admin as a failure.
+        Globals::setBackupRestoreEnabled(true);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'lwt_test_');
+        $gz = gzopen($tmpFile, 'w');
+        gzwrite($gz, "-- lwt-backup-2026-07-08.sql.gz\n");
+        gzclose($gz);
+
+        $repo = $this->createMock(BackupRepositoryInterface::class);
+        $repo->method('restoreFromHandle')
+            ->willReturn('Error: Database Restore file contains no SQL statements');
+
+        $useCase = new RestoreFromUpload($repo);
+        $result = $useCase->execute([
+            'name' => 'backup.sql.gz',
+            'type' => 'application/gzip',
+            'tmp_name' => $tmpFile,
+            'error' => 0,
+            'size' => filesize($tmpFile),
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('no SQL statements', $result['error']);
+
+        @unlink($tmpFile);
+        Globals::setBackupRestoreEnabled(null);
+    }
+
     public function testRestoreFromUploadDisabledMessageMentionsEnvSetting(): void
     {
         Globals::setBackupRestoreEnabled(false);
