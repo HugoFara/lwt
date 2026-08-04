@@ -61,6 +61,16 @@ ones are marked like "v1.0.0-fork".
 
 ### Changed
 
+* **Three further security advisories** published after the bumps below, all
+  fixed within existing constraints. `guzzlehttp/guzzle` 7.15.1 → 7.15.2 clears
+  CVE-2026-69246 (high — a noncanonical host bypasses host-based checks) and
+  CVE-2026-69245 (medium — a noncanonical cookie domain keeps subdomain scope);
+  guzzle reaches LWT through `league/oauth2-google`, so both affect the running
+  application. On the build side the `brace-expansion` override floor moves from
+  `>=5.0.8` to `>=5.0.9`: GHSA-rgw5-rvv9-x895 bypasses the earlier
+  CVE-2026-14257 mitigation and covers every version up to 5.0.8, so the floor
+  set for that advisory no longer sufficed. `composer audit` and `npm audit` are
+  both clean again.
 * **Dependency security bumps** clearing all eight open Dependabot alerts plus
   two more from `npm audit` — ten advisories across five packages, all within
   existing constraints. Affecting the running app: `guzzlehttp/guzzle`
@@ -69,10 +79,11 @@ ones are marked like "v1.0.0-fork".
   `brace-expansion` → 5.0.8, `linkify-it` → 5.0.2, `postcss` → 8.5.23.
   `composer audit` and `npm audit` are clean.
 * **Routine dependency refresh** inside the declared ranges: `phpmailer`,
-  `league/commonmark`, `oauth2-azure`, `phpunit` on the PHP side; `vite`,
-  `vitest`, `eslint`, `cypress`, `lucide`, `@alpinejs/csp`, `typescript-eslint`,
-  `prettier` and `vue` on the JS side. Held at their current majors:
-  `typescript`, `purgecss`, `@types/node`.
+  `league/commonmark` (2.9.0), `oauth2-azure`, `phpunit`, plus Symfony and amphp
+  transitives on the PHP side; `vite` (8.2.0), `vitest`, `eslint`, `cypress`
+  (15.20.0), `lucide` (1.28.0), `@alpinejs/csp`, `typescript-eslint` (8.66.0),
+  `globals`, `prettier` and `vue` on the JS side. Held at their current majors:
+  `typescript` (6 → 7), `purgecss` (4 → 8), `@types/node` (25 → 26).
 * **Word-status model is now a single source of truth** (#238, Phase 1): the
   `TermStatus` value object owns the abbreviation, CSS class, colour, order and
   predicates, replacing scattered `[1,2,3,4,5,98,99]` literals and `=== 98`-style
