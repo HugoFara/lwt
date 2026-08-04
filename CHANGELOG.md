@@ -9,6 +9,11 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **A CRLF term file broke tag-only imports**: `CompleteImportService`'s
+  tags-only path split uploads on `PHP_EOL`, so a CRLF file on Linux left a stray
+  `"\r"` on every last field and an LF file on Windows collapsed the upload into
+  one line. Line endings are normalised before splitting — the last site of the
+  defect fixed in #241, #248 and #249.
 * **The term-edit modal hid the text while reading** (#253): "Add"/"Edit" opened
   a full-viewport Bulma modal that covered the text being read. The backdrop
   dimming is gone, on mobile the card is a capped-height bottom sheet, and the
