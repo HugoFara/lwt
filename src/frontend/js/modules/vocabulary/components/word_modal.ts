@@ -17,6 +17,12 @@ import { initIcons } from '@shared/icons/lucide_icons';
 import { trapFocus, releaseFocus } from '@shared/accessibility/focus_trap';
 import { announce } from '@shared/accessibility/aria_live';
 import { t } from '@shared/i18n/translator';
+import {
+  computeModalPlacement,
+  getRememberedModalAnchor,
+  modalPlacementClasses,
+  type ModalPlacement,
+} from './modal_placement';
 
 /**
  * Status display information.
@@ -71,6 +77,10 @@ export interface WordModalData {
   readonly modalTitle: string;
   readonly statuses: StatusInfo[];
 
+  // Which half of the viewport the card takes, so it avoids the clicked word
+  placement: ModalPlacement;
+  readonly modalClasses: string;
+
   // CSP-safe null-safe proxy properties for word.*
   readonly wordText: string;
   readonly wordTranslation: string;
@@ -117,6 +127,10 @@ export function wordModalData(): WordModalData {
     // View mode state
     viewMode: 'info' as ViewMode,
 
+    // Default matches the pre-existing placement, so nothing moves until an
+    // anchor says it should.
+    placement: 'bottom' as ModalPlacement,
+
     // Initialize icons when modal opens (called by Alpine.js x-init or x-effect)
     init(): void {
       // Close on Escape key
@@ -129,6 +143,12 @@ export function wordModalData(): WordModalData {
       // Watch for modal open state changes to load form data and re-initialize icons
       Alpine.effect(() => {
         if (this.store.isEditModalOpen) {
+          // Decide placement before the card paints, so it does not visibly
+          // jump. `openEditModal()` keeps `popoverTargetElement` alive, so the
+          // clicked word is still available here.
+          this.placement = computeModalPlacement(
+            this.store.popoverTargetElement || getRememberedModalAnchor()
+          );
           // Load form data when modal opens
           this.showEditForm();
           // Re-initialize icons and trap focus after DOM update
@@ -183,6 +203,10 @@ export function wordModalData(): WordModalData {
 
     get isOpen(): boolean {
       return this.store.isEditModalOpen;
+    },
+
+    get modalClasses(): string {
+      return modalPlacementClasses(this.isOpen, this.placement);
     },
 
     get isLoading(): boolean {

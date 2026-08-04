@@ -16,6 +16,7 @@ import { TextsApi } from '@modules/text/api/texts_api';
 import { SettingsApi } from '@modules/admin/api/settings_api';
 import { renderBookNav } from '../pages/reading/book_nav_renderer';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { rememberModalAnchor } from '@modules/vocabulary/components/modal_placement';
 
 /**
  * Text reader Alpine.js component interface.
@@ -236,6 +237,10 @@ export function textReaderData(): TextReaderData {
 
       event.preventDefault();
       event.stopPropagation();
+
+      // Anchor for the term modals, which place themselves in the half of the
+      // viewport this word is not in.
+      rememberModalAnchor(wordEl);
 
       // Get word data from element (use getAttribute for underscore attributes)
       const hex = wordEl.getAttribute('data_hex') || '';

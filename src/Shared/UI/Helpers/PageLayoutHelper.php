@@ -22,6 +22,7 @@ use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Language\CurrentLanguage;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 use Lwt\Shared\I18n\Translator;
 use Lwt\Shared\UI\Assets\ViteHelper;
@@ -95,7 +96,11 @@ class PageLayoutHelper
                 ];
             }
 
-            $currentId = (int) Settings::getWithDefault('currentlanguage');
+            // Resolve rather than read the raw setting: with 'currentlanguage'
+            // unset, no option got marked selected and the browser silently
+            // displayed the first one anyway, so the navbar showed a language
+            // the rest of the app did not consider selected.
+            $currentId = CurrentLanguage::resolveId();
 
             return ['languages' => $result, 'currentId' => $currentId];
         } catch (\Throwable $e) {

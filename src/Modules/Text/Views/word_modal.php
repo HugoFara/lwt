@@ -25,7 +25,7 @@ namespace Lwt\Views\Text;
 <div x-data="wordModal" x-cloak>
   <div
     class="modal reading-modal"
-    :class="{ 'is-active': isOpen }"
+    :class="modalClasses"
     role="dialog"
     aria-modal="true"
     aria-labelledby="word-modal-title">

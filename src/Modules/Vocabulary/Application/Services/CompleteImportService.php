@@ -719,7 +719,14 @@ class CompleteImportService
                 return;
             }
 
-            foreach (explode(PHP_EOL, $dataText) as $line) {
+            // The upload's line terminator comes from whoever wrote the file,
+            // not from the host PHP runs on, so splitting on PHP_EOL broke this
+            // wherever the two disagree: a CRLF file on Linux left a stray "\r"
+            // on every last field, and an LF file on Windows collapsed the whole
+            // upload into one line. Normalise first, then split on "\n".
+            $dataText = str_replace(["\r\n", "\r"], "\n", $dataText);
+
+            foreach (explode("\n", $dataText) as $line) {
                 if ($i++ == 0 && $ignoreFirst) {
                     continue;
                 }

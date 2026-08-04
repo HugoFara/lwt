@@ -3052,18 +3052,50 @@ Settings Page - Collapsible Sections
   background-color: transparent;
 }
 
+/* Keep the clicked word visible: the card takes the half of the viewport the
+   word is not in. `is-placed-top`/`is-placed-bottom` come from the modal
+   components, which measure the anchor word when the modal opens. Bulma's
+   `.modal` is `flex-direction: column`, so the vertical axis is the main one
+   and `justify-content` — not `align-items` — is what moves the card. Leave
+   `align-items` alone or the card stops being horizontally centred. */
+.reading-modal.is-placed-top {
+  justify-content: flex-start;
+}
+
+.reading-modal.is-placed-bottom {
+  justify-content: flex-end;
+}
+
+.reading-modal.is-placed-top .modal-card,
+.reading-modal.is-placed-bottom .modal-card {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  max-height: calc(50vh - 2rem);
+}
+
 @media screen and (max-width: 768px) {
   .reading-modal .modal-card {
     position: fixed;
-    bottom: 0;
     left: 0;
     right: 0;
-    top: auto;
     max-width: 100%;
     min-width: 100%;
     max-height: 50vh;
     margin: 0;
+  }
+
+  .reading-modal.is-placed-bottom .modal-card {
+    bottom: 0;
+    top: auto;
     border-radius: 12px 12px 0 0;
+  }
+
+  /* Word in the lower half — flip the sheet to the top edge so the sentence
+     being read stays on screen below it. */
+  .reading-modal.is-placed-top .modal-card {
+    top: 0;
+    bottom: auto;
+    border-radius: 0 0 12px 12px;
   }
 }
 
