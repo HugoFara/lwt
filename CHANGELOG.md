@@ -9,6 +9,15 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **A single-language install could never browse Gutenberg or GDL**: the
+  new-text page said "Please select a language above" while the navbar already
+  showed one. `currentlanguage` is only written when the user picks from the
+  navbar dropdown, and with exactly one language there is nothing to switch to,
+  so it could never be set. The navbar looked right only because a `<select>`
+  with no `selected` option displays the first one. `CurrentLanguage::resolveId()`
+  is now the single source for the active language — the stored setting when it
+  still points at an existing language, otherwise the first one the navbar lists.
+  Read-only: a plain GET never writes the setting.
 * **A CRLF term file broke tag-only imports**: `CompleteImportService`'s
   tags-only path split uploads on `PHP_EOL`, so a CRLF file on Linux left a stray
   `"\r"` on every last field and an LF file on Windows collapsed the upload into

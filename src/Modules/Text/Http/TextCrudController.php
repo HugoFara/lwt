@@ -29,6 +29,7 @@ use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Language\CurrentLanguage;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
 /**
@@ -71,6 +72,15 @@ class TextCrudController extends BaseController
         $currentLang = Validation::language(
             InputValidator::getStringWithDb("filterlang", 'currentlanguage')
         );
+        // The new-text form carries the language in a hidden TxLgID field taken
+        // from the navbar selection. Without this fallback that field rendered
+        // as 0 whenever 'currentlanguage' was unset, gating the Gutenberg and
+        // GDL browsers behind "Please select a language above" on an install
+        // whose navbar was already displaying a language.
+        if ($currentLang === '') {
+            $resolved = CurrentLanguage::resolveId();
+            $currentLang = $resolved > 0 ? (string) $resolved : '';
+        }
 
         $op = $this->param('op');
         if ($op !== '') {
