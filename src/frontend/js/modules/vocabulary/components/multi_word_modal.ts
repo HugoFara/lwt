@@ -13,6 +13,12 @@ import type { MultiWordFormStoreState } from '../stores/multi_word_form_store';
 import { initIcons } from '@shared/icons/lucide_icons';
 import { trapFocus, releaseFocus } from '@shared/accessibility/focus_trap';
 import { announce } from '@shared/accessibility/aria_live';
+import {
+  computeModalPlacement,
+  getRememberedModalAnchor,
+  modalPlacementClasses,
+  type ModalPlacement,
+} from './modal_placement';
 
 /**
  * Status display information.
@@ -42,6 +48,10 @@ export interface MultiWordModalData {
   // Computed properties
   readonly store: MultiWordFormStoreState;
   readonly isOpen: boolean;
+
+  // Which half of the viewport the card takes, so it avoids the selected words
+  placement: ModalPlacement;
+  readonly modalClasses: string;
   readonly isLoading: boolean;
   readonly isSubmitting: boolean;
   readonly modalTitle: string;
@@ -82,6 +92,10 @@ export interface MultiWordModalData {
  */
 export function multiWordModalData(): MultiWordModalData {
   return {
+    // Default matches the pre-existing placement, so nothing moves until an
+    // anchor says it should.
+    placement: 'bottom' as ModalPlacement,
+
     // Initialize icons and focus trap when modal opens
     init(): void {
       // Close on Escape key
@@ -93,6 +107,9 @@ export function multiWordModalData(): MultiWordModalData {
 
       Alpine.effect(() => {
         if (this.store.isVisible) {
+          // The multi-word store is opened by id and never sees an element, so
+          // this falls back to the last word the reader clicked.
+          this.placement = computeModalPlacement(getRememberedModalAnchor());
           requestAnimationFrame(() => {
             initIcons();
             const modalCard = document.querySelector<HTMLElement>('#multi-word-modal-title')
@@ -112,6 +129,10 @@ export function multiWordModalData(): MultiWordModalData {
 
     get isOpen(): boolean {
       return this.store.isVisible;
+    },
+
+    get modalClasses(): string {
+      return modalPlacementClasses(this.isOpen, this.placement);
     },
 
     get isLoading(): boolean {

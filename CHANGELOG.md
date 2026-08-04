@@ -23,6 +23,14 @@ ones are marked like "v1.0.0-fork".
   `"\r"` on every last field and an LF file on Windows collapsed the upload into
   one line. Line endings are normalised before splitting — the last site of the
   defect fixed in #241, #248 and #249.
+* **The term modal covered the word being added**: the word popover anchors
+  itself above or below the clicked word, but the Add/Edit modal did not — Bulma
+  centred it, so it regularly landed on the word whose sentence the user needs
+  while typing a translation. The modal now measures the anchor word when it
+  opens and takes the half of the viewport the word is not in, flipping the
+  mobile sheet to the top edge when the word sits low. Best-effort rather than
+  exact: a word near the middle of a short viewport can still be covered. With
+  no anchor available it falls back to the previous placement.
 * **The term-edit modal hid the text while reading** (#253): "Add"/"Edit" opened
   a full-viewport Bulma modal that covered the text being read. The backdrop
   dimming is gone, on mobile the card is a capped-height bottom sheet, and the
