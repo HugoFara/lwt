@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.2.2-fork] - 2026-08-05
+
 ### Fixed
 
 * **A single-language install could never browse Gutenberg or GDL**: the
