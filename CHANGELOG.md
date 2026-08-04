@@ -9,111 +9,62 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
-* **One over-long headword aborted a whole dictionary import** (#250):
-  importing FreeDict German-English failed with "Data too long for column
-  'LeTerm' at row 670" and no entries usable. `LeTerm` is `VARCHAR(250)`, and
-  exactly one of that dictionary's 517,534 entries has a 293-character headword
-  (the Lord's Prayer, stored as a single entry). Under `STRICT_ALL_TABLES` an
-  over-long value fails the entire multi-row `INSERT`, so that one entry
-  discarded its whole 1000-row batch and ended the import — losing the other
-  517,533 entries. Entries whose headword cannot be stored are now skipped and
-  counted instead of aborting the run, and the count is reported alongside the
-  import total so the result is not silently lossy. 250 characters is also LWT's
-  own term length (`words.WoText`), so a longer headword could never have become
-  a usable term. `LeReading` and `LePartOfSpeech` are descriptive metadata and
-  are truncated rather than costing the entry. This applies to every import path
-  — curated, uploaded file, and API — not just the curated one. A failed import
-  now also drops its half-filled dictionary, which previously stayed behind with
-  however many rows had already been inserted.
+* **The term-edit modal hid the text while reading** (#253): "Add"/"Edit" opened
+  a full-viewport Bulma modal that covered the text being read. The backdrop
+  dimming is gone, on mobile the card is a capped-height bottom sheet, and the
+  form is split into tabs (Translation / Example / Notes / Tags) so it fits
+  without scrolling.
+* **One over-long headword aborted a whole dictionary import** (#250): a single
+  293-character headword in FreeDict German-English failed its multi-row
+  `INSERT` under `STRICT_ALL_TABLES` and ended the import, losing all 517,533
+  other entries. Unstorable headwords are now skipped and counted rather than
+  aborting the run, across every import path. A failed import no longer leaves a
+  half-filled dictionary behind.
 * **Japanese (MeCab) parsing produced no tokens on Windows**: both MeCab output
-  readers split their lines on `PHP_EOL`, but a subprocess's line terminator
-  comes from MeCab, not from the host PHP runs on. Wherever the two disagree —
-  notably Windows, where `PHP_EOL` is `"\r\n"` while the output ends lines with
-  `"\n"` — the entire output stayed a single line and every token collapsed into
-  one, yielding zero usable tokens. Both
-  `JapaneseTextParser::buildTokensFromMecab()` and
-  `MecabParser::parseMecabOutput()` now normalize line endings before splitting,
-  the same way `SqlFileParser` does since #241. This is what failed the Windows
-  PHPUnit jobs. Verified end-to-end against MeCab 0.996 and covered by tests
-  that assert LF, CRLF and CR-only output tokenize identically.
-* **Restoring a backup wiped the database and reported success** (#249): on a
-  Windows host, "Restore from Backup" emptied the install and restored nothing,
-  while the page still said "Database restored". `Restore::restoreFile` split
-  the dump into statements on `';' . PHP_EOL` — `";\r\n"` on Windows — but LWT
-  always writes `";\n"`, so the split never matched, every statement piled up
-  in the accumulator and the statement list came back empty. The restore then
-  dropped every table and replayed nothing. This is the same defect fixed in
-  `SqlFileParser` for #241; the restore path was missed. Line endings are now
-  normalized before splitting, so a dump restores identically regardless of
-  which OS wrote or reads it. Three further hardening changes make the failure
-  non-destructive if it ever recurs: a dump that parses to zero statements is
-  refused *before* any table is dropped, the restore's own report (query and
-  record counts) is shown verbatim instead of a flat "Database restored", and a
-  final statement not followed by a newline is no longer discarded.
-* **Restore left the database in pieces when foreign keys were enabled**
-  (#249): a dump's `CREATE TABLE` statements come from `SHOW CREATE TABLE`, so
-  they carry their `FOREIGN KEY` clauses, but they are replayed in backup-table
-  order rather than dependency order (`feed_links` references `news_feeds` yet
-  is created before it). With foreign-key checks on, every such statement
-  failed with errno 1215 — on a 12-table backup, 11 of 12 `CREATE TABLE`s were
-  lost. Checks are now suspended for the replay and enforced again once every
-  table exists.
-* **Choosing a restore file did nothing** (#249): the file field stayed empty
-  and the "Restore from Backup" button stayed disabled, because the inline
-  `@change` handler used optional chaining
-  (`$event.target.files[0]?.name || ''`), which `@alpinejs/csp` cannot parse —
-  it threw "CSP Parser Error: Unexpected token" on every selection. The handler
-  moved into the `backupManager` component as `selectFile()`.
+  readers split on `PHP_EOL`, but the terminator comes from MeCab, not the
+  host — on Windows the output stayed one line and every token collapsed into one.
+  Both readers now normalize line endings first.
+* **Restoring a backup wiped the database and reported success** (#249): on
+  Windows, `Restore::restoreFile` split on `';' . PHP_EOL` while LWT writes
+  `";\n"`, so no statement ever matched — the restore dropped every table and
+  replayed nothing. Line endings are normalized before splitting, and a dump that
+  parses to zero statements is now refused *before* any table is dropped.
+* **Restore left the database in pieces when foreign keys were enabled** (#249):
+  `CREATE TABLE` statements carry their `FOREIGN KEY` clauses but replay in
+  backup-table order, not dependency order, so 11 of 12 failed with errno 1215.
+  Checks are suspended for the replay and enforced once every table exists.
+* **Choosing a restore file did nothing** (#249): the inline `@change` handler
+  used optional chaining, which `@alpinejs/csp` cannot parse. Moved into the
+  `backupManager` component as `selectFile()`.
 
 ### Changed
 
-* **Dependency security bumps** clearing all eight open Dependabot alerts
-  (two high, six moderate) plus two more that `npm audit` reports — ten
-  advisories across five packages, all fixed within existing version
-  constraints. PHP runtime: `guzzlehttp/guzzle` 7.12.1 → 7.15.1 (five
-  advisories: proxy-authorization headers sent to origin servers, URI
-  fragments disclosed in redirect `Referer` headers, unbounded response
-  cookies, host-only cookie scope not preserved, and cookie disclosure via
-  IP-address domains) and `guzzlehttp/psr7` 2.12.1 → 2.13.0 (host confusion
-  via weak URI host validation, CVE-2026-59882). Both reach LWT through
-  `league/oauth2-google`, so these affect the running application, not just
-  the toolchain. JS build/test toolchain (not shipped to users):
-  `brace-expansion` → 5.0.8 (two denial-of-service advisories),
-  `linkify-it` → 5.0.2 and `postcss` → 8.5.23. The `brace-expansion` override
-  floor moves from `>=5.0.6` to `>=5.0.8`, since the newer advisory covers
-  versions up to 5.0.7. `composer audit` and `npm audit` are both clean.
-* **Routine dependency refresh** alongside the security bumps, all inside the
-  declared ranges: `phpmailer/phpmailer` 7.1.1, `league/commonmark` 2.8.3,
-  `thenetworg/oauth2-azure` 2.2.6, `phpunit/phpunit` 11.5.56, plus Symfony and
-  amphp transitives; on the JS side `vite` 8.1.5, `vitest` 4.1.10, `eslint`
-  10.8.0, `cypress` 15.19.0, `lucide` 1.26.0, `@alpinejs/csp` 3.15.12,
-  `typescript-eslint` 8.65.0, `prettier` 3.9.6 and `vue` 3.5.40. Held back at
-  their current majors: `typescript` (6 → 7), `purgecss` (4 → 8) and
-  `@types/node` (25 → 26).
+* **Dependency security bumps** clearing all eight open Dependabot alerts plus
+  two more from `npm audit` — ten advisories across five packages, all within
+  existing constraints. Affecting the running app: `guzzlehttp/guzzle`
+  7.12.1 → 7.15.1 (five advisories) and `guzzlehttp/psr7` 2.12.1 → 2.13.0
+  (CVE-2026-59882), both reached via `league/oauth2-google`. Build/test only:
+  `brace-expansion` → 5.0.8, `linkify-it` → 5.0.2, `postcss` → 8.5.23.
+  `composer audit` and `npm audit` are clean.
+* **Routine dependency refresh** inside the declared ranges: `phpmailer`,
+  `league/commonmark`, `oauth2-azure`, `phpunit` on the PHP side; `vite`,
+  `vitest`, `eslint`, `cypress`, `lucide`, `@alpinejs/csp`, `typescript-eslint`,
+  `prettier` and `vue` on the JS side. Held at their current majors:
+  `typescript`, `purgecss`, `@types/node`.
 * **Word-status model is now a single source of truth** (#238, Phase 1): the
-  `TermStatus` value object is promoted to the authoritative model — it owns the
-  abbreviation, CSS class, light-theme colour, display order and predicates, and
-  exposes `TermStatus::definitions()` (the one ordered status table). The scattered
-  `[1,2,3,4,5,98,99]` literals and `=== 5 || === 99` / `=== 98` checks across the
-  Review, Vocabulary and Admin modules now call `TermStatus::isValid()` /
-  `values()` / `isKnownValue()` / `isIgnoredValue()`, and `TermStatusService` /
-  `StatusHelper` delegate to the VO instead of redefining the tables. The model is
-  exposed once to the frontend via `GET /api/v1/settings/status-definitions`, and
-  the duplicated TypeScript status tables (`text_status_chart.ts`,
-  `texts_grouped_app.ts`, `html_utils.ts`, `term_edit_modal.ts`, the `app_data.ts`
-  proxy) now resolve from a single `shared/stores/statuses.ts`. No behaviour or
-  wire-format change; the per-status scheduling formulas are untouched (they belong
-  to the proposed Phase 2, FSRS-aligned scheduling).
-* **Single `data_hex` word identity in the reading view** (#237): every word
-  occurrence now carries its term identity solely as a `data_hex` attribute,
-  and the redundant `TERM<hex>` CSS class has been dropped. The token is now a
-  short SHA-256-derived hex string (`StringUtils::toClassName()`) — pure
-  `[0-9a-f]`, so it is selector-safe and the occurrence-lookup regexes become
-  correct by construction. This replaces the original 2011 `¤`/hex encoder
-  whose per-byte vs. per-codepoint confusion PHP 8.5 surfaced by deprecating
-  `ord()` on multi-byte strings. There is no API wire-format change (the `hex`
-  field keeps its role, recomputed identically on the PHP and JS sides) and no
-  styling change (the `TERM` class carried no CSS rules).
+  `TermStatus` value object owns the abbreviation, CSS class, colour, order and
+  predicates, replacing scattered `[1,2,3,4,5,98,99]` literals and `=== 98`-style
+  checks across the Review, Vocabulary and Admin modules. Exposed to the frontend
+  once via `GET /api/v1/settings/status-definitions`, so the duplicated
+  TypeScript status tables now resolve from a single store. No behaviour or
+  wire-format change; scheduling formulas are untouched.
+* **Single `data_hex` word identity in the reading view** (#237): word
+  occurrences carry their term identity solely as `data_hex`, and the redundant
+  `TERM<hex>` class is dropped. The token is now a SHA-256-derived hex string —
+  pure `[0-9a-f]`, so the occurrence-lookup regexes are correct by construction.
+  Replaces the 2011 `¤`/hex encoder whose per-byte vs. per-codepoint confusion
+  PHP 8.5 surfaced by deprecating `ord()` on multi-byte strings. No API or
+  styling change.
 
 ## [3.2.1-fork] - 2026-06-30
 
