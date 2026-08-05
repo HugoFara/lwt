@@ -1,10 +1,22 @@
 /**
  * Word Result Initialization - Auto-initializes word result views.
  *
- * Handles initialization of result views after word operations:
- * - save_result.php (new word saved)
+ * Handles initialization of result views after word operations. Each view emits a
+ * `<script type="application/json" data-lwt-*-config>` blob that the matching
+ * initializer below reads and applies to the reading frame's DOM. The full set of
+ * views still using this mechanism:
+ *
+ * - save_result.php (new word saved in multi-word context)
  * - edit_result.php (word created or updated)
+ * - edit_term_result.php (word updated during review)
+ * - edit_multi_update_result.php (multi-word expression updated)
+ * - hover_save_result.php (word saved via hover)
  * - all_wellknown_result.php (mark all as well-known/ignored)
+ * - bulk_save_result.php (bulk translated words saved)
+ *
+ * Keep this list in sync with the views — a handler with no emitting view is dead
+ * code, which is how the delete/insert-wellknown/insert-ignore/delete-multi
+ * handlers came to be removed.
  *
  * @license Unlicense <http://unlicense.org/>
  * @since 3.0.0
@@ -18,11 +30,7 @@ import {
   getParentContext,
   updateLearnStatus,
   updateTestWordInDOM,
-  deleteWordFromDOM,
-  markWordWellKnownInDOM,
-  markWordIgnoredInDOM,
   updateMultiWordInDOM,
-  deleteMultiWordFromDOM,
   updateBulkWordInDOM,
   type BulkWordUpdateParams
 } from '../services/word_dom_updates';
@@ -110,35 +118,6 @@ interface HoverSaveResultConfig {
 }
 
 /**
- * Configuration for delete_result view (word deleted).
- */
-interface DeleteResultConfig {
-  wid: number;
-  term: string;
-  todoContent: string;
-}
-
-/**
- * Configuration for insert_wellknown_result view (word marked as well-known).
- */
-interface InsertWellKnownResultConfig {
-  wid: number;
-  hex: string;
-  term: string;
-  todoContent: string;
-}
-
-/**
- * Configuration for insert_ignore_result view (word marked as ignored).
- */
-interface InsertIgnoreResultConfig {
-  wid: number;
-  hex: string;
-  term: string;
-  todoContent: string;
-}
-
-/**
  * Configuration for edit_multi_update_result view (multi-word expression updated).
  */
 interface EditMultiUpdateResultConfig {
@@ -148,15 +127,6 @@ interface EditMultiUpdateResultConfig {
   romanization: string;
   status: number;
   oldStatus: number;
-}
-
-/**
- * Configuration for delete_multi_result view (multi-word expression deleted).
- */
-interface DeleteMultiResultConfig {
-  wid: number;
-  showAll: boolean;
-  todoContent: string;
 }
 
 /**
@@ -321,33 +291,6 @@ function initEditResult(config: EditResultConfig): void {
 }
 
 /**
- * Initialize delete_result view.
- * Updates the DOM after a word is deleted (reset to unknown state).
- */
-function initDeleteResult(config: DeleteResultConfig): void {
-  deleteWordFromDOM(config.wid, config.term);
-  completeWordOperation(config.todoContent);
-}
-
-/**
- * Initialize insert_wellknown_result view.
- * Updates the DOM after marking a word as well-known (status 99).
- */
-function initInsertWellKnownResult(config: InsertWellKnownResultConfig): void {
-  markWordWellKnownInDOM(config.wid, config.hex, config.term);
-  completeWordOperation(config.todoContent);
-}
-
-/**
- * Initialize insert_ignore_result view.
- * Updates the DOM after marking a word as ignored (status 98).
- */
-function initInsertIgnoreResult(config: InsertIgnoreResultConfig): void {
-  markWordIgnoredInDOM(config.wid, config.hex, config.term);
-  completeWordOperation(config.todoContent);
-}
-
-/**
  * Initialize edit_multi_update_result view.
  * Updates the DOM after a multi-word expression is updated.
  */
@@ -361,15 +304,6 @@ function initEditMultiUpdateResult(config: EditMultiUpdateResultConfig): void {
     config.oldStatus
   );
   cleanupRightFrames();
-}
-
-/**
- * Initialize delete_multi_result view.
- * Updates the DOM after a multi-word expression is deleted.
- */
-function initDeleteMultiResult(config: DeleteMultiResultConfig): void {
-  deleteMultiWordFromDOM(config.wid, config.showAll);
-  completeWordOperation(config.todoContent);
 }
 
 /**
@@ -455,39 +389,6 @@ export function autoInitWordResults(): void {
     }
   }
 
-  // Delete result
-  const deleteConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-delete-result-config]');
-  if (deleteConfigEl) {
-    try {
-      const config = JSON.parse(deleteConfigEl.textContent || '{}') as DeleteResultConfig;
-      initDeleteResult(config);
-    } catch (e) {
-      console.error('Failed to parse delete result config:', e);
-    }
-  }
-
-  // Insert well-known result
-  const insertWellKnownConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-insert-wellknown-result-config]');
-  if (insertWellKnownConfigEl) {
-    try {
-      const config = JSON.parse(insertWellKnownConfigEl.textContent || '{}') as InsertWellKnownResultConfig;
-      initInsertWellKnownResult(config);
-    } catch (e) {
-      console.error('Failed to parse insert wellknown result config:', e);
-    }
-  }
-
-  // Insert ignore result
-  const insertIgnoreConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-insert-ignore-result-config]');
-  if (insertIgnoreConfigEl) {
-    try {
-      const config = JSON.parse(insertIgnoreConfigEl.textContent || '{}') as InsertIgnoreResultConfig;
-      initInsertIgnoreResult(config);
-    } catch (e) {
-      console.error('Failed to parse insert ignore result config:', e);
-    }
-  }
-
   // Edit multi-word update result
   const editMultiUpdateConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-edit-multi-update-result-config]');
   if (editMultiUpdateConfigEl) {
@@ -496,17 +397,6 @@ export function autoInitWordResults(): void {
       initEditMultiUpdateResult(config);
     } catch (e) {
       console.error('Failed to parse edit multi update result config:', e);
-    }
-  }
-
-  // Delete multi-word result
-  const deleteMultiConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-delete-multi-result-config]');
-  if (deleteMultiConfigEl) {
-    try {
-      const config = JSON.parse(deleteMultiConfigEl.textContent || '{}') as DeleteMultiResultConfig;
-      initDeleteMultiResult(config);
-    } catch (e) {
-      console.error('Failed to parse delete multi result config:', e);
     }
   }
 

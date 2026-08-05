@@ -37,7 +37,6 @@ export * from './services/dictionary';
 export * from './services/translation_api';
 export * from './services/term_operations';
 export * from './services/word_dom_updates';
-export * from './services/word_status_ajax';
 
 // Shared utilities needed by vocabulary pages
 import '@shared/forms/bulk_actions';
