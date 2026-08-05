@@ -17,9 +17,30 @@ declare global {
        * Check that a form field with validation class exists and is required
        */
       checkRequiredField(selector: string): Chainable<JQuery<HTMLElement>>;
+
+      /**
+       * Issue an API request the way the real client does.
+       *
+       * State-changing verbs (POST/PUT/DELETE/PATCH) are rejected with 403 by
+       * CsrfMiddleware unless they carry either a Bearer token or the
+       * `X-CSRF-TOKEN` header. `@shared/api/client` reads that token from
+       * `<meta name="csrf-token">`; this command does the same, so a bare
+       * `cy.request()` in a spec is almost always a bug.
+       */
+      apiRequest(
+        options: Partial<Cypress.RequestOptions> & { url: string }
+      ): Chainable<Cypress.Response<unknown>>;
+
+      /**
+       * Read the current session's CSRF token from a rendered page.
+       */
+      csrfToken(): Chainable<string>;
     }
   }
 }
+
+/** Verbs CsrfMiddleware guards; mirrors its PROTECTED_METHODS. */
+const CSRF_PROTECTED = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
 // Database reset via demo install
 Cypress.Commands.add('installDemo', () => {
@@ -37,6 +58,34 @@ Cypress.Commands.add('selectLanguage', (langName: string) => {
 // Check required field exists
 Cypress.Commands.add('checkRequiredField', (selector: string) => {
   return cy.get(selector).should('exist').and('be.visible');
+});
+
+// Read the CSRF token for the current session from a rendered page.
+// `cy.request` shares the browser's cookie jar, so the token minted here
+// belongs to the same session the subsequent request will authenticate under.
+Cypress.Commands.add('csrfToken', () => {
+  return cy.request('/').then((response) => {
+    const match = /<meta name="csrf-token" content="([^"]*)"/.exec(
+      String(response.body)
+    );
+    return match ? match[1] : '';
+  });
+});
+
+// API request carrying the CSRF header for state-changing verbs.
+Cypress.Commands.add('apiRequest', (options) => {
+  const method = String(options.method ?? 'GET').toUpperCase();
+
+  if (!CSRF_PROTECTED.includes(method)) {
+    return cy.request(options);
+  }
+
+  return cy.csrfToken().then((token) => {
+    return cy.request({
+      ...options,
+      headers: { ...(options.headers ?? {}), 'X-CSRF-TOKEN': token },
+    });
+  });
 });
 
 export {};

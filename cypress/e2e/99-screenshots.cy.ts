@@ -52,49 +52,25 @@ describe('Documentation Screenshots', () => {
 
     it('adding-text - Text creation form', () => {
       cy.visit('/texts/new');
-      cy.wait(500);
 
-      // Wait for form to load
+      // /texts/new is a two-step wizard. The source tiles are server-rendered,
+      // so wait until Alpine has stripped x-cloak before clicking one —
+      // otherwise the click is dropped silently and step 2 never appears.
+      cy.get('div[x-show="step === 2"]').should('not.have.attr', 'x-cloak');
+      cy.contains('.is-clickable', /paste text/i).should('be.visible').click();
+
       cy.get('form').should('exist');
       cy.get('input[name="TxTitle"]').should('be.visible');
 
-      // Fill in some example data for a nicer screenshot
+      // Fill in some example data for a nicer screenshot. The language is no
+      // longer chosen here — it comes from the navbar's current language.
       cy.get('input[name="TxTitle"]').type('Le Petit Prince - Chapitre 1');
-
-      // Select French if available using the searchable-select component
-      cy.get('.searchable-select').first().as('langSelect');
-      cy.get('@langSelect').find('.searchable-select__trigger').click();
-      // Wait for dropdown to be visible
-      cy.get('@langSelect')
-        .find('.searchable-select__options')
-        .should('be.visible');
-      // Try to find French, otherwise select the first non-placeholder option
-      cy.get('@langSelect')
-        .find('.searchable-select__options li:not(.searchable-select__empty)')
-        .then(($options) => {
-          let found = false;
-          $options.each((i, opt) => {
-            const text = opt.textContent?.toLowerCase() || '';
-            if (text.includes('french') || text.includes('français')) {
-              cy.wrap(opt).click();
-              found = true;
-              return false; // break loop
-            }
-          });
-          if (!found) {
-            // Select first non-placeholder option
-            cy.get('@langSelect')
-              .find('.searchable-select__options li:not(.searchable-select__empty)')
-              .eq(1)
-              .click();
-          }
-        });
 
       // Add sample French text
       cy.get('textarea[name="TxText"]').type(
-        `Lorsque j'avais six ans j'ai vu, une fois, une magnifique image, dans un livre sur la Forêt Vierge qui s'appelait "Histoires Vécues". Ça représentait un serpent boa qui avalait un fauve.
+        `Lorsque j'avais six ans j'ai vu, une fois, une magnifique image, dans un livre sur la For\u00eat Vierge qui s'appelait "Histoires V\u00e9cues". \u00c7a repr\u00e9sentait un serpent boa qui avalait un fauve.
 
-On disait dans le livre: "Les serpents boas avalent leur proie tout entière, sans la mâcher. Ensuite ils ne peuvent plus bouger et ils dorment pendant les six mois de leur digestion".`
+On disait dans le livre: "Les serpents boas avalent leur proie tout enti\u00e8re, sans la m\u00e2cher. Ensuite ils ne peuvent plus bouger et ils dorment pendant les six mois de leur digestion".`
       );
 
       cy.wait(300);

@@ -1,5 +1,24 @@
 /// <reference types="cypress" />
 
+/**
+ * Open /texts/new and advance the two-step wizard to the review step.
+ *
+ * Step 1 picks where the text comes from; the title/body fields only live in
+ * step 2. The source tiles are plain server-rendered markup, so waiting for
+ * `[x-data="textNewForm"]` proves nothing — it is present before Alpine runs,
+ * and a click that lands first is dropped silently by the CSP build (no error,
+ * no effect). Alpine strips `x-cloak` once it has initialised the tree, so the
+ * absence of that attribute is the real "handlers are bound" signal.
+ */
+function startPastedText(): void {
+  cy.visit('/texts/new');
+  cy.get('div[x-show="step === 2"]').should('not.have.attr', 'x-cloak');
+  cy.contains('.is-clickable', /paste text/i)
+    .should('be.visible')
+    .click();
+  cy.get('input[name="TxTitle"]').should('be.visible');
+}
+
 describe('Texts Management', () => {
   beforeEach(() => {
     cy.visit('/text/edit');
@@ -64,26 +83,13 @@ describe('Texts Management', () => {
     });
 
     it('should create a new text', () => {
-      cy.visit('/texts/new');
-
       const uniqueTitle = `Test Text ${Date.now()}`;
 
-      // Fill in required fields
+      startPastedText();
+
+      // The language is inherited from the navbar's current-language selection
+      // and submitted as a hidden TxLgID input.
       cy.get('input[name="TxTitle"]').type(uniqueTitle);
-
-      // Select first available language using the searchable-select component
-      // The component uses Alpine.js and stores options in x-data
-      cy.get('.searchable-select').first().as('langSelect');
-
-      // Click to open the dropdown
-      cy.get('@langSelect').find('.searchable-select__trigger').click();
-
-      // Wait for dropdown to be visible and select first non-placeholder option
-      cy.get('@langSelect')
-        .find('.searchable-select__options li:not(.searchable-select__empty)')
-        .should('have.length.at.least', 2)
-        .eq(1) // Skip the [Choose...] placeholder
-        .click();
 
       // Add text content
       cy.get('textarea[name="TxText"]').type(
@@ -98,25 +104,12 @@ describe('Texts Management', () => {
     });
 
     it('should create a new text and open it for reading with Save & Open', () => {
-      cy.visit('/texts/new');
-
       const uniqueTitle = `Save Open Test ${Date.now()}`;
+
+      startPastedText();
 
       // Fill in required fields
       cy.get('input[name="TxTitle"]').type(uniqueTitle);
-
-      // Select first available language using the searchable-select component
-      cy.get('.searchable-select').first().as('langSelect');
-
-      // Click to open the dropdown
-      cy.get('@langSelect').find('.searchable-select__trigger').click();
-
-      // Wait for dropdown to be visible and select first non-placeholder option
-      cy.get('@langSelect')
-        .find('.searchable-select__options li:not(.searchable-select__empty)')
-        .should('have.length.at.least', 2)
-        .eq(1) // Skip the [Choose...] placeholder
-        .click();
 
       // Add text content
       cy.get('textarea[name="TxText"]').type(
@@ -197,10 +190,13 @@ describe('Texts Management', () => {
 
     it('should have required fields for text creation', () => {
       cy.visit('/texts/new');
-      // Language selector - now uses searchable-select component
-      cy.get('.searchable-select, select[name="TxLgID"]').should('exist');
-      // Text input area
-      cy.get('textarea[name="TxText"]').should('exist');
+      // The language is no longer picked here — it comes from the navbar's
+      // current-language selection and rides along as a hidden input.
+      cy.get('input[name="TxLgID"]').should('exist').and('not.have.value', '');
+
+      // The title/body fields live in step 2, reached by choosing a source.
+      startPastedText();
+      cy.get('textarea[name="TxText"]').should('be.visible');
     });
   });
 });

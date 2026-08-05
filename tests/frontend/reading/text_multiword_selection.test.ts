@@ -143,6 +143,41 @@ describe('text_multiword_selection.ts', () => {
       );
     });
 
+    it('uses the visible surface, not the data_hex identity token', () => {
+      // Regression: data_hex used to be a reversible hex encoding of the word,
+      // so reading it yielded the surface. Since #237 it is a SHA-256 derived
+      // identity token, and reading it produced terms literally named
+      // "e6967a5826fe441a 75e3090289e2955d".
+      document.body.innerHTML = `
+        <div id="thetext">
+          <span id="sent_1">
+            <span id="ID-1-1" class="wsty word" data_order="1"
+                  data_hex="e6967a5826fe441a">Hello</span>
+            <span id="ID-2-1" class="wsty word" data_order="2"
+                  data_hex="75e3090289e2955d">World</span>
+          </span>
+        </div>
+      `;
+      const container = document.getElementById('thetext')!;
+      const word1 = container.querySelector('[data_order="1"]')!;
+      const word2 = container.querySelector('[data_order="2"]')!;
+
+      const mockRange = {
+        intersectsNode: (node: Node) => node === word1 || node === word2
+      };
+      const mockSelection = {
+        isCollapsed: false,
+        rangeCount: 1,
+        getRangeAt: vi.fn().mockReturnValue(mockRange),
+        removeAllRanges: vi.fn()
+      };
+      vi.spyOn(window, 'getSelection').mockReturnValue(mockSelection as unknown as Selection);
+
+      handleTextSelection(container);
+
+      expect(mockStore.loadForEdit).toHaveBeenCalledWith(1, 1, 'Hello World', 2);
+    });
+
     it('shows alert when selected text is too long', () => {
       // Words are stored consecutively without space elements
       document.body.innerHTML = `

@@ -58,12 +58,14 @@ describe('Authentication', () => {
       });
     });
 
-    it('should have a link to WordPress login when multi-user enabled', () => {
+    it('should link to WordPress login when the WordPress integration is enabled', () => {
+      // The link is gated on WORDPRESS_ENABLED, not on multi-user mode — the two
+      // are independent, so presence of the login form says nothing about it.
       cy.get('body').then(($body) => {
-        if ($body.find('form[action="/login"]').length > 0) {
-          cy.get('a[href="/wordpress/start"]').should('exist');
+        if ($body.find('a[href="/wordpress/start"]').length > 0) {
+          cy.get('a[href="/wordpress/start"]').should('be.visible');
         } else {
-          cy.log('Multi-user mode disabled - skipping WordPress login test');
+          cy.log('WORDPRESS_ENABLED unset - no WordPress login link expected');
         }
       });
     });
@@ -82,7 +84,7 @@ describe('Authentication', () => {
       cy.get('body').then(($body) => {
         if ($body.find('form[action="/login"]').length > 0) {
           // Submit empty form
-          cy.get('button[type="submit"]').click();
+          cy.get('form[method="POST"] button[type="submit"]').click();
           // HTML5 validation should prevent submission or show error
           cy.get('input#username:invalid').should('exist');
         } else {
@@ -100,7 +102,7 @@ describe('Authentication', () => {
 
         cy.get('input#username').type('nonexistent_user');
         cy.get('input#password').type('wrongpassword');
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for navigation/response
         cy.wait(500);
@@ -120,7 +122,7 @@ describe('Authentication', () => {
         const testUsername = 'test_preserved_user';
         cy.get('input#username').type(testUsername);
         cy.get('input#password').type('wrongpassword');
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for navigation/response
         cy.wait(500);
@@ -267,7 +269,7 @@ describe('Authentication', () => {
         cy.get('input#email').type(testUser.email);
         cy.get('input#password').type(testUser.password);
         cy.get('input#password_confirm').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for response
         cy.wait(500);
@@ -298,7 +300,7 @@ describe('Authentication', () => {
         cy.get('input#email').type(`different_${testUser.email}`);
         cy.get('input#password').type(testUser.password);
         cy.get('input#password_confirm').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for response
         cy.wait(500);
@@ -322,7 +324,7 @@ describe('Authentication', () => {
         cy.get('input#email').type(testUser.email);
         cy.get('input#password').type(testUser.password);
         cy.get('input#password_confirm').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for response
         cy.wait(500);
@@ -345,7 +347,7 @@ describe('Authentication', () => {
 
         cy.get('input#username').type(testUser.username);
         cy.get('input#password').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for response
         cy.wait(500);
@@ -369,7 +371,7 @@ describe('Authentication', () => {
 
         cy.get('input#username').type(testUser.email);
         cy.get('input#password').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for response
         cy.wait(500);
@@ -393,7 +395,7 @@ describe('Authentication', () => {
         // First login
         cy.get('input#username').type(testUser.username);
         cy.get('input#password').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for response
         cy.wait(500);
@@ -420,7 +422,7 @@ describe('Authentication', () => {
         // Login
         cy.get('input#username').type(testUser.username);
         cy.get('input#password').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Wait for response
         cy.wait(500);
@@ -451,7 +453,7 @@ describe('Authentication', () => {
           // Multi-user mode is enabled - login required
           cy.get('input#username').type(testUser.username);
           cy.get('input#password').type(testUser.password);
-          cy.get('button[type="submit"]').click();
+          cy.get('form[method="POST"] button[type="submit"]').click();
 
           // After login, should not be on login page
           cy.url().should('not.include', '/login');
@@ -481,12 +483,12 @@ describe('Authentication', () => {
           // Multi-user mode - try to login first
           cy.get('input#username').type(testUser.username);
           cy.get('input#password').type(testUser.password);
-          cy.get('button[type="submit"]').click();
+          cy.get('form[method="POST"] button[type="submit"]').click();
           cy.wait(500);
         }
 
         // Check settings endpoint works (should work in both modes)
-        cy.request({
+        cy.apiRequest({
           method: 'POST',
           url: `${apiBase}/settings`,
           form: true,
@@ -566,7 +568,7 @@ describe('Authentication', () => {
 
         cy.get('input#username').type(testUser.username);
         cy.get('input#password').type(testUser.password);
-        cy.get('button[type="submit"]').click();
+        cy.get('form[method="POST"] button[type="submit"]').click();
 
         // Password should never appear in URL
         cy.url().should('not.include', testUser.password);
@@ -578,8 +580,17 @@ describe('Authentication', () => {
 
       cy.get('body').then(($body) => {
         if ($body.find('form[action="/login"]').length > 0) {
-          // Form should use POST method
-          cy.get('form[action="/login"]').should('have.attr', 'method', 'POST');
+          // Assert on the form that actually carries credentials rather than on
+          // `form[action="/login"]`, which also matches the page's language
+          // switcher (a legitimate GET form). The property that matters is that
+          // no password is ever submitted via GET, where it would land in the
+          // URL, browser history and access logs.
+          cy.get('form')
+            .filter((_i, form) => form.querySelector('input[type="password"]') !== null)
+            .should('have.length.at.least', 1)
+            .each(($form) => {
+              expect($form.attr('method')).to.match(/^post$/i);
+            });
         } else {
           cy.log('Multi-user mode disabled - skipping login form security test');
         }
@@ -589,7 +600,12 @@ describe('Authentication', () => {
 
       cy.get('body').then(($body) => {
         if ($body.find('form[action="/register"]').length > 0) {
-          cy.get('form[action="/register"]').should('have.attr', 'method', 'POST');
+          cy.get('form')
+            .filter((_i, form) => form.querySelector('input[type="password"]') !== null)
+            .should('have.length.at.least', 1)
+            .each(($form) => {
+              expect($form.attr('method')).to.match(/^post$/i);
+            });
         } else {
           cy.log('Multi-user mode disabled - skipping register form security test');
         }
