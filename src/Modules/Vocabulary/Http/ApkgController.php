@@ -148,7 +148,7 @@ class ApkgController extends VocabularyBaseController
                 . '<li>Updated: ' . $result->updated . '</li>'
                 . '<li>Unchanged: ' . $result->unchanged . '</li>'
                 . '<li>Skipped (term not found): ' . $result->skippedMissing . '</li>'
-                . '<li>Skipped (no LWT id): ' . $result->skippedUnknown . '</li>'
+                . '<li>Not created by LWT: ' . $result->skippedUnknown . '</li>'
                 . '<li>Demoted to Ignored from suspended: ' . $result->statusSetToIgnored . '</li>'
                 . '<li>Tag changes applied: ' . $result->tagsChanged . '</li>'
                 . '</ul></div>';
@@ -173,6 +173,17 @@ class ApkgController extends VocabularyBaseController
             . 'Translations, romanizations, notes, and tags are updated. '
             . 'Cards suspended in Anki demote learning-status terms to <em>Ignored</em>.'
             . '</p>';
+
+        // The commonest wrong turn: arriving here with a deck built in Anki,
+        // which has no LWT guids and so updates nothing at all.
+        echo '<div class="notification is-info is-light mt-4">'
+            . '<strong>Importing a deck you built in Anki?</strong> This page only updates terms '
+            . 'that LWT exported in the first place — a deck from Anki or AnkiWeb has nothing here '
+            . 'to match against, so nothing would change. Use '
+            . '<a href="/vocabulary/anki-deck/import">Import an Anki deck</a> instead, which '
+            . 'creates new terms and works out how well you know each word from Anki\'s own '
+            . 'scheduling.'
+            . '</div>';
     }
 
     private function streamDownload(string $path, string $filename): never

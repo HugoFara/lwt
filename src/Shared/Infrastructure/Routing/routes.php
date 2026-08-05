@@ -334,6 +334,20 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
+    // Import a deck built in Anki as new terms (AnkiDeckImportController).
+    // Distinct from the apkg routes above: those round-trip LWT's own export,
+    // this one seeds terms from a foreign deck.
+    $router->get(
+        '/vocabulary/anki-deck/import',
+        'Lwt\\Modules\\Vocabulary\\Http\\AnkiDeckImportController@index',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/vocabulary/anki-deck/import',
+        'Lwt\\Modules\\Vocabulary\\Http\\AnkiDeckImportController@index',
+        AUTH_MIDDLEWARE
+    );
+
     // Review status change during review (iframe/ajax view).
     // NB: the dead text-reader frame routes (set-status, delete-term,
     // delete-multi, insert-wellknown, insert-ignore) are unregistered here —

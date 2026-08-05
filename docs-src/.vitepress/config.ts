@@ -81,6 +81,7 @@ export default defineConfig({
             { text: 'Text Parsers', link: '/reference/parsers' },
             { text: 'Lemmatization', link: '/reference/lemmatization' },
             { text: 'Anki Export & Import', link: '/reference/anki-export-import' },
+            { text: 'Import an Anki Deck', link: '/reference/anki-deck-import' },
             { text: 'Term Scores', link: '/reference/term-scores' },
             { text: 'Export Templates', link: '/reference/export-templates' },
             { text: 'Database Schema', link: '/reference/database-schema' },
