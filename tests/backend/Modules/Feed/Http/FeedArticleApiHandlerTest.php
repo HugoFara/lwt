@@ -567,7 +567,7 @@ class FeedArticleApiHandlerTest extends TestCase
                 ]
             ]);
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
@@ -598,7 +598,7 @@ class FeedArticleApiHandlerTest extends TestCase
                 $this->makeFeedLinkRow('11', 'Article 2'),
             ]);
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
@@ -621,7 +621,7 @@ class FeedArticleApiHandlerTest extends TestCase
                 $this->makeFeedLinkRow('10', 'Broken Article'),
             ]);
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([
@@ -647,7 +647,7 @@ class FeedArticleApiHandlerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')
             ->willReturn([$this->makeFeedLinkRow('10', 'Article')]);
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $option) {
                 return $option === 'tag' ? 'custom-tag' : null;
             });
@@ -674,7 +674,7 @@ class FeedArticleApiHandlerTest extends TestCase
                 $this->makeFeedLinkRow('10', 'Article', 'VeryLongFeedNameForTagging'),
             ]);
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $option) {
                 return $option === 'tag' ? '' : null;
             });
@@ -699,7 +699,7 @@ class FeedArticleApiHandlerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')
             ->willReturn([$this->makeFeedLinkRow('10', 'Article')]);
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([
@@ -722,7 +722,7 @@ class FeedArticleApiHandlerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')
             ->willReturn([$row]);
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturnCallback(function (array $doc) {
@@ -757,7 +757,7 @@ class FeedArticleApiHandlerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')
             ->willReturn([$this->makeFeedLinkRow('10', 'Article')]);
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([
@@ -777,7 +777,7 @@ class FeedArticleApiHandlerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')
             ->willReturn([$this->makeFeedLinkRow('10', 'Article')]);
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         $this->feedFacade->method('extractTextFromArticle')
             ->willReturn([
@@ -948,7 +948,7 @@ class FeedArticleApiHandlerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')
             ->willReturn([$row]);
 
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $option) {
                 if ($option === 'charset') {
                     return 'windows-1252';
@@ -980,7 +980,7 @@ class FeedArticleApiHandlerTest extends TestCase
         $this->feedFacade->method('getMarkedFeedLinks')
             ->willReturn([$this->makeFeedLinkRow('10', 'Multi Article')]);
 
-        $this->feedFacade->method('getNfOption')->willReturn(null);
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
 
         // Extraction returns multiple texts from one article
         $this->feedFacade->method('extractTextFromArticle')
