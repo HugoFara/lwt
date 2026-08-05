@@ -9,6 +9,16 @@ ones are marked like "v1.0.0-fork".
 
 ### Added
 
+* **Import an Anki deck to seed known words** (#228): point LWT at a deck you
+  already study in Anki and it creates the terms for you, working out how well
+  you know each word from Anki's own scheduling — mature cards become *well
+  known*, younger ones get a learning status, suspended ones become *ignored*.
+  You pick the note type, which field holds the term, and the language, since an
+  `.apkg` records none of that. Importing is create-only, so running it twice is
+  safe. This is the direction #259 did **not** cover: that one round-trips LWT's
+  own exports and silently matches nothing in a deck built in Anki. See
+  `docs/reference/anki-deck-import`.
+
 * **FSRS scheduling groundwork** (#238, phase 2a): LWT now records FSRS-6 memory
   state per term — stability, difficulty, due date and a review history.
   Nothing user-visible changes yet: the legacy scoring still drives the review

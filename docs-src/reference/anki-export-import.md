@@ -2,6 +2,16 @@
 
 LWT can export your vocabulary to a real Anki package (`.apkg`) and read changes back from a `.apkg` you re-export from Anki. The flow is **manual round-trip** — not a live sync — but the file format is universal, so any Anki client (desktop, AnkiMobile, AnkiDroid, AnkiWeb) can study the deck.
 
+::: warning Importing a deck you built in Anki?
+This page covers the **round trip** for terms that started in LWT: export them,
+study in Anki, import the file back to update them. Notes are matched by an
+`lwt-` identifier that only LWT-exported files carry, so a deck built in Anki or
+downloaded from AnkiWeb has nothing to match and **nothing would change**.
+
+To seed LWT from a deck you already study, use
+[Import an Anki Deck](/reference/anki-deck-import) instead.
+:::
+
 ## When to use this
 
 - You already have an Anki workflow and want LWT to seed it from your reading.
