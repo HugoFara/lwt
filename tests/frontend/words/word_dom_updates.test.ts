@@ -10,13 +10,10 @@ import {
   updateNewWordInDOM,
   updateExistingWordInDOM,
   updateWordStatusInDOM,
-  deleteWordFromDOM,
   markWordWellKnownInDOM,
   markWordIgnoredInDOM,
   updateMultiWordInDOM,
-  deleteMultiWordFromDOM,
   updateBulkWordInDOM,
-  updateHoverSaveInDOM,
   updateTestWordInDOM,
   completeWordOperation,
   type WordUpdateParams,
@@ -300,48 +297,6 @@ describe('word_dom_updates.ts', () => {
   });
 
   // ===========================================================================
-  // deleteWordFromDOM Tests
-  // ===========================================================================
-
-  describe('deleteWordFromDOM', () => {
-    it('resets word to status0', () => {
-      document.body.innerHTML = `
-        <span class="word789 status3" data_trans="old trans" data_rom="old rom" data_wid="789" data_img="img.png">word</span>
-      `;
-
-      deleteWordFromDOM(789, 'word');
-
-      const element = document.querySelector('span')!;
-      expect(element.classList.contains('word789')).toBe(false);
-      expect(element.classList.contains('status3')).toBe(false);
-      expect(element.classList.contains('status0')).toBe(true);
-      expect(element.getAttribute('data_status')).toBe('0');
-      expect(element.getAttribute('data_trans')).toBe('');
-      expect(element.getAttribute('data_rom')).toBe('');
-      expect(element.getAttribute('data_wid')).toBe('');
-      expect(element.getAttribute('data_img')).toBeNull();
-    });
-
-    it('removes all status classes', () => {
-      document.body.innerHTML = `
-        <span class="word789 status99 status98 status1 status2 status3 status4 status5">word</span>
-      `;
-
-      deleteWordFromDOM(789, 'word');
-
-      const element = document.querySelector('span')!;
-      expect(element.classList.contains('status99')).toBe(false);
-      expect(element.classList.contains('status98')).toBe(false);
-      expect(element.classList.contains('status1')).toBe(false);
-      expect(element.classList.contains('status2')).toBe(false);
-      expect(element.classList.contains('status3')).toBe(false);
-      expect(element.classList.contains('status4')).toBe(false);
-      expect(element.classList.contains('status5')).toBe(false);
-      expect(element.classList.contains('status0')).toBe(true);
-    });
-  });
-
-  // ===========================================================================
   // markWordWellKnownInDOM Tests
   // ===========================================================================
 
@@ -419,42 +374,6 @@ describe('word_dom_updates.ts', () => {
   });
 
   // ===========================================================================
-  // deleteMultiWordFromDOM Tests
-  // ===========================================================================
-
-  describe('deleteMultiWordFromDOM', () => {
-    it('removes multi-word elements and shows sub-words', () => {
-      document.body.innerHTML = `
-        <div id="sentence1">
-          <span class="word444">hello world</span>
-          <span class="hide">hello</span>
-          <span class="hide">world</span>
-        </div>
-      `;
-
-      deleteMultiWordFromDOM(444, false);
-
-      expect(document.querySelectorAll('.word444').length).toBe(0);
-      expect(document.querySelectorAll('.hide').length).toBe(0);
-    });
-
-    it('removes multi-word elements when showAll is true', () => {
-      document.body.innerHTML = `
-        <div id="sentence1">
-          <span class="word444">hello world</span>
-          <span class="hide">hello</span>
-        </div>
-      `;
-
-      deleteMultiWordFromDOM(444, true);
-
-      expect(document.querySelectorAll('.word444').length).toBe(0);
-      // When showAll is true, hidden elements are not unhidden
-      expect(document.querySelectorAll('.hide').length).toBe(1);
-    });
-  });
-
-  // ===========================================================================
   // updateBulkWordInDOM Tests
   // ===========================================================================
 
@@ -498,38 +417,6 @@ describe('word_dom_updates.ts', () => {
       updateBulkWordInDOM(term, false);
 
       expect(document.querySelector('[data_hex="48454c4c4f"]')!.getAttribute('title')).toBe('');
-    });
-  });
-
-  // ===========================================================================
-  // updateHoverSaveInDOM Tests
-  // ===========================================================================
-
-  describe('updateHoverSaveInDOM', () => {
-    it('updates word after hover save operation', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="48454c4c4f">hello</span>
-      `;
-
-      updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
-
-      const element = document.querySelector('[data_hex="48454c4c4f"]')!;
-      expect(element.classList.contains('status0')).toBe(false);
-      expect(element.classList.contains('status1')).toBe(true);
-      expect(element.classList.contains('word666')).toBe(true);
-      expect(element.getAttribute('data_trans')).toBe('quick trans');
-      expect(element.getAttribute('data_wid')).toBe('666');
-    });
-
-    it('sets title with generated tooltip', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="48454c4c4f">hello</span>
-      `;
-
-      updateHoverSaveInDOM(666, '48454c4c4f', 1, 'quick trans', 'hello');
-
-      // Title is set with formatted tooltip
-      expect(document.querySelector('[data_hex="48454c4c4f"]')!.getAttribute('title')).toBe('hello|quick trans||1');
     });
   });
 
@@ -602,18 +489,6 @@ describe('word_dom_updates.ts', () => {
 
       expect(document.querySelector('.word888')!.classList.contains('status99')).toBe(true);
       expect(document.querySelector('.word888')!.getAttribute('data_status')).toBe('99');
-    });
-
-    it('handles missing annotation data in deleteWordFromDOM', () => {
-      document.body.innerHTML = `
-        <span class="word999 status3">word</span>
-      `;
-
-      deleteWordFromDOM(999, 'word');
-
-      // Should not throw even without data_ann attribute
-      expect(document.querySelectorAll('.word999').length).toBe(0);
-      expect(document.querySelectorAll('.status0').length).toBe(1);
     });
 
     it('handles multiple elements with same word ID', () => {

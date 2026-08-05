@@ -12,11 +12,7 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates',
   getParentContext: vi.fn(() => document),
   updateLearnStatus: vi.fn(),
   updateTestWordInDOM: vi.fn(),
-  deleteWordFromDOM: vi.fn(),
-  markWordWellKnownInDOM: vi.fn(),
-  markWordIgnoredInDOM: vi.fn(),
   updateMultiWordInDOM: vi.fn(),
-  deleteMultiWordFromDOM: vi.fn(),
   updateBulkWordInDOM: vi.fn()
 }));
 
@@ -39,11 +35,7 @@ vi.mock('../../../src/frontend/js/shared/utils/html_utils', () => ({
 import {
   updateNewWordInDOM,
   completeWordOperation,
-  deleteWordFromDOM,
-  markWordWellKnownInDOM,
-  markWordIgnoredInDOM,
   updateMultiWordInDOM,
-  deleteMultiWordFromDOM,
   updateBulkWordInDOM,
   updateLearnStatus,
   updateExistingWordInDOM
@@ -190,77 +182,6 @@ describe('word_result_init.ts', () => {
   });
 
   // ===========================================================================
-  // Delete Result Config Tests
-  // ===========================================================================
-
-  describe('delete result config', () => {
-    it('initializes from delete result config', () => {
-      document.body.innerHTML = `
-        <script data-lwt-delete-result-config type="application/json">
-          {
-            "wid": 111,
-            "term": "deleted word",
-            "todoContent": "8 words"
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      expect(deleteWordFromDOM).toHaveBeenCalledWith(111, 'deleted word');
-      expect(completeWordOperation).toHaveBeenCalledWith('8 words');
-    });
-  });
-
-  // ===========================================================================
-  // Insert Well-Known Result Config Tests
-  // ===========================================================================
-
-  describe('insert wellknown result config', () => {
-    it('initializes from insert wellknown result config', () => {
-      document.body.innerHTML = `
-        <script data-lwt-insert-wellknown-result-config type="application/json">
-          {
-            "wid": 222,
-            "hex": "aaa",
-            "term": "known word",
-            "todoContent": "3 words"
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      expect(markWordWellKnownInDOM).toHaveBeenCalledWith(222, 'aaa', 'known word');
-      expect(completeWordOperation).toHaveBeenCalledWith('3 words');
-    });
-  });
-
-  // ===========================================================================
-  // Insert Ignore Result Config Tests
-  // ===========================================================================
-
-  describe('insert ignore result config', () => {
-    it('initializes from insert ignore result config', () => {
-      document.body.innerHTML = `
-        <script data-lwt-insert-ignore-result-config type="application/json">
-          {
-            "wid": 333,
-            "hex": "bbb",
-            "term": "ignored word",
-            "todoContent": "2 words"
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      expect(markWordIgnoredInDOM).toHaveBeenCalledWith(333, 'bbb', 'ignored word');
-      expect(completeWordOperation).toHaveBeenCalledWith('2 words');
-    });
-  });
-
-  // ===========================================================================
   // Edit Multi Update Result Config Tests
   // ===========================================================================
 
@@ -284,29 +205,6 @@ describe('word_result_init.ts', () => {
       expect(updateMultiWordInDOM).toHaveBeenCalledWith(
         444, 'multi word', 'phrase', 'rom', 4, 3
       );
-    });
-  });
-
-  // ===========================================================================
-  // Delete Multi Result Config Tests
-  // ===========================================================================
-
-  describe('delete multi result config', () => {
-    it('initializes from delete multi result config', () => {
-      document.body.innerHTML = `
-        <script data-lwt-delete-multi-result-config type="application/json">
-          {
-            "wid": 555,
-            "showAll": true,
-            "todoContent": "12 words"
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      expect(deleteMultiWordFromDOM).toHaveBeenCalledWith(555, true);
-      expect(completeWordOperation).toHaveBeenCalledWith('12 words');
     });
   });
 
@@ -522,19 +420,25 @@ describe('word_result_init.ts', () => {
     it('processes multiple different config types', () => {
       document.body.innerHTML = `
         <div data-lwt-cleanup-frames="true"></div>
-        <script data-lwt-delete-result-config type="application/json">
-          { "wid": 1, "term": "word", "todoContent": "" }
+        <script data-lwt-edit-result-config type="application/json">
+          {
+            "wid": 1, "status": 2, "translation": "t", "romanization": "r",
+            "text": "word", "hex": "a", "textId": 7, "todoContent": "", "isNew": true
+          }
         </script>
-        <script data-lwt-insert-wellknown-result-config type="application/json">
-          { "wid": 2, "hex": "a", "term": "known", "todoContent": "" }
+        <script data-lwt-edit-multi-update-result-config type="application/json">
+          {
+            "wid": 2, "text": "multi word", "translation": "phrase",
+            "romanization": "rom", "status": 4, "oldStatus": 1
+          }
         </script>
       `;
 
       autoInitWordResults();
 
       expect(cleanupRightFrames).toHaveBeenCalled();
-      expect(deleteWordFromDOM).toHaveBeenCalled();
-      expect(markWordWellKnownInDOM).toHaveBeenCalled();
+      expect(updateNewWordInDOM).toHaveBeenCalled();
+      expect(updateMultiWordInDOM).toHaveBeenCalled();
     });
   });
 

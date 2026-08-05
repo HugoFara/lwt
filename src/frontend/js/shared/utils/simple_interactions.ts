@@ -197,11 +197,6 @@ export function initSimpleInteractions(): void {
       }
       break;
 
-    case 'show-right-frames':
-      // Legacy action - right frames panel was removed in v3.2.0
-      // This action is now a no-op
-      break;
-
     case 'hide-right-frames':
       // Legacy action - right frames panel was removed in v3.2.0
       // This action is now a no-op
