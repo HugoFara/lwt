@@ -178,7 +178,12 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow">
                 <div class="dropdown" :class="columnsOpen ? 'is-active' : ''">
                     <div class="dropdown-trigger">
-                        <button type="button" class="button is-small" @click="toggleColumnsDropdown()" @click.outside="closeColumnsDropdown()">
+                        <button
+                            type="button"
+                            class="button is-small"
+                            @click="toggleColumnsDropdown()"
+                            @click.outside="closeColumnsDropdown()"
+                        >
                             <span><?= __('vocabulary.list.columns') ?></span>
                             <span class="icon is-small">
                                 <?php
@@ -600,7 +605,11 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="level-right">
                             <div class="level-item">
                                 <div class="tags has-addons mb-0">
-                                    <span class="tag" :class="getStatusClass(word.status)" x-text="word.statusAbbr"></span>
+                                    <span
+                                        class="tag"
+                                        :class="getStatusClass(word.status)"
+                                        x-text="word.statusAbbr"
+                                    ></span>
                                     <span
                                         class="tag"
                                         :class="getStatusClass(word.status)"

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Smoke test for the Anki .apkg writer + reader.
  *
@@ -15,6 +13,8 @@ declare(strict_types=1);
  * verification, or to scripts/anki/validate-apkg.py for automated checking
  * via the genanki round-trip.
  */
+
+declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -92,7 +92,10 @@ foreach ($inputs as $expected) {
     $assert($actual->translation === $expected->translation, "translation mismatch for #{$expected->lwtTermId}");
     $assert($actual->romanization === $expected->romanization, "romanization mismatch for #{$expected->lwtTermId}");
     $assert($actual->notes === $expected->notes, "notes mismatch for #{$expected->lwtTermId}");
-    $assert($actual->tags === $expected->tags, "tags mismatch for #{$expected->lwtTermId} (got " . json_encode($actual->tags) . ')');
+    $assert(
+        $actual->tags === $expected->tags,
+        "tags mismatch for #{$expected->lwtTermId} (got " . json_encode($actual->tags) . ')'
+    );
     $assert($actual->suspended === $expected->suspended, "suspended mismatch for #{$expected->lwtTermId}");
 }
 

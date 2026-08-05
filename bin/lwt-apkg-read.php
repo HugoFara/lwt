@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Read an .apkg with the PHP reader and print one line per note. Useful for
  * verifying that LWT can ingest a file produced by Anki itself.
@@ -9,6 +7,8 @@ declare(strict_types=1);
  * Usage:
  *   php bin/lwt-apkg-read.php path/to/file.apkg
  */
+
+declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
