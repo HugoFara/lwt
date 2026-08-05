@@ -7,7 +7,24 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
-## [3.2.2-fork] - 2026-08-05
+### Added
+
+* **Anki `.apkg` export and import** (refs #228): terms round-trip to Anki as a
+  real Anki package, written and read by LWT itself (no genanki, no Python) —
+  `ApkgWriter`/`ApkgReader` build the SQLite collection and zip container
+  directly. Export the whole language from the vocabulary list's **ALL** menu,
+  or just the rows you ticked via **Marked Terms → Export Selection**. Notes
+  carry a stable `lwt-<WoID>` guid, so re-importing the file matches notes back
+  to the terms they came from and updates translation, romanization, notes and
+  tags in place; a card you suspended in Anki demotes a learning-status term to
+  *Ignored*. A subset export only ever touches the terms it contains — terms
+  outside the selection are left alone. Notes with no LWT guid are counted and
+  skipped rather than created, since LWT could not tell which language they
+  belong to. **SRS scheduling state is deliberately not exchanged**: LWT's
+  score model and Anki's are not comparable, and pretending otherwise would
+  silently corrupt review timing on both sides — see #238 for the FSRS work
+  that would make it meaningful. Reference page at
+  `docs/reference/anki-export-import`.
 
 ### Fixed
 

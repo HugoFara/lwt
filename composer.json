@@ -46,7 +46,8 @@
         "squizlabs/php_codesniffer": "^4.0"
     },
     "suggest": {
-        "squizlabs/php_codesniffer": "Following code style standards is a good thing"
+        "squizlabs/php_codesniffer": "Following code style standards is a good thing",
+        "ext-pdo_sqlite": "Required for Anki .apkg export/import; an .apkg is a zipped SQLite collection"
     },
     "scripts": {
         "test:cleanup-db": "@php tests/cleanup_db_connections.php",

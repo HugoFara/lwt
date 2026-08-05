@@ -311,6 +311,29 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
+    // Anki .apkg export / import (ApkgController)
+    // Both GET (whole language) and POST (selection-aware via marked[]).
+    $router->get(
+        '/vocabulary/apkg/export',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@export',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/vocabulary/apkg/export',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@export',
+        AUTH_MIDDLEWARE
+    );
+    $router->get(
+        '/vocabulary/apkg/import',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@importForm',
+        AUTH_MIDDLEWARE
+    );
+    $router->post(
+        '/vocabulary/apkg/import',
+        'Lwt\\Modules\\Vocabulary\\Http\\ApkgController@importForm',
+        AUTH_MIDDLEWARE
+    );
+
     // Review status change during review (iframe/ajax view).
     // NB: the dead text-reader frame routes (set-status, delete-term,
     // delete-multi, insert-wellknown, insert-ignore) are unregistered here —
