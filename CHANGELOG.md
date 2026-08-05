@@ -9,6 +9,25 @@ ones are marked like "v1.0.0-fork".
 
 ### Added
 
+* **FSRS scheduling groundwork** (#238, phase 2a): LWT now records real
+  spaced-repetition memory state — Stability, Difficulty and a due date per
+  term, plus an append-only review history — using **FSRS-6**, the algorithm
+  Anki uses. This phase is deliberately *additive and invisible*: the legacy
+  Leitner scoring keeps running untouched, nothing yet reads the new state to
+  pick review words, and **reading-view colours are unchanged**. `WoStatus`
+  stays manual and authoritative for display, because unlike Anki — where every
+  card is reviewed — reading is LWT's primary loop and many users never open the
+  review page; deriving colours from a scheduler they don't use would make words
+  they deliberately marked "known" drift back on their own. Existing terms are
+  seeded lazily on their first graded review, mapping each status to the
+  stability that reproduces its old interval (1/2/9/27/71 days), so upgrading
+  neither floods the queue nor costs anything on a large vocabulary. The
+  scheduler sits behind an interface and is a hand-port of `py-fsrs` v6.3.1
+  validated against 24 reference vectors generated from that exact release —
+  the official PHP binding needs a hand-compiled Rust extension, and the only
+  pure-PHP package on Packagist is a single-commit v0.1. That file carries the
+  reference implementation's MIT notice; the rest of LWT remains public domain.
+
 * **Anki `.apkg` export and import** (refs #228): terms round-trip to Anki as a
   real Anki package, written and read by LWT itself (no genanki, no Python) —
   `ApkgWriter`/`ApkgReader` build the SQLite collection and zip container

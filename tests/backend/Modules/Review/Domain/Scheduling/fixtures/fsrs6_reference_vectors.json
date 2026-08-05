@@ -1,0 +1,229 @@
+[
+  {
+    "name": "all_good",
+    "reviews": [
+      {
+        "grade": 3,
+        "advance_days": 0,
+        "retrievability_before": 0,
+        "stability": 2.3065,
+        "difficulty": 2.118103970459,
+        "interval_days": 2
+      },
+      {
+        "grade": 3,
+        "advance_days": 3,
+        "retrievability_before": 0.880947955766,
+        "stability": 13.826903694355,
+        "difficulty": 2.111214235785,
+        "interval_days": 14
+      },
+      {
+        "grade": 3,
+        "advance_days": 10,
+        "retrievability_before": 0.920684082573,
+        "stability": 47.452033728477,
+        "difficulty": 2.104331390846,
+        "interval_days": 47
+      }
+    ]
+  },
+  {
+    "name": "all_again",
+    "reviews": [
+      {
+        "grade": 1,
+        "advance_days": 0,
+        "retrievability_before": 0,
+        "stability": 0.212,
+        "difficulty": 6.4133,
+        "interval_days": 1
+      },
+      {
+        "grade": 1,
+        "advance_days": 1,
+        "retrievability_before": 0.766195730228,
+        "stability": 0.100885789821,
+        "difficulty": 8.806304468857,
+        "interval_days": 1
+      },
+      {
+        "grade": 1,
+        "advance_days": 1,
+        "retrievability_before": 0.693681760194,
+        "stability": 0.055034530118,
+        "difficulty": 9.59286876534,
+        "interval_days": 1
+      }
+    ]
+  },
+  {
+    "name": "hard_path",
+    "reviews": [
+      {
+        "grade": 2,
+        "advance_days": 0,
+        "retrievability_before": 0,
+        "stability": 1.2931,
+        "difficulty": 5.112170705601,
+        "interval_days": 1
+      },
+      {
+        "grade": 2,
+        "advance_days": 2,
+        "retrievability_before": 0.867367501757,
+        "stability": 4.46945534827,
+        "difficulty": 6.74045951083,
+        "interval_days": 4
+      },
+      {
+        "grade": 3,
+        "advance_days": 5,
+        "retrievability_before": 0.892110243127,
+        "stability": 13.120059931383,
+        "difficulty": 6.728947420616,
+        "interval_days": 13
+      }
+    ]
+  },
+  {
+    "name": "easy_path",
+    "reviews": [
+      {
+        "grade": 4,
+        "advance_days": 0,
+        "retrievability_before": 0,
+        "stability": 8.2956,
+        "difficulty": 1.0,
+        "interval_days": 8
+      },
+      {
+        "grade": 4,
+        "advance_days": 15,
+        "retrievability_before": 0.854487230786,
+        "stability": 95.507784291677,
+        "difficulty": 1.0,
+        "interval_days": 96
+      },
+      {
+        "grade": 3,
+        "advance_days": 40,
+        "retrievability_before": 0.948337087463,
+        "stability": 217.491789592754,
+        "difficulty": 1.0,
+        "interval_days": 217
+      }
+    ]
+  },
+  {
+    "name": "lapse_then_recover",
+    "reviews": [
+      {
+        "grade": 3,
+        "advance_days": 0,
+        "retrievability_before": 0,
+        "stability": 2.3065,
+        "difficulty": 2.118103970459,
+        "interval_days": 2
+      },
+      {
+        "grade": 3,
+        "advance_days": 7,
+        "retrievability_before": 0.808309940238,
+        "stability": 21.411391979982,
+        "difficulty": 2.111214235785,
+        "interval_days": 21
+      },
+      {
+        "grade": 1,
+        "advance_days": 9,
+        "retrievability_before": 0.94818240154,
+        "stability": 1.952053281067,
+        "difficulty": 7.392238132343,
+        "interval_days": 2
+      },
+      {
+        "grade": 3,
+        "advance_days": 1,
+        "retrievability_before": 0.939178195405,
+        "stability": 3.984164776141,
+        "difficulty": 7.380074263507,
+        "interval_days": 4
+      }
+    ]
+  },
+  {
+    "name": "same_day_repeat",
+    "reviews": [
+      {
+        "grade": 3,
+        "advance_days": 0,
+        "retrievability_before": 0,
+        "stability": 2.3065,
+        "difficulty": 2.118103970459,
+        "interval_days": 2
+      },
+      {
+        "grade": 3,
+        "advance_days": 0,
+        "retrievability_before": 1.0,
+        "stability": 2.3065,
+        "difficulty": 2.111214235785,
+        "interval_days": 2
+      },
+      {
+        "grade": 2,
+        "advance_days": 0,
+        "retrievability_before": 1.0,
+        "stability": 1.333378716804,
+        "difficulty": 4.748284761595,
+        "interval_days": 1
+      }
+    ]
+  },
+  {
+    "name": "mixed",
+    "reviews": [
+      {
+        "grade": 3,
+        "advance_days": 0,
+        "retrievability_before": 0,
+        "stability": 2.3065,
+        "difficulty": 2.118103970459,
+        "interval_days": 2
+      },
+      {
+        "grade": 2,
+        "advance_days": 4,
+        "retrievability_before": 0.857985789233,
+        "stability": 10.648376990077,
+        "difficulty": 4.752858488533,
+        "interval_days": 11
+      },
+      {
+        "grade": 4,
+        "advance_days": 12,
+        "retrievability_before": 0.8915822096,
+        "stability": 59.887280766199,
+        "difficulty": 2.984736681491,
+        "interval_days": 60
+      },
+      {
+        "grade": 1,
+        "advance_days": 30,
+        "retrievability_before": 0.940254547582,
+        "stability": 2.97795144376,
+        "difficulty": 7.679359020294,
+        "interval_days": 3
+      },
+      {
+        "grade": 3,
+        "advance_days": 2,
+        "retrievability_before": 0.924961761919,
+        "stability": 6.277857254672,
+        "difficulty": 7.66690803057,
+        "interval_days": 6
+      }
+    ]
+  }
+]
