@@ -77,7 +77,13 @@ The status mapping is intentionally one-way for 98/99 → suspended on export. W
 - **Note type:** a single LWT-defined type called *LWT Term*. Five fields, one card template (Term → Translation). Re-importing into Anki repeatedly does not create new note types — Anki dedupes on the type's id (`1607392319000`).
 - **Deck:** one Anki deck per LWT language, named `LWT::{LanguageName}`. The double-colon makes Anki nest it under a top-level `LWT` deck so all your LWT decks live under one parent.
 
+## Requirements
+
+An `.apkg` is a zip containing a SQLite collection, so this feature needs PHP's **`pdo_sqlite`** extension. It is compiled in by default on most Linux builds; on Windows and some shared hosts you may need to enable `extension=pdo_sqlite` in `php.ini` and restart PHP. If it is missing, export and import stop with a message telling you exactly that — nothing else in LWT is affected.
+
 ## Troubleshooting
+
+**"Anki .apkg support requires the pdo_sqlite PHP extension."** See [Requirements](#requirements) above — enable `extension=pdo_sqlite` in your `php.ini`.
 
 **"No terms to export for language X."** The language has zero terms. Add some by reading a text first.
 

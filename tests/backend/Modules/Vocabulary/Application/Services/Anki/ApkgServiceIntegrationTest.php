@@ -99,6 +99,9 @@ final class ApkgServiceIntegrationTest extends TestCase
 
     protected function setUp(): void
     {
+        if (!extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped('pdo_sqlite required to build an .apkg collection');
+        }
         if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
             $this->markTestSkipped('Database connection required');
         }

@@ -25,6 +25,13 @@ final class ApkgWriterReaderTest extends TestCase
 {
     private string $tmpFile = '';
 
+    protected function setUp(): void
+    {
+        if (!extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped('pdo_sqlite required to build an .apkg collection');
+        }
+    }
+
     protected function tearDown(): void
     {
         if ($this->tmpFile !== '' && is_file($this->tmpFile)) {

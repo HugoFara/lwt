@@ -26,6 +26,24 @@ final class AnkiSchema
     public const FIELD_LWT_ID = 'LwtId';
 
     /**
+     * An .apkg is a zipped SQLite collection, so the whole feature needs
+     * pdo_sqlite. It ships enabled on most Linux builds but not on stock
+     * Windows PHP, where the driver only surfaces as a bare
+     * "could not find driver" PDOException from deep inside the writer.
+     * Fail early with something a user can act on instead.
+     */
+    public static function assertSqliteAvailable(): void
+    {
+        if (!extension_loaded('pdo_sqlite')) {
+            throw new \RuntimeException(
+                'Anki .apkg support requires the pdo_sqlite PHP extension, which is not '
+                . 'enabled on this server. Enable extension=pdo_sqlite in your php.ini '
+                . 'and restart PHP.'
+            );
+        }
+    }
+
+    /**
      * Sequence of CREATE statements to build a fresh collection.anki21.
      *
      * @return list<string>

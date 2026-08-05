@@ -30,6 +30,8 @@ final class ApkgWriter
      */
     public function write(string $outputPath, ApkgDeck $deck, array $notes): void
     {
+        AnkiSchema::assertSqliteAvailable();
+
         $colDb = tempnam(sys_get_temp_dir(), 'lwt_apkg_');
         if ($colDb === false) {
             throw new RuntimeException('Could not allocate temp file for collection');

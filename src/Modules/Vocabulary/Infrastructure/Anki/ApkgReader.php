@@ -24,6 +24,8 @@ final class ApkgReader
      */
     public function read(string $apkgPath): array
     {
+        AnkiSchema::assertSqliteAvailable();
+
         if (!is_file($apkgPath)) {
             throw new RuntimeException("APKG file not found: {$apkgPath}");
         }
