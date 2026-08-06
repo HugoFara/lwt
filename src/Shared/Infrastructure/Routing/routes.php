@@ -160,15 +160,16 @@ function registerRoutes(Router $router): void
     // Split into focused controllers: TermEditController, TermDisplayController,
     // TermStatusController, TermApiController, TermImportController, MultiWordController
 
-    // Edit word (TermEditController)
-    $router->registerWithMiddleware(
+    // Edit word (TermEditController). The editor is client-rendered against
+    // /api/v1/terms/*, so these only ever serve a page — never a submission.
+    $router->get(
         '/word/edit',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWord',
         AUTH_MIDDLEWARE
     );
 
     // Edit term while testing (TermEditController)
-    $router->registerWithMiddleware(
+    $router->get(
         '/word/edit-term',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editTerm',
         AUTH_MIDDLEWARE
@@ -180,12 +181,6 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
         AUTH_MIDDLEWARE
     );
-    $router->post(
-        '/words/{id:int}/edit',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
-        AUTH_MIDDLEWARE
-    );
-
     // Delete word (RESTful route): DELETE /words/123
     $router->delete(
         '/words/{id:int}',

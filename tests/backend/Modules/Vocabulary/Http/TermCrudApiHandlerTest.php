@@ -967,6 +967,44 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertStringContainsString("return ['error' => 'Text not found']", $source);
     }
 
+    public function testCreateTermsBulkRejectsAnEmptyList(): void
+    {
+        $handler = new TermCrudApiHandler();
+
+        $this->assertArrayHasKey('error', $handler->createTermsBulk([]));
+        $this->assertArrayHasKey('error', $handler->createTermsBulk(['terms' => []]));
+        $this->assertArrayHasKey('error', $handler->createTermsBulk(['terms' => 'nope']));
+    }
+
+    public function testCreateTermsBulkRejectsRowsWithoutTextOrLanguage(): void
+    {
+        $handler = new TermCrudApiHandler();
+
+        // Every row is unusable, so nothing reaches the database.
+        $result = $handler->createTermsBulk(['terms' => [
+            ['text' => '', 'lg' => 3],
+            ['text' => 'ok', 'lg' => 0],
+            'not-an-array',
+        ]]);
+
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function testCreateTermsBulkLinksNewTermsToTheirOccurrences(): void
+    {
+        $source = $this->getMethodSource('createTermsBulk');
+
+        // Without this the reading view keeps rendering them as unknown.
+        $this->assertStringContainsString('linkNewWordsToTextItems', $source);
+    }
+
+    public function testCreateTermsBulkValidatesStatus(): void
+    {
+        $source = $this->getMethodSource('createTermsBulk');
+
+        $this->assertStringContainsString('TermStatusService::isValidStatus', $source);
+    }
+
     public function testGetTermForEditResolvesLanguageFromWordWhenWordIdGiven(): void
     {
         $source = $this->getMethodSource('getTermForEdit');

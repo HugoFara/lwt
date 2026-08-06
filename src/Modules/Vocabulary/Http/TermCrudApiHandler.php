@@ -26,6 +26,7 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
@@ -50,6 +51,7 @@ class TermCrudApiHandler
     private WordContextService $contextService;
     private WordDiscoveryService $discoveryService;
     private WordLinkingService $linkingService;
+    private WordBulkService $bulkService;
 
     /**
      * Constructor.
@@ -65,13 +67,15 @@ class TermCrudApiHandler
         ?FindSimilarTerms $findSimilarTerms = null,
         ?WordContextService $contextService = null,
         ?WordDiscoveryService $discoveryService = null,
-        ?WordLinkingService $linkingService = null
+        ?WordLinkingService $linkingService = null,
+        ?WordBulkService $bulkService = null
     ) {
         $this->facade = $facade ?? new VocabularyFacade();
         $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
         $this->contextService = $contextService ?? new WordContextService();
         $this->discoveryService = $discoveryService ?? new WordDiscoveryService();
         $this->linkingService = $linkingService ?? new WordLinkingService();
+        $this->bulkService = $bulkService ?? new WordBulkService();
     }
 
     // =========================================================================
@@ -866,6 +870,61 @@ class TermCrudApiHandler
                 'status' => $status,
                 'tags' => $tags
             ]
+        ];
+    }
+
+    /**
+     * Create several terms at once, as the bulk-translate page does.
+     *
+     * @param array $data Request body with a `terms` list of
+     *                    {lg, text, status, trans} entries
+     *
+     * @return array Response data
+     */
+    public function createTermsBulk(array $data): array
+    {
+        $rawTerms = $data['terms'] ?? null;
+        if (!is_array($rawTerms) || $rawTerms === []) {
+            return ['error' => 'No terms supplied'];
+        }
+
+        $terms = [];
+        /** @var mixed $row */
+        foreach ($rawTerms as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $text = trim((string) ($row['text'] ?? ''));
+            $langId = (int) ($row['lg'] ?? 0);
+            if ($text === '' || $langId <= 0) {
+                continue;
+            }
+            $status = (int) ($row['status'] ?? 1);
+            if (!TermStatusService::isValidStatus($status)) {
+                return ['error' => 'Status must be 1-5, 98, or 99'];
+            }
+            $terms[] = [
+                'lg' => $langId,
+                'text' => $text,
+                'status' => $status,
+                'trans' => trim((string) ($row['trans'] ?? '')),
+            ];
+        }
+
+        if ($terms === []) {
+            return ['error' => 'No terms supplied'];
+        }
+
+        $maxWoId = $this->bulkService->bulkSaveTerms($terms);
+        $newWords = $this->bulkService->getNewWordsAfter($maxWoId);
+
+        // Newly created terms have to be attached to their occurrences, or the
+        // reading view keeps showing them as unknown.
+        $this->linkingService->linkNewWordsToTextItems($maxWoId);
+
+        return [
+            'success' => true,
+            'saved' => count($newWords),
         ];
     }
 

@@ -84,12 +84,15 @@ $colStatus = __('vocabulary.upload.results.status');
 </article>
 <?php endif; ?>
 
-<div class="box"
-     x-data="wordUploadResultApp({
-         lastUpdate: '<?php echo htmlspecialchars($lastUpdate); ?>',
-         rtl: <?php echo $rtl ? 'true' : 'false'; ?>,
-         recno: <?php echo $recno; ?>
-     })">
+<script type="application/json" data-lwt-upload-result-config>
+<?php echo json_encode([
+    'lastUpdate' => $lastUpdate,
+    'rtl' => $rtl,
+    'recno' => $recno,
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
+</script>
+
+<div class="box" x-data="wordUploadResultApp">
 
     <!-- No terms message -->
     <template x-if="!hasTerms && !isLoading">
@@ -140,7 +143,7 @@ $colStatus = __('vocabulary.upload.results.status');
                                     <select
                                         class="select is-small"
                                         x-model="currentPage"
-                                        @change="goToPage(parseInt($event.target.value))"
+                                        @change="goToPageFromEvent($event)"
                                     >
                                         <template x-for="p in totalPages" :key="p">
                                             <option :value="p" x-text="p" :selected="p === currentPage"></option>

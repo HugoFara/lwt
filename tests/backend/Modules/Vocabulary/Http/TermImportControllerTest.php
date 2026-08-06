@@ -110,7 +110,6 @@ class TermImportControllerTest extends TestCase
         $reflection = new \ReflectionClass(TermImportController::class);
 
         $expectedMethods = [
-            'handleBulkSave',
             'displayBulkTranslateForm',
             'displayUploadForm',
             'handleUploadImport',
@@ -286,14 +285,17 @@ class TermImportControllerTest extends TestCase
     }
 
     #[Test]
-    public function handleBulkSaveParameterTypes(): void
+    public function bulkTranslateOnlyRendersTerms(): void
     {
-        $method = new \ReflectionMethod(TermImportController::class, 'handleBulkSave');
-        $params = $method->getParameters();
+        // Saving moved to POST /api/v1/terms/bulk, so no write path is left
+        // here and nothing renders a confirmation page.
+        $source = file_get_contents(
+            (new \ReflectionClass(TermImportController::class))->getFileName()
+        );
 
-        $this->assertCount(1, $params);
-        $this->assertSame('terms', $params[0]->getName());
-        $this->assertSame('array', $params[0]->getType()->getName());
+        $this->assertStringNotContainsString('handleBulkSave', $source);
+        $this->assertStringNotContainsString('bulk_save_result', $source);
+        $this->assertStringNotContainsString("InputValidator::getArray('term')", $source);
     }
 
     #[Test]

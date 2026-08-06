@@ -80,24 +80,10 @@ class TermImportController extends VocabularyBaseController
         $tid = InputValidator::getInt('tid', 0) ?? 0;
         $pos = InputValidator::getInt('offset');
 
-        // Handle form submission (save terms)
-        $termsArray = InputValidator::getArray('term');
-        if (!empty($termsArray)) {
-            /** @var array<int, array{lg: int, text: string, status: int, trans?: string}> $terms */
-            $terms = $termsArray;
-            $cnt = count($terms);
+        // Saving goes to POST /api/v1/terms/bulk and the next batch is a plain
+        // GET, so this only ever renders a batch of terms.
+        PageLayoutHelper::renderPageStartNobody('Translate New Words');
 
-            if ($pos !== null) {
-                $pos -= $cnt;
-            }
-
-            PageLayoutHelper::renderPageStart($cnt . ' New Word' . ($cnt == 1 ? '' : 's') . ' Saved', false);
-            $this->handleBulkSave($terms);
-        } else {
-            PageLayoutHelper::renderPageStartNobody('Translate New Words');
-        }
-
-        // Show next page of terms if there are more
         if ($pos !== null) {
             $sl = InputValidator::getString('sl');
             $tl = InputValidator::getString('tl');
@@ -105,30 +91,6 @@ class TermImportController extends VocabularyBaseController
         }
 
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Handle saving bulk translated terms.
-     *
-     * @param array<int, array{lg: int, text: string, status: int, trans?: string}> $terms Array of term data
-     *
-     * @return void
-     *
-     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
-     */
-    private function handleBulkSave(array $terms): void
-    {
-        $bulkService = $this->getBulkService();
-        $maxWoId = $bulkService->bulkSaveTerms($terms);
-
-        /** @var list<array<string, mixed>> $newWords */
-        $newWords = $bulkService->getNewWordsAfter($maxWoId);
-
-        // Link new words to text items
-        $linkingService = new \Lwt\Modules\Vocabulary\Application\Services\WordLinkingService();
-        $linkingService->linkNewWordsToTextItems($maxWoId);
-
-        include $this->viewPath . 'bulk_save_result.php';
     }
 
     /**

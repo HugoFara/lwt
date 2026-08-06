@@ -23,6 +23,22 @@ import { getStatusDefinitions } from '@shared/stores/statuses';
 import { createTheDictUrl } from '@modules/vocabulary/services/dictionary';
 import { t } from '@shared/i18n/translator';
 
+/**
+ * What the host does once the editor finishes.
+ *
+ * The modal closes itself; a full-page editor navigates away instead. Keeping
+ * these as callbacks is what lets one renderer serve both.
+ */
+interface EditorHost {
+  onSaved(): void;
+  onCancel(): void;
+}
+
+let host: EditorHost = {
+  onSaved: () => closeModal(),
+  onCancel: () => closeModal()
+};
+
 /** Current form context */
 let currentContext: {
   textId: number;
@@ -343,8 +359,8 @@ async function handleSave(e: Event): Promise<void> {
       throw new Error(response.error || response.data?.error || 'Failed to save');
     }
 
-    // Success - close modal and dispatch event for parent page to refresh
-    closeModal();
+    // Success - let the host decide what "done" looks like
+    host.onSaved();
 
     // Dispatch event to notify the host page to refresh
     if (response.data?.term) {
@@ -363,6 +379,78 @@ async function handleSave(e: Event): Promise<void> {
   if (saveBtn) {
     saveBtn.disabled = false;
     saveBtn.classList.remove('is-loading');
+  }
+}
+
+/** A loaded editor, ready for the host to insert. */
+export interface LoadedTermEditor {
+  html: string;
+  title: string;
+}
+
+/**
+ * Fetch a term and render its editor, without deciding where it goes.
+ *
+ * @param textId   Text ID (may be 0 when wordId is given)
+ * @param position Word position in text
+ * @param wordId   Word ID (optional, for existing terms)
+ *
+ * @returns The rendered editor, or the error to show instead
+ */
+export async function loadTermEditor(
+  textId: number,
+  position: number,
+  wordId?: number
+): Promise<{ ok: true; editor: LoadedTermEditor } | { ok: false; error: string }> {
+  try {
+    const response = await TermsApi.getForEdit(textId, position, wordId);
+
+    if (response.error || !response.data) {
+      return { ok: false, error: response.error || 'Failed to load term data' };
+    }
+    if (response.data.error) {
+      return { ok: false, error: response.data.error };
+    }
+
+    currentContext = {
+      textId,
+      position,
+      wordId: response.data.term.id,
+      isNew: response.data.isNew,
+      hex: response.data.term.hex,
+      textLc: response.data.term.textLc ?? ''
+    };
+
+    return {
+      ok: true,
+      editor: {
+        html: renderForm(response.data),
+        title: response.data.isNew
+          ? t('vocabulary.form.new_term')
+          : t('vocabulary.form.edit_term')
+      }
+    };
+  } catch {
+    return { ok: false, error: 'Failed to load term data' };
+  }
+}
+
+/**
+ * Attach the editor's handlers once its markup is in the document.
+ *
+ * @param hostHandlers What to do after a save, and on cancel
+ */
+export function wireTermEditor(hostHandlers: EditorHost): void {
+  host = hostHandlers;
+
+  const form = document.getElementById(FIELD.form);
+  const cancelBtn = document.getElementById(FIELD.cancel);
+
+  if (form) {
+    form.addEventListener('submit', handleSave);
+  }
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => host.onCancel());
   }
 }
 
@@ -385,58 +473,23 @@ export async function openTermEditModal(
     closeOnOverlayClick: false
   });
 
-  try {
-    const response = await TermsApi.getForEdit(textId, position, wordId);
+  const result = await loadTermEditor(textId, position, wordId);
 
-    if (response.error || !response.data) {
-      openModal(`<p class="has-text-danger">${escapeHtml(response.error || 'Failed to load term data')}</p>`, {
-        title: 'Error'
-      });
-      return;
-    }
-
-    if (response.data.error) {
-      openModal(`<p class="has-text-danger">${escapeHtml(response.data.error)}</p>`, {
-        title: 'Error'
-      });
-      return;
-    }
-
-    // Store context for save handler
-    currentContext = {
-      textId,
-      position,
-      wordId: response.data.term.id,
-      isNew: response.data.isNew,
-      hex: response.data.term.hex,
-      textLc: response.data.term.textLc ?? ''
-    };
-
-    // Render form
-    const title = response.data.isNew
-      ? t('vocabulary.form.new_term')
-      : t('vocabulary.form.edit_term');
-    openModal(renderForm(response.data), {
-      title,
-      closeOnEscape: true,
-      closeOnOverlayClick: false
-    });
-
-    // Attach event listeners
-    const form = document.getElementById(FIELD.form);
-    const cancelBtn = document.getElementById(FIELD.cancel);
-
-    if (form) {
-      form.addEventListener('submit', handleSave);
-    }
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', () => closeModal());
-    }
-  } catch {
-    openModal('<p class="has-text-danger">Failed to load term data</p>', {
-      title: 'Error'
-    });
+  if (!result.ok) {
+    openModal(`<p class="has-text-danger">${escapeHtml(result.error)}</p>`, { title: 'Error' });
+    return;
   }
+
+  openModal(result.editor.html, {
+    title: result.editor.title,
+    closeOnEscape: true,
+    closeOnOverlayClick: false
+  });
+
+  wireTermEditor({
+    onSaved: () => closeModal(),
+    onCancel: () => closeModal()
+  });
 }
 
 // Expose for global access (needed for inline onclick handlers)
