@@ -7,6 +7,24 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Changed
+
+* **EPUB import no longer depends on an external Composer package** (#263):
+  LWT now ships its own EPUB reader
+  (`src/Modules/Book/Infrastructure/Epub/`), replacing `kiwilan/php-ebook`.
+  It reads the OCF container, the OPF package document, and both flavours of
+  table of contents — the EPUB 2 NCX and the EPUB 3 navigation document — which
+  is everything the importer consumed. Dropping it also removed four transitive
+  dependencies (`kiwilan/php-archive`, `kiwilan/php-xml-reader`,
+  `smalot/pdfparser`, `spatie/temporary-directory`), taking `composer.lock` from
+  20 packages to 15. Parsing relies only on `ext-zip` and `ext-dom`, both
+  already required. XML is parsed with entity substitution off and network
+  access disabled, so a hostile EPUB cannot mount an XXE attack.
+
+  Note that this does not by itself remove the need to run `composer install`
+  from a source checkout — `phpmailer/phpmailer`, `league/oauth2-google` and
+  `thenetworg/oauth2-azure` are still required.
+
 ## [3.3.0-fork] - 2026-08-06
 
 ### Added
