@@ -103,7 +103,40 @@ sudo systemctl restart httpd  # or nginx</code></pre>
 </div>
 <?php endif; ?>
 
-<form enctype="multipart/form-data" class="validate" action="/book/import" method="post"<?php echo $formStyle; ?>>
+<div x-data="epubImportForm">
+
+<!-- Import outcome, rendered from the API response instead of a result page -->
+<template x-if="isDone">
+<div>
+    <h2 class="title is-4"><?php echo __('book.import_result_title'); ?></h2>
+
+    <div class="notification" :class="messageType">
+        <span x-text="message"></span>
+    </div>
+
+    <div class="buttons">
+        <template x-if="hasBook()">
+            <a :href="bookUrl()" class="button is-primary">
+                <?php echo IconHelper::render('book', ['alt' => __('book.view_book')]); ?>
+                <span class="ml-2"><?php echo __('book.view_book'); ?></span>
+            </a>
+        </template>
+
+        <a href="/texts/new" class="button is-info is-outlined">
+            <?php echo IconHelper::render('upload', ['alt' => __('book.import_another_epub')]); ?>
+            <span class="ml-2"><?php echo __('book.import_another_epub'); ?></span>
+        </a>
+
+        <a href="/books" class="button is-light">
+            <?php echo IconHelper::render('library', ['alt' => __('book.all_books')]); ?>
+            <span class="ml-2"><?php echo __('book.all_books'); ?></span>
+        </a>
+    </div>
+</div>
+</template>
+
+<form enctype="multipart/form-data" class="validate" method="post"
+      x-show="!isDone" @submit.prevent="submit"<?php echo $formStyle; ?>>
     <?php echo FormHelper::csrfField(); ?>
 
     <div class="box">
@@ -135,7 +168,6 @@ sudo systemctl restart httpd  # or nginx</code></pre>
                     <?php echo IconHelper::render('asterisk', ['alt' => __('common.required_field')]); ?>
                 </span>
             </label>
-            <?php $noFile = htmlspecialchars(__('book.no_file_selected'), ENT_QUOTES); ?>
             <div class="file has-name is-fullwidth">
                 <label class="file-label">
                     <input class="file-input"
@@ -143,15 +175,15 @@ sudo systemctl restart httpd  # or nginx</code></pre>
                            name="thefile"
                            accept=".epub"
                            required
-                           @change="document.getElementById('filename').textContent =
-                               $el.files[0]?.name || '<?php echo $noFile; ?>'" />
+                           @change="updateFileName($event)" />
                     <span class="file-cta">
                         <span class="file-icon">
                             <?php echo IconHelper::render('upload', ['alt' => __('common.upload')]); ?>
                         </span>
                         <span class="file-label"><?php echo __('book.choose_epub_file'); ?></span>
                     </span>
-                    <span class="file-name" id="filename"><?php echo __('book.no_file_selected'); ?></span>
+                    <span class="file-name" id="filename"
+                          x-text="fileName"><?php echo __('book.no_file_selected'); ?></span>
                 </label>
             </div>
             <p class="help">
@@ -197,10 +229,14 @@ sudo systemctl restart httpd  # or nginx</code></pre>
         </div>
         <div class="control">
             <button type="submit" name="op" value="Import"
-                    class="button is-primary"<?php echo $submitDisabled; ?>>
+                    class="button is-primary"
+                    :class="submitButtonClass()"
+                    :disabled="isSubmitting"<?php echo $submitDisabled; ?>>
                 <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
                 <span class="ml-2"><?php echo __('book.import_epub'); ?></span>
             </button>
         </div>
     </div>
 </form>
+
+</div>

@@ -94,7 +94,7 @@ class Endpoints
         'feeds/list' => ['GET'],
         'feeds/articles' => ['GET'],
         'feeds/articles/import' => ['POST'],
-        'books' => ['GET'],
+        'books' => ['GET', 'POST'],
         'books/chapters' => ['GET'],
         'books/progress' => ['PUT'],
         'local-dictionaries' => ['GET', 'POST', 'PUT', 'DELETE'],

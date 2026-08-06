@@ -635,15 +635,17 @@ class BookApiHandlerTest extends TestCase
     }
 
     // =========================================================================
-    // routePost tests (uses trait default - 405)
+    // routePost tests (EPUB import)
     // =========================================================================
 
     #[Test]
-    public function routePostReturnsMethodNotAllowed(): void
+    public function routePostHandlesTheCollection(): void
     {
+        // No language in the body, so this is the handled-failure path rather
+        // than the trait's old 405 — POST /books is a real endpoint now.
         $response = $this->handler->routePost([], []);
 
-        $this->assertSame(405, $response->getStatusCode());
+        $this->assertSame(200, $response->getStatusCode());
     }
 
     // =========================================================================
@@ -724,10 +726,124 @@ class BookApiHandlerTest extends TestCase
         $this->assertSame('array', $method->getReturnType()->getName());
     }
 
+    // =========================================================================
+    // importBook tests
+    // =========================================================================
+
+    #[Test]
+    public function importBookRejectsMissingLanguage(): void
+    {
+        $this->bookFacade->expects($this->never())->method('importEpub');
+
+        $result = $this->handler->importBook([]);
+
+        $this->assertFalse($result['success']);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    #[Test]
+    public function importBookRejectsNonPositiveLanguage(): void
+    {
+        $this->bookFacade->expects($this->never())->method('importEpub');
+
+        $result = $this->handler->importBook(['LgID' => '0', 'TxLgID' => '-3']);
+
+        $this->assertFalse($result['success']);
+    }
+
+    #[Test]
+    public function importBookRejectsMissingFile(): void
+    {
+        // A language is present, so this can only fail on the absent upload.
+        $_FILES = [];
+        $this->bookFacade->expects($this->never())->method('importEpub');
+
+        $result = $this->handler->importBook(['LgID' => '2']);
+
+        $this->assertFalse($result['success']);
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    #[Test]
+    public function importBookAcceptsTxLgIdAliasFromTextsNew(): void
+    {
+        // /texts/new posts the language as TxLgID rather than LgID; reaching
+        // the file check proves the alias resolved to a usable language.
+        $_FILES = [];
+
+        $result = $this->handler->importBook(['TxLgID' => '7']);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringNotContainsString('language', strtolower((string) $result['error']));
+    }
+
+    #[Test]
+    public function importBookReadsEitherFileFieldName(): void
+    {
+        // /book/import names the input 'thefile', /texts/new 'importFile'.
+        $source = file_get_contents(
+            (new \ReflectionClass(BookApiHandler::class))->getFileName()
+        );
+
+        $this->assertStringContainsString("getUploadedFile('thefile')", $source);
+        $this->assertStringContainsString("getUploadedFile('importFile')", $source);
+    }
+
+    #[Test]
+    public function parseTagIdsHandlesACommaSeparatedString(): void
+    {
+        $this->assertSame([3, 7, 12], $this->parseTagIds('3,7,12'));
+        $this->assertSame([3, 7], $this->parseTagIds(' 3 , 7 '));
+    }
+
+    #[Test]
+    public function parseTagIdsHandlesAnArray(): void
+    {
+        // Tagify replaces the text input with its own multi-value control, so
+        // the field arrives as an array. Casting that to string raises a
+        // warning the exception handler turns into a 500.
+        $this->assertSame([4, 9], $this->parseTagIds(['4', '9']));
+        $this->assertSame([4, 9], $this->parseTagIds([4, 9]));
+    }
+
+    #[Test]
+    public function parseTagIdsDropsEmptyAndNonNumericEntries(): void
+    {
+        $this->assertSame([], $this->parseTagIds(''));
+        $this->assertSame([], $this->parseTagIds(null));
+        $this->assertSame([], $this->parseTagIds([]));
+        $this->assertSame([5], $this->parseTagIds(['', '5', 'abc', '0']));
+    }
+
+    /**
+     * Call the private tag parser.
+     *
+     * @param mixed $raw Posted TextTags value
+     *
+     * @return int[]
+     */
+    private function parseTagIds(mixed $raw): array
+    {
+        $method = new \ReflectionMethod(BookApiHandler::class, 'parseTagIds');
+
+        /** @var int[] $result */
+        $result = $method->invoke($this->handler, $raw);
+
+        return $result;
+    }
+
+    #[Test]
+    public function routePostRejectsSubResources(): void
+    {
+        $response = $this->handler->routePost(['books', '12'], []);
+
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
     #[Test]
     public function routeMethodsReturnJsonResponse(): void
     {
-        $methods = ['routeGet', 'routePut', 'routeDelete'];
+        $methods = ['routeGet', 'routePost', 'routePut', 'routeDelete'];
         foreach ($methods as $methodName) {
             $method = new \ReflectionMethod(BookApiHandler::class, $methodName);
             $this->assertSame(

@@ -122,7 +122,10 @@ class BookController
     }
 
     /**
-     * Show EPUB import form or handle import submission.
+     * Show the EPUB import form.
+     *
+     * The upload itself goes to POST /api/v1/books and the outcome is
+     * rendered client-side, so this only ever serves the form.
      *
      * @param array<string, mixed> $params Route parameters
      *
@@ -130,14 +133,6 @@ class BookController
      */
     public function import(array $params): void
     {
-        $op = InputValidator::getString('op');
-
-        if ($op === 'Import') {
-            $this->processImport();
-            return;
-        }
-
-        // Show import form
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
         $languages = $languageFacade->getLanguagesForSelect();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, null, __('book.choose_option'));
@@ -147,83 +142,6 @@ class BookController
 
         PageLayoutHelper::renderPageStart(__('book.import_epub'), true, 'books');
         include $this->viewPath . 'import_epub_form.php';
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Process EPUB import submission.
-     *
-     * @return void
-     */
-    private function processImport(): void
-    {
-        // Accept both the legacy /book/import field names (LgID, thefile) and the
-        // /texts/new form's names (TxLgID, importFile) so the inline EPUB flow
-        // can post here without renaming any client-side fields.
-        $languageId = InputValidator::getInt('LgID');
-        if ($languageId <= 0) {
-            $languageId = InputValidator::getInt('TxLgID');
-        }
-        $overrideTitle = InputValidator::getString('TxTitle');
-        $uploadedFile = InputValidator::getUploadedFile('thefile')
-            ?? InputValidator::getUploadedFile('importFile');
-        $userId = Globals::getCurrentUserId();
-
-        // Get tag IDs if any
-        $tagIds = [];
-        $tagList = InputValidator::getString('TextTags');
-        if ($tagList !== '') {
-            $tagIds = array_map('intval', explode(',', $tagList));
-        }
-
-        if ($languageId <= 0) {
-            $message = __('book.flash.select_language');
-            $messageType = 'is-danger';
-            $this->showImportResult($message, $messageType, null);
-            return;
-        }
-
-        if ($uploadedFile === null || !isset($uploadedFile['tmp_name']) || $uploadedFile['tmp_name'] === '') {
-            $message = __('book.flash.select_epub');
-            $messageType = 'is-danger';
-            $this->showImportResult($message, $messageType, null);
-            return;
-        }
-
-        $result = $this->bookFacade->importEpub(
-            $languageId,
-            $uploadedFile,
-            $overrideTitle !== '' ? $overrideTitle : null,
-            $tagIds,
-            $userId
-        );
-
-        if ($result['success']) {
-            $message = $result['message'];
-            $messageType = 'is-success';
-            $bookId = $result['bookId'];
-        } else {
-            $message = $result['message'];
-            $messageType = 'is-danger';
-            $bookId = null;
-        }
-
-        $this->showImportResult($message, $messageType, $bookId);
-    }
-
-    /**
-     * Show import result page.
-     *
-     * @param string   $message     Result message
-     * @param string   $messageType Bulma notification class
-     * @param int|null $bookId      Book ID if successful
-     *
-     * @return void
-     */
-    private function showImportResult(string $message, string $messageType, ?int $bookId): void
-    {
-        PageLayoutHelper::renderPageStart(__('book.import_result_title'), true, 'books');
-        include $this->viewPath . 'import_result.php';
         PageLayoutHelper::renderPageEnd();
     }
 
