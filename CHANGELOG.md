@@ -36,6 +36,14 @@ ones are marked like "v1.0.0-fork".
 
 ### Fixed
 
+* **Selecting several words in the reader produced a term named after hashes**:
+  creating a multi-word term captured each word's `data_hex` identity token
+  instead of its text, so the term came out as e.g.
+  "e6967a5826fe441a 75e3090289e2955d" and the example sentence lost its
+  `{...}` markers. `data_hex` used to be a reversible hex encoding of the word,
+  which is why reading it once worked; it became a SHA-256 derived token in
+  3.2.0 (#237) and this call site was never updated.
+
 * **The "edit term" button in the review table went nowhere** (#266): it pointed
   at `edit_tword.php`, a filename that stopped being routed in v3, and opened it
   in a frame the reader no longer renders. It now links to `/word/edit-term`,

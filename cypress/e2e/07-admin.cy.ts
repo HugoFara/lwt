@@ -30,20 +30,21 @@ describe('Admin Pages', () => {
   });
 
   describe('Statistics', () => {
-    it('should load statistics page', () => {
+    it('should redirect the legacy /admin/statistics URL to the per-user page', () => {
+      // Statistics became per-user; /admin/statistics is kept as a redirect.
       cy.visit('/admin/statistics');
-      cy.url().should('include', '/admin/statistics');
+      cy.url().should('include', '/profile/statistics');
       cy.get('body').should('be.visible');
     });
 
     it('should show statistics sections', () => {
-      cy.visit('/admin/statistics');
+      cy.visit('/profile/statistics');
       // The statistics page uses Chart.js with box/card sections
       cy.get('.box, [x-data="statisticsApp()"]').should('exist');
     });
 
     it('should show statistics data', () => {
-      cy.visit('/admin/statistics');
+      cy.visit('/profile/statistics');
       // Statistics page has JSON data for charts with language statistics
       cy.get('#statistics-intensity-data, #statistics-frequency-data, canvas').should('exist');
     });

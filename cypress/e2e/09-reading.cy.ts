@@ -27,8 +27,10 @@ describe('Reading Interface', () => {
       }
     });
 
-    // Wait for page to load
-    cy.url().should('include', '/text/read');
+    // Accept both the RESTful `/text/{id}/read` and the legacy
+    // `/text/read?start={id}` form — which of the two we land on depends on
+    // whether the list had a text to click or we used the fallback below.
+    cy.url().should('match', /\/text\/(\d+\/)?read/);
     cy.wait(500);
   };
 
@@ -58,6 +60,49 @@ describe('Reading Interface', () => {
   });
 
   describe('Multi-Word Selection', () => {
+    // These tests select the first two words of the first sentence and turn
+    // them into a multi-word term. That term persists, and on the next run the
+    // reader renders it as one span covering both words — so the "first two
+    // words" become an overlapping pair and the selection yields nothing.
+    // Without this reset the suite passes exactly once per fresh database.
+    //
+    // Deleting the term is not sufficient, and checking for one is not a valid
+    // guard: the multi-word *span* lives in the text's parsed items and
+    // survives the term with wordId=null, so a run can have zero multi-word
+    // terms and still render the span. Only a reparse drops it.
+    //
+    // Runs once rather than per test, because these tests deliberately chain —
+    // one creates the term and a later one re-selects it to exercise the
+    // existing-term path, which per-test cleanup would break.
+    before(() => {
+      cy.request({ url: '/api/v1/terms/list', qs: { count: 500 }, failOnStatusCode: false })
+        .then((res) => {
+          const words = (res.body?.words ?? []) as Array<{ id: number; text: string }>;
+          words
+            .filter((w) => /\s/.test(w.text ?? ''))
+            .forEach((w) => {
+              cy.apiRequest({
+                method: 'DELETE',
+                url: `/api/v1/terms/${w.id}`,
+                failOnStatusCode: false
+              });
+            });
+        });
+
+      cy.request({ url: '/api/v1/languages', failOnStatusCode: false }).then((langRes) => {
+        const langs = (langRes.body?.languages ?? []) as Array<{ id: number; textCount: number }>;
+        langs
+          .filter((l) => l.textCount > 0)
+          .forEach((l) => {
+            cy.apiRequest({
+              method: 'POST',
+              url: `/api/v1/languages/${l.id}/refresh`,
+              failOnStatusCode: false
+            });
+          });
+      });
+    });
+
     beforeEach(() => {
       visitReadingPage();
       // Wait for text to be fully rendered
@@ -268,14 +313,21 @@ describe('Reading Interface', () => {
     });
 
     it('should show multi-word text with spaces in modal', () => {
-      // Get a sentence with at least 2 words
       cy.get('#thetext [id^="sent_"]').first().as('sentence');
-      cy.get('@sentence').find('.wsty').should('have.length.at.least', 2);
 
-      // Get the first two words
-      cy.get('@sentence').find('.wsty').then(($words) => {
-        const firstWord = $words[0];
-        const secondWord = $words[1];
+      // By the time this runs the earlier tests have created a multi-word term
+      // over the first two words, so `.wsty` index 0 is that combined span and
+      // index 1 is its own first word — an overlapping pair that selects
+      // nothing. Restrict to plain single-word spans (`data_code` is only set
+      // on multi-word spans) and take the last adjacent pair, which the
+      // earlier tests never touch.
+      cy.get('@sentence')
+        .find('.wsty:not([data_code])')
+        .should('have.length.at.least', 2);
+
+      cy.get('@sentence').find('.wsty:not([data_code])').then(($singles) => {
+        const firstWord = $singles[$singles.length - 2];
+        const secondWord = $singles[$singles.length - 1];
 
         // Create a text selection spanning both words
         cy.window().then((win) => {

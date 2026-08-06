@@ -75,12 +75,17 @@ function getSelectedWords(container: HTMLElement): HTMLElement[] {
  * Get the surface text of a single word span, ignoring any inline annotation
  * children (e.g. <span class="word-ann"> that renders the translation hint).
  *
- * Prefers data_hex (canonical surface form set server-side); falls back to
- * the first text-node child when missing.
+ * Do NOT read `data_hex` here. It used to be a reversible hex encoding of the
+ * surface, which made it a legitimate source; since #237 it is a SHA-256
+ * derived identity token, so using it yielded terms literally named
+ * "e6967a5826fe441a 75e3090289e2955d".
+ *
+ * `data_text` carries the surface for multi-word spans, whose own text content
+ * is the word count in "show all" mode. Everything else reads its text nodes.
  */
 function getWordSurface(el: HTMLElement): string {
-  const hex = el.getAttribute('data_hex');
-  if (hex !== null && hex !== '') return hex;
+  const dataText = el.getAttribute('data_text');
+  if (dataText !== null && dataText !== '') return dataText;
   for (const node of Array.from(el.childNodes)) {
     if (node.nodeType === Node.TEXT_NODE) {
       const t = node.textContent;
