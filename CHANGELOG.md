@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.3.0-fork] - 2026-08-06
+
 ### Added
 
 * **Import an Anki deck to seed known words** (#228): point LWT at a deck you
@@ -48,6 +50,20 @@ ones are marked like "v1.0.0-fork".
   at `edit_tword.php`, a filename that stopped being routed in v3, and opened it
   in a frame the reader no longer renders. It now links to `/word/edit-term`,
   the same route the Alpine review view already used.
+
+### Removed
+
+* **Dead legacy result-view plumbing** (#266): four result handlers
+  (`delete_result`, `insert_wellknown_result`, `insert_ignore_result`,
+  `delete_multi_result`) outlived the views that once fed them, and
+  `word_status_ajax.ts` waited on a `#word-status-config` element no page has
+  emitted since the frame reader was retired. Dropping them plus their now
+  orphaned DOM helpers removes ~1000 lines. No behaviour change — none of it
+  could run.
+
+## [3.2.2-fork] - 2026-08-05
+
+### Fixed
 
 * **A single-language install could never browse Gutenberg or GDL**: the
   new-text page said "Please select a language above" while the navbar already
@@ -138,16 +154,6 @@ ones are marked like "v1.0.0-fork".
   Replaces the 2011 `¤`/hex encoder whose per-byte vs. per-codepoint confusion
   PHP 8.5 surfaced by deprecating `ord()` on multi-byte strings. No API or
   styling change.
-
-### Removed
-
-* **Dead legacy result-view plumbing** (#266): four result handlers
-  (`delete_result`, `insert_wellknown_result`, `insert_ignore_result`,
-  `delete_multi_result`) outlived the views that once fed them, and
-  `word_status_ajax.ts` waited on a `#word-status-config` element no page has
-  emitted since the frame reader was retired. Dropping them plus their now
-  orphaned DOM helpers removes ~1000 lines. No behaviour change — none of it
-  could run.
 
 ## [3.2.1-fork] - 2026-06-30
 
