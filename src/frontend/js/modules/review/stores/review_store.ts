@@ -10,6 +10,7 @@
 
 import Alpine from 'alpinejs';
 import { ReviewApi } from '@modules/review/api/review_api';
+import { successSound, failureSound } from '@shared/utils/audio_feedback';
 
 /**
  * Language settings for the review.
@@ -498,14 +499,10 @@ function createReviewStore(initialValues?: ReviewStoreInitialValues): ReviewStor
      * Play success or failure sound.
      */
     playSound(correct: boolean): void {
-      const soundId = correct ? 'success_sound' : 'failure_sound';
-      const audio = document.getElementById(soundId) as HTMLAudioElement | null;
-      if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(() => {
-          // Ignore autoplay errors
-        });
-      }
+      const play = correct ? successSound : failureSound;
+      play().catch(() => {
+        // Ignore autoplay errors
+      });
     },
 
     /**

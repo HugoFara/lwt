@@ -841,6 +841,7 @@ describe('review/stores/review_store.ts', () => {
       const store = getReviewStore();
       const mockAudio = {
         currentTime: 10,
+        pause: vi.fn(),
         play: vi.fn().mockResolvedValue(undefined)
       };
       vi.spyOn(document, 'getElementById').mockImplementation((id) => {
@@ -858,6 +859,7 @@ describe('review/stores/review_store.ts', () => {
       const store = getReviewStore();
       const mockAudio = {
         currentTime: 10,
+        pause: vi.fn(),
         play: vi.fn().mockResolvedValue(undefined)
       };
       vi.spyOn(document, 'getElementById').mockImplementation((id) => {
@@ -883,6 +885,7 @@ describe('review/stores/review_store.ts', () => {
       const store = getReviewStore();
       const mockAudio = {
         currentTime: 0,
+        pause: vi.fn(),
         play: vi.fn().mockRejectedValue(new Error('Autoplay blocked'))
       };
       vi.spyOn(document, 'getElementById').mockReturnValue(

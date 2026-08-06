@@ -18,10 +18,6 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_status', () =
   createWordTooltip: vi.fn((word, trans, rom, status) => `${word}|${trans}|${rom}|${status}`)
 }));
 
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  cleanupRightFrames: vi.fn()
-}));
-
 import { resetSettingsConfig } from '../../../src/frontend/js/shared/utils/settings_config';
 
 describe('word_dom_updates.ts', () => {
