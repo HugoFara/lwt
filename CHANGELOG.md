@@ -7,6 +7,60 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.3.0-fork] - 2026-08-06
+
+### Added
+
+* **Import an Anki deck to seed known words** (#228): point LWT at a deck you
+  already study in Anki and it creates the terms for you, working out how well
+  you know each word from Anki's own scheduling — mature cards become *well
+  known*, younger ones get a learning status, suspended ones become *ignored*.
+  You pick the note type, which field holds the term, and the language, since an
+  `.apkg` records none of that. Importing is create-only, so running it twice is
+  safe. This is the direction #259 did **not** cover: that one round-trips LWT's
+  own exports and silently matches nothing in a deck built in Anki. See
+  `docs/reference/anki-deck-import`.
+
+* **FSRS scheduling groundwork** (#238, phase 2a): LWT now records FSRS-6 memory
+  state per term — stability, difficulty, due date and a review history.
+  Nothing user-visible changes yet: the legacy scoring still drives the review
+  queue and reading colours are untouched. Existing terms seed lazily from their
+  status, so upgrading neither floods the queue nor costs anything on a large
+  vocabulary. See `docs/developer/term-status-fsrs`.
+
+* **Anki `.apkg` export and import** (refs #228): terms round-trip to Anki as a
+  real `.apkg`, written and read by LWT itself — no genanki, no Python. Export a
+  whole language or just the rows you ticked, from the vocabulary list. Notes
+  carry a stable guid, so re-importing updates the terms they came from
+  (translation, romanization, notes, tags) and a card suspended in Anki demotes
+  a learning term to *Ignored*. Scheduling state is deliberately not exchanged.
+  See `docs/reference/anki-export-import`.
+
+### Fixed
+
+* **Selecting several words in the reader produced a term named after hashes**:
+  creating a multi-word term captured each word's `data_hex` identity token
+  instead of its text, so the term came out as e.g.
+  "e6967a5826fe441a 75e3090289e2955d" and the example sentence lost its
+  `{...}` markers. `data_hex` used to be a reversible hex encoding of the word,
+  which is why reading it once worked; it became a SHA-256 derived token in
+  3.2.0 (#237) and this call site was never updated.
+
+* **The "edit term" button in the review table went nowhere** (#266): it pointed
+  at `edit_tword.php`, a filename that stopped being routed in v3, and opened it
+  in a frame the reader no longer renders. It now links to `/word/edit-term`,
+  the same route the Alpine review view already used.
+
+### Removed
+
+* **Dead legacy result-view plumbing** (#266): four result handlers
+  (`delete_result`, `insert_wellknown_result`, `insert_ignore_result`,
+  `delete_multi_result`) outlived the views that once fed them, and
+  `word_status_ajax.ts` waited on a `#word-status-config` element no page has
+  emitted since the frame reader was retired. Dropping them plus their now
+  orphaned DOM helpers removes ~1000 lines. No behaviour change — none of it
+  could run.
+
 ## [3.2.2-fork] - 2026-08-05
 
 ### Fixed

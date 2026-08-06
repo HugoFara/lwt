@@ -150,33 +150,6 @@ export function updateWordStatusInDOM(
 }
 
 /**
- * Delete a word from the DOM (reset to unknown/status0 state).
- *
- * @param wid Word ID
- * @param term Term text
- */
-export function deleteWordFromDOM(wid: number, term: string): void {
-  const context = getParentContext();
-
-  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(elem => {
-    const ann = elem.getAttribute('data_ann') ?? '';
-    const trans = elem.getAttribute('data_trans') ?? '';
-    const rom = elem.getAttribute('data_rom') ?? '';
-    const combinedTrans = ann + (ann ? ' / ' : '') + trans;
-    const title = createWordTooltip(term, combinedTrans, rom, '0');
-
-    elem.classList.remove('status99', 'status98', 'status1', 'status2', 'status3', 'status4', 'status5', `word${wid}`);
-    elem.classList.add('status0');
-    elem.setAttribute('data_status', '0');
-    elem.setAttribute('data_trans', '');
-    elem.setAttribute('data_rom', '');
-    elem.setAttribute('data_wid', '');
-    elem.title = title;
-    elem.removeAttribute('data_img');
-  });
-}
-
-/**
  * Mark a word as well-known (status 99) in the DOM.
  *
  * @param wid Word ID
@@ -251,44 +224,6 @@ export function updateMultiWordInDOM(
   });
 }
 
-/**
- * Delete a multi-word expression from the DOM.
- *
- * @param wid Word ID
- * @param showAll Whether to show all words (affects visibility of sub-words)
- */
-export function deleteMultiWordFromDOM(wid: number, showAll: boolean): void {
-  const context = getParentContext();
-
-  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(wordEl => {
-    const sid = wordEl.parentElement;
-    wordEl.remove();
-
-    if (!showAll && sid) {
-      // Show all hidden elements
-      sid.querySelectorAll<HTMLElement>('*').forEach(el => {
-        el.classList.remove('hide');
-      });
-
-      // Re-hide elements based on multi-word expression rules
-      sid.querySelectorAll<HTMLElement>('.mword').forEach(mword => {
-        if (!mword.classList.contains('hide')) {
-          const code = parseInt(mword.getAttribute('data_code') ?? '0', 10);
-          const order = parseInt(mword.getAttribute('data_order') ?? '0', 10);
-          const u = code * 2 + order - 1;
-
-          // Hide all siblings until we find the end marker
-          let sibling = mword.nextElementSibling as HTMLElement | null;
-          while (sibling && !sibling.id?.startsWith(`ID-${u}-`)) {
-            sibling.classList.add('hide');
-            sibling = sibling.nextElementSibling as HTMLElement | null;
-          }
-        }
-      });
-    }
-  });
-}
-
 export interface BulkWordUpdateParams {
   WoID: number;
   WoTextLC: string;
@@ -323,35 +258,6 @@ export function updateBulkWordInDOM(term: BulkWordUpdateParams, useTooltip: bool
     } else {
       el.title = '';
     }
-  });
-}
-
-/**
- * Update word for hover save operation.
- *
- * @param wid Word ID
- * @param hex Hex class identifier
- * @param status Word status
- * @param translation Translation text
- * @param wordRaw Raw word text
- */
-export function updateHoverSaveInDOM(
-  wid: number,
-  hex: string,
-  status: number | string,
-  translation: string,
-  wordRaw: string
-): void {
-  const context = getParentContext();
-  const title = createWordTooltip(wordRaw, translation, '', String(status));
-
-  context.querySelectorAll<HTMLElement>(`[data_hex="${hex}"]`).forEach(el => {
-    el.classList.remove('status0');
-    el.classList.add(`status${status}`, `word${wid}`);
-    el.setAttribute('data_status', String(status));
-    el.setAttribute('data_wid', String(wid));
-    el.title = title;
-    el.setAttribute('data_trans', translation);
   });
 }
 

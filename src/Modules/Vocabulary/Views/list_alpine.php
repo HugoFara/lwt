@@ -178,7 +178,12 @@ echo PageLayoutHelper::buildActionCard([
             <div class="column is-narrow">
                 <div class="dropdown" :class="columnsOpen ? 'is-active' : ''">
                     <div class="dropdown-trigger">
-                        <button type="button" class="button is-small" @click="toggleColumnsDropdown()" @click.outside="closeColumnsDropdown()">
+                        <button
+                            type="button"
+                            class="button is-small"
+                            @click="toggleColumnsDropdown()"
+                            @click.outside="closeColumnsDropdown()"
+                        >
                             <span><?= __('vocabulary.list.columns') ?></span>
                             <span class="icon is-small">
                                 <?php
@@ -319,6 +324,10 @@ echo PageLayoutHelper::buildActionCard([
                                     <option value="alladdtag"><?= __('vocabulary.multi.add_tag') ?></option>
                                     <option value="alldeltag"><?= __('vocabulary.multi.remove_tag') ?></option>
                                 </optgroup>
+                                <optgroup label="<?= $grpExport ?>">
+                                    <option value="allexpapkg"><?= __('vocabulary.multi.export_apkg_all') ?></option>
+                                    <option value="allimpapkg"><?= __('vocabulary.multi.import_apkg') ?></option>
+                                </optgroup>
                                 <optgroup label="<?= $grpDanger ?>">
                                     <option value="alldel"><?= __('vocabulary.multi.delete_all') ?></option>
                                 </optgroup>
@@ -378,6 +387,7 @@ echo PageLayoutHelper::buildActionCard([
                                 <optgroup label="<?= $grpExport ?>">
                                     <option value="exp"><?= __('vocabulary.multi.export_anki') ?></option>
                                     <option value="exptsv"><?= __('vocabulary.multi.export_tsv') ?></option>
+                                    <option value="expapkg"><?= __('vocabulary.multi.export_apkg_selection') ?></option>
                                 </optgroup>
                                 <optgroup label="<?= $grpOther ?>">
                                     <option value="review"><?= __('vocabulary.multi.review_selection') ?></option>
@@ -595,7 +605,11 @@ echo PageLayoutHelper::buildActionCard([
                         <div class="level-right">
                             <div class="level-item">
                                 <div class="tags has-addons mb-0">
-                                    <span class="tag" :class="getStatusClass(word.status)" x-text="word.statusAbbr"></span>
+                                    <span
+                                        class="tag"
+                                        :class="getStatusClass(word.status)"
+                                        x-text="word.statusAbbr"
+                                    ></span>
                                     <span
                                         class="tag"
                                         :class="getStatusClass(word.status)"
@@ -733,7 +747,8 @@ echo PageLayoutHelper::buildActionCard([
 <!-- Config for Alpine - pass active language and per-page setting -->
 <script type="application/json" id="word-list-config"><?php echo json_encode([
     'activeLanguageId' => $currentlang,
-    'perPage' => $perPage
+    'perPage' => $perPage,
+    'csrfToken' => \Lwt\Shared\UI\Helpers\FormHelper::csrfToken(),
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 
 <style>

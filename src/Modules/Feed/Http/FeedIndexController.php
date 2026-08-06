@@ -112,7 +112,7 @@ class FeedIndexController
         $languages = null;
 
         foreach ($feedLinks as $row) {
-            $requiresEdit = $this->feedFacade->getNfOption($row['NfOptions'], 'edit_text') == 1;
+            $requiresEdit = $this->feedFacade->getFeedOption($row['NfOptions'], 'edit_text') == 1;
 
             if ($requiresEdit) {
                 if ($editText == 1) {
@@ -132,20 +132,22 @@ class FeedIndexController
                 'text' => $row['FlText']
             ]];
 
-            $nfName = $row['NfName'];
-            $nfId = $row['NfID'];
-            $nfOptions = $row['NfOptions'];
+            $feedName = $row['NfName'];
+            $feedId = $row['NfID'];
+            $feedOptions = $row['NfOptions'];
 
-            $tagNameRaw = $this->feedFacade->getNfOption($nfOptions, 'tag');
-            $tagName = is_string($tagNameRaw) && $tagNameRaw !== '' ? $tagNameRaw : mb_substr($nfName, 0, 20, "utf-8");
+            $tagNameRaw = $this->feedFacade->getFeedOption($feedOptions, 'tag');
+            $tagName = is_string($tagNameRaw) && $tagNameRaw !== ''
+                ? $tagNameRaw
+                : mb_substr($feedName, 0, 20, "utf-8");
 
-            $maxTextsRaw = $this->feedFacade->getNfOption($nfOptions, 'max_texts');
+            $maxTextsRaw = $this->feedFacade->getFeedOption($feedOptions, 'max_texts');
             $maxTexts = is_string($maxTextsRaw) ? (int)$maxTextsRaw : 0;
             if (!$maxTexts) {
                 $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
             }
 
-            $charsetRaw = $this->feedFacade->getNfOption($nfOptions, 'charset');
+            $charsetRaw = $this->feedFacade->getFeedOption($feedOptions, 'charset');
             $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $texts = $this->feedFacade->extractTextFromArticle(
                 $doc,

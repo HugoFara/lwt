@@ -9,10 +9,19 @@ describe('Database Setup', () => {
   it('should install demo database', () => {
     cy.visit('/admin/install-demo');
     cy.get('form').should('exist');
-    // Check the confirmation checkbox first (required to enable the install button)
+
+    // The checkbox is server-rendered, so it is clickable before Alpine has
+    // bound `x-model` to it — and a click that lands first is dropped
+    // silently. Alpine applying `:disabled="!confirmed"` to the install button
+    // is proof it has processed this tree, so gate on that before ticking.
+    cy.get('button[type="submit"], input[type="submit"]').should('be.disabled');
     cy.get('input[type="checkbox"]').check();
-    // Now click the install button
-    cy.get('button[type="submit"], input[type="submit"]').click();
+
+    // Then let Cypress retry until the tick has propagated; it retries
+    // assertions but never retries the click itself.
+    cy.get('button[type="submit"], input[type="submit"]')
+      .should('not.be.disabled')
+      .click();
     // Wait for install to complete and page to reload
     cy.url().should('include', '/admin/install-demo');
     // Should show success message or remain on page
@@ -23,7 +32,7 @@ describe('Database Setup', () => {
     cy.visit('/languages');
     // Check that the languages page loads and has content
     // The page uses Alpine.js with card-based layout
-    cy.get('[x-data="languageList"], .language-card, .action-card').should('exist');
+    cy.get('[x-data="languageList"]').should('exist');
   });
 
   it('should have demo texts after install', () => {

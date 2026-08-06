@@ -96,7 +96,7 @@ describe('REST API', () => {
 
   describe('Settings Endpoint', () => {
     it('should accept POST to save setting', () => {
-      cy.request({
+      cy.apiRequest({
         method: 'POST',
         url: `${apiBase}/settings`,
         form: true,
@@ -131,7 +131,7 @@ describe('REST API', () => {
     });
 
     it('should return 405 for unsupported methods', () => {
-      cy.request({
+      cy.apiRequest({
         method: 'DELETE',
         url: `${apiBase}/version`,
         failOnStatusCode: false,
@@ -178,7 +178,7 @@ describe('REST API', () => {
     });
 
     it('should set reading position', () => {
-      cy.request({
+      cy.apiRequest({
         method: 'POST',
         url: `${apiBase}/texts/1/reading-position`,
         form: true,

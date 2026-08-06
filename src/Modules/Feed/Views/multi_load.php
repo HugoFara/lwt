@@ -54,8 +54,8 @@ namespace Lwt\Views\Feed;
     <?php
     $time = time();
     foreach ($feeds as $row) :
-        $nfUpdate = $row['NfUpdate'] ?? 0;
-        $diff = $time - $nfUpdate;
+        $lastUpdate = $row['NfUpdate'] ?? 0;
+        $diff = $time - $lastUpdate;
         ?>
     <tr>
         <td class="has-text-centered">
@@ -66,7 +66,7 @@ namespace Lwt\Views\Feed;
             echo htmlspecialchars($row['NfName'] ?? '', ENT_QUOTES, 'UTF-8');
         ?></td>
         <td class="has-text-centered" sorttable_customkey="<?php echo $diff; ?>">
-            <?php if ($nfUpdate) {
+            <?php if ($lastUpdate) {
                 echo $feedService->formatLastUpdate($diff);
             } ?>
         </td>

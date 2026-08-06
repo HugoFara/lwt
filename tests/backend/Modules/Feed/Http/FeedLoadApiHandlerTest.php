@@ -89,7 +89,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
         $this->assertCount(2, $params);
         $this->assertSame('feed', $params[0]->getName());
-        $this->assertSame('nfid', $params[1]->getName());
+        $this->assertSame('feedId', $params[1]->getName());
         $this->assertSame('array', $params[0]->getType()->getName());
         $this->assertSame('int', $params[1]->getType()->getName());
     }
@@ -126,11 +126,11 @@ class FeedLoadApiHandlerTest extends TestCase
         $params = $ref->getParameters();
 
         $this->assertCount(5, $params);
-        $this->assertSame('importedFeed', $params[0]->getName());
-        $this->assertSame('nif', $params[1]->getName());
-        $this->assertSame('nfname', $params[2]->getName());
-        $this->assertSame('nfid', $params[3]->getName());
-        $this->assertSame('nfoptions', $params[4]->getName());
+        $this->assertSame('importedCount', $params[0]->getName());
+        $this->assertSame('duplicateCount', $params[1]->getName());
+        $this->assertSame('feedName', $params[2]->getName());
+        $this->assertSame('feedId', $params[3]->getName());
+        $this->assertSame('feedOptions', $params[4]->getName());
     }
 
     public function testGetFeedResultParameterTypes(): void
@@ -151,7 +151,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedReturnsErrorWhenParsingReturnsFalse(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
             ->willReturn(false);
@@ -164,7 +164,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedReturnsErrorWhenParsingReturnsEmptyArray(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
             ->willReturn([]);
@@ -176,7 +176,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedErrorIncludesFeedName(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
             ->willReturn(false);
@@ -188,7 +188,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedErrorDoesNotHaveSuccessKey(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
             ->willReturn(false);
@@ -203,7 +203,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedErrorWhenParsingReturnsNull(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         // parseRssFeed returns false for failure, but the check is !is_array
         // so non-array values all trigger the error path
@@ -217,7 +217,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedPassesArticleSourceToParseRssFeed(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $key) {
                 if ($key === 'article_source') {
                     return 'article';
@@ -235,7 +235,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedPassesEmptyStringWhenArticleSourceNotString(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $key) {
                 if ($key === 'article_source') {
                     return null;
@@ -253,7 +253,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testLoadFeedPassesEmptyStringWhenArticleSourceIsArray(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $key) {
                 if ($key === 'article_source') {
                     return ['not', 'a', 'string'];
@@ -294,10 +294,10 @@ class FeedLoadApiHandlerTest extends TestCase
         $params = $ref->getParameters();
 
         $this->assertCount(4, $params);
-        $this->assertSame('nfname', $params[0]->getName());
-        $this->assertSame('nfid', $params[1]->getName());
-        $this->assertSame('nfsourceuri', $params[2]->getName());
-        $this->assertSame('nfoptions', $params[3]->getName());
+        $this->assertSame('feedName', $params[0]->getName());
+        $this->assertSame('feedId', $params[1]->getName());
+        $this->assertSame('feedSourceUri', $params[2]->getName());
+        $this->assertSame('feedOptions', $params[3]->getName());
     }
 
     // =========================================================================
@@ -306,7 +306,7 @@ class FeedLoadApiHandlerTest extends TestCase
 
     public function testFormatLoadFeedDelegatesToLoadFeed(): void
     {
-        $this->feedFacade->method('getNfOption')
+        $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
             ->willReturn(false);

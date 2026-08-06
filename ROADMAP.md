@@ -57,7 +57,7 @@ pay for the hard parts when demand proves them worth it.
 
 ## The keystone constraint
 
-LWT renders HTML server-side (94 view templates). Until more logic moves to the
+LWT renders HTML server-side (93 view templates). Until more logic moves to the
 frontend against `/api/v1`, *any* mobile wrapper is just a window to a server.
 So **"more frontend, less server-rendered" is the enabling work** — the thing
 that makes a good client today and offline/local-first possible tomorrow.
@@ -93,7 +93,12 @@ that makes a good client today and offline/local-first possible tomorrow.
 `textReader.renderTextContent()` against `/api/v1`, with an offline prototype
 (`offline-text-reader.ts` + IndexedDB) started. `review_desktop.php` is "all UI
 rendered by Alpine.js." So Phase 1 is **cutting the server-shell umbilical, not
-converting pages**. Three dependencies to sever + one real conversion:
+converting pages**.
+
+**Status (re-audited 2026-08-05): every mobile-critical surface is shell-free.**
+The only open item is the legacy-fragment cleanup in the last bullet, which is
+not a mobile blocker. Tracked on the issue board as
+[#266](https://github.com/HugoFara/lwt/issues/266).
 
 - [x] **(Phase 0 gate) Injectable API base URL.** Done in Phase 0 — same seam.
       `@shared/api/client` resolves an injectable **absolute** server root and
@@ -109,9 +114,18 @@ converting pages**. Three dependencies to sever + one real conversion:
       `audioPlayer` fetch), so `read_desktop.php` carries no per-text data and
       `TextReadController` dropped the server-side book/media plumbing. Verified
       live (book nav, audio reveal, no-regression plain read). Toolbar labels use
-      `__e()` but resolve via the client i18n `t()`. *Remaining (lower urgency,
-      not reader-specific):* the **global navbar** is still PHP-rendered — tracked
-      separately since it spans every page.
+      `__e()` but resolve via the client i18n `t()`. Nothing outstanding — the
+      global navbar was the last shared dependency and it shipped (next bullet).
+- [x] **Global navbar — shell-free.** Shipped in 3.2.0 (`d6e6a5203`).
+      `PageLayoutHelper::buildNavbar()` is gone; PHP now emits only the mount
+      point `<div id="navbar-root" data-current-page="…">`
+      (`buildNavbarPlaceholder()`), and `mountNavbar()` fetches
+      `GET /api/v1/navbar` (per-user language list, current language, theme
+      state, admin/multi-user flags) and builds the markup in
+      `shared/components/navbar_renderer.ts`. Labels resolve from the i18n
+      bundle, so the payload stays locale-agnostic. Zero server-rendered navbar
+      markup remains in `src/**/*.php`. This was the last chrome dependency
+      spanning every page.
 - [x] **i18n → client (delivery mechanism).** Shipped: `GET /api/v1/i18n[/{locale}]`
       (public; `Translator::getAllTranslations()`) returns the flat
       "namespace.key" => string bundle, merging English fallback — the same shape
@@ -135,8 +149,8 @@ converting pages**. Three dependencies to sever + one real conversion:
       and the destructive **bulk archive/delete** now go through
       `PUT /api/v1/texts/bulk-action` (per-user scoped) instead of a same-origin
       form POST, so they work against a configurable API base. The remaining
-      bulk actions (tag / review / reparse) intentionally stay on the form path —
-      they need pickers/navigation and are desktop-admin, not mobile flows.
+      bulk actions (tag / review / reparse) intentionally stay on the form
+      path — they need pickers/navigation and are desktop-admin, not mobile.
       `__e()` labels resolve via the i18n API once a page boots from it.
 - [~] **Vocabulary mgmt — mobile path already shell-free; legacy fragments
       remain.** *Re-audit (corrected):* the **modern reader's** word actions
@@ -153,6 +167,10 @@ converting pages**. Three dependencies to sever + one real conversion:
       those popups onto the API button family / `word_modal`** and then deleting
       the fragments — a UI-consolidation pass that needs live E2E in the reader,
       not a server-vs-client data conversion. Track as cleanup; low urgency.
+      Still open as of 2026-08-05: eight `*_result.php` views survive
+      (`save_result`, `edit_result`, `edit_term_result`, `edit_multi_update_result`,
+      `hover_save_result`, `all_wellknown_result`, `bulk_save_result`,
+      `upload_result`) plus `Book/Views/import_result.php`.
 
 **Out of Phase 1** (leave server-rendered, fine in a WebView online): imports
 (file/web/youtube/whisper), admin/settings, language config, feeds.
@@ -176,15 +194,17 @@ the next achievable target. See `lukaisu/ROADMAP.md` for the build-side detail.
       persisted in native Preferences, then navigates the WebView to the server.
 - [~] **Bundled-client (Model B) build mode.** `npm run build:app`
       (`vite.app.config.ts` → `dist-app/`) emits standalone connect/library/
-      reader pages that boot `main.ts` against a remote `/api/v1` with no PHP in
-      the loop. Each page body is **prerendered from the real PHP view** at build
-      time (`build/php-view-prerender.mjs`) so the Alpine scaffolds, icons and
-      labels stay a single source of truth. `../lukaisu` consumes `dist-app/` as
-      its Capacitor `webDir` (`npm run sync:model-b` there). First slice: connect
-      → library → reader. **CORS is now required** — the bundle origin
-      (`https://localhost`) is cross-origin to every server, so servers must set
-      `CORS_ALLOWED_ORIGINS=https://localhost`. Remaining: review surface,
-      client-rendered global navbar, on-device QA.
+      reader/review pages that boot `main.ts` against a remote `/api/v1` with no
+      PHP in the loop. Each page body is **prerendered from the real PHP view**
+      at build time (`build/php-view-prerender.mjs`) so the Alpine scaffolds,
+      icons and labels stay a single source of truth. `../lukaisu` consumes
+      `dist-app/` as
+      its Capacitor `webDir` (`npm run sync:model-b` there). **CORS is now
+      required** — the bundle origin (`https://localhost`) is cross-origin to
+      every server, so servers must set `CORS_ALLOWED_ORIGINS=https://localhost`.
+      All four surfaces are bundled: connect → library → reader → **review**
+      (`f1f062c24`), and the navbar they share is client-rendered too.
+      **Remaining: on-device QA only** — everything else in this bullet ships.
 - [ ] Reuse existing PWA assets; close the small gaps: real adaptive/maskable
       launcher icons (replace placeholders) and a manifest **`id`** (Lukaisu v0.2).
 - [ ] Ship through **our own F-Droid repo first** (low bar, full control,

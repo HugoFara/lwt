@@ -19,6 +19,7 @@ namespace Lwt\Modules\Review\Application\UseCases;
 
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewSession;
+use Lwt\Modules\Review\Domain\Scheduling\Rating;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermStatus;
 
@@ -33,6 +34,7 @@ class SubmitAnswer
 {
     private ReviewRepositoryInterface $repository;
     private SessionStateManager $sessionManager;
+    private RecordScheduledReview $scheduledReview;
 
     /**
      * Constructor.
@@ -42,10 +44,32 @@ class SubmitAnswer
      */
     public function __construct(
         ReviewRepositoryInterface $repository,
-        ?SessionStateManager $sessionManager = null
+        ?SessionStateManager $sessionManager = null,
+        ?RecordScheduledReview $scheduledReview = null
     ) {
         $this->repository = $repository;
         $this->sessionManager = $sessionManager ?? new SessionStateManager();
+        $this->scheduledReview = $scheduledReview ?? new RecordScheduledReview();
+    }
+
+    /**
+     * Submit a graded answer (issue #238, phase 2a).
+     *
+     * This is the FSRS-native entry point: the grade drives the scheduler, and
+     * is *also* mapped onto the legacy ±1 status nudge so the reading view
+     * behaves exactly as it does for a binary answer. Again lowers the status,
+     * every other grade raises it.
+     *
+     * @param int    $wordId Word ID
+     * @param Rating $grade  Again / Hard / Good / Easy
+     *
+     * @return array Same shape as execute(), plus a 'scheduled' flag
+     */
+    public function executeWithGrade(int $wordId, Rating $grade): array
+    {
+        $result = $this->executeWithChange($wordId, $grade->legacyStatusChange(), $grade);
+
+        return $result;
     }
 
     /**
@@ -125,7 +149,7 @@ class SubmitAnswer
      *
      * @return array Same as execute()
      */
-    public function executeWithChange(int $wordId, int $change): array
+    public function executeWithChange(int $wordId, int $change, ?Rating $grade = null): array
     {
         // Get current status
         $currentStatus = $this->repository->getWordStatus($wordId);
@@ -145,7 +169,20 @@ class SubmitAnswer
         // Calculate new status
         $newStatus = $this->calculateNewStatus($currentStatus, $change);
 
-        return $this->execute($wordId, $newStatus);
+        $result = $this->execute($wordId, $newStatus);
+
+        // Shadow-write FSRS state (issue #238, phase 2a). A binary answer has
+        // no Hard/Easy signal, so it maps to Again/Good; the graded endpoint
+        // passes the real grade through. Only recorded once the legacy update
+        // actually succeeded, so the two models cannot diverge.
+        if ($result['success'] === true) {
+            $result['scheduled'] = $this->scheduledReview->execute(
+                $wordId,
+                $grade ?? Rating::fromBinary($change >= 0)
+            );
+        }
+
+        return $result;
     }
 
     /**

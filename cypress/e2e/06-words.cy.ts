@@ -19,13 +19,13 @@ describe('Words Management', () => {
 
     it('should have language filter', () => {
       // Words page uses Alpine.js with x-model bindings
-      cy.get('[x-data="wordListApp()"]').should('exist');
+      cy.get('[x-data="wordListApp"]').should('exist');
       cy.get('select').should('exist');
     });
 
     it('should have status filter', () => {
       // The Alpine.js app has filter options including status
-      cy.get('[x-data="wordListApp()"] select').should('have.length.at.least', 1);
+      cy.get('[x-data="wordListApp"] select').should('have.length.at.least', 1);
     });
 
     it('should have search/query input', () => {
@@ -35,7 +35,7 @@ describe('Words Management', () => {
 
     it('should have filter controls', () => {
       // The page has filter dropdowns (language, status, etc.)
-      cy.get('[x-data="wordListApp()"]').should('exist');
+      cy.get('[x-data="wordListApp"]').should('exist');
       cy.get('select').should('have.length.at.least', 1);
     });
   });

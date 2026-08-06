@@ -210,12 +210,12 @@ class FeedWizardController
         $feedLen = count(array_filter(array_keys($feedData), 'is_numeric'));
 
         // Handle article section change
-        $nfArticleSection = InputValidator::getString('NfArticleSection');
+        $articleSectionInput = InputValidator::getString('NfArticleSection');
         if (
-            $nfArticleSection !== '' &&
-            ($nfArticleSection != ($feedData['feed_text'] ?? ''))
+            $articleSectionInput !== '' &&
+            ($articleSectionInput != ($feedData['feed_text'] ?? ''))
         ) {
-            $this->updateFeedArticleSource($nfArticleSection, $feedLen);
+            $this->updateFeedArticleSource($articleSectionInput, $feedLen);
         }
 
         PageLayoutHelper::renderPageStart('Feed Wizard - Step 2', true);
@@ -269,13 +269,13 @@ class FeedWizardController
         }
 
         $options = $this->wizardSession->getOptions();
-        $autoUpdI = $this->feedFacade->getNfOption($options, 'autoupdate');
-        if ($autoUpdI === null || !is_string($autoUpdI)) {
-            $autoUpdV = null;
-            $autoUpdI = null;
+        $autoUpdateRaw = $this->feedFacade->getFeedOption($options, 'autoupdate');
+        if ($autoUpdateRaw === null || !is_string($autoUpdateRaw)) {
+            $autoUpdateUnit = null;
+            $autoUpdateInterval = null;
         } else {
-            $autoUpdV = substr($autoUpdI, -1);
-            $autoUpdI = substr($autoUpdI, 0, -1);
+            $autoUpdateUnit = substr($autoUpdateRaw, -1);
+            $autoUpdateInterval = substr($autoUpdateRaw, 0, -1);
         }
 
         $wizardData = $this->wizardSession->getAll();
@@ -381,7 +381,7 @@ class FeedWizardController
         $this->wizardSession->setLang((string)$row['NfLgID']);
 
         // Handle custom article source
-        $articleSource = $this->feedFacade->getNfOption($row['NfOptions'], 'article_source');
+        $articleSource = $this->feedFacade->getFeedOption($row['NfOptions'], 'article_source');
         $articleSourceStr = is_string($articleSource) ? $articleSource : '';
         $currentFeedText = $feedText;
         if ($currentFeedText !== $articleSourceStr && $articleSourceStr !== '') {
@@ -506,9 +506,9 @@ class FeedWizardController
         if ($hostStatus !== '' && $hostName !== '') {
             $this->wizardSession->setHostStatus($hostName, $hostStatus);
         }
-        $nfName = InputValidator::getString('NfName');
-        if ($nfName !== '') {
-            $this->wizardSession->setFeedTitle($nfName);
+        $feedName = InputValidator::getString('NfName');
+        if ($feedName !== '') {
+            $this->wizardSession->setFeedTitle($feedName);
         }
     }
 
@@ -519,13 +519,13 @@ class FeedWizardController
      */
     private function processStep3SessionParams(): void
     {
-        $nfName = InputValidator::getString('NfName');
-        if ($nfName !== '') {
-            $this->wizardSession->setFeedTitle($nfName);
+        $feedName = InputValidator::getString('NfName');
+        if ($feedName !== '') {
+            $this->wizardSession->setFeedTitle($feedName);
         }
-        $nfArticleSection = InputValidator::getString('NfArticleSection');
-        if ($nfArticleSection !== '') {
-            $this->wizardSession->setArticleSection($nfArticleSection);
+        $articleSectionInput = InputValidator::getString('NfArticleSection');
+        if ($articleSectionInput !== '') {
+            $this->wizardSession->setArticleSection($articleSectionInput);
         }
         $articleSelector = InputValidator::getString('article_selector');
         if ($articleSelector !== '') {
@@ -543,13 +543,13 @@ class FeedWizardController
         if ($html !== '') {
             $this->wizardSession->setFilterTags($html);
         }
-        $nfOptions = InputValidator::getString('NfOptions');
-        if ($nfOptions !== '') {
-            $this->wizardSession->setOptions($nfOptions);
+        $feedOptions = InputValidator::getString('NfOptions');
+        if ($feedOptions !== '') {
+            $this->wizardSession->setOptions($feedOptions);
         }
-        $nfLgId = InputValidator::getString('NfLgID');
-        if ($nfLgId !== '') {
-            $this->wizardSession->setLang($nfLgId);
+        $feedLanguageId = InputValidator::getString('NfLgID');
+        if ($feedLanguageId !== '') {
+            $this->wizardSession->setLang($feedLanguageId);
         }
         if (!$this->wizardSession->has('article_tags')) {
             $this->wizardSession->setArticleTags('');
@@ -648,7 +648,7 @@ class FeedWizardController
                 $typedItem['text'] = $feedItem['text'];
             }
             $aFeed = [$typedItem];
-            $charsetRaw = $this->feedFacade->getNfOption($this->wizardSession->getOptions(), 'charset');
+            $charsetRaw = $this->feedFacade->getFeedOption($this->wizardSession->getOptions(), 'charset');
             $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $html = $this->feedFacade->extractTextFromArticle(
                 $aFeed,
@@ -691,7 +691,7 @@ class FeedWizardController
                 $typedItem['text'] = $feedItem['text'];
             }
             $aFeed = [$typedItem];
-            $charsetRaw = $this->feedFacade->getNfOption($this->wizardSession->getOptions(), 'charset');
+            $charsetRaw = $this->feedFacade->getFeedOption($this->wizardSession->getOptions(), 'charset');
             $charset = is_string($charsetRaw) ? $charsetRaw : null;
             $html = $this->feedFacade->extractTextFromArticle(
                 $aFeed,

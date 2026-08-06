@@ -51,38 +51,38 @@ class FeedsTest extends TestCase
     }
 
     /**
-     * Test getNfOption method - parses options from feed options string
+     * Test getFeedOption method - parses options from feed options string
      * Note: Uses comma as separator, not semicolon
      */
     public function testGetNfOption(): void
     {
         // Test basic option retrieval (comma-separated)
         $options = "max_texts=10";
-        $result = $this->feedService->getNfOption($options, 'max_texts');
+        $result = $this->feedService->getFeedOption($options, 'max_texts');
         $this->assertEquals('10', $result);
 
         // Test autoupdate option
         $options = "autoupdate=12h";
-        $result = $this->feedService->getNfOption($options, 'autoupdate');
+        $result = $this->feedService->getFeedOption($options, 'autoupdate');
         $this->assertEquals('12h', $result);
 
         // Test multiple options (comma-separated)
         $options = "max_texts=5,autoupdate=1d,tag=news";
-        $this->assertEquals('5', $this->feedService->getNfOption($options, 'max_texts'));
-        $this->assertEquals('1d', $this->feedService->getNfOption($options, 'autoupdate'));
-        $this->assertEquals('news', $this->feedService->getNfOption($options, 'tag'));
+        $this->assertEquals('5', $this->feedService->getFeedOption($options, 'max_texts'));
+        $this->assertEquals('1d', $this->feedService->getFeedOption($options, 'autoupdate'));
+        $this->assertEquals('news', $this->feedService->getFeedOption($options, 'tag'));
 
         // Test non-existent option - returns null, which is falsy
-        $result = $this->feedService->getNfOption($options, 'nonexistent');
+        $result = $this->feedService->getFeedOption($options, 'nonexistent');
         $this->assertNull($result);
 
         // Test empty options string
-        $result = $this->feedService->getNfOption('', 'max_texts');
+        $result = $this->feedService->getFeedOption('', 'max_texts');
         $this->assertNull($result);
 
         // Test option with special characters
         $options = "tag=news-daily";
-        $result = $this->feedService->getNfOption($options, 'tag');
+        $result = $this->feedService->getFeedOption($options, 'tag');
         $this->assertEquals('news-daily', $result);
     }
 
@@ -195,52 +195,52 @@ class FeedsTest extends TestCase
     }
 
     /**
-     * Test getNfOption with edge cases
+     * Test getFeedOption with edge cases
      */
     public function testGetNfOptionEdgeCases(): void
     {
         // Test with empty string
-        $result = $this->feedService->getNfOption('', 'max_texts');
+        $result = $this->feedService->getFeedOption('', 'max_texts');
         $this->assertNull($result);
 
         // Test with whitespace
-        $result = $this->feedService->getNfOption(' ', 'max_texts');
+        $result = $this->feedService->getFeedOption(' ', 'max_texts');
         $this->assertNull($result);
 
         // Test with malformed option
-        $result = $this->feedService->getNfOption('no_equals_sign', 'max_texts');
+        $result = $this->feedService->getFeedOption('no_equals_sign', 'max_texts');
         $this->assertNull($result);
 
         // Test with multiple equals signs (explode splits on first = only with limit 2)
         $options = 'key=value=extra';
-        $result = $this->feedService->getNfOption($options, 'key');
+        $result = $this->feedService->getFeedOption($options, 'key');
         // explode without limit takes all = signs, so 'value' is returned
         $this->assertEquals('value', $result);
     }
 
     /**
-     * Test getNfOption with special characters
+     * Test getFeedOption with special characters
      */
     public function testGetNfOptionWithSpecialCharacters(): void
     {
         // Test with special characters in value
         $options = 'tag=news&entertainment,max_texts=10';
-        $result = $this->feedService->getNfOption($options, 'tag');
+        $result = $this->feedService->getFeedOption($options, 'tag');
         $this->assertEquals('news&entertainment', $result);
 
         // Test with URL in value
         $options = 'url=http://example.com/feed,max_texts=5';
-        $result = $this->feedService->getNfOption($options, 'url');
+        $result = $this->feedService->getFeedOption($options, 'url');
         $this->assertEquals('http://example.com/feed', $result);
     }
 
     /**
-     * Test getNfOption with 'all' parameter
+     * Test getFeedOption with 'all' parameter
      */
     public function testGetNfOptionAll(): void
     {
         $options = 'max_texts=10,autoupdate=12h,tag=news';
-        $result = $this->feedService->getNfOption($options, 'all');
+        $result = $this->feedService->getFeedOption($options, 'all');
 
         $this->assertIsArray($result);
         $this->assertArrayHasKey('max_texts', $result);
@@ -252,45 +252,45 @@ class FeedsTest extends TestCase
     }
 
     /**
-     * Test getNfOption with 'all' on empty string
+     * Test getFeedOption with 'all' on empty string
      */
     public function testGetNfOptionAllEmpty(): void
     {
-        $result = $this->feedService->getNfOption('', 'all');
+        $result = $this->feedService->getFeedOption('', 'all');
         $this->assertIsArray($result);
         // Empty string creates one empty element when exploded
         // So array will have one entry with empty key and value
     }
 
     /**
-     * Test getNfOption with single option
+     * Test getFeedOption with single option
      */
     public function testGetNfOptionSingleOption(): void
     {
         $options = 'max_texts=25';
-        $result = $this->feedService->getNfOption($options, 'max_texts');
+        $result = $this->feedService->getFeedOption($options, 'max_texts');
         $this->assertEquals('25', $result);
     }
 
     /**
-     * Test getNfOption with whitespace in option
+     * Test getFeedOption with whitespace in option
      */
     public function testGetNfOptionWithWhitespace(): void
     {
         // With leading/trailing spaces (trim is used in function)
         $options = ' max_texts = 10 ,autoupdate=1d';
-        $result = $this->feedService->getNfOption($options, 'max_texts');
+        $result = $this->feedService->getFeedOption($options, 'max_texts');
         $this->assertNotNull($result);
     }
 
     /**
-     * Test getNfOption with duplicate keys
+     * Test getFeedOption with duplicate keys
      */
     public function testGetNfOptionDuplicateKeys(): void
     {
         // Last occurrence should win
         $options = 'max_texts=10,max_texts=20';
-        $result = $this->feedService->getNfOption($options, 'max_texts');
+        $result = $this->feedService->getFeedOption($options, 'max_texts');
         // Function returns first match, not last
         $this->assertEquals('10', $result);
     }
@@ -391,32 +391,32 @@ class FeedsTest extends TestCase
     }
 
     /**
-     * Test getNfOption with numeric values
+     * Test getFeedOption with numeric values
      */
     public function testGetNfOptionNumericValues(): void
     {
         $options = 'max_texts=100,min_length=50';
 
-        $result = $this->feedService->getNfOption($options, 'max_texts');
+        $result = $this->feedService->getFeedOption($options, 'max_texts');
         $this->assertEquals('100', $result);
         $this->assertIsString($result); // Returns string, not int
 
-        $result = $this->feedService->getNfOption($options, 'min_length');
+        $result = $this->feedService->getFeedOption($options, 'min_length');
         $this->assertEquals('50', $result);
     }
 
     /**
-     * Test getNfOption case sensitivity
+     * Test getFeedOption case sensitivity
      */
     public function testGetNfOptionCaseSensitivity(): void
     {
         $options = 'MaxTexts=10,max_texts=20';
 
         // Keys are case-sensitive
-        $result = $this->feedService->getNfOption($options, 'max_texts');
+        $result = $this->feedService->getFeedOption($options, 'max_texts');
         $this->assertEquals('20', $result);
 
-        $result = $this->feedService->getNfOption($options, 'MaxTexts');
+        $result = $this->feedService->getFeedOption($options, 'MaxTexts');
         $this->assertEquals('10', $result);
     }
 

@@ -5,14 +5,14 @@ description: Centralize the scattered word-status model into a single source of 
 
 # Proposal: Term Status Model + FSRS Scheduling
 
-**Status:** **Phase 1 implemented** (#238). Phase 2 (FSRS scheduling) remains
-proposed — deferred, and gated on the product decisions in
-[Trade-offs & open questions](#trade-offs-open-questions). The FSRS part is an
-architectural change worth landing on its own.
+**Status:** **Phase 1 and phase 2a implemented** (#238). Phase 2b (retiring the
+legacy Leitner scoring and switching the review queue over) remains proposed.
 Tracked in [issue #238](https://github.com/HugoFara/lwt/issues/238).
 
-Phase 1 (status as a single source of truth) is shipped; the rest is a design
-proposal, not shipped work.
+The three open product questions have been decided — see
+[Decisions taken](#decisions-taken). Phase 2 was split in two so the
+irreversible part (dropping the old score columns) is a separate, later step
+from the additive part (accumulating FSRS state).
 
 ## Problem
 
@@ -135,38 +135,163 @@ map each status to a starting `S` (reuse the current per-status intervals as the
 seed), set a default `D`, and `last_review = WoStatusChanged`. No review history is
 lost because there is none today; the `review_log` starts accumulating from rollout.
 
+## Decisions taken
+
+The three questions this proposal was gated on, and how they were resolved.
+
+### 1. Display status stays **manual**, not derived from stability
+
+The original recommendation was to derive the 1–5 reading colours from FSRS
+stability. That was rejected: it imports an Anki assumption that does not hold
+here. **In Anki every card is reviewed; in LWT review is optional and reading is
+the primary loop.** Many users never open the review page — they read, click
+words, and set status by hand.
+
+Deriving status from stability would give those users reading colours that drift
+on their own, driven by a scheduler they do not use: a word deliberately marked
+5 decays to 3 because it was never reviewed. That is a regression in the core
+experience.
+
+So `WoStatus` remains manual and authoritative for display, and FSRS state is
+purely additive. This also removes the migration's biggest risk for free —
+"reading-view colours are unchanged after upgrading" is true by construction
+rather than something to verify. A derived-status mode can be added later as an
+opt-in setting.
+
+### 2. **Four grades**, no 2-button mode
+
+Hard and Easy are where FSRS gets the information that makes it beat SM-2; a
+2-button mode degrades it to roughly the Leitner behaviour we already have.
+The legacy binary answer maps to Again/Good (`Rating::fromBinary()`), so old
+callers keep working without a separate mode to maintain.
+
+### 3. **Hand-port**, not a vendored dependency
+
+Neither PHP option was viable:
+
+- [`fsrs-rs-php`](https://github.com/open-spaced-repetition/fsrs-rs-php), the
+  official binding, requires compiling a Rust PHP extension — manual `.so`
+  copy, `php.ini` edit, no Composer install. Disqualifying for a self-hosting
+  audience; LWT already had to fix Windows CI for a *bundled* extension
+  (`pdo_sqlite`, #259).
+- [`scottlaurent/fsrs`](https://packagist.org/packages/scottlaurent/fsrs) is
+  pure PHP and MIT, but v0.1 / one commit / no validation against reference
+  vectors, and declares PHP 8.1–8.3 against LWT's 8.2–8.5.
+
+`Fsrs6Scheduler` is therefore a hand-port of
+[py-fsrs](https://github.com/open-spaced-repetition/py-fsrs) **v6.3.1**,
+validated against vectors generated from that exact release (see
+[Verification](#verification)). LWT is public-domain under the Unlicense; that
+one file carries the reference implementation's MIT notice, as the licence
+requires.
+
+::: warning Pin the reference version
+py-fsrs's unreleased `main` widens the short-term stability clamp from
+`(Good, Easy)` to `(Hard, Good, Easy)`. That materially changes same-day
+repeats — a same-day Hard becomes a no-op instead of a ~44% stability cut. The
+port follows released **v6.3.1**. Retarget it only together with regenerated
+fixtures.
+:::
+
+## Phase 2a — additive FSRS state ✅ implemented
+
+Everything below accumulates FSRS data on real reviews **without changing what
+users see**. The legacy scoring keeps running untouched, so the two models can
+be compared on real data before anything is retired.
+
+- **Two new tables** (`db/migrations/20260805_200000_add_fsrs_scheduling.sql`):
+  `term_schedule` (stability, difficulty, due, last review, reps, lapses, state)
+  and the append-only `review_log`. `TsState` values match Anki's `cards.type`
+  so the `.apkg` exporter can write them straight through later.
+- **`Fsrs6Scheduler`** behind `SchedulerInterface`, with `FsrsParameters`
+  (21 weights, target retention, maximum interval) — swappable by design.
+- **Lazy seeding.** `LegacyStatusSeed` maps each legacy status to the stability
+  that reproduces its Leitner interval (1/2/9/27/71 days for statuses 1–5), with
+  `lastReview = WoStatusChanged`. Rows appear on a term's first graded review
+  rather than via a bulk backfill, so a 100k-term vocabulary costs nothing at
+  upgrade time and nobody's queue floods. 98/99 are never scheduled.
+- **`RecordScheduledReview`** is called from `SubmitAnswer` as a *shadow write*:
+  it runs only after the legacy update succeeds, and swallows storage errors so
+  a scheduling failure can never break the review the user just submitted.
+- **`SubmitAnswer::executeWithGrade()`** is the FSRS-native entry point; the
+  grade also drives the legacy ±1 status nudge, so reading behaviour is
+  identical whichever endpoint is used.
+
+**Not in 2a:** nothing reads `term_schedule` to choose review words yet, there
+is no 4-grade UI, and interval fuzzing and the parameter optimiser are omitted
+(fuzzing only exists to spread Anki's daily load; the optimiser needs
+accumulated history).
+
+## Phase 2b — retire the legacy scoring (proposed)
+
+Once 2a has accumulated real data: switch the review queue to order by `TsDue`,
+build the 4-grade UI, drop `SCORE_FORMULA_*` / `WoTodayScore` /
+`WoTomorrowScore` / `WoRandom` and their 16 call sites, and populate
+`cards.data` + `revlog` in the `.apkg` exporter so scheduling round-trips to
+Anki (#228).
+
 ## Trade-offs & open questions
 
-- **Display status: derived vs. manual.** Deriving 1–5 from `S` is the principled
-  end state but changes how colours move (they now track scheduling). Alternative:
-  keep status fully manual and orthogonal to FSRS. *Recommended: derive, with manual
-  override.* — needs your call.
-- **4-grade UX.** A real behaviour change for users used to "I knew it / I didn't."
-  Could ship a 2-button mode that maps to Again/Good.
+The three gating questions are resolved in [Decisions taken](#decisions-taken).
+What remains open, all deferred to phase 2b or later:
+
 - **Per-user vs. global parameters.** FSRS ships sensible defaults; per-user
-  optimisation needs enough `review_log` history and an optimiser job (defer).
-- **Scope.** Phase 2 touches schema, the Review module, the review UI, and stats.
-  Phase 1 is independent and should land first.
-- **Licensing.** Confirm the chosen FSRS implementation's licence is compatible
-  before vendoring.
+  optimisation needs enough `review_log` history and an optimiser job. 2a starts
+  accumulating that history — revisit once real data exists.
+- **Interval fuzzing.** Omitted deliberately. It exists to spread Anki's daily
+  review load; whether LWT wants it depends on how the 2b queue behaves.
+- **Seed quality.** The status→stability mapping reproduces the *legacy*
+  intervals, which were hand-tuned rather than fitted. Once `review_log` has
+  data, check whether seeded terms behave sensibly or whether the mapping should
+  be re-derived.
+- **Scope of 2b.** Retiring the score columns touches 16 PHP files, the review
+  UI, and stats. Sequence it after 2a has proven itself.
 
 ## Scope sketch (when picked up)
 
 - **Phase 1:** `TermStatus` VO (expand), `TermStatusService` + `StatusHelper`
   (fold in), ~11 PHP call sites (adopt VO), status-definitions API + bootstrap, ~6 TS
   files → `shared/stores/statuses.ts`.
-- **Phase 2:** migration (schedule columns / `term_schedule` + `review_log`),
-  `Scheduler` interface + FSRS implementation, `Review/Application/UseCases/SubmitAnswer`
-  (call scheduler), review UI (4-grade), stats that read `WoTodayScore` → read `due`,
-  removal of `SCORE_FORMULA_*` and `WoRandom`.
+- **Phase 2a (done):** migration (`term_schedule` + `review_log`),
+  `SchedulerInterface` + `Fsrs6Scheduler` + `FsrsParameters`, `LegacyStatusSeed`,
+  `MySqlTermScheduleRepository`, `RecordScheduledReview`, and the shadow-write
+  hook in `SubmitAnswer`.
+- **Phase 2b:** review UI (4-grade), review queue ordered by `TsDue`, stats that
+  read `WoTodayScore` → read `TsDue`, removal of `SCORE_FORMULA_*` /
+  `WoTodayScore` / `WoTomorrowScore` / `WoRandom` across their 16 call sites,
+  and `cards.data` + `revlog` in the `.apkg` exporter (#228).
 
-## Verification (at implementation time)
+## Verification
 
-1. Unit-test the FSRS `Scheduler` against the reference implementation's known
-   vectors (same `S`/`D`/grade in → same interval out).
-2. PHP + frontend gates (`phpcs`, `psalm`, `composer test:no-coverage`, `typecheck`,
-   `lint`, `test`, `build:all`).
-3. Migration round-trip on a seeded DB: every pre-existing term gets valid FSRS state;
-   reading-view colours are stable immediately after migration.
-4. E2E: run a review session, grade across all 4 buttons, confirm due dates advance
-   sensibly and the reading view reflects status changes.
+**Done for phase 2a:**
+
+1. **Reference vectors.** `Fsrs6SchedulerTest` replays 7 review sequences (24
+   graded reviews) generated from py-fsrs v6.3.1, asserting stability,
+   difficulty, retrievability and interval at every step to 1e-9. The fixture
+   and its generator live in
+   `tests/backend/Modules/Review/Domain/Scheduling/fixtures/`. Regenerate with:
+
+   ```bash
+   python3 -m venv .venv
+   ./.venv/bin/pip install 'fsrs==6.3.1'
+   ./.venv/bin/python generate_reference_vectors.py > fsrs6_reference_vectors.json
+   ```
+
+   These vectors already caught one real porting bug (the short-term clamp
+   described above), which is exactly what they are for.
+
+2. **Property tests** alongside them: difficulty saturates within [1, 10] under
+   40 consecutive Again and 40 consecutive Easy; a lapse never increases
+   stability; Hard < Good < Easy intervals from identical state; retrievability
+   is exactly 0.9 after one stability period; a stricter retention target
+   schedules sooner.
+
+3. **Integration** (`TermScheduleRepositoryIntegrationTest`, real MySQL): lazy
+   seeding from each status, state upsert vs. append-only log, lapse counting,
+   due counting, and null for unowned/missing terms.
+
+4. **Gates:** psalm 0 errors, phpcs PSR12 clean, full PHPUnit suite green.
+
+**Still to do for phase 2b:** E2E through a real review session across all four
+grades, and confirmation that reading-view colours are untouched on a populated
+upgrade (true by construction under decision 1, but worth seeing).
