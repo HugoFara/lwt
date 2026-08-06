@@ -168,7 +168,6 @@
     "result.translation_label": "Übersetzung:",
     "result.word_marked_well_known": "Wort als gut bekannt markiert.",
     "result.word_marked_ignored": "Wort als ignoriert markiert.",
-    "result.updating_texts": "Texte werden aktualisiert",
     "result.ignored_all": "Alle {count} Wörter ignoriert!",
     "result.ignored_one": "1 Wort ignoriert.",
     "result.ignored_none": "Kein neues Wort ignoriert!",

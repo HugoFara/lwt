@@ -5,18 +5,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   getParentContext,
   getFrameElement,
-  updateLearnStatus,
   generateTooltip,
-  updateNewWordInDOM,
   updateExistingWordInDOM,
   updateWordStatusInDOM,
   markWordWellKnownInDOM,
   markWordIgnoredInDOM,
-  updateBulkWordInDOM,
-  updateTestWordInDOM,
-  completeWordOperation,
-  type WordUpdateParams,
-  type BulkWordUpdateParams
+  type WordUpdateParams
 } from '../../../src/frontend/js/modules/vocabulary/services/word_dom_updates';
 
 // Mock dependencies
@@ -108,26 +102,6 @@ describe('word_dom_updates.ts', () => {
   });
 
   // ===========================================================================
-  // updateLearnStatus Tests
-  // ===========================================================================
-
-  describe('updateLearnStatus', () => {
-    it('updates #learnstatus element with content', () => {
-      document.body.innerHTML = `<div id="learnstatus">Old content</div>`;
-
-      updateLearnStatus('<span>New content</span>');
-
-      expect(document.querySelector('#learnstatus')!.innerHTML).toBe('<span>New content</span>');
-    });
-
-    it('does nothing when element does not exist', () => {
-      document.body.innerHTML = '';
-
-      expect(() => updateLearnStatus('content')).not.toThrow();
-    });
-  });
-
-  // ===========================================================================
   // generateTooltip Tests
   // ===========================================================================
 
@@ -143,77 +117,6 @@ describe('word_dom_updates.ts', () => {
       const result = generateTooltip('test', 'translated', 'rom', 99);
 
       expect(result).toBe('test|translated|rom|99');
-    });
-  });
-
-  // ===========================================================================
-  // updateNewWordInDOM Tests
-  // ===========================================================================
-
-  describe('updateNewWordInDOM', () => {
-    it('updates elements with matching hex class', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="48454c4c4f">hello</span>
-        <span class="status0" data_hex="48454c4c4f">hello</span>
-      `;
-
-      const params: WordUpdateParams = {
-        wid: 123,
-        status: 2,
-        translation: 'bonjour',
-        romanization: '',
-        text: 'hello',
-        hex: '48454c4c4f'
-      };
-
-      updateNewWordInDOM(params);
-
-      const elements = document.querySelectorAll('[data_hex="48454c4c4f"]');
-      elements.forEach(el => {
-        expect(el.classList.contains('status0')).toBe(false);
-        expect(el.classList.contains('status2')).toBe(true);
-        expect(el.classList.contains('word123')).toBe(true);
-        expect(el.getAttribute('data_trans')).toBe('bonjour');
-        expect(el.getAttribute('data_wid')).toBe('123');
-      });
-    });
-
-    it('does nothing when hex is not provided', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="48454c4c4f">hello</span>
-      `;
-
-      const params: WordUpdateParams = {
-        wid: 123,
-        status: 2,
-        translation: 'bonjour',
-        romanization: '',
-        text: 'hello'
-      };
-
-      updateNewWordInDOM(params);
-
-      expect(document.querySelector('[data_hex="48454c4c4f"]')!.classList.contains('status0')).toBe(true);
-    });
-
-    it('sets title attribute with generated tooltip', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="48454c4c4f">hello</span>
-      `;
-
-      const params: WordUpdateParams = {
-        wid: 123,
-        status: 2,
-        translation: 'bonjour',
-        romanization: 'bɔ̃ʒuʁ',
-        text: 'hello',
-        hex: '48454c4c4f'
-      };
-
-      updateNewWordInDOM(params);
-
-      // generateTooltip returns formatted tooltip string
-      expect(document.querySelector('[data_hex="48454c4c4f"]')!.getAttribute('title')).toBe('hello|bonjour|bɔ̃ʒuʁ|2');
     });
   });
 
@@ -348,100 +251,6 @@ describe('word_dom_updates.ts', () => {
       expect(element.classList.contains('word222')).toBe(true);
       expect(element.getAttribute('data_status')).toBe('98');
       expect(element.getAttribute('data_wid')).toBe('222');
-    });
-  });
-
-  // ===========================================================================
-  // updateBulkWordInDOM Tests
-  // ===========================================================================
-
-  describe('updateBulkWordInDOM', () => {
-    it('updates word from bulk translate', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="48454c4c4f">hello</span>
-      `;
-
-      const term: BulkWordUpdateParams = {
-        WoID: 555,
-        WoTextLC: 'hello',
-        WoStatus: 3,
-        translation: 'bonjour',
-        hex: '48454c4c4f'
-      };
-
-      updateBulkWordInDOM(term, true);
-
-      const element = document.querySelector('[data_hex="48454c4c4f"]')!;
-      expect(element.classList.contains('status0')).toBe(false);
-      expect(element.classList.contains('status3')).toBe(true);
-      expect(element.classList.contains('word555')).toBe(true);
-      expect(element.getAttribute('data_wid')).toBe('555');
-      expect(element.getAttribute('data_trans')).toBe('bonjour');
-    });
-
-    it('sets empty title when useTooltip is false', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="48454c4c4f" title="old title">hello</span>
-      `;
-
-      const term: BulkWordUpdateParams = {
-        WoID: 555,
-        WoTextLC: 'hello',
-        WoStatus: 3,
-        translation: 'bonjour',
-        hex: '48454c4c4f'
-      };
-
-      updateBulkWordInDOM(term, false);
-
-      expect(document.querySelector('[data_hex="48454c4c4f"]')!.getAttribute('title')).toBe('');
-    });
-  });
-
-  // ===========================================================================
-  // updateTestWordInDOM Tests
-  // ===========================================================================
-
-  describe('updateTestWordInDOM', () => {
-    it('updates word data attributes for test results', () => {
-      document.body.innerHTML = `
-        <span class="word777">test word</span>
-      `;
-
-      updateTestWordInDOM(777, 'test word', 'new trans', 'new rom', 5);
-
-      const element = document.querySelector('.word777')!;
-      expect(element.getAttribute('data_text')).toBe('test word');
-      expect(element.getAttribute('data_trans')).toBe('new trans');
-      expect(element.getAttribute('data_rom')).toBe('new rom');
-      expect(element.getAttribute('data_status')).toBe('5');
-    });
-  });
-
-  // ===========================================================================
-  // completeWordOperation Tests
-  // ===========================================================================
-
-  describe('completeWordOperation', () => {
-    it('updates learn status and cleans up frames', async () => {
-      const { cleanupRightFrames } = await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
-
-      document.body.innerHTML = `<div id="learnstatus">old</div>`;
-
-      completeWordOperation('<span>5 words to learn</span>');
-
-      expect(document.querySelector('#learnstatus')!.innerHTML).toBe('<span>5 words to learn</span>');
-      expect(cleanupRightFrames).toHaveBeenCalled();
-    });
-
-    it('skips cleanup when shouldCleanup is false', async () => {
-      const { cleanupRightFrames } = await import('../../../src/frontend/js/modules/text/pages/reading/frame_management');
-
-      document.body.innerHTML = `<div id="learnstatus">old</div>`;
-
-      completeWordOperation('content', false);
-
-      expect(cleanupRightFrames).not.toHaveBeenCalled();
     });
   });
 

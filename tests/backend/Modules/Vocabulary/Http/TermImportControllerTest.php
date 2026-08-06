@@ -291,13 +291,9 @@ class TermImportControllerTest extends TestCase
         $method = new \ReflectionMethod(TermImportController::class, 'handleBulkSave');
         $params = $method->getParameters();
 
-        $this->assertCount(3, $params);
+        $this->assertCount(1, $params);
         $this->assertSame('terms', $params[0]->getName());
         $this->assertSame('array', $params[0]->getType()->getName());
-        $this->assertSame('tid', $params[1]->getName());
-        $this->assertSame('int', $params[1]->getType()->getName());
-        $this->assertSame('cleanUp', $params[2]->getName());
-        $this->assertSame('bool', $params[2]->getType()->getName());
     }
 
     #[Test]

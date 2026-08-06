@@ -195,31 +195,7 @@ class TermEditController extends VocabularyBaseController
 
         TagsFacade::saveWordTagsFromForm($wid);
 
-        // Prepare view variables
-        $textId = InputValidator::getInt('tid', 0) ?? 0;
-        $status = InputValidator::getString('WoStatus');
-        $romanization = InputValidator::getString('WoRomanization');
-        $fromAnn = InputValidator::getString('fromAnn');
-
-        $tagList = TagsFacade::getWordTagList($wid, false);
-        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
-
-        $this->render('edit_result', [
-            'wid' => $wid,
-            'message' => $message,
-            'textId' => $textId,
-            'status' => $status,
-            'romanization' => $romanization,
-            'translation' => $translation,
-            'hex' => $hex,
-            'oldStatus' => $oldStatus,
-            'isNew' => ($op == 'Save'),
-            'fromAnn' => $fromAnn,
-            'text' => $text,
-            'textlc' => $textlc,
-            'tagList' => $tagList,
-            'todoContent' => $todoContent,
-        ]);
+        $this->render('edit_result', ['message' => $message]);
 
         return false;
     }
@@ -490,46 +466,7 @@ class TermEditController extends VocabularyBaseController
 
             $message = 'Updated';
 
-            /** @var int|null $lang */
-            $lang = QueryBuilder::table('words')
-                ->where('WoID', '=', $wid)
-                ->valuePrepared('WoLgID');
-            if (!isset($lang)) {
-                throw new \RuntimeException('Cannot retrieve language: word not found');
-            }
-            /** @var string|null $regexword */
-            $regexword = QueryBuilder::table('languages')
-                ->where('LgID', '=', $lang)
-                ->valuePrepared('LgRegexpWordCharacters');
-            if (!isset($regexword)) {
-                throw new \RuntimeException('Cannot retrieve language data: language not found');
-            }
-            $sent = htmlspecialchars(ExportService::replaceTabNewline($woSentence), ENT_QUOTES, 'UTF-8');
-            $sent1 = str_replace(
-                "{",
-                ' <b>[',
-                str_replace(
-                    "}",
-                    ']</b> ',
-                    ExportService::maskTermInSentence($sent, $regexword)
-                )
-            );
-
-            $status = $newstatus;
-            $romanization = $woRomanization;
-            $text = $woText;
-            $tagList = TagsFacade::getWordTagList($wid, false);
-
-            $this->render('edit_term_result', [
-                'wid' => $wid,
-                'message' => $message,
-                'status' => $status,
-                'romanization' => $romanization,
-                'translation' => $translation,
-                'text' => $text,
-                'sent1' => $sent1,
-                'tagList' => $tagList,
-            ]);
+            $this->render('edit_term_result', ['message' => $message]);
         }
 
         return false;
@@ -704,36 +641,6 @@ class TermEditController extends VocabularyBaseController
                     $this->getExpressionService()->insertExpressions($result['textlc'], $woLgId, $wid, $len, 0);
                 } elseif ($len == 1) {
                     $this->getLinkingService()->linkToTextItems($wid, $woLgId, $result['textlc']);
-
-                    // Prepare view variables
-                    $hex = $contextService->textToClassName($result['textlc']);
-                    $translation = ExportService::replaceTabNewline(InputValidator::getString('WoTranslation'));
-                    if ($translation === '') {
-                        $translation = '*';
-                    }
-                    $status = InputValidator::getString('WoStatus');
-                    $romanization = InputValidator::getString('WoRomanization');
-                    $text = $result['text'];
-                    $textId = InputValidator::getInt('tid', 0) ?? 0;
-                    $success = true;
-                    $message = $result['message'];
-                    $tagList = TagsFacade::getWordTagList($wid, false);
-                    $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
-
-                    $this->render('save_result', [
-                        'wid' => $wid,
-                        'hex' => $hex,
-                        'translation' => $translation,
-                        'status' => $status,
-                        'romanization' => $romanization,
-                        'text' => $text,
-                        'textId' => $textId,
-                        'success' => $success,
-                        'message' => $message,
-                        'len' => $len,
-                        'tagList' => $tagList,
-                        'todoContent' => $todoContent,
-                    ]);
                 }
             }
         } else {

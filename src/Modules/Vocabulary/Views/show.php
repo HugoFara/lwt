@@ -89,4 +89,3 @@ assert(is_string($ann));
 </tr>
 </table>
 
-<div data-lwt-cleanup-frames="true" hidden></div>

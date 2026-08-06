@@ -168,7 +168,7 @@
     "result.translation_label": "Translation:",
     "result.word_marked_well_known": "Word marked as Well-Known.",
     "result.word_marked_ignored": "Word marked as Ignored.",
-    "result.updating_texts": "Updating Texts",
+    "result.bulk_saved": "Saved {count} terms.",
     "result.ignored_all": "Ignored all {count} words!",
     "result.ignored_one": "Ignored 1 word.",
     "result.ignored_none": "No new word ignored!",

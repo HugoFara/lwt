@@ -17,9 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Http;
 
-use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Vocabulary\Application\Services\FrequencyLanguageMap;
@@ -94,7 +92,7 @@ class TermImportController extends VocabularyBaseController
             }
 
             PageLayoutHelper::renderPageStart($cnt . ' New Word' . ($cnt == 1 ? '' : 's') . ' Saved', false);
-            $this->handleBulkSave($terms, $tid, $pos === null);
+            $this->handleBulkSave($terms);
         } else {
             PageLayoutHelper::renderPageStartNobody('Translate New Words');
         }
@@ -113,38 +111,22 @@ class TermImportController extends VocabularyBaseController
      * Handle saving bulk translated terms.
      *
      * @param array<int, array{lg: int, text: string, status: int, trans?: string}> $terms Array of term data
-     * @param int  $tid     Text ID
-     * @param bool $cleanUp Whether to clean up right frames after save
      *
      * @return void
      *
-     * @psalm-suppress UnusedParam $tid and $cleanUp are used in included view file
      * @psalm-suppress UnresolvableInclude Path computed from viewPath property
      */
-    private function handleBulkSave(array $terms, int $tid, bool $cleanUp): void
+    private function handleBulkSave(array $terms): void
     {
         $bulkService = $this->getBulkService();
         $maxWoId = $bulkService->bulkSaveTerms($terms);
 
-        $tooltipMode = Settings::getWithDefault('set-tooltip-mode');
-        $res = $bulkService->getNewWordsAfter($maxWoId);
+        /** @var list<array<string, mixed>> $newWords */
+        $newWords = $bulkService->getNewWordsAfter($maxWoId);
 
         // Link new words to text items
         $linkingService = new \Lwt\Modules\Vocabulary\Application\Services\WordLinkingService();
         $linkingService->linkNewWordsToTextItems($maxWoId);
-
-        // Prepare data for view
-        /** @var list<array<string, mixed>> $newWords */
-        $newWords = [];
-        foreach ($res as $record) {
-            $record['hex'] = StringUtils::toClassName(
-                Escaping::prepareTextdata((string)$record['WoTextLC'])
-            );
-            $record['translation'] = (string)$record['WoTranslation'];
-            $newWords[] = $record;
-        }
-
-        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($tid);
 
         include $this->viewPath . 'bulk_save_result.php';
     }

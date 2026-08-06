@@ -9,6 +9,32 @@ ones are marked like "v1.0.0-fork".
 
 ### Removed
 
+* **The last of the frame-era result plumbing** (#266, #262): four result views
+  still emitted a `<script type="application/json">` blob that
+  `word_result_init.ts` applied to `window.parent.document` — the reading
+  *frame*. No frameset has existed for some time (`frames-r` and `frame-l` are
+  emitted nowhere), so for a same-tab navigation `window.parent` was the result
+  page itself and every update found nothing. `#learnstatus`, which
+  `updateLearnStatus` wrote into, is likewise emitted nowhere in the app.
+
+  The confirmation pages stay; only the dead payload goes, along with the
+  server-side work that existed solely to build it — two `QueryBuilder` queries
+  and the sentence masking behind `edit_term_result`, and a
+  `getTodoWordsContent()` call on each of four paths. `save_result.php` is gone
+  entirely: its only remaining output was the message the controller already
+  echoed a few lines above, so single-word saves had been printing it twice.
+
+  Also removed: `word_result_init.ts`, the orphaned `updateLearnStatus`,
+  `updateNewWordInDOM`, `updateBulkWordInDOM`, `updateTestWordInDOM` and
+  `completeWordOperation` helpers, and the `data-lwt-cleanup-frames` marker in
+  `show.php`. `updateExistingWordInDOM`, `updateWordStatusInDOM` and the
+  `markWord*InDOM` pair stay — the reading view's keyboard shortcuts and popup
+  actions call them after an API write.
+
+  Not touched: `upload_result.php` is not a violation. Its config blob feeds a
+  real Alpine component that fetches `/api/v1/terms/imported`, which is the
+  documented CSP-safe pattern rather than frame plumbing.
+
 * **Two more superseded legacy term routes** (#266, #262): `/vocabulary/term-hover`
   and `/word/set-all-status` each rendered a server-built page whose only real
   payload was a JSON blob applied to a reading *frame* that no longer exists.

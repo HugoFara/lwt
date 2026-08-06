@@ -168,7 +168,6 @@
     "result.translation_label": "翻訳：",
     "result.word_marked_well_known": "単語を「よく知っている」に設定しました。",
     "result.word_marked_ignored": "単語を「無視」に設定しました。",
-    "result.updating_texts": "テキストを更新中",
     "result.ignored_all": "{count}個の単語をすべて無視しました！",
     "result.ignored_one": "1個の単語を無視しました。",
     "result.ignored_none": "新しく無視された単語はありません！",
