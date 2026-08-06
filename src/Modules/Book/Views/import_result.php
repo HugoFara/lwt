@@ -23,14 +23,18 @@ declare(strict_types=1);
 namespace Lwt\Views\Book;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
-use Lwt\Shared\UI\Helpers\PageLayoutHelper;
+
+// Type assertions for variables passed from the controller
+assert(is_string($message));
+assert(is_string($messageType));
+assert($bookId === null || is_int($bookId));
 
 ?>
 
 <h2 class="title is-4"><?php echo __('book.import_result_title'); ?></h2>
 
 <div class="notification <?php echo $messageType; ?>">
-    <?php echo htmlspecialchars($message); ?>
+    <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?>
 </div>
 
 <div class="buttons">

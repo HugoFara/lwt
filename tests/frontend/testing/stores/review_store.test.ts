@@ -788,26 +788,6 @@ describe('review/stores/review_store.ts', () => {
   });
 
   // ===========================================================================
-  // getEditUrl Tests
-  // ===========================================================================
-
-  describe('getEditUrl', () => {
-    it('returns # without current word', () => {
-      const store = getReviewStore();
-      store.currentWord = null;
-
-      expect(store.getEditUrl()).toBe('#');
-    });
-
-    it('returns correct edit URL', () => {
-      const store = getReviewStore();
-      store.currentWord = { wordId: 123 } as never;
-
-      expect(store.getEditUrl()).toBe('/word/edit-term?wid=123');
-    });
-  });
-
-  // ===========================================================================
   // Modal Tests
   // ===========================================================================
 

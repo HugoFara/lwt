@@ -11,6 +11,7 @@
 import Alpine from 'alpinejs';
 import { ReviewApi } from '@modules/review/api/review_api';
 import { successSound, failureSound } from '@shared/utils/audio_feedback';
+import { openTermEditModal } from '@modules/vocabulary/components/term_edit_modal';
 
 /**
  * Language settings for the review.
@@ -131,7 +132,8 @@ export interface ReviewStoreState {
   formatElapsed(seconds: number): string;
   getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string;
   hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean;
-  getEditUrl(): string;
+  editWord(wordId: number): void;
+  editCurrentWord(): void;
   openModal(): void;
   closeModal(): void;
   playSound(correct: boolean): void;
@@ -474,11 +476,23 @@ function createReviewStore(initialValues?: ReviewStoreInitialValues): ReviewStor
     },
 
     /**
-     * Get edit URL for the current word.
+     * Open the term editor for a word in the review table.
+     *
+     * The term already knows its language, so no reading context is needed.
+     *
+     * @param wordId Term ID
      */
-    getEditUrl(): string {
-      if (!this.currentWord) return '#';
-      return `/word/edit-term?wid=${this.currentWord.wordId}`;
+    editWord(wordId: number): void {
+      void openTermEditModal(0, 0, wordId);
+    },
+
+    /**
+     * Open the term editor for the word currently under review.
+     */
+    editCurrentWord(): void {
+      if (!this.currentWord) return;
+      this.closeModal();
+      void openTermEditModal(0, 0, this.currentWord.wordId);
     },
 
     /**

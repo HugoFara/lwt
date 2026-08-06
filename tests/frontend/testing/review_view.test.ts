@@ -42,7 +42,8 @@ const mockReviewStore = {
   openModal: vi.fn(),
   closeModal: vi.fn(),
   getDictUrl: vi.fn(() => 'http://dict.test'),
-  getEditUrl: vi.fn(() => '/word/edit')
+  editWord: vi.fn(),
+  editCurrentWord: vi.fn()
 };
 
 // Mock review_store
