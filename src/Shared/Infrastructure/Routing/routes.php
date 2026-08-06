@@ -236,13 +236,6 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Create term from hover (TermDisplayController)
-    $router->registerWithMiddleware(
-        '/vocabulary/term-hover',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@hoverCreate',
-        AUTH_MIDDLEWARE
-    );
-
     // Similar terms lookup (TermDisplayController)
     $router->registerWithMiddleware(
         '/vocabulary/similar-terms',
@@ -288,13 +281,6 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Vocabulary\\Http\\TermApiController@delete',
         AUTH_MIDDLEWARE,
         'POST'
-    );
-
-    // Set all words status (wellknown/ignore) (TermStatusController)
-    $router->registerWithMiddleware(
-        '/word/set-all-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@markAllWords',
-        AUTH_MIDDLEWARE
     );
 
     // Upload words (TermImportController)

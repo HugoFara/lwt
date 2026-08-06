@@ -9,6 +9,18 @@ ones are marked like "v1.0.0-fork".
 
 ### Removed
 
+* **Two more superseded legacy term routes** (#266, #262): `/vocabulary/term-hover`
+  and `/word/set-all-status` each rendered a server-built page whose only real
+  payload was a JSON blob applied to a reading *frame* that no longer exists.
+  Both were superseded by the API — `POST /api/v1/terms/quick` for hover-create
+  (used by `word_popover`, `word_modal` and `text_keyboard`) and
+  `TextPositionApiHandler` for mark-all-known/ignored, which calls the very same
+  `markAllWordsWithStatus` service. Neither route had a single inbound link.
+  Removing them drops `hover_save_result.php`, `all_wellknown_result.php`, the
+  `TermDisplayController::hoverCreate` and `TermStatusController::markAllWords`
+  handlers, the orphaned `CreateTermFromHover` use case, and their
+  `word_result_init.ts` initialisers.
+
 * **The legacy multi-word edit page** (#266, #262): `/word/edit-multi` rendered
   a server-built HTML form that posted back to itself and answered with
   `edit_multi_update_result.php` — a view whose entire output was a JSON blob in

@@ -181,7 +181,6 @@ class RoutesTest extends TestCase
             'word show' => ['/word/show', "{$termDisplayController}@showWord"],
             'word inline-edit' => ['/word/inline-edit', "{$termEditController}@inlineEdit"],
             'word bulk-translate' => ['/word/bulk-translate', "{$termImportController}@bulkTranslate"],
-            'word set-all-status' => ['/word/set-all-status', "{$termStatusController}@markAllWords"],
             'word upload' => ['/word/upload', "{$termImportController}@upload"],
         ];
     }

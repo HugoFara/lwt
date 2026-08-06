@@ -247,97 +247,6 @@ describe('word_result_init.ts', () => {
   });
 
   // ===========================================================================
-  // All Well-Known Result Config Tests
-  // ===========================================================================
-
-  describe('all wellknown result config', () => {
-    beforeEach(() => {
-      // Mock parent for closePopup
-      Object.defineProperty(window, 'parent', {
-        writable: true,
-        value: {
-          closePopup: vi.fn(),
-          setTimeout: vi.fn((fn) => fn())
-        }
-      });
-    });
-
-    it('initializes from all wellknown result config', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="abc">word1</span>
-        <span class="status0" data_hex="def">word2</span>
-        <script data-lwt-all-wellknown-config type="application/json">
-          {
-            "words": [
-              { "wid": 1, "hex": "abc", "term": "word1", "status": 99 },
-              { "wid": 2, "hex": "def", "term": "word2", "status": 98 }
-            ],
-            "useTooltips": true,
-            "todoContent": "0 words"
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      expect(updateLearnStatus).toHaveBeenCalledWith('0 words');
-    });
-
-    it('updates word elements with new status', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="abc" data_status="0">word</span>
-        <script data-lwt-all-wellknown-config type="application/json">
-          {
-            "words": [
-              { "wid": 1, "hex": "abc", "term": "word", "status": 99 }
-            ],
-            "useTooltips": false,
-            "todoContent": ""
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      const wordEl = document.querySelector('[data_hex="abc"]');
-      expect(wordEl?.classList.contains('status99')).toBe(true);
-      expect(wordEl?.classList.contains('word1')).toBe(true);
-      expect(wordEl?.getAttribute('data_status')).toBe('99');
-      expect(wordEl?.getAttribute('data_wid')).toBe('1');
-    });
-  });
-
-  // ===========================================================================
-  // Hover Save Result Config Tests
-  // ===========================================================================
-
-  describe('hover save result config', () => {
-    it('initializes from hover save result config', () => {
-      document.body.innerHTML = `
-        <span class="status0" data_hex="abc">word</span>
-        <script data-lwt-hover-save-result-config type="application/json">
-          {
-            "wid": 123,
-            "hex": "abc",
-            "status": 1,
-            "translation": "translated",
-            "wordRaw": "word",
-            "todoContent": "5 words"
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      const wordEl = document.querySelector('[data_hex="abc"]');
-      expect(wordEl?.classList.contains('status1')).toBe(true);
-      expect(wordEl?.classList.contains('word123')).toBe(true);
-      expect(updateLearnStatus).toHaveBeenCalledWith('5 words');
-      expect(cleanupRightFrames).toHaveBeenCalled();
-    });
-  });
-
-  // ===========================================================================
   // Edit Term Result Config Tests
   // ===========================================================================
 
@@ -415,23 +324,6 @@ describe('word_result_init.ts', () => {
   // ===========================================================================
 
   describe('error handling', () => {
-    it('handles invalid all wellknown config', () => {
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-      document.body.innerHTML = `
-        <script data-lwt-all-wellknown-config type="application/json">
-          {invalid}
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      expect(errorSpy).toHaveBeenCalledWith(
-        'Failed to parse all wellknown result config:',
-        expect.any(Error)
-      );
-    });
-
     it('handles invalid edit term result config', () => {
       const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 

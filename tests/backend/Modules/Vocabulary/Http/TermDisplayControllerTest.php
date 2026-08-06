@@ -7,7 +7,6 @@ namespace Lwt\Tests\Modules\Vocabulary\Http;
 use Lwt\Modules\Vocabulary\Http\TermDisplayController;
 use Lwt\Modules\Vocabulary\Http\VocabularyBaseController;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
-use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Domain\Term;
 use Lwt\Modules\Vocabulary\Domain\ValueObject\TermId;
@@ -30,9 +29,6 @@ class TermDisplayControllerTest extends TestCase
     /** @var VocabularyFacade&MockObject */
     private VocabularyFacade $facade;
 
-    /** @var CreateTermFromHover&MockObject */
-    private CreateTermFromHover $createTermFromHover;
-
     /** @var FindSimilarTerms&MockObject */
     private FindSimilarTerms $findSimilarTerms;
 
@@ -47,13 +43,11 @@ class TermDisplayControllerTest extends TestCase
     protected function setUp(): void
     {
         $this->facade = $this->createMock(VocabularyFacade::class);
-        $this->createTermFromHover = $this->createMock(CreateTermFromHover::class);
         $this->findSimilarTerms = $this->createMock(FindSimilarTerms::class);
         $this->dictionaryAdapter = $this->createMock(DictionaryAdapter::class);
         $this->languageFacade = $this->createMock(LanguageFacade::class);
         $this->controller = new TermDisplayController(
             $this->facade,
-            $this->createTermFromHover,
             $this->findSimilarTerms,
             $this->dictionaryAdapter,
             $this->languageFacade
@@ -83,14 +77,6 @@ class TermDisplayControllerTest extends TestCase
         $reflection = new \ReflectionProperty(TermDisplayController::class, 'facade');
 
         $this->assertSame($this->facade, $reflection->getValue($this->controller));
-    }
-
-    #[Test]
-    public function constructorSetsCreateTermFromHoverProperty(): void
-    {
-        $reflection = new \ReflectionProperty(TermDisplayController::class, 'createTermFromHover');
-
-        $this->assertSame($this->createTermFromHover, $reflection->getValue($this->controller));
     }
 
     #[Test]
@@ -141,7 +127,6 @@ class TermDisplayControllerTest extends TestCase
             'show',
             'showWord',
             'edit',
-            'hoverCreate',
             'similarTerms',
             'listEditAlpine',
         ];
@@ -165,7 +150,6 @@ class TermDisplayControllerTest extends TestCase
         $reflection = new \ReflectionClass(TermDisplayController::class);
 
         $expectedMethods = [
-            'createFromHover',
             'getDictionaryLinks',
         ];
 
@@ -213,16 +197,6 @@ class TermDisplayControllerTest extends TestCase
     public function editAcceptsArrayParameter(): void
     {
         $method = new \ReflectionMethod(TermDisplayController::class, 'edit');
-        $params = $method->getParameters();
-
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
-
-    #[Test]
-    public function hoverCreateAcceptsArrayParameter(): void
-    {
-        $method = new \ReflectionMethod(TermDisplayController::class, 'hoverCreate');
         $params = $method->getParameters();
 
         $this->assertCount(1, $params);
@@ -404,40 +378,7 @@ class TermDisplayControllerTest extends TestCase
     }
 
     // =========================================================================
-    // createFromHover tests via reflection
     // =========================================================================
-
-    #[Test]
-    public function createFromHoverCallsUseCaseExecute(): void
-    {
-        $method = new \ReflectionMethod(TermDisplayController::class, 'createFromHover');
-
-        $this->createTermFromHover->expects($this->once())
-            ->method('shouldSetNoCacheHeaders')
-            ->with(2)
-            ->willReturn(false);
-
-        $this->createTermFromHover->expects($this->once())
-            ->method('execute')
-            ->with(5, 'word', 2, 'de', 'en')
-            ->willReturn(['wid' => 10, 'hex' => 'ff', 'word' => 'word']);
-
-        $result = $method->invoke($this->controller, 5, 'word', 2, 'de', 'en');
-
-        $this->assertSame(10, $result['wid']);
-    }
-
-    #[Test]
-    public function createFromHoverUsesDefaultEmptyLanguageParams(): void
-    {
-        $method = new \ReflectionMethod(TermDisplayController::class, 'createFromHover');
-
-        $params = $method->getParameters();
-        $this->assertSame('sourceLang', $params[3]->getName());
-        $this->assertSame('', $params[3]->getDefaultValue());
-        $this->assertSame('targetLang', $params[4]->getName());
-        $this->assertSame('', $params[4]->getDefaultValue());
-    }
 
     // =========================================================================
     // showWord tests

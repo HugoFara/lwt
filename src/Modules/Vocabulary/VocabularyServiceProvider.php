@@ -52,7 +52,6 @@ use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
 use Lwt\Modules\Vocabulary\Http\TermStatusApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiRouter;
 use Lwt\Modules\Text\Application\TextFacade;
-use Lwt\Modules\Vocabulary\Application\UseCases\CreateTermFromHover;
 use Lwt\Modules\Vocabulary\Application\Services\WordListService;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
@@ -227,14 +226,6 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             );
         });
 
-        // Register CreateTermFromHover Use Case
-        $container->singleton(CreateTermFromHover::class, function (Container $c): CreateTermFromHover {
-            return new CreateTermFromHover(
-                $c->getTyped(VocabularyFacade::class),
-                $c->getTyped(\Lwt\Modules\Dictionary\Application\DictionaryFacade::class)
-            );
-        });
-
         // Register Term CRUD API Handler
         $container->singleton(TermCrudApiHandler::class, function (Container $c) {
             return new TermCrudApiHandler(
@@ -308,7 +299,6 @@ class VocabularyServiceProvider implements ServiceProviderInterface
         $container->singleton(TermDisplayController::class, function (Container $c) {
             return new TermDisplayController(
                 $c->getTyped(VocabularyFacade::class),
-                $c->getTyped(CreateTermFromHover::class),
                 $c->getTyped(FindSimilarTerms::class),
                 $c->getTyped(DictionaryAdapter::class),
                 $c->getTyped(LanguageFacade::class)

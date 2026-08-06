@@ -9,8 +9,6 @@
  * - save_result.php (new word saved in multi-word context)
  * - edit_result.php (word created or updated)
  * - edit_term_result.php (word updated during review)
- * - hover_save_result.php (word saved via hover)
- * - all_wellknown_result.php (mark all as well-known/ignored)
  * - bulk_save_result.php (bulk translated words saved)
  *
  * Keep this list in sync with the views — a handler with no emitting view is dead
@@ -32,30 +30,9 @@ import {
   updateBulkWordInDOM,
   type BulkWordUpdateParams
 } from '../services/word_dom_updates';
-import { createWordTooltip } from '@modules/vocabulary/services/word_status';
 import { cleanupRightFrames } from '@modules/text/pages/reading/frame_management';
 import { loadTermTranslations, editImprTextInOpener } from '@modules/vocabulary/services/term_operations';
-import { closeParentPopup } from '@modules/vocabulary/components/word_popup';
 import { escapeHtml } from '@shared/utils/html_utils';
-
-/**
- * Word data for all_wellknown_result view.
- */
-interface WellKnownWordData {
-  wid: number;
-  hex: string;
-  term: string;
-  status: number;
-}
-
-/**
- * Configuration for all_wellknown_result view (mark all as well-known/ignored).
- */
-interface AllWellKnownConfig {
-  words: WellKnownWordData[];
-  useTooltips: boolean;
-  todoContent: string;
-}
 
 /**
  * Configuration for save_result view (new word saved in multi-word context).
@@ -101,18 +78,6 @@ interface EditTermResultConfig {
   status: number;
   sentence: string;
   statusControlsHtml: string;
-}
-
-/**
- * Configuration for hover_save_result view (word saved via hover).
- */
-interface HoverSaveResultConfig {
-  wid: number;
-  hex: string;
-  status: number;
-  translation: string;
-  wordRaw: string;
-  todoContent: string;
 }
 
 /**
@@ -166,57 +131,6 @@ function initEditTermResult(config: EditTermResultConfig): void {
   }
 
   cleanupRightFrames();
-}
-
-/**
- * Initialize hover_save_result view.
- * Updates the DOM for a word saved via hover interaction.
- */
-function initHoverSaveResult(config: HoverSaveResultConfig): void {
-  const context = getParentContext();
-
-  // Always generate tooltips (jQuery UI tooltips removed, now using native)
-  const title = createWordTooltip(config.wordRaw, config.translation, '', String(config.status));
-
-  context.querySelectorAll<HTMLElement>(`[data_hex="${config.hex}"]`).forEach(el => {
-    el.classList.remove('status0');
-    el.classList.add(`status${config.status}`, `word${config.wid}`);
-    el.setAttribute('data_status', String(config.status));
-    el.setAttribute('data_wid', String(config.wid));
-    el.title = title;
-    el.setAttribute('data_trans', config.translation);
-  });
-
-  updateLearnStatus(config.todoContent);
-  cleanupRightFrames();
-}
-
-/**
- * Initialize all_wellknown_result view.
- * Updates the DOM for all words marked as well-known or ignored.
- */
-function initAllWellKnownResult(config: AllWellKnownConfig): void {
-  const context = getParentContext();
-
-  config.words.forEach((word) => {
-    let title = '';
-    if (config.useTooltips) {
-      title = createWordTooltip(word.term, '*', '', String(word.status));
-    }
-
-    context.querySelectorAll<HTMLElement>(`[data_hex="${word.hex}"]`).forEach(el => {
-      el.classList.remove('status0');
-      el.classList.add(`status${word.status}`, `word${word.wid}`);
-      el.setAttribute('data_status', String(word.status));
-      el.setAttribute('data_wid', String(word.wid));
-      el.title = title;
-    });
-  });
-
-  updateLearnStatus(config.todoContent);
-
-  // Close popup in parent frame after a delay
-  setTimeout(() => closeParentPopup(), 1000);
 }
 
 /**
@@ -304,17 +218,6 @@ export function autoInitWordResults(): void {
     cleanupRightFrames();
   }
 
-  // All well-known result
-  const wellKnownConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-all-wellknown-config]');
-  if (wellKnownConfigEl) {
-    try {
-      const config = JSON.parse(wellKnownConfigEl.textContent || '{}') as AllWellKnownConfig;
-      initAllWellKnownResult(config);
-    } catch (e) {
-      console.error('Failed to parse all wellknown result config:', e);
-    }
-  }
-
   // Edit term result (testing context)
   const editTermConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-edit-term-result-config]');
   if (editTermConfigEl) {
@@ -323,17 +226,6 @@ export function autoInitWordResults(): void {
       initEditTermResult(config);
     } catch (e) {
       console.error('Failed to parse edit term result config:', e);
-    }
-  }
-
-  // Hover save result
-  const hoverSaveConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-hover-save-result-config]');
-  if (hoverSaveConfigEl) {
-    try {
-      const config = JSON.parse(hoverSaveConfigEl.textContent || '{}') as HoverSaveResultConfig;
-      initHoverSaveResult(config);
-    } catch (e) {
-      console.error('Failed to parse hover save result config:', e);
     }
   }
 
