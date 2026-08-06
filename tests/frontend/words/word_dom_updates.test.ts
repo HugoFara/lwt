@@ -12,7 +12,6 @@ import {
   updateWordStatusInDOM,
   markWordWellKnownInDOM,
   markWordIgnoredInDOM,
-  updateMultiWordInDOM,
   updateBulkWordInDOM,
   updateTestWordInDOM,
   completeWordOperation,
@@ -349,27 +348,6 @@ describe('word_dom_updates.ts', () => {
       expect(element.classList.contains('word222')).toBe(true);
       expect(element.getAttribute('data_status')).toBe('98');
       expect(element.getAttribute('data_wid')).toBe('222');
-    });
-  });
-
-  // ===========================================================================
-  // updateMultiWordInDOM Tests
-  // ===========================================================================
-
-  describe('updateMultiWordInDOM', () => {
-    it('updates multi-word expression attributes', () => {
-      document.body.innerHTML = `
-        <span class="word333 status2">hello world</span>
-      `;
-
-      updateMultiWordInDOM(333, 'hello world', 'bonjour monde', 'rom', 4, 2);
-
-      const element = document.querySelector('.word333')!;
-      expect(element.classList.contains('status2')).toBe(false);
-      expect(element.classList.contains('status4')).toBe(true);
-      expect(element.getAttribute('data_trans')).toBe('bonjour monde');
-      expect(element.getAttribute('data_rom')).toBe('rom');
-      expect(element.getAttribute('data_status')).toBe('4');
     });
   });
 

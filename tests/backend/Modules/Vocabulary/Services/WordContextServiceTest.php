@@ -147,31 +147,6 @@ class WordContextServiceTest extends TestCase
         $this->assertArrayHasKey('translate', $result);
     }
 
-    // ===== exportTermAsJson() tests =====
-
-    public function testExportTermAsJsonReturnsValidJson(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $json = $this->service->exportTermAsJson(
-            123,
-            'test term',
-            'test roman',
-            'test translation',
-            2
-        );
-
-        $decoded = json_decode($json, true);
-        $this->assertNotNull($decoded);
-        $this->assertEquals(123, $decoded['woid']);
-        $this->assertEquals('test term', $decoded['text']);
-        $this->assertEquals('test roman', $decoded['romanization']);
-        $this->assertEquals('test translation', $decoded['translation']);
-        $this->assertEquals(2, $decoded['status']);
-    }
-
     // ===== getLanguageIdFromText() tests =====
 
     public function testGetLanguageIdFromTextReturnsNullForNonExistent(): void

@@ -9,7 +9,6 @@
  * - save_result.php (new word saved in multi-word context)
  * - edit_result.php (word created or updated)
  * - edit_term_result.php (word updated during review)
- * - edit_multi_update_result.php (multi-word expression updated)
  * - hover_save_result.php (word saved via hover)
  * - all_wellknown_result.php (mark all as well-known/ignored)
  * - bulk_save_result.php (bulk translated words saved)
@@ -30,7 +29,6 @@ import {
   getParentContext,
   updateLearnStatus,
   updateTestWordInDOM,
-  updateMultiWordInDOM,
   updateBulkWordInDOM,
   type BulkWordUpdateParams
 } from '../services/word_dom_updates';
@@ -115,18 +113,6 @@ interface HoverSaveResultConfig {
   translation: string;
   wordRaw: string;
   todoContent: string;
-}
-
-/**
- * Configuration for edit_multi_update_result view (multi-word expression updated).
- */
-interface EditMultiUpdateResultConfig {
-  wid: number;
-  text: string;
-  translation: string;
-  romanization: string;
-  status: number;
-  oldStatus: number;
 }
 
 /**
@@ -291,22 +277,6 @@ function initEditResult(config: EditResultConfig): void {
 }
 
 /**
- * Initialize edit_multi_update_result view.
- * Updates the DOM after a multi-word expression is updated.
- */
-function initEditMultiUpdateResult(config: EditMultiUpdateResultConfig): void {
-  updateMultiWordInDOM(
-    config.wid,
-    config.text,
-    config.translation,
-    config.romanization,
-    config.status,
-    config.oldStatus
-  );
-  cleanupRightFrames();
-}
-
-/**
  * Initialize bulk_save_result view.
  * Updates the DOM after bulk translated words are saved.
  */
@@ -386,17 +356,6 @@ export function autoInitWordResults(): void {
       initEditResult(config);
     } catch (e) {
       console.error('Failed to parse edit result config:', e);
-    }
-  }
-
-  // Edit multi-word update result
-  const editMultiUpdateConfigEl = document.querySelector<HTMLScriptElement>('script[data-lwt-edit-multi-update-result-config]');
-  if (editMultiUpdateConfigEl) {
-    try {
-      const config = JSON.parse(editMultiUpdateConfigEl.textContent || '{}') as EditMultiUpdateResultConfig;
-      initEditMultiUpdateResult(config);
-    } catch (e) {
-      console.error('Failed to parse edit multi update result config:', e);
     }
   }
 

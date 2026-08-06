@@ -73,7 +73,6 @@ use Lwt\Modules\Vocabulary\Http\TermDisplayController;
 use Lwt\Modules\Vocabulary\Http\TermStatusController;
 use Lwt\Modules\Vocabulary\Http\TermApiController;
 use Lwt\Modules\Vocabulary\Http\TermImportController;
-use Lwt\Modules\Vocabulary\Http\MultiWordController;
 use Lwt\Modules\Language\Application\LanguageFacade;
 
 /**
@@ -332,14 +331,6 @@ class VocabularyServiceProvider implements ServiceProviderInterface
             return new TermImportController(
                 $c->getTyped(LanguageFacade::class),
                 $c->getTyped(\Lwt\Modules\Dictionary\Application\DictionaryFacade::class)
-            );
-        });
-
-        $container->singleton(MultiWordController::class, function (Container $c) {
-            return new MultiWordController(
-                $c->getTyped(VocabularyFacade::class),
-                $c->getTyped(DictionaryAdapter::class),
-                $c->getTyped(LanguageFacade::class)
             );
         });
 

@@ -12,7 +12,6 @@ vi.mock('../../../src/frontend/js/modules/vocabulary/services/word_dom_updates',
   getParentContext: vi.fn(() => document),
   updateLearnStatus: vi.fn(),
   updateTestWordInDOM: vi.fn(),
-  updateMultiWordInDOM: vi.fn(),
   updateBulkWordInDOM: vi.fn()
 }));
 
@@ -35,7 +34,6 @@ vi.mock('../../../src/frontend/js/shared/utils/html_utils', () => ({
 import {
   updateNewWordInDOM,
   completeWordOperation,
-  updateMultiWordInDOM,
   updateBulkWordInDOM,
   updateLearnStatus,
   updateExistingWordInDOM
@@ -184,29 +182,6 @@ describe('word_result_init.ts', () => {
   // ===========================================================================
   // Edit Multi Update Result Config Tests
   // ===========================================================================
-
-  describe('edit multi update result config', () => {
-    it('initializes from edit multi update result config', () => {
-      document.body.innerHTML = `
-        <script data-lwt-edit-multi-update-result-config type="application/json">
-          {
-            "wid": 444,
-            "text": "multi word",
-            "translation": "phrase",
-            "romanization": "rom",
-            "status": 4,
-            "oldStatus": 3
-          }
-        </script>
-      `;
-
-      autoInitWordResults();
-
-      expect(updateMultiWordInDOM).toHaveBeenCalledWith(
-        444, 'multi word', 'phrase', 'rom', 4, 3
-      );
-    });
-  });
 
   // ===========================================================================
   // Bulk Save Result Config Tests
@@ -426,19 +401,12 @@ describe('word_result_init.ts', () => {
             "text": "word", "hex": "a", "textId": 7, "todoContent": "", "isNew": true
           }
         </script>
-        <script data-lwt-edit-multi-update-result-config type="application/json">
-          {
-            "wid": 2, "text": "multi word", "translation": "phrase",
-            "romanization": "rom", "status": 4, "oldStatus": 1
-          }
-        </script>
       `;
 
       autoInitWordResults();
 
       expect(cleanupRightFrames).toHaveBeenCalled();
       expect(updateNewWordInDOM).toHaveBeenCalled();
-      expect(updateMultiWordInDOM).toHaveBeenCalled();
     });
   });
 

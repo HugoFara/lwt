@@ -200,13 +200,6 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Edit multi-word (MultiWordController)
-    $router->registerWithMiddleware(
-        '/word/edit-multi',
-        'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController@editMulti',
-        AUTH_MIDDLEWARE
-    );
-
     // All words (list view) - Alpine.js SPA version (TermDisplayController)
     $router->registerWithMiddleware(
         '/words',

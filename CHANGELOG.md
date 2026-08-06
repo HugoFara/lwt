@@ -7,6 +7,21 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Removed
+
+* **The legacy multi-word edit page** (#266, #262): `/word/edit-multi` rendered
+  a server-built HTML form that posted back to itself and answered with
+  `edit_multi_update_result.php` — a view whose entire output was a JSON blob in
+  a `<script type="application/json">` tag, which the reader then applied to the
+  opener's DOM. The modern reader stopped using any of it when the frame reader
+  was retired: selecting several words now opens the Alpine multi-word modal,
+  which talks to `POST /api/v1/terms/multi` and `PUT /api/v1/terms/multi/{id}`.
+  Nothing linked to the route any more, so the whole loop was unreachable.
+  Removing it drops `MultiWordController`, its three views, the route, the
+  `word_result_init.ts` handler, and the now-orphaned `updateMultiWordInDOM`
+  and `WordContextService::exportTermAsJson`. No behaviour change — none of it
+  could run.
+
 ### Changed
 
 * **EPUB import no longer depends on an external Composer package** (#263):

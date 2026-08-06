@@ -193,37 +193,6 @@ export function markWordIgnoredInDOM(wid: number, hex: string, term: string): vo
   });
 }
 
-/**
- * Update a multi-word expression in the DOM.
- *
- * @param wid Word ID
- * @param text Term text
- * @param translation Translation
- * @param romanization Romanization
- * @param status New status
- * @param oldStatus Previous status
- */
-export function updateMultiWordInDOM(
-  wid: number,
-  text: string,
-  translation: string,
-  romanization: string,
-  status: number | string,
-  oldStatus: number | string
-): void {
-  const context = getParentContext();
-  const title = generateTooltip(text, translation, romanization, status);
-
-  context.querySelectorAll<HTMLElement>(`.word${wid}`).forEach(el => {
-    el.setAttribute('data_trans', translation);
-    el.setAttribute('data_rom', romanization);
-    el.title = title;
-    el.classList.remove(`status${oldStatus}`);
-    el.classList.add(`status${status}`);
-    el.setAttribute('data_status', String(status));
-  });
-}
-
 export interface BulkWordUpdateParams {
   WoID: number;
   WoTextLC: string;
