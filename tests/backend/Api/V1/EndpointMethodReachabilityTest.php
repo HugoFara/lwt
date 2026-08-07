@@ -45,6 +45,10 @@ class EndpointMethodReachabilityTest extends TestCase
             'update book progress'  => ['PUT', '/api/v1/books/12/progress'],
             'delete a book'         => ['DELETE', '/api/v1/books/12'],
 
+            // Reads added for the bulk-translate and feed-article-edit pages.
+            'unknown words to translate' => ['GET', '/api/v1/terms/unknown-for-translate'],
+            'extract articles to edit'   => ['POST', '/api/v1/feeds/articles/extract'],
+
             // Anchors on surfaces that already work, so a regression in the
             // fallback itself is caught rather than only the books entry.
             'set a term status'     => ['PUT', '/api/v1/terms/5/status'],

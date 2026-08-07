@@ -86,6 +86,16 @@ class VocabularyApiRouter implements ApiRoutableInterface
                 (int) ($params["page"] ?? 0),
                 (int) ($params["count"] ?? 0)
             ));
+        } elseif ($frag1 === 'unknown-for-translate') {
+            $textId = (int) ($params['text_id'] ?? 0);
+            if ($textId <= 0) {
+                return Response::error('text_id is required', 400);
+            }
+            return Response::success($this->termHandler->getUnknownWordsForTranslate(
+                $textId,
+                (int) ($params['offset'] ?? 0),
+                (int) ($params['limit'] ?? 100)
+            ));
         } elseif ($frag1 === 'for-edit') {
             return Response::success($this->termHandler->formatGetTermForEdit(
                 (int) ($params['term_id'] ?? 0),

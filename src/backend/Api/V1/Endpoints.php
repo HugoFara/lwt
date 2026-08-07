@@ -67,6 +67,7 @@ class Endpoints
         'terms/full' => ['POST'],
         'terms/bulk' => ['POST'],
         'terms/for-edit' => ['GET'],
+        'terms/unknown-for-translate' => ['GET'],
         'terms/bulk-status' => ['PUT'],
         'terms/list' => ['GET'],
         'terms/filter-options' => ['GET'],
@@ -95,6 +96,7 @@ class Endpoints
         'feeds/list' => ['GET'],
         'feeds/articles' => ['GET'],
         'feeds/articles/import' => ['POST'],
+        'feeds/articles/extract' => ['POST'],
         // A URL carrying an ID (books/12/progress) never matches a key here
         // exactly, so getMethodsForEndpoint() falls back to the first segment.
         // The bare 'books' entry therefore has to permit every method any

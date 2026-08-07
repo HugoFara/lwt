@@ -470,6 +470,9 @@ class FeedApiHandler implements ApiRoutableInterface
         if ($frag1 === 'articles' && $frag2 === 'import') {
             return Response::success($this->article->formatImportArticles($params));
         }
+        if ($frag1 === 'articles' && $frag2 === 'extract') {
+            return Response::success($this->article->extractArticles($params));
+        }
         if ($frag1 === '') {
             return Response::success($this->crud->formatCreateFeed($params));
         }

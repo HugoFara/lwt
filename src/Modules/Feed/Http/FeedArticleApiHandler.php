@@ -217,6 +217,88 @@ class FeedArticleApiHandler
     }
 
     /**
+     * Extract selected articles into editable texts without importing them.
+     *
+     * This is the read half of {@see importArticles()}: it runs the same
+     * extraction, but returns the texts for the caller to edit and submit
+     * rather than writing them. It performs no writes except marking links
+     * whose extraction failed, which `importArticles()` does too — leaving
+     * them unmarked would make the same article fail again on every attempt.
+     *
+     * @param array<string, mixed> $data Request payload carrying `article_ids`
+     *
+     * @return array{success: bool, texts: list<array<string, mixed>>,
+     *               language_id: int, errors: list<string>}
+     */
+    public function extractArticles(array $data): array
+    {
+        $articleIds = $data['article_ids'] ?? [];
+        if (!is_array($articleIds) || count($articleIds) === 0) {
+            return ['success' => false, 'texts' => [], 'language_id' => 0, 'errors' => ['No articles selected']];
+        }
+
+        $ids = implode(',', array_map('intval', $articleIds));
+        $feedLinks = $this->feedFacade->getMarkedFeedLinks($ids);
+
+        $collected = [];
+        $errors = [];
+        $languageId = 0;
+
+        foreach ($feedLinks as $row) {
+            /** @var array<string, mixed> $row */
+            $feedOptions = (string)($row['NfOptions'] ?? '');
+            $languageId = (int)($row['NfLgID'] ?? 0);
+
+            $flLink = (string)($row['FlLink'] ?? '');
+            $flId = (string)($row['FlID'] ?? '');
+            $doc = [[
+                'link' => empty($flLink) ? ('#' . $flId) : $flLink,
+                'title' => (string)($row['FlTitle'] ?? ''),
+                'audio' => (string)($row['FlAudio'] ?? ''),
+                'text' => (string)($row['FlText'] ?? '')
+            ]];
+
+            $charsetRaw = $this->feedFacade->getFeedOption($feedOptions, 'charset');
+            $charset = is_string($charsetRaw) ? $charsetRaw : null;
+            $texts = $this->feedFacade->extractTextFromArticle(
+                $doc,
+                (string)($row['NfArticleSectionTags'] ?? ''),
+                (string)($row['NfFilterTags'] ?? ''),
+                $charset
+            );
+
+            if (isset($texts['error'])) {
+                /** @var array{message?: string, link?: string[]} $errorData */
+                $errorData = $texts['error'];
+                $errors[] = $errorData['message'] ?? 'Unknown error';
+                foreach ($errorData['link'] ?? [] as $errLink) {
+                    $this->feedFacade->markLinkAsError($errLink);
+                }
+                unset($texts['error']);
+            }
+
+            if (is_array($texts)) {
+                foreach ($texts as $text) {
+                    /** @var array{TxTitle?: mixed, TxText?: mixed, TxAudioURI?: mixed, TxSourceURI?: mixed} $text */
+                    $collected[] = [
+                        'TxTitle' => (string)($text['TxTitle'] ?? ''),
+                        'TxText' => (string)($text['TxText'] ?? ''),
+                        'TxAudioURI' => (string)($text['TxAudioURI'] ?? ''),
+                        'TxSourceURI' => (string)($text['TxSourceURI'] ?? ''),
+                    ];
+                }
+            }
+        }
+
+        return [
+            'success' => true,
+            'texts' => $collected,
+            'language_id' => $languageId,
+            'errors' => $errors,
+        ];
+    }
+
+    /**
      * Import articles as texts.
      *
      * @param array $data Import data:

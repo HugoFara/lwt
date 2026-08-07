@@ -300,6 +300,39 @@ class TermCrudApiHandler
         return $this->deleteTerm($termId);
     }
 
+    /**
+     * List a text's still-unknown single words, for the bulk-translate page.
+     *
+     * Paginated by the caller-supplied offset. One extra row beyond `limit` is
+     * fetched so the response can report whether another page exists without a
+     * second COUNT query — the row itself is not returned.
+     *
+     * The underlying query is scoped through `Ti2TxID -> texts`, so a text
+     * belonging to another user yields nothing rather than leaking terms.
+     *
+     * @param int $textId Text whose unknown words to list
+     * @param int $offset Rows to skip
+     * @param int $limit  Rows to return (1-500)
+     *
+     * @return array{terms: list<array<string, mixed>>, has_more: bool, next_offset: int|null}
+     */
+    public function getUnknownWordsForTranslate(int $textId, int $offset, int $limit): array
+    {
+        $offset = max(0, $offset);
+        $limit = min(500, max(1, $limit));
+
+        $rows = $this->discoveryService->getUnknownWordsForBulkTranslate($textId, $offset, $limit + 1);
+
+        $hasMore = count($rows) > $limit;
+        $terms = $hasMore ? array_slice($rows, 0, $limit) : $rows;
+
+        return [
+            'terms' => array_values($terms),
+            'has_more' => $hasMore,
+            'next_offset' => $hasMore ? $offset + $limit : null,
+        ];
+    }
+
     // =========================================================================
     // Term Details (migrated from TermHandler)
     // =========================================================================
