@@ -522,6 +522,31 @@ describe('bulk_translate.ts', () => {
         expect(typeof window.googleTranslateElementInit).toBe('function');
       });
     });
+
+    describe('setupInteractions', () => {
+      it('keeps a hostile translation inside the input value', () => {
+        // The translation is third-party text: it used to be interpolated
+        // into value="…", so a quote in it could inject attributes.
+        const hostile = '" onfocus="alert(1)" autofocus x="';
+        document.body.innerHTML = `
+          <span class="trans" id="Trans_0"><font>${hostile
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/"/g, '&quot;')}</font></span>
+        `;
+
+        const component = bulkTranslateApp();
+        component.setupInteractions();
+        vi.advanceTimersByTime(500);
+
+        const input = document.querySelector('.trans input') as HTMLInputElement;
+        expect(input).not.toBeNull();
+        expect(input.value).toBe(hostile);
+        expect(input.getAttribute('onfocus')).toBeNull();
+        expect(input.hasAttribute('autofocus')).toBe(false);
+        expect(input.name).toBe('term[0][trans]');
+      });
+    });
   });
 
   // ===========================================================================

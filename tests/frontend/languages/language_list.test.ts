@@ -303,6 +303,59 @@ describe('languages/language_list.ts', () => {
     });
   });
 
+  describe('hostile language names', () => {
+    beforeEach(async () => {
+      // A language name is user-supplied and used to be interpolated straight
+      // into both a text node and a data- attribute.
+      document.body.innerHTML = `
+        <div id="language-notification" style="display: none;" class="notification">
+          <span id="language-notification-text"></span>
+        </div>
+        <div class="language-card is-current" data-lang-id="1">
+          <div class="card-header-title">&lt;img src=x onerror=alert(1)&gt;</div>
+          <div class="card-header-icon"></div>
+        </div>
+        <div class="language-card" data-lang-id="2">
+          <div class="card-header-title">" onmouseover="alert(2)</div>
+          <div class="card-header-icon">
+            <button class="button set-current-language-btn" data-action="set-current-language" data-lang-id="2" data-lang-name="x">
+              Set as Default
+            </button>
+          </div>
+        </div>
+      `;
+      vi.resetModules();
+      await import('../../../src/frontend/js/modules/language/pages/language_list');
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+    });
+
+    it('does not execute markup from a language name', async () => {
+      mockSave.mockResolvedValueOnce({ error: null });
+
+      const card2 = document.querySelector('[data-lang-id="2"]')!;
+      const button = card2.querySelector('.set-current-language-btn') as HTMLElement;
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      await vi.waitFor(() => {
+        expect(mockSave).toHaveBeenCalled();
+      });
+
+      // Card 1 lost "current" and gets its button rebuilt from its own name.
+      const card1 = document.querySelector('[data-lang-id="1"]')!;
+      const rebuilt = card1.querySelector('.set-current-language-btn') as HTMLElement;
+      expect(rebuilt).not.toBeNull();
+      expect(rebuilt.dataset.langName).toBe('<img src=x onerror=alert(1)>');
+      expect(rebuilt.getAttribute('onerror')).toBeNull();
+      expect(document.querySelector('img')).toBeNull();
+
+      // Card 2 became current: its title now carries the indicator icon plus
+      // the name, which must stay text.
+      const title2 = card2.querySelector('.card-header-title')!;
+      expect(title2.textContent).toContain('" onmouseover="alert(2)');
+      expect(title2.querySelector('[onmouseover]')).toBeNull();
+    });
+  });
+
   describe('handleSetCurrentLanguage', () => {
     beforeEach(async () => {
       document.body.innerHTML = `

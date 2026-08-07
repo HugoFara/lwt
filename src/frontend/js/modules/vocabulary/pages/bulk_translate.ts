@@ -361,9 +361,21 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
             const cnt = (trans.id || '').replace('Trans_', '');
 
             trans.classList.add('notranslate');
-            trans.innerHTML =
-              `<input type="text" name="term[${cnt}][trans]" value="${txt}" maxlength="100" class="respinput">` +
-              '<div class="del_trans"></div>';
+
+            // Built through the DOM, not a markup string: the translation is
+            // third-party text, and a quote in it would otherwise close the
+            // value attribute and let the rest inject attributes.
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = `term[${cnt}][trans]`;
+            input.value = txt;
+            input.maxLength = 100;
+            input.className = 'respinput';
+
+            const delTrans = document.createElement('div');
+            delTrans.className = 'del_trans';
+
+            trans.replaceChildren(input, delTrans);
           });
 
           // Add dictionary links after each term

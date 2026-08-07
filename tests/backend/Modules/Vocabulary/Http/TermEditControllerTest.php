@@ -645,19 +645,17 @@ class TermEditControllerTest extends TestCase
     }
 
     // =========================================================================
-    // editWord early return tests
+    // editWord argument validation
     // =========================================================================
 
     #[Test]
-    public function editWordReturnsEarlyWithNoParams(): void
+    public function editWordRejectsARequestThatIdentifiesNoTerm(): void
     {
-        // No GET params set - wid='', tid='', ord='', op=''
-        // This should trigger early return
-        ob_start();
-        $this->controller->editWord([]);
-        $output = ob_get_clean();
+        // No GET params set - wid='', tid='', ord='', op=''. Returning here
+        // would serve a blank page; the exception handler renders an error.
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Cannot edit term: expected a term ID, or a text ID with a position');
 
-        // No output when early return
-        $this->assertSame('', $output);
+        $this->controller->editWord([]);
     }
 }
