@@ -1,13 +1,15 @@
 <?php
 
 /**
- * Books List View
+ * Books List View — scaffold only.
+ *
+ * Carries no book data. The `bookList` Alpine component fetches everything
+ * from `GET /api/v1/books` and renders the table, filter and pagination, so
+ * this page works against a configurable API base URL.
  *
  * Variables expected:
- * - $books: array - Array of book data
- * - $pagination: array - Pagination info (total, page, perPage, totalPages)
- * - $languagesOption: string - HTML options for language select
- * - $languageId: int|null - Currently selected language ID
+ * - $languageId: int|null - Language filter from the query string
+ * - $page: int - Page number from the query string
  *
  * PHP version 8.1
  *
@@ -25,11 +27,6 @@ namespace Lwt\Views\Book;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
-use Lwt\Shared\UI\Helpers\FormHelper;
-
-/**
- * @var string $message
- */
 
 $actions = [
     ['url' => '/texts/new', 'label' => __('book.import_epub'), 'icon' => 'file-up', 'class' => 'is-primary'],
@@ -52,129 +49,133 @@ $actions = [
 
 <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
-<?php if ($message !== '') : ?>
-<div class="notification is-info is-light">
-    <?php echo htmlspecialchars($message); ?>
-    <button class="delete" @click="$el.parentElement.remove()"></button>
-</div>
-<?php endif; ?>
+<script type="application/json" id="book-list-config"><?php
+echo json_encode([
+    'languageId' => $languageId ?? 0,
+    'page' => $page ?? 1,
+], JSON_HEX_TAG | JSON_HEX_AMP);
+?></script>
 
-<!-- Filter -->
-<div class="box">
-    <form method="get" action="/books" class="field is-horizontal">
-        <div class="field-body">
-            <div class="field">
-                <label class="label is-small"><?php echo __('common.language'); ?></label>
-                <div class="control">
-                    <div class="select is-small is-fullwidth">
-                        <select name="lg_id" @change="$el.form.submit()">
-                            <?php echo $languagesOption; ?>
-                        </select>
+<div x-data="bookList" x-init="init()">
+
+    <div x-show="notification" x-transition class="notification is-info is-light">
+        <button class="delete" @click="clearNotification()"></button>
+        <span x-text="notification"></span>
+    </div>
+
+    <div x-show="error" class="notification is-danger is-light">
+        <span x-text="error"></span>
+    </div>
+
+    <!-- Filter -->
+    <div class="box">
+        <div class="field is-horizontal">
+            <div class="field-body">
+                <div class="field">
+                    <label class="label is-small" for="book-language-filter">
+                        <?php echo __('common.language'); ?>
+                    </label>
+                    <div class="control">
+                        <div class="select is-small is-fullwidth">
+                            <select id="book-language-filter" @change="changeLanguage($event)">
+                                <option value="0" :selected="languageId === 0">
+                                    <?php echo __('book.all_languages_option'); ?>
+                                </option>
+                                <template x-for="lang in languages" :key="lang.id">
+                                    <option :value="lang.id" :selected="isSelectedLanguage(lang)"
+                                            x-text="lang.name"></option>
+                                </template>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="field">
-                <label class="label is-small">&nbsp;</label>
-                <div class="control">
-                    <button type="submit" class="button is-small is-info">
-                        <?php echo __('common.filter'); ?>
-                    </button>
-                </div>
-            </div>
         </div>
-    </form>
-</div>
+    </div>
 
-<?php if (empty($books)) : ?>
-<div class="notification is-light">
-    <p><?php echo __('book.no_books_found'); ?></p>
-</div>
-<?php else : ?>
-<div class="box">
-    <table class="table is-fullwidth is-hoverable">
-        <thead>
-            <tr>
-                <th><?php echo __('common.title'); ?></th>
-                <th><?php echo __('common.author'); ?></th>
-                <th><?php echo __('book.col_chapters'); ?></th>
-                <th><?php echo __('book.col_progress'); ?></th>
-                <th><?php echo __('common.actions'); ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($books as $book) : ?>
-            <tr>
-                <td>
-                    <a href="/book/<?php echo $book['id']; ?>">
-                        <strong><?php echo htmlspecialchars($book['title']); ?></strong>
-                    </a>
-                    <?php if ($book['sourceType'] === 'epub') : ?>
-                    <span class="tag is-small is-info ml-2">EPUB</span>
-                    <?php endif; ?>
-                </td>
-                <td><?php echo htmlspecialchars($book['author'] ?? ''); ?></td>
-                <td><?php echo $book['totalChapters']; ?></td>
-                <td>
-                    <progress class="progress is-small is-primary"
-                              value="<?php echo $book['progress']; ?>"
-                              max="100"
-                              title="<?php echo round($book['progress'], 1); ?>%">
-                        <?php echo round($book['progress'], 1); ?>%
-                    </progress>
-                </td>
-                <td>
-                    <?php if ($book['totalChapters'] > 0) : ?>
-                    <a href="/book/<?php echo $book['id']; ?>" class="button is-small is-primary"
-                       title="<?php echo htmlspecialchars(__('book.continue_reading'), ENT_QUOTES); ?>">
-                        <?php echo IconHelper::render('book-open', ['alt' => __('common.read')]); ?>
-                    </a>
-                    <?php endif; ?>
-                    <?php
-                    $confirmDelete = htmlspecialchars(__('book.confirm_delete_book'), ENT_QUOTES);
-                    ?>
-                    <form method="post" action="/book/<?php echo $book['id']; ?>/delete"
-                          style="display: inline;"
-                          data-confirm="<?php echo $confirmDelete; ?>"
-                          @submit="if(!confirm($el.dataset.confirm)) $event.preventDefault()">
-                        <?php echo FormHelper::csrfField(); ?>
-                        <button type="submit" class="button is-small is-danger is-outlined"
-                                title="<?php echo htmlspecialchars(__('common.delete'), ENT_QUOTES); ?>">
-                            <?php echo IconHelper::render('trash-2', ['alt' => __('common.delete')]); ?>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
+    <!-- Loading -->
+    <div x-show="isLoading" class="has-text-centered py-6">
+        <span class="icon is-large">
+            <i data-lucide="loader-2" class="animate-spin"></i>
+        </span>
+    </div>
 
-<!-- Pagination -->
-    <?php if ($pagination['totalPages'] > 1) : ?>
-<nav class="pagination is-centered" role="navigation">
-    <a class="pagination-previous"
-       href="/books?page=<?php echo max(1, $pagination['page'] - 1); ?><?php
-           echo $languageId ? '&lg_id=' . $languageId : ''; ?>"
-           <?php echo $pagination['page'] <= 1 ? 'disabled' : ''; ?>>
-        <?php echo __('common.previous'); ?>
-    </a>
-    <a class="pagination-next"
-       href="/books?page=<?php echo min($pagination['totalPages'], $pagination['page'] + 1); ?><?php
-           echo $languageId ? '&lg_id=' . $languageId : ''; ?>"
-           <?php echo $pagination['page'] >= $pagination['totalPages'] ? 'disabled' : ''; ?>>
-        <?php echo __('common.next'); ?>
-    </a>
-    <ul class="pagination-list">
-            <?php for ($i = 1; $i <= $pagination['totalPages']; $i++) : ?>
-        <li>
-            <a class="pagination-link <?php echo $i === $pagination['page'] ? 'is-current' : ''; ?>"
-               href="/books?page=<?php echo $i; ?><?php echo $languageId ? '&lg_id=' . $languageId : ''; ?>">
-                <?php echo $i; ?>
-            </a>
-        </li>
-            <?php endfor; ?>
-    </ul>
-</nav>
-    <?php endif; ?>
+    <!-- Empty -->
+    <div x-show="!isLoading && books.length === 0 && !error" class="notification is-light">
+        <p><?php echo __('book.no_books_found'); ?></p>
+    </div>
 
-<?php endif; ?>
+    <!-- Books -->
+    <div class="box" x-show="!isLoading && books.length > 0">
+        <table class="table is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                    <th><?php echo __('common.title'); ?></th>
+                    <th><?php echo __('common.author'); ?></th>
+                    <th><?php echo __('book.col_chapters'); ?></th>
+                    <th><?php echo __('book.col_progress'); ?></th>
+                    <th><?php echo __('common.actions'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <template x-for="book in books" :key="book.id">
+                    <tr>
+                        <td>
+                            <a :href="bookHref(book)"><strong x-text="book.title"></strong></a>
+                            <span class="tag is-small is-info ml-2"
+                                  x-show="book.sourceType === 'epub'">EPUB</span>
+                        </td>
+                        <td x-text="authorLabel(book)"></td>
+                        <td x-text="book.totalChapters"></td>
+                        <td>
+                            <progress class="progress is-small is-primary"
+                                      :value="book.progress"
+                                      max="100"
+                                      :title="progressLabel(book)"
+                                      x-text="progressLabel(book)"></progress>
+                        </td>
+                        <td>
+                            <a :href="bookHref(book)"
+                               class="button is-small is-primary"
+                               x-show="book.totalChapters > 0"
+                               title="<?php echo htmlspecialchars(__('book.continue_reading'), ENT_QUOTES); ?>">
+                                <?php echo IconHelper::render('book-open', ['alt' => __('common.read')]); ?>
+                            </a>
+                            <button type="button"
+                                    class="button is-small is-danger is-outlined"
+                                    @click="confirmDelete(book)"
+                                    title="<?php echo htmlspecialchars(__('common.delete'), ENT_QUOTES); ?>">
+                                <?php echo IconHelper::render('trash-2', ['alt' => __('common.delete')]); ?>
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination is-centered" role="navigation" x-show="pagination.total_pages > 1">
+        <button type="button" class="pagination-previous"
+                :disabled="pagination.page <= 1"
+                @click="goToPage(pagination.page - 1)">
+            <?php echo __('common.previous'); ?>
+        </button>
+        <button type="button" class="pagination-next"
+                :disabled="pagination.page >= pagination.total_pages"
+                @click="goToPage(pagination.page + 1)">
+            <?php echo __('common.next'); ?>
+        </button>
+        <ul class="pagination-list">
+            <template x-for="n in pageNumbers()" :key="n">
+                <li>
+                    <button type="button"
+                            class="pagination-link"
+                            :class="isCurrentPage(n) ? 'is-current' : ''"
+                            @click="goToPage(n)"
+                            x-text="n"></button>
+                </li>
+            </template>
+        </ul>
+    </nav>
+</div>

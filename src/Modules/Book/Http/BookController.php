@@ -23,7 +23,6 @@ use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
-use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * Controller for book management operations.
@@ -62,27 +61,12 @@ class BookController
      */
     public function index(array $params): void
     {
-        $userId = Globals::getCurrentUserId();
-        $languageId = InputValidator::getInt('lg_id');
-        $pageParam = InputValidator::getInt('page');
-        $page = max(1, $pageParam ?? 1);
-
-        $result = $this->bookFacade->getBooks($userId, $languageId, $page);
-        $books = $result['books'];
-        $pagination = [
-            'total' => $result['total'],
-            'page' => $result['page'],
-            'perPage' => $result['perPage'],
-            'totalPages' => $result['totalPages'],
-        ];
-
-        // Get languages for filter dropdown
-        $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
-        $languages = $languageFacade->getLanguagesForSelect();
-        $languagesOption = SelectOptionsBuilder::forLanguages($languages, $languageId, __('book.all_languages_option'));
-
-        // Extract flash message from query string
-        $message = InputValidator::getString('message');
+        // The list, the language filter and the pagination are all fetched by
+        // the bookList component from /api/v1. Only the query-string state is
+        // handed over, so a bookmarked ?lg_id=&page= still opens where the
+        // reader left off.
+        $languageId = InputValidator::getInt('lg_id') ?? 0;
+        $page = max(1, InputValidator::getInt('page') ?? 1);
 
         PageLayoutHelper::renderPageStart(__('book.my_books'), true, 'books');
         include $this->viewPath . 'index.php';
@@ -105,18 +89,10 @@ class BookController
             exit;
         }
 
-        $result = $this->bookFacade->getBook($bookId);
-
-        if ($result === null) {
-            header('Location: /books');
-            exit;
-        }
-
-        $book = $result['book'];
-        $chapters = $result['chapters'];
-        $bookTitle = $book['title'];
-
-        PageLayoutHelper::renderPageStart($bookTitle, true, 'books');
+        // The bookDetail component fetches the book from /api/v1 and reports a
+        // missing one itself, so no lookup happens here. The page title is
+        // generic because the title is not known server-side any more.
+        PageLayoutHelper::renderPageStart(__('book.my_books'), true, 'books');
         include $this->viewPath . 'show.php';
         PageLayoutHelper::renderPageEnd();
     }

@@ -7,6 +7,42 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Fixed
+
+* **`DELETE /api/v1/books/{id}` and `PUT /api/v1/books/{id}/progress` returned
+  405 despite being fully implemented.** `Endpoints::ROUTES` is keyed by path,
+  and a URL carrying an ID matches no key exactly, so `getMethodsForEndpoint()`
+  falls back to the *first path segment*. The `books/chapters` and
+  `books/progress` keys therefore never matched anything — they read as
+  authorisation but were decorative — and the bare `books` entry allowed only
+  `GET` and `POST`. Both requests were rejected before dispatch, so
+  `BookApiHandler::routeDelete()` and `updateProgress()` were unreachable code.
+  No caller had ever exercised them, so nothing regressed; the routes simply
+  did not exist. `books` now allows all four methods.
+
+  `EndpointMethodReachabilityTest` guards the class: it asserts real request
+  shapes (with IDs) resolve through `Endpoints::resolve()`, and fails with an
+  explanation pointing at the first-segment rule. It fails against the previous
+  registry on exactly those two routes.
+
+### Added
+
+* **Books are shell-free.** `/books` and `/book/{id}` render entirely from
+  `/api/v1` through the new `bookList` and `bookDetail` Alpine components. The
+  views became scaffolds carrying a config blob — the query-string filter and
+  page for the list, the book ID for the detail — and `BookController` no
+  longer calls `BookFacade` to render either page. The detail page issues one
+  request, not two, because `GET /books/{id}` already nests the chapters.
+
+  The list keeps its behaviour: the language filter and pagination now update
+  the address bar via `history.replaceState`, so a bookmarked `?lg_id=&page=`
+  still opens where the reader left off, and deleting the last row of a page
+  steps back rather than stranding the reader on an empty one.
+
+  Psalm's `MixedArrayAccess` / `MixedAssignment` / `MixedOperand` suppressions
+  for `src/Modules/Book/Views` were removed — with no row data left to walk,
+  Psalm reported them as unnecessary.
+
 ### Removed
 
 * **Seven orphaned view templates**, taking `src/**/Views` from 78 files to 71.

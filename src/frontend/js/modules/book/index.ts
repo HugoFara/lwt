@@ -7,3 +7,5 @@
 
 export * from './api/books_api';
 export * from './pages/epub_import_form';
+export * from './pages/book_list';
+export * from './pages/book_detail';

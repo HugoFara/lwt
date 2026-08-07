@@ -95,7 +95,12 @@ class Endpoints
         'feeds/list' => ['GET'],
         'feeds/articles' => ['GET'],
         'feeds/articles/import' => ['POST'],
-        'books' => ['GET', 'POST'],
+        // A URL carrying an ID (books/12/progress) never matches a key here
+        // exactly, so getMethodsForEndpoint() falls back to the first segment.
+        // The bare 'books' entry therefore has to permit every method any
+        // books/{id}/... route uses, or that route 405s before reaching the
+        // handler. The two sub-keys below are documentation, not enforcement.
+        'books' => ['GET', 'POST', 'PUT', 'DELETE'],
         'books/chapters' => ['GET'],
         'books/progress' => ['PUT'],
         'local-dictionaries' => ['GET', 'POST', 'PUT', 'DELETE'],

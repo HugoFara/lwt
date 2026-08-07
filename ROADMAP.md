@@ -62,6 +62,14 @@ frontend against `/api/v1`, *any* mobile wrapper is just a window to a server.
 So **"more frontend, less server-rendered" is the enabling work** — the thing
 that makes a good client today and offline/local-first possible tomorrow.
 
+**The raw count overstates the remaining work,** and converting a view does not
+reduce it — a converted page keeps its `.php` file as a scaffold. Classified by
+what each template actually does (audited 2026-08-07): roughly 18 are already
+Alpine-rendered mount points, ~35 are static markup and form fields where
+conversion buys nothing, and only ~17 still render database rows into HTML.
+Most of those 17 are admin/config surfaces that are fine in an online WebView.
+Track the mobile-critical flows, not the file count.
+
 ---
 
 ## Phase 0 — Foundations (now)
@@ -183,6 +191,18 @@ shell-free, and the legacy-fragment cleanup that was the last open item
       The term editor behind `/word/edit`, `/word/edit-term` and
       `/words/{id}/edit` now mounts the same API-driven component the reading
       view opens in a modal, and bulk save posts to `POST /api/v1/terms/bulk`.
+- [x] **Books — shell-free.** `/books` and `/book/{id}` render from
+      `GET /api/v1/books`, `GET /api/v1/books/{id}` (which nests the chapters)
+      via `bookList` / `bookDetail`; the views carry a config blob and nothing
+      else, and `BookController` no longer touches `BookFacade` to render
+      either page. The blocker was the endpoint registry, not the client:
+      `DELETE /books/{id}` and `PUT /books/{id}/progress` were rejected with
+      405 before dispatch even though `BookApiHandler` implemented both. A URL
+      carrying an ID never matches a `ROUTES` key exactly, so lookup falls back
+      to the first path segment — the `books/chapters` and `books/progress`
+      keys were decorative, and the bare `books` entry allowed only GET and
+      POST. `EndpointMethodReachabilityTest` now asserts real request shapes
+      resolve, so the next drift fails a test instead of a feature.
 
 **Out of Phase 1** (leave server-rendered, fine in a WebView online): imports
 (file/web/youtube/whisper), admin/settings, language config, feeds.
