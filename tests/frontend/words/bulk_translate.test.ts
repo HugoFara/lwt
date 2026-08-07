@@ -27,9 +27,24 @@ vi.mock('../../../src/frontend/js/modules/language/stores/language_config', () =
   resetLanguageConfig: vi.fn()
 }));
 
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
+  apiGet: vi.fn().mockResolvedValue({
+    data: {
+      terms: [
+        { word: 'Haus', Ti2LgID: 3, pos: 1 },
+        { word: 'Baum', Ti2LgID: 3, pos: 2 }
+      ],
+      has_more: true,
+      next_offset: 50
+    }
+  }),
+  apiPost: vi.fn().mockResolvedValue({ data: { success: true, saved: 0 } })
+}));
+
 import { createTheDictUrl, openDictionaryPopup } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 import { selectToggle } from '../../../src/frontend/js/shared/forms/bulk_actions';
 import { setDictionaryLinks } from '../../../src/frontend/js/modules/language/stores/language_config';
+import { apiGet } from '../../../src/frontend/js/shared/api/client';
 
 describe('bulk_translate.ts', () => {
   beforeEach(() => {
@@ -97,15 +112,29 @@ describe('bulk_translate.ts', () => {
         expect(component.targetLanguage).toBe('en');
       });
 
-      it('sets hasOffset when offset input exists', () => {
-        document.body.innerHTML = `
-          <input name="offset" value="10">
-        `;
+      it('takes hasOffset from the API next_offset, not a hidden input', async () => {
+        // hasOffset used to be probed from <input name="offset">, which the
+        // server rendered. The rows and their paging now come from
+        // /terms/unknown-for-translate, so next_offset is the source of truth.
+        document.body.innerHTML = '';
 
         const component = bulkTranslateApp();
-        component.init();
+        component.textId = 7;
+        await component.loadTerms();
 
+        expect(component.nextOffset).toBe(50);
         expect(component.hasOffset).toBe(true);
+      });
+
+      it('clears hasOffset on the final page', async () => {
+        vi.mocked(apiGet).mockResolvedValueOnce({
+          data: { terms: [], has_more: false, next_offset: null }
+        });
+
+        const component = bulkTranslateApp();
+        await component.loadTerms();
+
+        expect(component.hasOffset).toBe(false);
       });
 
       it('marks headers as notranslate', () => {

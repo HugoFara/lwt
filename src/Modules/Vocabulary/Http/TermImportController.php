@@ -102,33 +102,20 @@ class TermImportController extends VocabularyBaseController
      * @param int         $pos Offset position
      *
      * @psalm-suppress UnresolvableInclude Path computed from viewPath property
+     * @psalm-suppress UnusedParam $sl, $tl and $pos are read by the included
+     *                 view, which Psalm cannot follow.
      *
      * @return void
      */
     private function displayBulkTranslateForm(int $tid, ?string $sl, ?string $tl, int $pos): void
     {
         $contextService = $this->getContextService();
-        $discoveryService = $this->getDiscoveryService();
-        $limit = (int) Settings::getWithDefault('set-ggl-translation-per-page') + 1;
         $dictionaries = $contextService->getLanguageDictionaries($tid);
 
-        $res = $discoveryService->getUnknownWordsForBulkTranslate($tid, $pos, $limit);
-
-        // Collect terms and check if there are more
-        $terms = [];
-        $hasMore = false;
-        $cnt = 0;
-        foreach ($res as $record) {
-            $cnt++;
-            if ($cnt < $limit) {
-                $terms[] = $record;
-            } else {
-                $hasMore = true;
-            }
-        }
-
-        // Calculate next offset if there are more terms
-        $nextOffset = $hasMore ? $pos + $limit - 1 : null;
+        // The rows come from GET /api/v1/terms/unknown-for-translate; only the
+        // page size travels with the page. The setting counts the extra
+        // look-ahead row the old server-side loop used, so drop it again.
+        $limit = max(1, (int) Settings::getWithDefault('set-ggl-translation-per-page'));
 
         include $this->viewPath . 'bulk_translate_form.php';
     }
