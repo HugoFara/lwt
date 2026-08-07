@@ -101,46 +101,4 @@ class FeedLoadController
 
         PageLayoutHelper::renderPageEnd();
     }
-
-    /**
-     * Multi-load feeds interface.
-     *
-     * Route: GET /feeds/multi-load
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function multiLoad(array $params): void
-    {
-        $currentLang = Validation::language(
-            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
-        );
-
-        $langName = $this->languageFacade->getLanguageName($currentLang);
-        PageLayoutHelper::renderPageStart('Multi-Load Feeds - ' . $langName, true);
-
-        $this->showMultiLoadForm((int)$currentLang);
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Show the multi-load feed form.
-     *
-     * @param int $currentLang Current language filter
-     *
-     * @return void
-     */
-    private function showMultiLoadForm(int $currentLang): void
-    {
-        $feeds = $this->feedFacade->getFeeds($currentLang ?: null);
-
-        // Pass service to view for utility methods
-        $feedService = $this->feedFacade;
-        $languages = $this->languageFacade->getLanguagesForSelect();
-
-        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
-        include $this->viewPath . 'multi_load.php';
-    }
 }

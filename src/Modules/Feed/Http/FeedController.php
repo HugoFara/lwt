@@ -76,16 +76,42 @@ class FeedController
     // Delegated Route Handlers
     // =========================================================================
 
-    /** @param array<string, string> $params */
+    /**
+     * Article browser.
+     *
+     * Kept server-rendered: it is the only entry to the edit-before-import
+     * flow (a feed with the `edit_text` option renders `edit_text_form.php`
+     * instead of importing straight away), and the SPA has no equivalent yet.
+     *
+     * @param array<string, string> $params Route parameters
+     */
     public function index(array $params): void
     {
         $this->indexController->index($params);
     }
 
-    /** @param array<string, string> $params */
+    /**
+     * Legacy feeds-list entry — now the SPA.
+     *
+     * `/feeds/edit` and `/feeds/multi-load` were a second, server-rendered
+     * implementation of what `/feeds/manage` already does entirely from
+     * `/api/v1`. They redirect rather than 404 so existing bookmarks keep
+     * working.
+     *
+     * @param array<string, string> $params Route parameters
+     */
     public function edit(array $params): void
     {
-        $this->editController->edit($params);
+        $this->redirectToManager();
+    }
+
+    /**
+     * Send the caller to the feeds manager SPA.
+     */
+    private function redirectToManager(): void
+    {
+        header('Location: ' . url('/feeds/manage'), true, 302);
+        exit;
     }
 
     /** @param array<string, string> $params */
@@ -118,7 +144,7 @@ class FeedController
     /** @param array<string, string> $params */
     public function multiLoad(array $params): void
     {
-        $this->loadController->multiLoad($params);
+        $this->redirectToManager();
     }
 
     /**
