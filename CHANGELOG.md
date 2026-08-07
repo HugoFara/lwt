@@ -9,6 +9,32 @@ ones are marked like "v1.0.0-fork".
 
 ### Removed
 
+* **Seven orphaned view templates**, taking `src/**/Views` from 78 files to 71.
+  None had a caller — checked against literal `include`s, `render('stem')`, and
+  the `$this->viewPath . 'file.php'` concatenation the controllers use. No view
+  is included under a computed name, so that enumeration is exhaustive.
+
+  Five belonged to the **legacy AJAX review page, which no longer exists**:
+  `ajax_review_config.php`, `review_interaction_globals.php`,
+  `review_term_area.php`, `status_change_config.php` and `review_finished.php`
+  — half the Review module's views. `/review` is the module's only route, and
+  it renders `review_desktop.php`. `review_ajax.ts` and its 431-line test go
+  with them: a "test" → "review" rename had moved the TypeScript onto
+  `#term-review`/`#review-finished-area`/`#reviews-done-today` while the views
+  still emitted `#term-test`/`#test-finished-area`/`#tests-done-today`, so the
+  two halves had been mutually unreachable, not merely unrouted. Nothing
+  imported the module's named exports; `modules/review/index.ts` pulled it in
+  for side effects alone. No controller plumbing survived either — no PHP
+  outside the deleted files builds `$reviewData`, `$statusChange`,
+  `$testStatus`, `$waitTime`, `$dict1Uri`, `$langSettings` or `$tomorrowTests`.
+
+  The other two were superseded and left behind: `Feed/Views/new.php` (the flat
+  add-feed form; `/feeds/new` has gone through `wizard_step1.php` since the
+  wizard landed) and `Vocabulary/Views/list_filter.php` (`list_alpine.php`
+  carries the filter markup now). `word_list_filter.test.ts` matches the latter
+  by name only — it covers the Alpine store `word_list_filter.ts`, so no
+  coverage is lost.
+
 * **The last of the frame-era result plumbing** (#266, #262): four result views
   still emitted a `<script type="application/json">` blob that
   `word_result_init.ts` applied to `window.parent.document` — the reading

@@ -57,7 +57,7 @@ pay for the hard parts when demand proves them worth it.
 
 ## The keystone constraint
 
-LWT renders HTML server-side (93 view templates). Until more logic moves to the
+LWT renders HTML server-side (71 view templates). Until more logic moves to the
 frontend against `/api/v1`, *any* mobile wrapper is just a window to a server.
 So **"more frontend, less server-rendered" is the enabling work** — the thing
 that makes a good client today and offline/local-first possible tomorrow.
@@ -148,8 +148,14 @@ shell-free, and the legacy-fragment cleanup that was the last open item
       `review_api.ts`) renders entirely from `/api/v1/review/*`
       (next-word/status/config/table-words/tomorrow-count all exist). Removed the
       orphaned `status_change_result.php` (HTML fragment, no route/no caller;
-      superseded by the JSON `status_change_config.php`). The legacy non-SPA
-      review-AJAX page is a separate, non-mobile entry — out of scope.
+      superseded by the JSON `status_change_config.php`).
+      **The legacy non-SPA review-AJAX page turned out not to exist** — an
+      earlier revision of this bullet called it "a separate, non-mobile entry —
+      out of scope", but `/review` is the module's only route. Its five views
+      and `review_ajax.ts` have been deleted: a "test" → "review" rename had
+      moved the TypeScript to `#term-review`/`#review-finished-area` while the
+      views still emitted `#term-test`/`#test-finished-area`, so the two halves
+      could not have worked together even if something had wired them up.
 - [x] **Text list / library — shell-free.** `texts_grouped_app.ts`
       client-renders the list from `/texts/by-language/{id}` + `/texts/statistics`,
       and the destructive **bulk archive/delete** now go through

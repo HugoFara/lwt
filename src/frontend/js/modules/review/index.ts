@@ -24,4 +24,3 @@ import '@shared/components/sorttable';
 // Side-effect imports (pages)
 import './pages/review_header';
 import './pages/review_table';
-import './pages/review_ajax';
