@@ -3,10 +3,12 @@
 /**
  * Local Dictionaries Index View
  *
+ * The dictionary table itself is rendered by the `dictionaryList` component
+ * from `GET /local-dictionaries`; this view supplies only the language ID.
+ *
  * Variables expected:
  * - $langId: int current language ID
  * - $langName: string current language name
- * - $dictionaries: array of LocalDictionary entities
  * - $localDictMode: int (0-3)
  * - $languages: array of languages for dropdown
  *
@@ -24,14 +26,12 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Dictionary\Views;
 
-use Lwt\Modules\Dictionary\Domain\LocalDictionary;
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
 /**
  * @var int $langId
  * @var string $langName
- * @var array<LocalDictionary> $dictionaries
  * @var int $localDictMode
  * @var array<array{id: int, name: string}> $languages
  * @var string $message
@@ -156,111 +156,92 @@ echo PageLayoutHelper::buildActionCard([
         ?>
     </h4>
 
-    <?php if (empty($dictionaries)) : ?>
-    <div class="notification is-light">
-        <p><?php echo __('dictionary.no_local_dicts'); ?></p>
-        <p class="mt-2">
-            <a href="/word/upload?tab=dictionary" class="button is-primary is-small">
-                <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
-                <?php echo __('dictionary.import_a_dictionary'); ?>
-            </a>
-        </p>
-    </div>
-    <?php else : ?>
-    <div class="table-container">
-        <table class="table is-fullwidth is-striped is-hoverable">
-            <thead>
-                <tr>
-                    <th><?php echo __('common.name'); ?></th>
-                    <th><?php echo __('dictionary.col_format'); ?></th>
-                    <th><?php echo __('dictionary.col_entries'); ?></th>
-                    <th><?php echo __('dictionary.col_priority'); ?></th>
-                    <th><?php echo __('common.status'); ?></th>
-                    <th><?php echo __('common.actions'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($dictionaries as $dict) :
-                    $description = $dict->description();
-                    ?>
-                <tr>
-                    <td>
-                        <strong><?php echo htmlspecialchars($dict->name(), ENT_QUOTES); ?></strong>
-                        <?php if ($description !== null && $description !== '') : ?>
-                        <br><span class="is-size-7 has-text-grey"><?php
-                            echo htmlspecialchars($description, ENT_QUOTES);
-                        ?></span>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <span class="tag"><?php echo strtoupper($dict->sourceFormat()); ?></span>
-                    </td>
-                    <td>
-                        <?php echo number_format($dict->entryCount()); ?>
-                    </td>
-                    <td>
-                        <?php echo $dict->priority(); ?>
-                    </td>
-                    <td>
-                        <?php if ($dict->isEnabled()) : ?>
-                        <span class="tag is-success"><?php echo __('common.enabled'); ?></span>
-                        <?php else : ?>
-                        <span class="tag is-warning"><?php echo __('common.disabled'); ?></span>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <div class="buttons are-small">
-                            <!-- Toggle enable/disable -->
-                            <form method="POST" action="/languages/<?php echo $langId; ?>/dictionaries"
-                                  style="display:inline;">
-                                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-                                <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
-                                <?php
-                                $toggleTitle = $dict->isEnabled()
-                                    ? __('dictionary.toggle_disable')
-                                    : __('dictionary.toggle_enable');
-                                ?>
-                                <button type="submit" name="toggle_enabled" value="1"
-                                        class="button <?php echo $dict->isEnabled() ? 'is-warning' : 'is-success'; ?>"
-                                        title="<?php echo htmlspecialchars($toggleTitle, ENT_QUOTES); ?>">
-                                    <?php
-                                    $eyeIcon = $dict->isEnabled() ? 'eye-off' : 'eye';
-                                    echo IconHelper::render($eyeIcon, ['alt' => $toggleTitle]);
-                                    ?>
-                                </button>
-                            </form>
+    <script type="application/json" id="dictionary-list-config"><?php
+    echo json_encode(['languageId' => $langId], JSON_HEX_TAG | JSON_HEX_AMP);
+    ?></script>
 
-                            <!-- Import more entries -->
-                            <a href="/word/upload?tab=dictionary"
-                               class="button is-info"
-                               title="<?php echo htmlspecialchars(__('dictionary.import_entries'), ENT_QUOTES); ?>">
-                                <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
-                            </a>
+    <div x-data="dictionaryList" x-init="init()">
 
-                            <!-- Delete -->
-                            <?php
-                            $confirmDelete = htmlspecialchars(
-                                __('dictionary.confirm_delete_dict'),
-                                ENT_QUOTES
-                            );
-                            ?>
-                            <form method="POST" action="/dictionaries/delete" style="display:inline;"
-                                  data-confirm="<?php echo $confirmDelete; ?>"
-                                  @submit="if(!confirm($el.dataset.confirm)) $event.preventDefault()">
-                                <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-                                <input type="hidden" name="dict_id" value="<?php echo $dict->id(); ?>">
-                                <input type="hidden" name="lang_id" value="<?php echo $langId; ?>">
-                                <button type="submit" class="button is-danger"
-                                        title="<?php echo htmlspecialchars(__('common.delete'), ENT_QUOTES); ?>">
-                                    <?php echo IconHelper::render('trash', ['alt' => __('common.delete')]); ?>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+        <div x-show="error" class="notification is-danger is-light">
+            <span x-text="error"></span>
+        </div>
+
+        <div x-show="isLoading" class="has-text-centered py-5">
+            <span class="icon is-large">
+                <i data-lucide="loader-2" class="animate-spin"></i>
+            </span>
+        </div>
+
+        <div x-show="!isLoading && dictionaries.length === 0" class="notification is-light">
+            <p><?php echo __('dictionary.no_local_dicts'); ?></p>
+            <p class="mt-2">
+                <a href="/word/upload?tab=dictionary" class="button is-primary is-small">
+                    <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
+                    <?php echo __('dictionary.import_a_dictionary'); ?>
+                </a>
+            </p>
+        </div>
+
+        <div class="table-container" x-show="!isLoading && dictionaries.length > 0">
+            <table class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th><?php echo __('common.name'); ?></th>
+                        <th><?php echo __('dictionary.col_format'); ?></th>
+                        <th><?php echo __('dictionary.col_entries'); ?></th>
+                        <th><?php echo __('dictionary.col_priority'); ?></th>
+                        <th><?php echo __('common.status'); ?></th>
+                        <th><?php echo __('common.actions'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="dict in dictionaries" :key="dict.id">
+                        <tr>
+                            <td>
+                                <strong x-text="dict.name"></strong>
+                                <template x-if="hasDescription(dict)">
+                                    <span>
+                                        <br><span class="is-size-7 has-text-grey"
+                                                  x-text="descriptionOf(dict)"></span>
+                                    </span>
+                                </template>
+                            </td>
+                            <td><span class="tag" x-text="formatLabel(dict)"></span></td>
+                            <td x-text="entryCountLabel(dict)"></td>
+                            <td x-text="dict.priority"></td>
+                            <td><span :class="statusClass(dict)" x-text="statusLabel(dict)"></span></td>
+                            <td>
+                                <div class="buttons are-small">
+                                    <button type="button"
+                                            :class="toggleClass(dict)"
+                                            :disabled="isBusy(dict)"
+                                            :title="toggleTitle(dict)"
+                                            @click="toggle(dict)">
+                                        <span class="icon is-small">
+                                            <i :data-lucide="toggleIcon(dict)"></i>
+                                        </span>
+                                    </button>
+
+                                    <a href="/word/upload?tab=dictionary"
+                                       class="button is-info"
+                                       title="<?php
+                                        echo htmlspecialchars(__('dictionary.import_entries'), ENT_QUOTES);
+                                        ?>">
+                                        <?php echo IconHelper::render('upload', ['alt' => __('common.import')]); ?>
+                                    </a>
+
+                                    <button type="button" class="button is-danger"
+                                            :disabled="isBusy(dict)"
+                                            title="<?php echo htmlspecialchars(__('common.delete'), ENT_QUOTES); ?>"
+                                            @click="confirmDelete(dict)">
+                                        <?php echo IconHelper::render('trash', ['alt' => __('common.delete')]); ?>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <?php endif; ?>
 </div>

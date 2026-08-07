@@ -74,8 +74,8 @@ class DictionaryController extends BaseController
         // Handle form submissions
         $this->handleFormSubmissions($langId);
 
-        // Get dictionaries
-        $dictionaries = $this->dictionaryFacade->getAllForLanguage($langId);
+        // The dictionary table is fetched by the dictionaryList component from
+        // GET /local-dictionaries; only the lookup mode is still rendered here.
         $localDictMode = $this->dictionaryFacade->getLocalDictMode($langId);
 
         // Get languages for dropdown

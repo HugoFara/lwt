@@ -108,7 +108,9 @@ const moduleMap: Record<string, () => Promise<unknown>> = {
   home: () => import('./home'),
   tags: () => import('@modules/tags/pages/tag_list'),
   auth: () => import('@modules/auth'),
-  dictionary: () => import('@modules/dictionary/pages/dictionary_import'),
+  // The module index, not the import page alone: the dictionary list at
+  // /languages/{id}/dictionaries needs its component from the same bundle.
+  dictionary: () => import('@modules/dictionary'),
   book: () => import('@modules/book'),
 };
 
