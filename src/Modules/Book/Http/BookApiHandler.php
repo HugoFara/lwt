@@ -22,6 +22,7 @@ use Lwt\Modules\Book\Application\BookFacade;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Globals;
+use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
@@ -135,6 +136,108 @@ class BookApiHandler implements ApiRoutableInterface
     }
 
     /**
+     * Handle POST /api/v1/books request — import an EPUB upload.
+     *
+     * The upload arrives as multipart/form-data, so the file itself comes from
+     * $_FILES rather than the decoded body. Both field-name pairs the old
+     * /book/import form used are accepted so either caller can post here.
+     *
+     * @param array $params Request parameters (LgID or TxLgID, TxTitle, TextTags)
+     *
+     * @return array Response data
+     */
+    public function importBook(array $params): array
+    {
+        $languageId = (int) ($params['LgID'] ?? 0);
+        if ($languageId <= 0) {
+            $languageId = (int) ($params['TxLgID'] ?? 0);
+        }
+
+        if ($languageId <= 0) {
+            return [
+                'success' => false,
+                'error' => __('book.flash.select_language'),
+            ];
+        }
+
+        $uploadedFile = InputValidator::getUploadedFile('thefile')
+            ?? InputValidator::getUploadedFile('importFile');
+
+        if ($uploadedFile === null || ($uploadedFile['tmp_name'] ?? '') === '') {
+            return [
+                'success' => false,
+                'error' => __('book.flash.select_epub'),
+            ];
+        }
+
+        $overrideTitle = trim((string) ($params['TxTitle'] ?? ''));
+
+        $tagIds = $this->parseTagIds($params['TextTags'] ?? null);
+
+        $result = $this->bookFacade->importEpub(
+            $languageId,
+            $uploadedFile,
+            $overrideTitle !== '' ? $overrideTitle : null,
+            $tagIds,
+            Globals::getCurrentUserId()
+        );
+
+        if (!$result['success']) {
+            return [
+                'success' => false,
+                'error' => $result['message'],
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => $result['message'],
+            'bookId' => $result['bookId'],
+        ];
+    }
+
+    /**
+     * Normalise the posted tag selection into a list of tag IDs.
+     *
+     * The field arrives in two shapes: a comma-separated string when the form
+     * is posted as-is, and an array once Tagify has replaced the input with
+     * its own multi-value control. Casting an array to string is a warning
+     * that the exception handler turns into a 500, so both are handled here.
+     *
+     * @param mixed $raw Posted TextTags value
+     *
+     * @return int[] Tag IDs, without zeroes
+     */
+    private function parseTagIds(mixed $raw): array
+    {
+        if ($raw === null || $raw === '') {
+            return [];
+        }
+
+        $parts = [];
+        if (is_array($raw)) {
+            /** @var mixed $item */
+            foreach ($raw as $item) {
+                if (is_scalar($item)) {
+                    $parts[] = (string) $item;
+                }
+            }
+        } elseif (is_scalar($raw)) {
+            $parts = explode(',', (string) $raw);
+        }
+
+        $ids = [];
+        foreach ($parts as $part) {
+            $id = (int) trim($part);
+            if ($id > 0) {
+                $ids[] = $id;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
      * Handle DELETE /api/v1/books/{id} request.
      *
      * @param array $params Request parameters (id)
@@ -202,6 +305,15 @@ class BookApiHandler implements ApiRoutableInterface
         }
 
         return Response::success($this->listBooks($params));
+    }
+
+    public function routePost(array $fragments, array $params): JsonResponse
+    {
+        if ($this->frag($fragments, 1) !== '') {
+            return Response::error('No sub-resource accepts POST', 404);
+        }
+
+        return Response::success($this->importBook($params));
     }
 
     public function routePut(array $fragments, array $params): JsonResponse

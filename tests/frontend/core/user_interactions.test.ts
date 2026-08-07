@@ -464,13 +464,59 @@ describe('user_interactions.ts', () => {
       `;
 
       const text = { '1': 'multi word' };
-      const attrs = ' class="mword status3"';
+      const attrs = { class: 'mword status3' };
 
       newExpressionInteractable(text, attrs, 2, 'abc123', false);
 
       const mword = document.getElementById('ID-1-2');
       expect(mword).not.toBeNull();
       expect(mword?.classList.contains('mword')).toBe(true);
+    });
+
+    it('cannot be made to inject markup through an attribute value', () => {
+      document.body.innerHTML = `
+        <span id="ID-1-1" data_pos="10">Word1</span>
+        <span id="ID-3-1" data_pos="20">Word2</span>
+      `;
+
+      // A term whose translation carries a quote used to break out of the
+      // attribute when the marker was built from a markup string.
+      newExpressionInteractable(
+        { '1': 'multi word' },
+        {
+          class: 'mword',
+          data_trans: '" onmouseover="alert(1)" x="',
+          data_rom: '"><img src=x onerror=alert(2)>'
+        },
+        2,
+        'abc123',
+        false
+      );
+
+      const mword = document.getElementById('ID-1-2');
+      expect(mword).not.toBeNull();
+      expect(mword?.getAttribute('onmouseover')).toBeNull();
+      expect(mword?.getAttribute('data_trans')).toBe('" onmouseover="alert(1)" x="');
+      expect(document.querySelector('img')).toBeNull();
+    });
+
+    it('renders the marker label as text, never as markup', () => {
+      document.body.innerHTML = `
+        <span id="ID-1-1" data_pos="10">Word1</span>
+        <span id="ID-3-1" data_pos="20">Word2</span>
+      `;
+
+      newExpressionInteractable(
+        { '1': '<img src=x onerror=alert(3)>' },
+        { class: 'mword' },
+        2,
+        'abc123',
+        false
+      );
+
+      const mword = document.getElementById('ID-1-2');
+      expect(mword?.textContent).toBe('<img src=x onerror=alert(3)>');
+      expect(document.querySelector('img')).toBeNull();
     });
 
     it('removes existing multi-word of same length', () => {
@@ -481,7 +527,7 @@ describe('user_interactions.ts', () => {
       `;
 
       const text = { '1': 'new multi word' };
-      newExpressionInteractable(text, ' class="mword"', 2, 'def456', false);
+      newExpressionInteractable(text, { class: 'mword' }, 2, 'def456', false);
 
       const mwords = document.querySelectorAll('#ID-1-2');
       expect(mwords.length).toBe(1);
@@ -494,7 +540,7 @@ describe('user_interactions.ts', () => {
       `;
 
       const text = { '5': 'test' };
-      newExpressionInteractable(text, ' class="mword"', 2, 'ghi789', true);
+      newExpressionInteractable(text, { class: 'mword' }, 2, 'ghi789', true);
 
       const mword = document.getElementById('ID-5-2');
       expect(mword?.getAttribute('data_order')).toBe('5');

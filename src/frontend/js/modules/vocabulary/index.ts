@@ -40,13 +40,12 @@ export * from './services/word_dom_updates';
 
 // Shared utilities needed by vocabulary pages
 import '@shared/forms/bulk_actions';
-import '@shared/forms/word_form_auto';
 
 // Side-effect imports (pages)
 import './pages/word_list_app';
 import './pages/bulk_translate';
 import './pages/word_upload';
 import './pages/expression_interactable';
-import './pages/word_result_init';
 import './pages/translation_page';
 import './pages/starter_vocab';
+import './pages/term_edit_page';

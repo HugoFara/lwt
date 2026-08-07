@@ -16,6 +16,7 @@ import { ReviewApi, type TableReviewWord } from '@modules/review/api/review_api'
 import { speechDispatcher } from '@shared/utils/user_interactions';
 import { saveSetting } from '@shared/utils/ajax_utilities';
 import { t } from '@shared/i18n/translator';
+import { openTermEditModal } from '@modules/vocabulary/components/term_edit_modal';
 
 /**
  * Review types configuration. Labels/titles resolved via i18n at build time.
@@ -373,9 +374,10 @@ function buildTableReview(): string {
             <template x-for="word in words" :key="word.id">
               <tr>
                 <td x-show="columns.edit" class="has-text-centered">
-                  <a :href="'/word/edit-term?wid=' + word.id" class="button is-small is-text">
+                  <button type="button" class="button is-small is-text"
+                          @click="editWord(word.id)">
                     ${escapeHtml(t('review.table.col_edit'))}
-                  </a>
+                  </button>
                 </td>
                 <td x-show="columns.status" class="has-text-centered">
                   <div class="buttons are-small is-centered">
@@ -461,9 +463,9 @@ function buildWordModal(): string {
           </template>
         </section>
         <footer class="modal-card-foot">
-          <a :href="store.getEditUrl()" class="button is-info">
+          <button type="button" class="button is-info" @click="store.editCurrentWord()">
             ${escapeHtml(t('review.modal.edit_term'))}
-          </a>
+          </button>
           <button class="button" @click="store.closeModal()">${escapeHtml(t('review.modal.close'))}</button>
         </footer>
       </div>
@@ -821,6 +823,9 @@ function registerTableReviewComponent(): void {
     async init() {
       this.loadColumnSettings();
       this.loadContextAnnotationSettings();
+      document.addEventListener('lwt-term-saved', () => {
+        void this.loadWords();
+      });
       await this.loadWords();
     },
 
@@ -851,6 +856,18 @@ function registerTableReviewComponent(): void {
       } catch (err) {
         console.error('Error updating status:', err);
       }
+    },
+
+    /**
+     * Open the term editor for a row.
+     *
+     * A saved term fires lwt-term-saved, which the component listens for to
+     * pull the row's fresh values back in.
+     *
+     * @param wordId Term ID
+     */
+    editWord(wordId: number) {
+      void openTermEditModal(0, 0, wordId);
     },
 
     revealTerm(wordId: number) {

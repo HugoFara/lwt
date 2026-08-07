@@ -168,7 +168,6 @@
     "result.translation_label": "Перевод:",
     "result.word_marked_well_known": "Слово отмечено как «Хорошо известно».",
     "result.word_marked_ignored": "Слово отмечено как «Игнорируется».",
-    "result.updating_texts": "Обновление текстов",
     "result.ignored_all": "Проигнорировано {count} слов!",
     "result.ignored_one": "Проигнорировано 1 слово.",
     "result.ignored_none": "Ни одного нового слова не проигнорировано!",

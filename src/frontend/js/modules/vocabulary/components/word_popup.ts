@@ -295,24 +295,4 @@ if (typeof document !== 'undefined') {
   const styleEl = document.createElement('style');
   styleEl.textContent = styles;
   document.head.appendChild(styleEl);
-
-  // Listen for cross-frame popup close events
-  document.addEventListener('lwt-close-popup', () => {
-    closePopup();
-  });
-}
-
-
-/**
- * Close popup in parent frame via custom event.
- * Use this from child frames instead of accessing window.parent.closePopup directly.
- */
-export function closeParentPopup(): void {
-  try {
-    if (window.parent && window.parent !== window) {
-      window.parent.document.dispatchEvent(new CustomEvent('lwt-close-popup'));
-    }
-  } catch {
-    // Parent access may be blocked by same-origin policy, ignore
-  }
 }

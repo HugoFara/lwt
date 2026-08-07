@@ -51,8 +51,22 @@ $lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUO
 <script type="text/javascript"
         src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<form name="form1" action="/word/bulk-translate" method="post"
-      x-data="bulkTranslateApp()">
+<form name="form1" method="post"
+      x-data="bulkTranslateApp()"
+      @submit="submitTerms($event)">
+
+    <!-- Save outcome, rendered from the API response -->
+    <template x-if="hasSaveError()">
+        <div class="notification is-danger">
+            <span x-text="saveError"></span>
+        </div>
+    </template>
+    <template x-if="isDone()">
+        <div class="notification is-success">
+            <span x-text="savedMessage()"></span>
+        </div>
+    </template>
+
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 
     <!-- Controls Panel -->
@@ -109,7 +123,8 @@ $lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUO
                             </div>
                         </div>
                         <div class="control">
-                            <button type="submit" class="button is-primary is-small">
+                            <button type="submit" class="button is-primary is-small"
+                                    :class="saveButtonClass()" :disabled="isSaving">
                                 <span class="icon is-small">
                                     <?php echo IconHelper::render('save', ['alt' => __('vocabulary.common.save')]); ?>
                                 </span>

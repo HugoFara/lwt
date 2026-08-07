@@ -447,7 +447,7 @@ HTML;
             || str_starts_with($path, '/archived')
             || str_starts_with($path, '/texts')
         ) {
-            return ['text', 'vocabulary'];
+            return ['text', 'vocabulary', 'book'];
         }
 
         // Vocabulary/word pages
@@ -506,7 +506,7 @@ HTML;
         }
 
         // Unknown routes — load all modules as safe fallback
-        return ['vocabulary', 'text', 'review', 'feed', 'language', 'admin'];
+        return ['vocabulary', 'text', 'review', 'feed', 'language', 'admin', 'book'];
     }
 
     /**

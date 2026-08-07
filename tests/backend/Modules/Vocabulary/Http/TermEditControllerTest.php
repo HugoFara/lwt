@@ -135,10 +135,7 @@ class TermEditControllerTest extends TestCase
         $reflection = new \ReflectionClass(TermEditController::class);
 
         $expectedMethods = [
-            'handleEditWordOperation',
-            'displayEditWordForm',
-            'handleEditTermOperation',
-            'displayEditTermForm',
+            'renderEditorPage',
             'getWordFormData',
         ];
 
@@ -520,17 +517,38 @@ class TermEditControllerTest extends TestCase
     }
 
     // =========================================================================
-    // handleEditWordOperation tests via reflection
+    // renderEditorPage tests via reflection
     // =========================================================================
 
     #[Test]
-    public function handleEditWordOperationReturnsBool(): void
+    public function renderEditorPagePassesOnlyIdentifiers(): void
     {
-        $method = new \ReflectionMethod(TermEditController::class, 'handleEditWordOperation');
+        // The page carries no term data: termEditPage loads it from the API.
+        $method = new \ReflectionMethod(TermEditController::class, 'renderEditorPage');
+        $params = $method->getParameters();
 
-        $returnType = $method->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertSame('bool', $returnType->getName());
+        $this->assertCount(4, $params);
+        $this->assertSame('textId', $params[0]->getName());
+        $this->assertSame('position', $params[1]->getName());
+        $this->assertSame('wordId', $params[2]->getName());
+        $this->assertSame('returnUrl', $params[3]->getName());
+        $this->assertTrue($params[2]->getType()->allowsNull());
+    }
+
+    #[Test]
+    public function editEntryPointsRenderTheClientSideEditor(): void
+    {
+        $source = file_get_contents(
+            (new \ReflectionClass(TermEditController::class))->getFileName()
+        );
+
+        // No server-rendered form or result page survives in this controller.
+        $this->assertStringContainsString("render('edit_page'", $source);
+        $this->assertStringNotContainsString('form_edit_new', $source);
+        $this->assertStringNotContainsString('form_edit_existing', $source);
+        $this->assertStringNotContainsString('form_edit_term', $source);
+        $this->assertStringNotContainsString('edit_result', $source);
+        $this->assertStringNotContainsString('edit_term_result', $source);
     }
 
     // =========================================================================
@@ -627,19 +645,17 @@ class TermEditControllerTest extends TestCase
     }
 
     // =========================================================================
-    // editWord early return tests
+    // editWord argument validation
     // =========================================================================
 
     #[Test]
-    public function editWordReturnsEarlyWithNoParams(): void
+    public function editWordRejectsARequestThatIdentifiesNoTerm(): void
     {
-        // No GET params set - wid='', tid='', ord='', op=''
-        // This should trigger early return
-        ob_start();
-        $this->controller->editWord([]);
-        $output = ob_get_clean();
+        // No GET params set - wid='', tid='', ord='', op=''. Returning here
+        // would serve a blank page; the exception handler renders an error.
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Cannot edit term: expected a term ID, or a text ID with a position');
 
-        // No output when early return
-        $this->assertSame('', $output);
+        $this->controller->editWord([]);
     }
 }

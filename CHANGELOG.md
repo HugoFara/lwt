@@ -7,6 +7,138 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Removed
+
+* **The last of the frame-era result plumbing** (#266, #262): four result views
+  still emitted a `<script type="application/json">` blob that
+  `word_result_init.ts` applied to `window.parent.document` — the reading
+  *frame*. No frameset has existed for some time (`frames-r` and `frame-l` are
+  emitted nowhere), so for a same-tab navigation `window.parent` was the result
+  page itself and every update found nothing. `#learnstatus`, which
+  `updateLearnStatus` wrote into, is likewise emitted nowhere in the app.
+
+  The confirmation pages stay; only the dead payload goes, along with the
+  server-side work that existed solely to build it — two `QueryBuilder` queries
+  and the sentence masking behind `edit_term_result`, and a
+  `getTodoWordsContent()` call on each of four paths. `save_result.php` is gone
+  entirely: its only remaining output was the message the controller already
+  echoed a few lines above, so single-word saves had been printing it twice.
+
+  Also removed: `word_result_init.ts`, the orphaned `updateLearnStatus`,
+  `updateNewWordInDOM`, `updateBulkWordInDOM`, `updateTestWordInDOM` and
+  `completeWordOperation` helpers, and the `data-lwt-cleanup-frames` marker in
+  `show.php`. `updateExistingWordInDOM`, `updateWordStatusInDOM` and the
+  `markWord*InDOM` pair stay — the reading view's keyboard shortcuts and popup
+  actions call them after an API write.
+
+  `upload_result.php` survives, because its config blob feeds a real Alpine
+  component that fetches `/api/v1/terms/imported` rather than frame plumbing.
+  (An earlier revision of this entry called it CSP-clean; it wasn't. Its
+  `x-data` was an inline object literal taking arguments and its page picker
+  called `parseInt`, both of which `@alpinejs/csp` rejects. Fixed by emitting
+  the config as a JSON blob and moving the parse into a component method.)
+
+* **Two more superseded legacy term routes** (#266, #262): `/vocabulary/term-hover`
+  and `/word/set-all-status` each rendered a server-built page whose only real
+  payload was a JSON blob applied to a reading *frame* that no longer exists.
+  Both were superseded by the API — `POST /api/v1/terms/quick` for hover-create
+  (used by `word_popover`, `word_modal` and `text_keyboard`) and
+  `TextPositionApiHandler` for mark-all-known/ignored, which calls the very same
+  `markAllWordsWithStatus` service. Neither route had a single inbound link.
+  Removing them drops `hover_save_result.php`, `all_wellknown_result.php`, the
+  `TermDisplayController::hoverCreate` and `TermStatusController::markAllWords`
+  handlers, the orphaned `CreateTermFromHover` use case, and their
+  `word_result_init.ts` initialisers.
+
+* **The legacy multi-word edit page** (#266, #262): `/word/edit-multi` rendered
+  a server-built HTML form that posted back to itself and answered with
+  `edit_multi_update_result.php` — a view whose entire output was a JSON blob in
+  a `<script type="application/json">` tag, which the reader then applied to the
+  opener's DOM. The modern reader stopped using any of it when the frame reader
+  was retired: selecting several words now opens the Alpine multi-word modal,
+  which talks to `POST /api/v1/terms/multi` and `PUT /api/v1/terms/multi/{id}`.
+  Nothing linked to the route any more, so the whole loop was unreachable.
+  Removing it drops `MultiWordController`, its three views, the route, the
+  `word_result_init.ts` handler, and the now-orphaned `updateMultiWordInDOM`
+  and `WordContextService::exportTermAsJson`. No behaviour change — none of it
+  could run.
+
+### Security — phase 8 (XSS hardening: kill the "build markup by concatenation" pattern)
+
+* **DOM XSS: Google Translate output was interpolated into `value="…"`**
+  (`bulk_translate.ts`). The bulk-translate page turns each machine
+  translation into an editable input; a quote in the translation closed the
+  value attribute and everything after it became attributes on the input
+  (`" onfocus="…" autofocus x="` is enough). Built through
+  `document.createElement` now.
+* **DOM XSS: multi-word markers were assembled as a markup string.**
+  `expression_interactable.ts` serialised a term's attributes into
+  `' k="v"'` pairs and `user_interactions.ts` parsed that back through
+  `innerHTML` — the same broken "produce a quoted literal by concatenation"
+  shape phase 7 removed from PHP. A term whose translation or romanization
+  contains `"` escaped its attribute and could add an event handler; both
+  fields are plantable through CSV or ePub import, so this was stored, not
+  reflected. `newExpressionInteractable` now takes the attribute map it was
+  always being handed and applies it with `setAttribute`, which is both safer
+  and less code. The marker label is set as `textContent`, so
+  `ExpressionService` sends a literal non-breaking space rather than the
+  `&nbsp;` entity (fixing, incidentally, a missing `;` that had been there
+  since the marker was written).
+* **DOM XSS: language names reached both a text node and a data attribute
+  unescaped** (`language_list.ts`). Setting a new default language rebuilds
+  the other cards' buttons from names read out of the DOM. Names are
+  user-supplied, so a language called `" onmouseover="…` injected a handler.
+  The button is built with `setAttribute`/`dataset` and the title text is
+  escaped.
+* **DOM XSS: LibreTranslate connection errors were rendered as markup**
+  (`language_form.ts`). The message can quote the `lwt_translator` parameter
+  read back off the user-configured translator URL, so it is escaped now.
+* **Hardening: `json_encode` into `<script type="application/json">` without
+  `JSON_HEX_TAG`, in five more places** — the Glosbe and Google-Translate
+  config blocks in `TranslationController` (which carry raw query
+  parameters), `ExpressionService`'s two multi-word config blocks (which
+  carry `WoTranslation` / `WoRomanization`), and `MediaService`'s
+  audio-player config.
+
+  **These were not exploitable.** PHP's `json_encode` escapes `/` as `\/`
+  unless `JSON_UNESCAPED_SLASHES` is passed, so a payload emerges as
+  `<\/script>`, which the HTML tokenizer does not accept as a closing tag.
+  (An earlier entry in this changelog states that `json_encode` "does not
+  escape `<`, `>`, or `/` by default" — the claim about `/` is wrong, and so
+  is any conclusion drawn from it about a live breakout.) What the flag buys
+  is independence from that default: `Home/Views/helpers.php` already passes
+  `JSON_UNESCAPED_SLASHES` on a page config block, so the one thing standing
+  between this pattern and a real breakout is a flag people do sometimes add.
+* **Regression is now held by an invariant, not by vigilance.** This is the
+  third sweep of this class, so
+  `tests/backend/Core/JsonScriptBlockEscapingTest.php` walks every
+  `json_encode` call in `src/`, brace-matches its arguments, and fails if a
+  call whose output lands inside a `<script>` element omits `JSON_HEX_TAG`.
+  API responses and outbound HTTP bodies are correctly ignored. It found the
+  `MediaService` site, which reading had missed.
+* **Regression tests**: hostile-input cases for the multi-word marker
+  (attribute breakout and a markup label), the bulk-translate input value,
+  and a language named `<img src=x onerror=…>` / `" onmouseover="…`. Each was
+  checked against the pre-fix code to confirm it actually fails there.
+
+### Changed
+
+* **EPUB import no longer depends on an external Composer package** (#263):
+  LWT now ships its own EPUB reader
+  (`src/Modules/Book/Infrastructure/Epub/`), replacing `kiwilan/php-ebook`.
+  It reads the OCF container, the OPF package document, and both flavours of
+  table of contents — the EPUB 2 NCX and the EPUB 3 navigation document — which
+  is everything the importer consumed. Dropping it also removed four transitive
+  dependencies (`kiwilan/php-archive`, `kiwilan/php-xml-reader`,
+  `smalot/pdfparser`, `spatie/temporary-directory`), taking `composer.lock` from
+  20 packages to 15. Parsing relies only on `ext-zip` and `ext-dom`, both
+  already required. XML is parsed with entity substitution off and network
+  access disabled, so a hostile EPUB cannot mount an XXE attack.
+
+  Note that this does not by itself remove the need to run `composer install`
+  from a source checkout — `phpmailer/phpmailer`, `league/oauth2-google` and
+  `thenetworg/oauth2-azure` are still required.
+
 ## [3.3.0-fork] - 2026-08-06
 
 ### Added

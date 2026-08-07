@@ -307,7 +307,9 @@ class ExpressionService
                 $txId = $occ['SeTxID'] ?? $occ['TxID'] ?? 0;
                 $appendtext[$txId] = [];
                 if (Settings::getZeroOrOne('showallwords', 1)) {
-                    $appendtext[$txId][$occ['position']] = "&nbsp;$len&nbsp";
+                    // A literal non-breaking space, not the entity: the client
+                    // sets this as text content, so markup would show verbatim.
+                    $appendtext[$txId][$occ['position']] = "\u{00A0}$len\u{00A0}";
                 } else {
                     if ('MECAB' == strtoupper(trim($regexp))) {
                         $appendtext[$txId][$occ['position']] = $occ['term'] ?? '';
@@ -384,7 +386,7 @@ class ExpressionService
         'multiWords' => $multiwords,
         'hex' => $hex,
         'showAll' => $showAll
-        ]); ?>
+        ], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
         <?php
         flush();
@@ -431,7 +433,7 @@ class ExpressionService
         'len' => $len,
         'hex' => $hex,
         'showAll' => $showAll
-        ]); ?>
+        ], JSON_HEX_TAG | JSON_HEX_AMP); ?>
 </script>
         <?php
         flush();

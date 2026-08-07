@@ -83,8 +83,15 @@ that makes a good client today and offline/local-first possible tomorrow.
         token refresh before the 30-day expiry, and `lwt:auth-expired` →
         `/connect` on a 401. Remaining for Phase 2: the Capacitor shell that
         hosts these screens and supplies a default server.
-- [ ] **Security hardening pass** — continue the XSS phases. Gate for any
+- [~] **Security hardening pass** — continue the XSS phases. Gate for any
       shared/public exposure; non-negotiable before a public instance.
+      Phase 8 shipped: four DOM sinks that built markup by string
+      concatenation (bulk-translate inputs, multi-word markers, the language
+      list, LibreTranslate errors) now set attributes and text through the DOM,
+      and the `json_encode`-into-`<script>` convention is held by a
+      codebase-wide invariant test instead of site-by-site vigilance. Ongoing —
+      this bullet stays open until a full review, not just the XSS classes, has
+      been done.
 
 ## Phase 1 — Frontend de-coupling (the enabling work)
 
@@ -95,10 +102,9 @@ that makes a good client today and offline/local-first possible tomorrow.
 rendered by Alpine.js." So Phase 1 is **cutting the server-shell umbilical, not
 converting pages**.
 
-**Status (re-audited 2026-08-05): every mobile-critical surface is shell-free.**
-The only open item is the legacy-fragment cleanup in the last bullet, which is
-not a mobile blocker. Tracked on the issue board as
-[#266](https://github.com/HugoFara/lwt/issues/266).
+**Status (re-audited 2026-08-07): complete.** Every mobile-critical surface is
+shell-free, and the legacy-fragment cleanup that was the last open item
+([#266](https://github.com/HugoFara/lwt/issues/266)) has shipped.
 
 - [x] **(Phase 0 gate) Injectable API base URL.** Done in Phase 0 — same seam.
       `@shared/api/client` resolves an injectable **absolute** server root and
@@ -152,25 +158,25 @@ not a mobile blocker. Tracked on the issue board as
       bulk actions (tag / review / reparse) intentionally stay on the form
       path — they need pickers/navigation and are desktop-admin, not mobile.
       `__e()` labels resolve via the i18n API once a page boots from it.
-- [~] **Vocabulary mgmt — mobile path already shell-free; legacy fragments
-      remain.** *Re-audit (corrected):* the **modern reader's** word actions
+- [x] **Vocabulary mgmt — shell-free; legacy fragments deleted.**
+      *Re-audit (corrected):* the **modern reader's** word actions
       already go through `/api/v1/terms/*` — `word_store.ts`/`word_modal.ts` call
       `TermsApi.setStatus/createQuick/delete`, and the unknown-word popup uses the
       API button family (`createWellKnownButton`/`createIgnoreButton` with a
       `WordActionContext`). The modern reader has no `#frames-r`, so the legacy
       `target="ro"` → `*_result.php` mechanism isn't even wired there. So the
       **mobile-critical vocab flow needs no conversion — it's done.**
-      What's left is *legacy/transitional* code, not a mobile blocker: the
-      `*_result.php` views + the `word_popup_interface.ts` link-builders
-      (`createStatusChangeLinks`, review-status links, etc.) that some
-      known/learning/review popups still emit. The clean fix is **consolidating
-      those popups onto the API button family / `word_modal`** and then deleting
-      the fragments — a UI-consolidation pass that needs live E2E in the reader,
-      not a server-vs-client data conversion. Track as cleanup; low urgency.
-      Still open as of 2026-08-05: eight `*_result.php` views survive
-      (`save_result`, `edit_result`, `edit_term_result`, `edit_multi_update_result`,
-      `hover_save_result`, `all_wellknown_result`, `bulk_save_result`,
-      `upload_result`) plus `Book/Views/import_result.php`.
+      The remaining *legacy/transitional* code has since been removed. All nine
+      dead-end `*_result.php` fragments are gone (`save_result`, `edit_result`,
+      `edit_term_result`, `edit_multi_update_result`, `hover_save_result`,
+      `all_wellknown_result`, `bulk_save_result`, and `Book/import_result`),
+      along with the `word_popup_interface.ts` link-builders that fed them. The
+      one file still named `*_result.php` is `Vocabulary/Views/upload_result.php`,
+      kept on purpose: it is a live results table rendered by Alpine from
+      `GET /api/v1/terms/imported`, not a server-rendered fragment.
+      The term editor behind `/word/edit`, `/word/edit-term` and
+      `/words/{id}/edit` now mounts the same API-driven component the reading
+      view opens in a modal, and bulk save posts to `POST /api/v1/terms/bulk`.
 
 **Out of Phase 1** (leave server-rendered, fine in a WebView online): imports
 (file/web/youtube/whisper), admin/settings, language config, feeds.

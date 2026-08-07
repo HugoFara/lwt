@@ -18,10 +18,6 @@ vi.mock('alpinejs', () => ({
 }));
 
 // Mock frame management
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  loadModalFrame: vi.fn()
-}));
-
 import {
   handleTextSelection,
   setupMultiWordSelection,

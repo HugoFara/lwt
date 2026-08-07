@@ -232,7 +232,7 @@ class TranslationController extends BaseController
             'text' => $text,
             'langId' => $lgId,
             'hasParentFrame' => $hasParentFrame
-        ]); ?>
+        ], JSON_HEX_TAG | JSON_HEX_AMP); ?>
         </script>
         <?php
         foreach ($translations as $word) {
@@ -340,7 +340,7 @@ class TranslationController extends BaseController
 
         ?>
         <script type="application/json" data-lwt-glosbe-config>
-        <?php echo json_encode($config); ?>
+        <?php echo json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP); ?>
         </script>
         <?php
     }

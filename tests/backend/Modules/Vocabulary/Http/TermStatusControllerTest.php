@@ -78,7 +78,6 @@ class TermStatusControllerTest extends TestCase
         $expectedMethods = [
             'updateStatus',
             'setReviewStatusView',
-            'markAllWords',
         ];
 
         foreach ($expectedMethods as $methodName) {
@@ -115,16 +114,6 @@ class TermStatusControllerTest extends TestCase
     public function setReviewStatusViewAcceptsArrayParameter(): void
     {
         $method = new \ReflectionMethod(TermStatusController::class, 'setReviewStatusView');
-        $params = $method->getParameters();
-
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
-
-    #[Test]
-    public function markAllWordsAcceptsArrayParameter(): void
-    {
-        $method = new \ReflectionMethod(TermStatusController::class, 'markAllWords');
         $params = $method->getParameters();
 
         $this->assertCount(1, $params);
@@ -218,20 +207,5 @@ class TermStatusControllerTest extends TestCase
         $reflection = new \ReflectionProperty(VocabularyBaseController::class, 'textStatisticsService');
 
         $this->assertNull($reflection->getValue($this->controller));
-    }
-
-    // =========================================================================
-    // markAllWords edge case
-    // =========================================================================
-
-    #[Test]
-    public function markAllWordsReturnsEarlyWhenTextIdIsNull(): void
-    {
-        // No GET 'text' param => textId is null => early return
-        ob_start();
-        $this->controller->markAllWords([]);
-        $output = ob_get_clean();
-
-        $this->assertSame('', $output);
     }
 }

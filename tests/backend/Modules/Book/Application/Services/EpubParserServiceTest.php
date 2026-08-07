@@ -17,11 +17,10 @@ declare(strict_types=1);
 
 namespace Lwt\Tests\Modules\Book\Application\Services;
 
-use Kiwilan\Ebook\Formats\Epub\Parser\EpubHtml;
 use Lwt\Modules\Book\Application\Services\EpubParserService;
+use Lwt\Modules\Book\Infrastructure\Epub\EpubDocument;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use RuntimeException;
 use InvalidArgumentException;
 
@@ -396,24 +395,15 @@ class EpubParserServiceTest extends TestCase
     }
 
     /**
-     * Construct an EpubHtml instance from a filename and body.
+     * Construct an EpubDocument from a filename and body.
      *
-     * EpubHtml's only public constructor (::make) expects a full HTML
-     * document; we want to set the filename and body independently for the
-     * navigation-detection tests, so reach in via reflection.
+     * A document with no `<body>` element reports its whole content as the
+     * body, so passing the bare fragment sets both independently, which is what
+     * the navigation-detection tests need.
      */
-    private function makeEpubHtml(string $filename, string $body = ''): EpubHtml
+    private function makeEpubHtml(string $filename, string $body = ''): EpubDocument
     {
-        $reflection = new ReflectionClass(EpubHtml::class);
-        $instance = $reflection->newInstanceWithoutConstructor();
-
-        $filenameProp = $reflection->getProperty('filename');
-        $filenameProp->setValue($instance, $filename);
-
-        $bodyProp = $reflection->getProperty('body');
-        $bodyProp->setValue($instance, $body);
-
-        return $instance;
+        return new EpubDocument($filename, $body);
     }
 
     #[Test]

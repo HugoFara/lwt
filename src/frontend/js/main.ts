@@ -109,6 +109,7 @@ const moduleMap: Record<string, () => Promise<unknown>> = {
   tags: () => import('@modules/tags/pages/tag_list'),
   auth: () => import('@modules/auth'),
   dictionary: () => import('@modules/dictionary/pages/dictionary_import'),
+  book: () => import('@modules/book'),
 };
 
 // Read which modules the current page needs from the server-emitted meta tag

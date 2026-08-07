@@ -106,7 +106,6 @@ export interface WordModalData {
   markWellKnown(): Promise<void>;
   markIgnored(): Promise<void>;
   deleteWord(): Promise<void>;
-  getEditUrl(): string;
   getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string;
   hasDictUrl(which: 'dict1' | 'dict2' | 'translator'): boolean;
   isCurrentStatus(status: number): boolean;
@@ -326,22 +325,6 @@ export function wordModalData(): WordModalData {
       if (confirm('Delete this term?')) {
         await this.store.deleteWord(word.hex);
       }
-    },
-
-    getEditUrl(): string {
-      const word = this.word;
-      if (!word) return '#';
-
-      const params = new URLSearchParams({
-        tid: String(this.store.textId),
-        ord: String(word.position)
-      });
-
-      if (word.wordId) {
-        params.set('wid', String(word.wordId));
-      }
-
-      return `/word/edit?${params.toString()}`;
     },
 
     getDictUrl(which: 'dict1' | 'dict2' | 'translator'): string {

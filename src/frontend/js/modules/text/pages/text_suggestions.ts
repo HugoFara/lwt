@@ -11,6 +11,7 @@
 import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
 import { getCsrfToken } from '@shared/api/client';
+import { importEpubForm } from '@modules/book/api/books_api';
 
 // ── Gutenberg browser ───────────────────────────────────────────────
 
@@ -786,6 +787,9 @@ interface TextNewFormData {
   isEpub(): boolean;
   formAction(): string;
   submitOp(): string;
+  epubError: string;
+  hasEpubError(): boolean;
+  handleSubmit(event: Event): void;
 }
 
 export function textNewFormData(): TextNewFormData {
@@ -796,6 +800,7 @@ export function textNewFormData(): TextNewFormData {
     autoImporting: false,
     fileTab: 'computer',
     fileType: '',
+    epubError: '',
 
     init() {
       // When arriving via import_url (Gutenberg/Feed) or import_epub_url
@@ -867,7 +872,43 @@ export function textNewFormData(): TextNewFormData {
     },
 
     formAction(): string {
-      return this.isEpub() ? '/book/import' : '/texts/new';
+      return this.isEpub() ? '/api/v1/books' : '/texts/new';
+    },
+
+    /**
+     * Whether the last EPUB import reported a failure.
+     *
+     * @returns True when an error message is pending
+     */
+    hasEpubError(): boolean {
+      return this.epubError !== '';
+    },
+
+    /**
+     * Send an EPUB to the books API instead of letting the form post.
+     *
+     * Every other source keeps its native POST to /texts/new.
+     *
+     * @param event Submit event
+     */
+    handleSubmit(event: Event) {
+      if (!this.isEpub()) return;
+
+      event.preventDefault();
+      const form = event.target as HTMLFormElement | null;
+      if (!form || this.autoImporting) return;
+
+      this.epubError = '';
+      this.autoImporting = true;
+
+      void importEpubForm(form).then((result) => {
+        if (result.bookId !== null) {
+          window.location.href = `/book/${result.bookId}`;
+          return;
+        }
+        this.epubError = result.error;
+        this.autoImporting = false;
+      });
     },
 
     submitOp(): string {

@@ -168,7 +168,6 @@
     "result.translation_label": "Traduction :",
     "result.word_marked_well_known": "Mot marqué comme Bien connu.",
     "result.word_marked_ignored": "Mot marqué comme Ignoré.",
-    "result.updating_texts": "Mise à jour des textes",
     "result.ignored_all": "{count} mots ignorés !",
     "result.ignored_one": "1 mot ignoré.",
     "result.ignored_none": "Aucun nouveau mot ignoré !",

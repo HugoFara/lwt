@@ -183,7 +183,7 @@ describe('expression_interactable.ts', () => {
 
       expect(newExpressionInteractable).toHaveBeenCalledWith(
         { "0": "append text" },
-        expect.stringContaining('class="status3"'),
+        expect.objectContaining({ class: 'status3' }),
         3,
         "def456",
         true
@@ -333,7 +333,7 @@ describe('expression_interactable.ts', () => {
 
       expect(newExpressionInteractable).toHaveBeenCalledWith(
         expect.anything(),
-        expect.stringContaining('data_wid="999"'),
+        expect.objectContaining({ data_wid: 999 }),
         expect.anything(),
         expect.anything(),
         expect.anything()

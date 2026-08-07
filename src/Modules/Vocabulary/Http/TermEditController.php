@@ -19,16 +19,10 @@ namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Http\RedirectResponse;
-use Lwt\Shared\Infrastructure\Database\Connection;
-use Lwt\Shared\Infrastructure\Database\QueryBuilder;
-use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
-use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
-use Lwt\Modules\Vocabulary\Application\Services\ExportService;
 use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Modules\Language\Application\LanguageFacade;
-use Lwt\Shared\Infrastructure\Language\LanguagePresets;
 use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 
@@ -80,9 +74,37 @@ class TermEditController extends VocabularyBaseController
     }
 
     /**
+     * Render the standalone term editor.
+     *
+     * The page carries only the identifiers; termEditPage loads the term from
+     * GET /api/v1/terms/for-edit and mounts the same editor the reading view
+     * opens in a modal, so there is one editor rather than three forms.
+     *
+     * @param int      $textId    Text ID, or 0 when editing an existing term
+     * @param int      $position  Word position in the text, or 0
+     * @param int|null $wordId    Term ID, or null when creating from a position
+     * @param string   $returnUrl Where to go once editing finishes
+     *
+     * @return void
+     */
+    private function renderEditorPage(int $textId, int $position, ?int $wordId, string $returnUrl): void
+    {
+        PageLayoutHelper::renderPageStart(__('vocabulary.form.edit_term'), true, 'words');
+
+        $this->render('edit_page', [
+            'textId' => $textId,
+            'position' => $position,
+            'wordId' => $wordId,
+            'returnUrl' => $returnUrl,
+        ]);
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
      * Edit word by ID.
      *
-     * Route: GET/POST /words/{id}/edit
+     * Route: GET /words/{id}/edit
      *
      * @param int $id Word ID from route parameter
      *
@@ -90,25 +112,11 @@ class TermEditController extends VocabularyBaseController
      */
     public function editWordById(int $id): void
     {
-        $op = InputValidator::getString('op');
-
-        if ($op !== '') {
-            if ($this->handleEditWordOperation()) {
-                return; // Error was rendered with full page
-            }
-        } else {
-            $this->displayEditWordForm($id, 0, 0, '');
-        }
-
-        PageLayoutHelper::renderPageEnd();
+        $this->renderEditorPage(0, 0, $id, '/words');
     }
 
     /**
-     * Edit word form.
-     *
-     * Handles:
-     * - Display edit form: ?wid=[wordid] or ?tid=[textid]&ord=[ord]
-     * - Save/Update: ?op=Save or ?op=Change
+     * Edit word form: ?wid=[wordid] or ?tid=[textid]&ord=[ord].
      *
      * @param array<string, string> $params Route parameters
      *
@@ -116,286 +124,24 @@ class TermEditController extends VocabularyBaseController
      */
     public function editWord(array $params): void
     {
-        $wid = InputValidator::getString('wid');
-        $tid = InputValidator::getString('tid');
-        $ord = InputValidator::getString('ord');
-        $op = InputValidator::getString('op');
-
-        // Check for valid entry point
-        if ($wid === '' && $tid . $ord === '' && $op === '') {
-            return;
-        }
-
-        $fromAnn = InputValidator::getString('fromAnn');
-
-        if ($op !== '') {
-            if ($this->handleEditWordOperation()) {
-                return; // Error was rendered with full page
-            }
-        } else {
-            $widInt = ($wid !== '' && is_numeric($wid)) ? (int) $wid : -1;
-            $textId = InputValidator::getInt('tid', 0) ?? 0;
-            $ordInt = InputValidator::getInt('ord', 0) ?? 0;
-            $this->displayEditWordForm($widInt, $textId, $ordInt, $fromAnn);
-        }
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Handle save/update operation for word edit.
-     *
-     * @return bool True if error response was rendered, false otherwise
-     */
-    private function handleEditWordOperation(): bool
-    {
-        $textlc = trim(Escaping::prepareTextdata(InputValidator::getString('WoTextLC')));
-        $text = trim(Escaping::prepareTextdata(InputValidator::getString('WoText')));
-
-        // Validate lowercase matches
-        if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $titletext = "New/Edit Term: " . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8');
-            PageLayoutHelper::renderPageStartNobody($titletext);
-            echo '<h1>' . $titletext . '</h1>';
-            echo '<div class="notification is-danger">' .
-                '<button class="delete" aria-label="close"></button>' .
-                'Error: Term in lowercase must be exactly = "' . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8') .
-                '", please go back and correct this!</div>';
-            PageLayoutHelper::renderPageEnd();
-            return true;
-        }
-
-        $translation = ExportService::replaceTabNewline(InputValidator::getString('WoTranslation'));
-        if ($translation == '') {
-            $translation = '*';
-        }
-
-        $op = InputValidator::getString('op');
-        $requestData = $this->getWordFormData();
-
-        if ($op == 'Save') {
-            // Insert new term
-            $result = $this->getCrudService()->create($requestData);
-            $hex = $this->getContextService()->textToClassName(InputValidator::getString('WoTextLC'));
-            $oldStatus = 0;
-            $titletext = "New Term: " . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8');
-        } else {
-            // Update existing term
-            $result = $this->getCrudService()->update(InputValidator::getInt('WoID', 0) ?? 0, $requestData);
-            $hex = null;
-            $oldStatus = InputValidator::getString('WoOldStatus');
-            $titletext = "Edit Term: " . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8');
-        }
-
-        PageLayoutHelper::renderPageStartNobody($titletext);
-        echo '<h1>' . $titletext . '</h1>';
-
-        $wid = $result['id'];
-        $message = $result['message'];
-
-        TagsFacade::saveWordTagsFromForm($wid);
-
-        // Prepare view variables
+        $wid = InputValidator::getInt('wid', 0) ?? 0;
         $textId = InputValidator::getInt('tid', 0) ?? 0;
-        $status = InputValidator::getString('WoStatus');
-        $romanization = InputValidator::getString('WoRomanization');
-        $fromAnn = InputValidator::getString('fromAnn');
+        $ord = InputValidator::getInt('ord', 0) ?? 0;
 
-        $tagList = TagsFacade::getWordTagList($wid, false);
-        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
+        // Nothing identifies a term: neither an ID nor a position in a text.
+        // Say so rather than serving a blank page.
+        if ($wid <= 0 && ($textId <= 0 || $ord <= 0)) {
+            throw new \RuntimeException(
+                'Cannot edit term: expected a term ID, or a text ID with a position'
+            );
+        }
 
-        $this->render('edit_result', [
-            'wid' => $wid,
-            'message' => $message,
-            'textId' => $textId,
-            'status' => $status,
-            'romanization' => $romanization,
-            'translation' => $translation,
-            'hex' => $hex,
-            'oldStatus' => $oldStatus,
-            'isNew' => ($op == 'Save'),
-            'fromAnn' => $fromAnn,
-            'text' => $text,
-            'textlc' => $textlc,
-            'tagList' => $tagList,
-            'todoContent' => $todoContent,
-        ]);
-
-        return false;
+        $returnUrl = $textId > 0 ? '/text/' . $textId . '/read' : '/words';
+        $this->renderEditorPage($textId, $ord, $wid > 0 ? $wid : null, $returnUrl);
     }
 
     /**
-     * Display the word edit form (new or existing).
-     *
-     * @param int    $wid     Word ID (-1 for new)
-     * @param int    $textId  Text ID
-     * @param int    $ord     Word order position
-     * @param string $fromAnn From annotation flag
-     *
-     * @return void
-     */
-    private function displayEditWordForm(int $wid, int $textId, int $ord, string $fromAnn): void
-    {
-        $crudService = $this->getCrudService();
-        $contextService = $this->getContextService();
-        $linkingService = $this->getLinkingService();
-
-        if ($wid == -1) {
-            // Get the term from text items
-            $termData = $linkingService->getTermFromTextItem($textId, $ord);
-            if ($termData === null) {
-                throw new \RuntimeException("Cannot access term and language: term not found in text");
-            }
-            $term = (string) $termData['Ti2Text'];
-            $lang = (int) $termData['Ti2LgID'];
-            $termlc = mb_strtolower($term, 'UTF-8');
-
-            // Check if word already exists
-            $existingId = $crudService->findByText($termlc, $lang);
-            if ($existingId !== null) {
-                $new = false;
-                $wid = $existingId;
-            } else {
-                $new = true;
-            }
-        } else {
-            // Get existing word data
-            $wordData = $crudService->findById($wid);
-            if ($wordData === null) {
-                throw new \RuntimeException("Cannot access term and language: word ID not found");
-            }
-            $term = (string) $wordData['WoText'];
-            $lang = (int) $wordData['WoLgID'];
-            $termlc = mb_strtolower($term, 'UTF-8');
-            $new = false;
-        }
-
-        $titletext = ($new ? "New Term" : "Edit Term") . ": " . htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
-        PageLayoutHelper::renderPageStartNobody($titletext);
-
-        $scrdir = $this->languageFacade->getScriptDirectionTag($lang);
-        $langData = $contextService->getLanguageData($lang);
-        $showRoman = $langData['showRoman'];
-
-        if ($new) {
-            // New word form
-            $sentence = $contextService->getSentenceForTerm($textId, $ord, $termlc);
-            $transUri = $langData['translateUri'];
-            $lgname = $langData['name'];
-            $langShort = array_key_exists($lgname, LanguagePresets::getAll()) ?
-                LanguagePresets::getAll()[$lgname][1] : '';
-
-            $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
-            $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
-                $lang,
-                $term,
-                'document.forms[0].WoSentence',
-                !InputValidator::hasFromGet('nodict')
-            );
-            $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
-                $lang,
-                $termlc,
-                'document.forms.newword.WoSentence',
-                0
-            );
-            $wordTagsHtml = TagsFacade::getWordTagsHtml(0);
-
-            $this->render('form_edit_new', [
-                'term' => $term,
-                'termlc' => $termlc,
-                'lang' => $lang,
-                'sentence' => $sentence,
-                'transUri' => $transUri,
-                'lgname' => $lgname,
-                'langShort' => $langShort,
-                'scrdir' => $scrdir,
-                'showRoman' => $showRoman,
-                'textId' => $textId,
-                'ord' => $ord,
-                'fromAnn' => $fromAnn,
-                'similarTermsRow' => $similarTermsRow,
-                'dictLinksHtml' => $dictLinksHtml,
-                'sentenceAreaHtml' => $sentenceAreaHtml,
-                'wordTagsHtml' => $wordTagsHtml,
-            ]);
-        } else {
-            // Edit existing word form
-            $wordData = $crudService->findById($wid);
-            if ($wordData === null) {
-                throw new \RuntimeException("Cannot access word data: word ID not found");
-            }
-
-            $status = (int)$wordData['WoStatus'];
-            if ($fromAnn == '' && $status >= 98) {
-                $status = 1;
-            }
-
-            $sentence = ExportService::replaceTabNewline((string)$wordData['WoSentence']);
-            if ($sentence == '' && $textId !== 0 && $ord !== 0) {
-                $sentence = $contextService->getSentenceForTerm($textId, $ord, $termlc);
-            }
-
-            $transl = ExportService::replaceTabNewline((string)$wordData['WoTranslation']);
-            if ($transl == '*') {
-                $transl = '';
-            }
-
-            // Get showRoman from language joined with text
-            $showRoman = (bool) QueryBuilder::table('languages')
-                ->join('texts', 'TxLgID', '=', 'LgID')
-                ->where('TxID', '=', $textId)
-                ->valuePrepared('LgShowRomanization');
-
-            $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
-            if ($fromAnn !== '') {
-                $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin2(
-                    $lang,
-                    'WoSentence',
-                    'WoText'
-                );
-            } else {
-                $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
-                    $lang,
-                    $term,
-                    'WoSentence',
-                    !InputValidator::hasFromGet('nodict')
-                );
-            }
-            $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
-                $lang,
-                $termlc,
-                'WoSentence',
-                $wid
-            );
-            $wordTagsHtml = TagsFacade::getWordTagsHtml($wid);
-
-            $this->render('form_edit_existing', [
-                'wid' => $wid,
-                'term' => $term,
-                'termlc' => $termlc,
-                'lang' => $lang,
-                'status' => $status,
-                'sentence' => $sentence,
-                'transl' => $transl,
-                'wordData' => $wordData,
-                'scrdir' => $scrdir,
-                'showRoman' => $showRoman,
-                'textId' => $textId,
-                'ord' => $ord,
-                'fromAnn' => $fromAnn,
-                'similarTermsRow' => $similarTermsRow,
-                'dictLinksHtml' => $dictLinksHtml,
-                'sentenceAreaHtml' => $sentenceAreaHtml,
-                'wordTagsHtml' => $wordTagsHtml,
-            ]);
-        }
-    }
-
-    /**
-     * Edit term while testing.
-     *
-     * Call: ?wid=[wordid] - display edit form
-     *       ?op=Change - update the term
+     * Edit term while reviewing: ?wid=[wordid].
      *
      * @param array<string, string> $params Route parameters
      *
@@ -403,211 +149,13 @@ class TermEditController extends VocabularyBaseController
      */
     public function editTerm(array $params): void
     {
-        $translation_raw = ExportService::replaceTabNewline(InputValidator::getString('WoTranslation'));
-        $translation = ($translation_raw == '') ? '*' : $translation_raw;
+        $wid = InputValidator::getInt('wid', 0) ?? 0;
 
-        $op = InputValidator::getString('op');
-        if ($op !== '') {
-            if ($this->handleEditTermOperation($translation)) {
-                return; // Error was rendered with full page
-            }
-        } else {
-            $this->displayEditTermForm();
+        if ($wid <= 0) {
+            throw new \RuntimeException('Cannot edit term: expected a term ID');
         }
 
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Handle update operation for edit term.
-     *
-     * @param string $translation Translation value
-     *
-     * @return bool True if error response was rendered, false otherwise
-     */
-    private function handleEditTermOperation(string $translation): bool
-    {
-        $woTextLC = InputValidator::getString('WoTextLC');
-        $woText = InputValidator::getString('WoText');
-        $textlc = trim(Escaping::prepareTextdata($woTextLC));
-        $text = trim(Escaping::prepareTextdata($woText));
-
-        if (mb_strtolower($text, 'UTF-8') != $textlc) {
-            $escapedText = htmlspecialchars(Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
-            $titletext = "New/Edit Term: " . $escapedText;
-            PageLayoutHelper::renderPageStartNobody($titletext);
-            echo '<h1>' . $titletext . '</h1>';
-            echo '<div class="notification is-danger">' .
-                '<button class="delete" aria-label="close"></button>' .
-                'Error: Term in lowercase must be exactly = "' . htmlspecialchars($textlc, ENT_QUOTES, 'UTF-8') .
-                '", please go back and correct this!</div>';
-            PageLayoutHelper::renderPageEnd();
-            return true;
-        }
-
-        $op = InputValidator::getString('op');
-        if ($op == 'Change') {
-            $titletext = "Edit Term: " . htmlspecialchars(Escaping::prepareTextdata($woTextLC), ENT_QUOTES, 'UTF-8');
-            PageLayoutHelper::renderPageStartNobody($titletext);
-            echo '<h1>' . $titletext . '</h1>';
-
-            $oldstatus = InputValidator::getString('WoOldStatus');
-            $newstatus = InputValidator::getString('WoStatus');
-            $woId = InputValidator::getInt('WoID', 0) ?? 0;
-            $woSentence = InputValidator::getString('WoSentence');
-            $woRomanization = InputValidator::getString('WoRomanization');
-
-            $scoreRandomUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
-            $sentenceEscaped = ExportService::replaceTabNewline($woSentence);
-
-            if ($oldstatus != $newstatus) {
-                // Status changed - update with status change timestamp
-                $bindings = [
-                    $woText, $translation, $sentenceEscaped, $woRomanization,
-                    $newstatus, $woId
-                ];
-                $sql = "UPDATE words SET
-                    WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
-                    WoStatus = ?, WoStatusChanged = NOW(), {$scoreRandomUpdate}
-                    WHERE WoID = ?"
-                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('words', $bindings);
-                Connection::preparedExecute($sql, $bindings);
-            } else {
-                // Status unchanged
-                $bindings = [
-                    $woText, $translation, $sentenceEscaped, $woRomanization,
-                    $woId
-                ];
-                $sql = "UPDATE words SET
-                    WoText = ?, WoTranslation = ?, WoSentence = ?, WoRomanization = ?,
-                    {$scoreRandomUpdate}
-                    WHERE WoID = ?"
-                    . \Lwt\Shared\Infrastructure\Database\UserScopedQuery::forTablePrepared('words', $bindings);
-                Connection::preparedExecute($sql, $bindings);
-            }
-            $wid = $woId;
-            TagsFacade::saveWordTagsFromForm($wid);
-
-            $message = 'Updated';
-
-            /** @var int|null $lang */
-            $lang = QueryBuilder::table('words')
-                ->where('WoID', '=', $wid)
-                ->valuePrepared('WoLgID');
-            if (!isset($lang)) {
-                throw new \RuntimeException('Cannot retrieve language: word not found');
-            }
-            /** @var string|null $regexword */
-            $regexword = QueryBuilder::table('languages')
-                ->where('LgID', '=', $lang)
-                ->valuePrepared('LgRegexpWordCharacters');
-            if (!isset($regexword)) {
-                throw new \RuntimeException('Cannot retrieve language data: language not found');
-            }
-            $sent = htmlspecialchars(ExportService::replaceTabNewline($woSentence), ENT_QUOTES, 'UTF-8');
-            $sent1 = str_replace(
-                "{",
-                ' <b>[',
-                str_replace(
-                    "}",
-                    ']</b> ',
-                    ExportService::maskTermInSentence($sent, $regexword)
-                )
-            );
-
-            $status = $newstatus;
-            $romanization = $woRomanization;
-            $text = $woText;
-            $tagList = TagsFacade::getWordTagList($wid, false);
-
-            $this->render('edit_term_result', [
-                'wid' => $wid,
-                'message' => $message,
-                'status' => $status,
-                'romanization' => $romanization,
-                'translation' => $translation,
-                'text' => $text,
-                'sent1' => $sent1,
-                'tagList' => $tagList,
-            ]);
-        }
-
-        return false;
-    }
-
-    /**
-     * Display the edit term form.
-     *
-     * @return void
-     */
-    private function displayEditTermForm(): void
-    {
-        $widParam = InputValidator::getString('wid');
-
-        if ($widParam == '') {
-            throw new \RuntimeException("Term ID missing: required parameter not provided");
-        }
-        $wid = (int) $widParam;
-
-        $record = QueryBuilder::table('words')
-            ->select(['WoText', 'WoLgID', 'WoTranslation', 'WoSentence', 'WoNotes', 'WoRomanization', 'WoStatus'])
-            ->where('WoID', '=', $wid)
-            ->firstPrepared();
-        if ($record !== null) {
-            $term = (string) $record['WoText'];
-            $lang = (int) $record['WoLgID'];
-            $transl = ExportService::replaceTabNewline((string)$record['WoTranslation']);
-            if ($transl == '*') {
-                $transl = '';
-            }
-            $sentence = ExportService::replaceTabNewline((string)$record['WoSentence']);
-            $notes = ExportService::replaceTabNewline((string)($record['WoNotes'] ?? ''));
-            $rom = (string)$record['WoRomanization'];
-            $status = (int)$record['WoStatus'];
-            $showRoman = (bool) QueryBuilder::table('languages')
-                ->where('LgID', '=', $lang)
-                ->valuePrepared('LgShowRomanization');
-        } else {
-            throw new \RuntimeException("Term data not found: invalid term ID");
-        }
-
-        $termlc = mb_strtolower($term, 'UTF-8');
-        $titletext = "Edit Term: " . htmlspecialchars($term, ENT_QUOTES, 'UTF-8');
-        PageLayoutHelper::renderPageStartNobody($titletext);
-        $scrdir = $this->languageFacade->getScriptDirectionTag($lang);
-
-        $similarTermsRow = (new \Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms())->getTableRow();
-        $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin(
-            $lang,
-            $term,
-            'document.forms[0].WoSentence',
-            true
-        );
-        $sentenceAreaHtml = $this->getSentenceService()->renderExampleSentencesArea(
-            $lang,
-            $termlc,
-            'document.forms.editword.WoSentence',
-            $wid
-        );
-        $wordTagsHtml = TagsFacade::getWordTagsHtml($wid);
-
-        $this->render('form_edit_term', [
-            'wid' => $wid,
-            'term' => $term,
-            'termlc' => $termlc,
-            'lang' => $lang,
-            'transl' => $transl,
-            'sentence' => $sentence,
-            'notes' => $notes,
-            'rom' => $rom,
-            'status' => $status,
-            'showRoman' => $showRoman,
-            'scrdir' => $scrdir,
-            'similarTermsRow' => $similarTermsRow,
-            'dictLinksHtml' => $dictLinksHtml,
-            'sentenceAreaHtml' => $sentenceAreaHtml,
-            'wordTagsHtml' => $wordTagsHtml,
-        ]);
+        $this->renderEditorPage(0, 0, $wid, '/review');
     }
 
     /**
@@ -704,36 +252,6 @@ class TermEditController extends VocabularyBaseController
                     $this->getExpressionService()->insertExpressions($result['textlc'], $woLgId, $wid, $len, 0);
                 } elseif ($len == 1) {
                     $this->getLinkingService()->linkToTextItems($wid, $woLgId, $result['textlc']);
-
-                    // Prepare view variables
-                    $hex = $contextService->textToClassName($result['textlc']);
-                    $translation = ExportService::replaceTabNewline(InputValidator::getString('WoTranslation'));
-                    if ($translation === '') {
-                        $translation = '*';
-                    }
-                    $status = InputValidator::getString('WoStatus');
-                    $romanization = InputValidator::getString('WoRomanization');
-                    $text = $result['text'];
-                    $textId = InputValidator::getInt('tid', 0) ?? 0;
-                    $success = true;
-                    $message = $result['message'];
-                    $tagList = TagsFacade::getWordTagList($wid, false);
-                    $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
-
-                    $this->render('save_result', [
-                        'wid' => $wid,
-                        'hex' => $hex,
-                        'translation' => $translation,
-                        'status' => $status,
-                        'romanization' => $romanization,
-                        'text' => $text,
-                        'textId' => $textId,
-                        'success' => $success,
-                        'message' => $message,
-                        'len' => $len,
-                        'tagList' => $tagList,
-                        'todoContent' => $todoContent,
-                    ]);
                 }
             }
         } else {

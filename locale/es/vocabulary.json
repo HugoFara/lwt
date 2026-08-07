@@ -169,7 +169,6 @@
     "result.translation_label": "Traducción:",
     "result.word_marked_well_known": "Palabra marcada como Bien conocida.",
     "result.word_marked_ignored": "Palabra marcada como Ignorada.",
-    "result.updating_texts": "Actualizando textos",
     "result.ignored_all": "¡Ignoradas todas las {count} palabras!",
     "result.ignored_one": "1 palabra ignorada.",
     "result.ignored_none": "¡Ninguna palabra nueva ignorada!",

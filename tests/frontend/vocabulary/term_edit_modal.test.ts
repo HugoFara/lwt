@@ -158,7 +158,7 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       expect(lastCall[0]).toContain('term-edit-sentence');
     });
 
-    it('uses "Add Term" title for new terms', async () => {
+    it('uses the new-term title for new terms', async () => {
       vi.mocked(TermsApi.getForEdit).mockResolvedValue({
         data: {
           ...mockTermResponse.data!,
@@ -170,7 +170,7 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
 
       expect(openModal).toHaveBeenLastCalledWith(
         expect.any(String),
-        expect.objectContaining({ title: 'Add Term' })
+        expect.objectContaining({ title: 'New Term' })
       );
     });
 
@@ -296,7 +296,11 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       // Set up DOM with form
       document.body.innerHTML = `
         <form id="term-edit-form">
+          <input id="term-edit-text" value="hello" />
           <textarea id="term-edit-translation">test translation</textarea>
+          <input id="term-edit-lemma" value="" />
+          <textarea id="term-edit-notes"></textarea>
+          <input id="term-edit-tags" value="" />
           <input id="term-edit-romanization" value="" />
           <textarea id="term-edit-sentence">test sentence</textarea>
           <select id="term-edit-status"><option value="2" selected>Learning (2)</option></select>
@@ -317,7 +321,11 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       // Set up DOM
       document.body.innerHTML = `
         <form id="term-edit-form">
+          <input id="term-edit-text" value="hello" />
           <textarea id="term-edit-translation">updated</textarea>
+          <input id="term-edit-lemma" value="" />
+          <textarea id="term-edit-notes"></textarea>
+          <input id="term-edit-tags" value="" />
           <input id="term-edit-romanization" value="" />
           <textarea id="term-edit-sentence">test</textarea>
           <select id="term-edit-status"><option value="3" selected>3</option></select>
@@ -444,7 +452,7 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       const lastCall = vi.mocked(openModal).mock.calls.slice(-1)[0];
       const formHtml = lastCall[0];
 
-      expect(formHtml).toContain('Use {curly braces} around the term');
+      expect(formHtml).toContain('Wrap the term in {curly braces}');
     });
   });
 
@@ -493,14 +501,176 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
   // ===========================================================================
 
   describe('Term Display', () => {
-    it('displays term text as readonly', async () => {
+    it('leaves an existing term text editable for recasing', async () => {
       await openTermEditModal(1, 5, 123);
+
+      const lastCall = vi.mocked(openModal).mock.calls.slice(-1)[0];
+      const formHtml = lastCall[0];
+
+      expect(formHtml).toContain('id="term-edit-text"');
+      expect(formHtml).not.toContain('readonly');
+      expect(formHtml).toContain('Only change uppercase/lowercase!');
+    });
+
+    it('locks the term text for a new term', async () => {
+      vi.mocked(TermsApi.getForEdit).mockResolvedValue({
+        data: {
+          ...mockTermResponse.data!,
+          isNew: true,
+          term: { ...mockTermResponse.data!.term, id: null },
+        },
+      });
+
+      await openTermEditModal(1, 5);
 
       const lastCall = vi.mocked(openModal).mock.calls.slice(-1)[0];
       const formHtml = lastCall[0];
 
       expect(formHtml).toContain('readonly');
       expect(formHtml).toContain('disabled');
+    });
+  });
+
+  // ===========================================================================
+  // Data-driven Field Tests
+  // ===========================================================================
+
+  describe('fields rendered from API data', () => {
+    it('renders lemma, notes and tags from the payload', async () => {
+      vi.mocked(TermsApi.getForEdit).mockResolvedValue({
+        data: {
+          ...mockTermResponse.data!,
+          allTags: ['noun', 'verb'],
+          term: {
+            ...mockTermResponse.data!.term,
+            lemma: 'hallo',
+            notes: 'a greeting',
+            tags: ['noun', 'common'],
+          },
+        },
+      });
+
+      await openTermEditModal(1, 5, 123);
+
+      const formHtml = vi.mocked(openModal).mock.calls.slice(-1)[0][0];
+
+      expect(formHtml).toContain('id="term-edit-lemma"');
+      expect(formHtml).toContain('value="hallo"');
+      expect(formHtml).toContain('a greeting');
+      expect(formHtml).toContain('value="noun, common"');
+      // allTags feeds the datalist, not the value.
+      expect(formHtml).toContain('<option value="verb">');
+    });
+
+    it('renders similar terms as links', async () => {
+      vi.mocked(TermsApi.getForEdit).mockResolvedValue({
+        data: {
+          ...mockTermResponse.data!,
+          similarTerms: [
+            { id: 7, text: 'hallo', translation: 'hi', status: 2 },
+            { id: 8, text: 'helo', translation: '*', status: 1 },
+          ],
+        },
+      });
+
+      await openTermEditModal(1, 5, 123);
+
+      const formHtml = vi.mocked(openModal).mock.calls.slice(-1)[0][0];
+
+      expect(formHtml).toContain('/words/7/edit');
+      expect(formHtml).toContain('hi');
+      // A '*' translation is a placeholder and must not be shown.
+      expect(formHtml).toContain('/words/8/edit');
+      expect(formHtml).not.toContain('— *');
+    });
+
+    it('omits the similar terms block when there are none', async () => {
+      await openTermEditModal(1, 5, 123);
+
+      const formHtml = vi.mocked(openModal).mock.calls.slice(-1)[0][0];
+
+      expect(formHtml).not.toContain('Similar Terms');
+    });
+
+    it('renders a dictionary link built from the language URI', async () => {
+      vi.mocked(TermsApi.getForEdit).mockResolvedValue({
+        data: {
+          ...mockTermResponse.data!,
+          language: {
+            ...mockTermResponse.data!.language,
+            translateUri: 'https://dict.test/?q=lwt_term',
+          },
+        },
+      });
+
+      await openTermEditModal(1, 5, 123);
+
+      const formHtml = vi.mocked(openModal).mock.calls.slice(-1)[0][0];
+
+      expect(formHtml).toContain('https://dict.test/?q=hello');
+    });
+
+    it('omits the dictionary link when the language has no URI', async () => {
+      await openTermEditModal(1, 5, 123);
+
+      const formHtml = vi.mocked(openModal).mock.calls.slice(-1)[0][0];
+
+      expect(formHtml).not.toContain('Dictionary Lookup');
+    });
+  });
+
+  // ===========================================================================
+  // Term Recasing Guard Tests
+  // ===========================================================================
+
+  describe('term recasing guard', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <form id="term-edit-form">
+          <input id="term-edit-text" value="hello" />
+          <textarea id="term-edit-translation">t</textarea>
+          <input id="term-edit-lemma" value="" />
+          <textarea id="term-edit-notes"></textarea>
+          <input id="term-edit-tags" value="" />
+          <textarea id="term-edit-sentence"></textarea>
+          <select id="term-edit-status"><option value="1" selected>1</option></select>
+          <button id="term-edit-save" type="submit">Save</button>
+          <div id="term-edit-error" style="display: none;"></div>
+        </form>
+      `;
+    });
+
+    it('accepts a pure change of capitalization', async () => {
+      await openTermEditModal(1, 5, 123);
+      (document.getElementById('term-edit-text') as HTMLInputElement).value = 'Hello';
+
+      document.getElementById('term-edit-form')
+        ?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return vi.mocked(TermsApi.updateFull).mock.calls.length > 0;
+      });
+
+      expect(TermsApi.updateFull).toHaveBeenCalledWith(
+        123,
+        expect.objectContaining({ text: 'Hello' })
+      );
+    });
+
+    it('rejects a different term before calling the API', async () => {
+      await openTermEditModal(1, 5, 123);
+      (document.getElementById('term-edit-text') as HTMLInputElement).value = 'goodbye';
+
+      document.getElementById('term-edit-form')
+        ?.dispatchEvent(new Event('submit', { cancelable: true }));
+
+      await vi.waitFor(() => {
+        return document.getElementById('term-edit-error')!.style.display === 'block';
+      });
+
+      expect(TermsApi.updateFull).not.toHaveBeenCalled();
+      const saveBtn = document.getElementById('term-edit-save') as HTMLButtonElement;
+      expect(saveBtn.disabled).toBe(false);
     });
   });
 
@@ -513,7 +683,11 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       // Set up DOM with form before each test
       document.body.innerHTML = `
         <form id="term-edit-form">
+          <input id="term-edit-text" value="hello" />
           <textarea id="term-edit-translation">test translation</textarea>
+          <input id="term-edit-lemma" value="" />
+          <textarea id="term-edit-notes"></textarea>
+          <input id="term-edit-tags" value="" />
           <input id="term-edit-romanization" value="romaji" />
           <textarea id="term-edit-sentence">test {sentence}</textarea>
           <select id="term-edit-status">
@@ -584,9 +758,12 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       });
 
       expect(TermsApi.updateFull).toHaveBeenCalledWith(123, {
+        text: 'hello',
         translation: 'test translation',
         romanization: 'romaji',
         sentence: 'test {sentence}',
+        notes: '',
+        lemma: '',
         status: 2,
         tags: []
       });
@@ -616,6 +793,8 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
         translation: 'test translation',
         romanization: 'romaji',
         sentence: 'test {sentence}',
+        notes: '',
+        lemma: '',
         status: 2,
         tags: []
       });
@@ -779,9 +958,12 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
       });
 
       expect(TermsApi.updateFull).toHaveBeenCalledWith(123, {
+        text: 'hello',
         translation: '',
         romanization: '',
         sentence: '',
+        notes: '',
+        lemma: '',
         status: 2,
         tags: []
       });
@@ -796,7 +978,11 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
     beforeEach(async () => {
       document.body.innerHTML = `
         <form id="term-edit-form">
+          <input id="term-edit-text" value="hello" />
           <textarea id="term-edit-translation">test</textarea>
+          <input id="term-edit-lemma" value="" />
+          <textarea id="term-edit-notes"></textarea>
+          <input id="term-edit-tags" value="" />
           <input id="term-edit-romanization" value="" />
           <textarea id="term-edit-sentence">test</textarea>
           <select id="term-edit-status"><option value="1" selected>1</option></select>
@@ -850,7 +1036,11 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
 
       document.body.innerHTML = `
         <form id="term-edit-form">
+          <input id="term-edit-text" value="hello" />
           <textarea id="term-edit-translation">test</textarea>
+          <input id="term-edit-lemma" value="" />
+          <textarea id="term-edit-notes"></textarea>
+          <input id="term-edit-tags" value="" />
           <input id="term-edit-romanization" value="" />
           <textarea id="term-edit-sentence">test</textarea>
           <select id="term-edit-status"><option value="1" selected>1</option></select>
@@ -893,11 +1083,15 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
         return vi.mocked(TermsApi.updateFull).mock.calls.length > 0;
       });
 
-      // Should use empty/default values for missing fields
+      // Should use empty/default values for missing fields. An absent term
+      // input sends text: '', which the server reads as "leave WoText alone".
       expect(TermsApi.updateFull).toHaveBeenCalledWith(123, {
+        text: '',
         translation: '',
         romanization: '',
         sentence: '',
+        notes: '',
+        lemma: '',
         status: 1, // Default when parsing empty string
         tags: []
       });
@@ -906,7 +1100,11 @@ describe('modules/vocabulary/components/term_edit_modal.ts', () => {
     it('handles status selection without romanization field', async () => {
       document.body.innerHTML = `
         <form id="term-edit-form">
+          <input id="term-edit-text" value="hello" />
           <textarea id="term-edit-translation">translation</textarea>
+          <input id="term-edit-lemma" value="" />
+          <textarea id="term-edit-notes"></textarea>
+          <input id="term-edit-tags" value="" />
           <textarea id="term-edit-sentence">sentence</textarea>
           <select id="term-edit-status">
             <option value="99" selected>Well Known</option>

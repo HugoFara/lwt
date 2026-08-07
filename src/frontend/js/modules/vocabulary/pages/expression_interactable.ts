@@ -71,14 +71,9 @@ function initMultiWordInteractable(config: MultiWordConfig): void {
     parseInt(term.data_status, 10)
   );
 
-  let attrs = '';
-  Object.entries(term).forEach(([k, v]) => {
-    attrs += ' ' + k + '="' + v + '"';
-  });
-
   newExpressionInteractable(
     config.multiWords[textId],
-    attrs,
+    { ...term },
     term.data_code,
     config.hex,
     config.showAll
@@ -100,14 +95,9 @@ function initExpressionInteractable2(config: ExpressionConfig): void {
     parseInt(term.data_status, 10)
   );
 
-  let attrs = '';
-  Object.entries(term).forEach(([k, v]) => {
-    attrs += ' ' + k + '="' + v + '"';
-  });
-
   newExpressionInteractable(
     config.appendText,
-    attrs,
+    { ...term },
     config.len,
     config.hex,
     config.showAll

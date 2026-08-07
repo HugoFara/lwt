@@ -163,6 +163,8 @@ export interface TermCreateFullRequest {
  * Request body for updating a term with full data.
  */
 export interface TermUpdateFullRequest {
+  /** Term text. Only a change of capitalization is accepted by the server. */
+  text?: string;
   translation: string;
   romanization?: string;
   sentence?: string;
@@ -496,6 +498,7 @@ export const TermsApi = {
     position: number,
     wordId?: number
   ): Promise<ApiResponse<TermForEditResponse>> {
+    // An existing term carries its own language, so textId/position may be 0.
     const params: Record<string, string> = {
       term_id: String(textId),
       ord: String(position)

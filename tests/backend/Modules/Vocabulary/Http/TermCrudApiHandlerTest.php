@@ -967,6 +967,67 @@ class TermCrudApiHandlerTest extends TestCase
         $this->assertStringContainsString("return ['error' => 'Text not found']", $source);
     }
 
+    public function testCreateTermsBulkRejectsAnEmptyList(): void
+    {
+        $handler = new TermCrudApiHandler();
+
+        $this->assertArrayHasKey('error', $handler->createTermsBulk([]));
+        $this->assertArrayHasKey('error', $handler->createTermsBulk(['terms' => []]));
+        $this->assertArrayHasKey('error', $handler->createTermsBulk(['terms' => 'nope']));
+    }
+
+    public function testCreateTermsBulkRejectsRowsWithoutTextOrLanguage(): void
+    {
+        $handler = new TermCrudApiHandler();
+
+        // Every row is unusable, so nothing reaches the database.
+        $result = $handler->createTermsBulk(['terms' => [
+            ['text' => '', 'lg' => 3],
+            ['text' => 'ok', 'lg' => 0],
+            'not-an-array',
+        ]]);
+
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function testCreateTermsBulkLinksNewTermsToTheirOccurrences(): void
+    {
+        $source = $this->getMethodSource('createTermsBulk');
+
+        // Without this the reading view keeps rendering them as unknown.
+        $this->assertStringContainsString('linkNewWordsToTextItems', $source);
+    }
+
+    public function testCreateTermsBulkValidatesStatus(): void
+    {
+        $source = $this->getMethodSource('createTermsBulk');
+
+        $this->assertStringContainsString('TermStatusService::isValidStatus', $source);
+    }
+
+    public function testGetTermForEditResolvesLanguageFromWordWhenWordIdGiven(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        // An existing term supplies its own language, so no text lookup is
+        // needed — that is what lets review and the term list open the editor.
+        $this->assertStringContainsString('$hasWordId', $source);
+        $this->assertStringContainsString("->select(['WoLgID'])", $source);
+        $this->assertStringContainsString("\$langId = (int) \$wordLang['WoLgID'];", $source);
+    }
+
+    public function testGetTermForEditOnlyLooksUpTextForNewTerms(): void
+    {
+        $source = $this->getMethodSource('getTermForEdit');
+
+        $textLookup = strpos($source, "QueryBuilder::table('texts')");
+        $guard = strpos($source, 'if ($hasWordId) {');
+
+        $this->assertNotFalse($textLookup);
+        $this->assertNotFalse($guard);
+        $this->assertGreaterThan($guard, $textLookup);
+    }
+
     public function testGetTermForEditReturnsLanguageNotFoundError(): void
     {
         $source = $this->getMethodSource('getTermForEdit');
@@ -1260,6 +1321,26 @@ class TermCrudApiHandlerTest extends TestCase
     // =========================================================================
     // updateTermFull — method signature & source analysis
     // =========================================================================
+
+    public function testUpdateTermFullAcceptsOnlyARecasingOfTheTerm(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        // WoTextLC is what textitems2 links on, so a real rename would orphan
+        // every occurrence. Only the display casing may move.
+        $this->assertStringContainsString(
+            "mb_strtolower(\$candidate, 'UTF-8') !== \$textLc",
+            $source
+        );
+        $this->assertStringContainsString('Term in lowercase must be exactly', $source);
+    }
+
+    public function testUpdateTermFullWritesTheTermText(): void
+    {
+        $source = $this->getMethodSource('updateTermFull');
+
+        $this->assertStringContainsString('WoText = ?', $source);
+    }
 
     public function testUpdateTermFullMethodSignature(): void
     {

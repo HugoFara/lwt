@@ -35,8 +35,7 @@
         "ext-zip": "*",
         "phpmailer/phpmailer": "^7.0",
         "league/oauth2-google": "^5.0",
-        "thenetworg/oauth2-azure": "^2.2",
-        "kiwilan/php-ebook": "^3.0"
+        "thenetworg/oauth2-azure": "^2.2"
     },
     "require-dev": {
         "vimeo/psalm": "^6.15",

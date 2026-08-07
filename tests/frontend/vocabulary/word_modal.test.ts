@@ -437,38 +437,6 @@ describe('word_modal.ts', () => {
       });
     });
 
-    describe('getEditUrl', () => {
-      it('returns correct edit URL with word parameters', () => {
-        const component = wordModalData();
-
-        const url = component.getEditUrl();
-
-        expect(url).toBe('/word/edit?tid=1&ord=10&wid=100');
-      });
-
-      it('returns URL without wid when wordId is not set', () => {
-        mockWordStore.getSelectedWord = vi.fn().mockReturnValue({
-          hex: 'test',
-          text: 'test',
-          position: 5,
-          wordId: null
-        });
-        const component = wordModalData();
-
-        const url = component.getEditUrl();
-
-        expect(url).toBe('/word/edit?tid=1&ord=5');
-      });
-
-      it('returns # when word is null', () => {
-        mockWordStore.getSelectedWord = vi.fn().mockReturnValue(null);
-        const component = wordModalData();
-
-        const url = component.getEditUrl();
-
-        expect(url).toBe('#');
-      });
-    });
 
     describe('getDictUrl', () => {
       it('delegates to store.getDictUrl', () => {

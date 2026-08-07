@@ -14,6 +14,7 @@ import { getLibreTranslateTranslation } from '@modules/vocabulary/services/trans
 import { deepFindValue, readTextWithExternal } from '@shared/utils/user_interactions';
 import { lwtFormCheck } from '@shared/forms/unloadformcheck';
 import { url } from '@shared/utils/url';
+import { escapeHtml } from '@shared/utils/html_utils';
 
 /**
  * Build a URL query string from an object (replaces $.param).
@@ -156,10 +157,12 @@ export const languageForm = {
   displayLibreTranslateError(error: string): void {
     const statusEl = document.getElementById('translator_status');
     if (statusEl) {
+      // The message can carry text echoed from the configured translator URL,
+      // so it is escaped before joining the surrounding markup.
       statusEl.innerHTML =
         '<a href="https://libretranslate.com/">LibreTranslate</a> server seems to be unreachable. ' +
         'You can install it on your server with the <a href="">LibreTranslate installation guide</a>. ' +
-        'Error: ' + error;
+        'Error: ' + escapeHtml(error);
     }
   },
 

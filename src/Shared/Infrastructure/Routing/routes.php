@@ -160,15 +160,16 @@ function registerRoutes(Router $router): void
     // Split into focused controllers: TermEditController, TermDisplayController,
     // TermStatusController, TermApiController, TermImportController, MultiWordController
 
-    // Edit word (TermEditController)
-    $router->registerWithMiddleware(
+    // Edit word (TermEditController). The editor is client-rendered against
+    // /api/v1/terms/*, so these only ever serve a page — never a submission.
+    $router->get(
         '/word/edit',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWord',
         AUTH_MIDDLEWARE
     );
 
     // Edit term while testing (TermEditController)
-    $router->registerWithMiddleware(
+    $router->get(
         '/word/edit-term',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editTerm',
         AUTH_MIDDLEWARE
@@ -180,12 +181,6 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
         AUTH_MIDDLEWARE
     );
-    $router->post(
-        '/words/{id:int}/edit',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
-        AUTH_MIDDLEWARE
-    );
-
     // Delete word (RESTful route): DELETE /words/123
     $router->delete(
         '/words/{id:int}',
@@ -197,13 +192,6 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware(
         '/words/edit',
         'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@listEditAlpine',
-        AUTH_MIDDLEWARE
-    );
-
-    // Edit multi-word (MultiWordController)
-    $router->registerWithMiddleware(
-        '/word/edit-multi',
-        'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController@editMulti',
         AUTH_MIDDLEWARE
     );
 
@@ -240,13 +228,6 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware(
         '/word/bulk-translate',
         'Lwt\\Modules\\Vocabulary\\Http\\TermImportController@bulkTranslate',
-        AUTH_MIDDLEWARE
-    );
-
-    // Create term from hover (TermDisplayController)
-    $router->registerWithMiddleware(
-        '/vocabulary/term-hover',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@hoverCreate',
         AUTH_MIDDLEWARE
     );
 
@@ -295,13 +276,6 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Vocabulary\\Http\\TermApiController@delete',
         AUTH_MIDDLEWARE,
         'POST'
-    );
-
-    // Set all words status (wellknown/ignore) (TermStatusController)
-    $router->registerWithMiddleware(
-        '/word/set-all-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@markAllWords',
-        AUTH_MIDDLEWARE
     );
 
     // Upload words (TermImportController)
