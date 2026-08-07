@@ -186,7 +186,11 @@ class StarterVocabController extends BaseController
         /** @var array<string, mixed> $group */
         foreach ($data['dictionaries'] as $group) {
             $groupName = strtolower((string) ($group['languageName'] ?? ''));
-            if ($groupName === $langLower || str_contains($groupName, $langLower) || str_contains($langLower, $groupName)) {
+            if (
+                $groupName === $langLower
+                || str_contains($groupName, $langLower)
+                || str_contains($langLower, $groupName)
+            ) {
                 $result[] = $group;
             }
         }
