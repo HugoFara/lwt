@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /**
  * LWT Front Controller
  *
@@ -18,13 +19,12 @@
  * released into the PUBLIC DOMAIN.
  */
 
-// Define base path constant
-define('LWT_BASE_PATH', __DIR__);
+declare(strict_types=1);
 
 // Load Composer autoloader for PSR-4 class autoloading
-require_once LWT_BASE_PATH . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 // Create and run the application
-$app = new \Lwt\Application(LWT_BASE_PATH);
+$app = new \Lwt\Application(__DIR__);
 $app->bootstrap();
 $app->run();

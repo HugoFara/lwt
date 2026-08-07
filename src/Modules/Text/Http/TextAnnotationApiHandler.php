@@ -84,7 +84,8 @@ class TextAnnotationApiHandler
     /**
      * Format annotation save error into human-readable message.
      *
-     * @param array{success: bool, error?: string, requested?: int, available?: int, position?: int, found?: int} $result
+     * @param array{success: bool, error?: string, requested?: int, available?: int,
+     *              position?: int, found?: int} $result
      *
      * @return string Formatted error message
      */
