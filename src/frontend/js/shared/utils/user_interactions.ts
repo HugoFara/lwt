@@ -1,7 +1,7 @@
 /**
  * General file to control dynamic interactions with the user.
  *
- * @author  HugoFara <Hugo.Farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   2.0.3-fork
  */

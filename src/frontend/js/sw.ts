@@ -4,7 +4,7 @@
  * Provides offline support through app shell caching and
  * network-first strategy for API requests.
  *
- * @author  HugoFara <Hugo.Farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

@@ -2,7 +2,7 @@
  * Review Table - Table review mode with column visibility toggles.
  *
  * @license Unlicense
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 

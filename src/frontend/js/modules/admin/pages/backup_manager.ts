@@ -4,7 +4,7 @@
  * Handles file selection, loading states, and confirmation for
  * backup, restore, and empty database operations.
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

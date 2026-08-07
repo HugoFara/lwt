@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Dictionary\Application
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -32,7 +32,7 @@ use Lwt\Shared\Infrastructure\Database\Settings;
  *
  * @category Lwt
  * @package  Lwt\Modules\Dictionary\Application
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0

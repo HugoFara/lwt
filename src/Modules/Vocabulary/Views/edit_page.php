@@ -18,7 +18,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.3.0

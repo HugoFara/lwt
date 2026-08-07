@@ -20,7 +20,7 @@ use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
  * `Authorization: Bearer` header rather than cookies, which sidesteps the
  * cookie-CORS and CSRF complications entirely.
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.1.1
  */

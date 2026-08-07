@@ -10,7 +10,7 @@
  *
  * @category Lwt
  * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 Split from kernel_utility.php
@@ -27,7 +27,7 @@ namespace Lwt\Shared\Infrastructure\Http;
  *
  * @category Lwt
  * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0

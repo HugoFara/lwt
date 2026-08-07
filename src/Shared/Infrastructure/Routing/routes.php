@@ -10,7 +10,7 @@
  *
  * @category Lwt
  * @package  Lwt\Shared\Infrastructure\Routing
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 All routes now use controller methods

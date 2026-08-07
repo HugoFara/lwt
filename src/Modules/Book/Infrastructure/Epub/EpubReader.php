@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Book\Infrastructure\Epub
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.4.0

@@ -7,7 +7,7 @@
  * - Curated dictionary browser
  * - Manual upload (CSV/TSV file, paste, dictionary file)
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0 Extracted from PHP inline scripts
  * @since   3.1.0 Migrated to Alpine.js component

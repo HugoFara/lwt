@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Text\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -31,7 +31,7 @@ use Lwt\Modules\Tags\Application\TagsFacade;
  *
  * @category Lwt
  * @package  Lwt\Modules\Text\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0

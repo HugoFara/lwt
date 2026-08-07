@@ -4,7 +4,7 @@
  * Handles all filter interactions for the word list page including
  * language, text, status, tags, query, and sort filters.
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  * @since   3.1.0 Migrated to Alpine.js component

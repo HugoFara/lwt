@@ -9,7 +9,7 @@
  *
  * @category Server
  * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmailhotmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0

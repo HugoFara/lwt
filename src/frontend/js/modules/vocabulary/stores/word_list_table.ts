@@ -4,7 +4,7 @@
  * Handles bulk selection, mark all/none, and bulk action execution
  * for the word list table.
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  * @since   3.1.0 Migrated to Alpine.js component
