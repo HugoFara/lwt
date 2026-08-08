@@ -27,6 +27,12 @@ class FeedLoadApiHandlerTest extends TestCase
     protected function setUp(): void
     {
         $this->feedFacade = $this->createMock(FeedFacade::class);
+
+        // loadFeed() refuses a feed the caller does not own, so these tests —
+        // which are about parsing behaviour, not authorization — default to an
+        // owned feed. FeedLoadOwnershipTest covers the refusal itself.
+        $this->feedFacade->method('getFeedById')->willReturn(['NfID' => 1]);
+
         $this->handler = new FeedLoadApiHandler($this->feedFacade);
     }
 
