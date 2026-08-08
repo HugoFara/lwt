@@ -216,95 +216,36 @@ class TermEditController extends VocabularyBaseController
      */
     public function createWord(array $params): void
     {
-        $op = InputValidator::getString('op');
-        $crudService = $this->getCrudService();
-        $contextService = $this->getContextService();
+        // Creation goes through POST /api/v1/terms/for-language, which
+        // validates the language against the caller's own. The retired POST
+        // branch here read WoLgID from the request and passed it straight into
+        // the occurrence-linking path.
+        $lang = InputValidator::getInt('lang', 0) ?? 0;
+        $textId = InputValidator::getInt('text', 0) ?? 0;
+        $scrdir = $this->languageFacade->getScriptDirectionTag($lang);
 
-        // Handle save operation
-        if ($op === 'Save') {
-            $requestData = $this->getWordFormData();
-            $result = $crudService->create($requestData);
+        $langData = $this->getContextService()->getLanguageData($lang);
+        $showRoman = $langData['showRoman'];
 
-            $titletext = "New Term: " . htmlspecialchars($result['textlc'] ?? '', ENT_QUOTES, 'UTF-8');
-            PageLayoutHelper::renderPageStartNobody($titletext);
-            echo '<h1>' . $titletext . '</h1>';
+        $showSimilarTerms = (int) Settings::getWithDefault("set-similar-terms-count") > 0;
+        $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText');
+        $wordTagsHtml = TagsFacade::getWordTagsHtml(0);
 
-            if (!$result['success']) {
-                // Handle duplicate entry error
-                if (strpos($result['message'], 'Duplicate entry') !== false) {
-                    $message = 'Error: <b>Duplicate entry for <i>'
-                        . htmlspecialchars($result['textlc'], ENT_QUOTES, 'UTF-8')
-                        . '</i></b><br /><br /><input type="button" value="&lt;&lt; Back" data-action="back" />';
-                } else {
-                    $message = htmlspecialchars($result['message'], ENT_QUOTES, 'UTF-8');
-                }
-                echo '<p>' . $message . '</p>';
-            } else {
-                $wid = $result['id'];
-                TagsFacade::saveWordTagsFromForm($wid);
-                \Lwt\Shared\Infrastructure\Database\Maintenance::initWordCount();
+        PageLayoutHelper::renderPageStart('New Term', true, 'terms');
 
-                echo '<p>' . htmlspecialchars($result['message'], ENT_QUOTES, 'UTF-8') . '</p>';
-
-                $woLgId = InputValidator::getInt('WoLgID', 0) ?? 0;
-                $len = $crudService->getWordCount($wid);
-                if ($len > 1) {
-                    $this->getExpressionService()->insertExpressions($result['textlc'], $woLgId, $wid, $len, 0);
-                } elseif ($len == 1) {
-                    $this->getLinkingService()->linkToTextItems($wid, $woLgId, $result['textlc']);
-                }
-            }
-        } else {
-            // Display the new word form
-            $lang = InputValidator::getInt('lang', 0) ?? 0;
-            $textId = InputValidator::getInt('text', 0) ?? 0;
-            $scrdir = $this->languageFacade->getScriptDirectionTag($lang);
-
-            $langData = $contextService->getLanguageData($lang);
-            $showRoman = $langData['showRoman'];
-
-            $showSimilarTerms = (int) Settings::getWithDefault("set-similar-terms-count") > 0;
-            $dictLinksHtml = $this->dictionaryAdapter->createDictLinksInEditWin3($lang, 'WoSentence', 'WoText');
-            $wordTagsHtml = TagsFacade::getWordTagsHtml(0);
-
-            PageLayoutHelper::renderPageStart('New Term', true, 'terms');
-
-            $this->render('form_new', [
-                'lang' => $lang,
-                'textId' => $textId,
-                'scrdir' => $scrdir,
-                'showRoman' => $showRoman,
-                'showSimilarTerms' => $showSimilarTerms,
-                'dictLinksHtml' => $dictLinksHtml,
-                'wordTagsHtml' => $wordTagsHtml,
-            ]);
-        }
+        $this->render('form_new', [
+            'lang' => $lang,
+            'textId' => $textId,
+            'scrdir' => $scrdir,
+            'showRoman' => $showRoman,
+            'showSimilarTerms' => $showSimilarTerms,
+            'dictLinksHtml' => $dictLinksHtml,
+            'wordTagsHtml' => $wordTagsHtml,
+        ]);
 
         PageLayoutHelper::renderPageEnd();
     }
 
-    /**
-     * Get form data for word create/update operations.
-     *
-     * @return array<string, mixed> Form data array
-     */
-    private function getWordFormData(): array
-    {
-        return [
-            'WoID' => InputValidator::getInt('WoID'),
-            'WoLgID' => InputValidator::getInt('WoLgID', 0) ?? 0,
-            'WoText' => InputValidator::getString('WoText'),
-            'WoTextLC' => InputValidator::getString('WoTextLC'),
-            'WoStatus' => InputValidator::getString('WoStatus'),
-            'WoOldStatus' => InputValidator::getString('WoOldStatus'),
-            'WoTranslation' => InputValidator::getString('WoTranslation'),
-            'WoRomanization' => InputValidator::getString('WoRomanization'),
-            'WoSentence' => InputValidator::getString('WoSentence'),
-            'tid' => InputValidator::getInt('tid'),
-            'ord' => InputValidator::getInt('ord'),
-            'len' => InputValidator::getInt('len'),
-        ];
-    }
 
     /**
      * Delete word.

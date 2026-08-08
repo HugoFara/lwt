@@ -170,6 +170,8 @@ class VocabularyApiRouter implements ApiRoutableInterface
                 (int) ($params['position'] ?? 0),
                 (int) ($params['status'] ?? 0)
             ));
+        } elseif ($frag1 === 'for-language') {
+            return Response::success($this->termHandler->createTermForLanguage($params));
         } elseif ($frag1 === 'full') {
             return Response::success($this->termHandler->formatCreateTermFull($params));
         } elseif ($frag1 === 'bulk') {
@@ -178,7 +180,10 @@ class VocabularyApiRouter implements ApiRoutableInterface
             return Response::success($this->multiWordHandler->createMultiWordTerm($params));
         }
 
-        return Response::error('Term ID (Integer), "new", "quick", "full", "bulk", or "multi" Expected', 404);
+        return Response::error(
+            'Term ID (Integer), "new", "quick", "full", "for-language", "bulk", or "multi" Expected',
+            404
+        );
     }
 
     public function routePut(array $fragments, array $params): JsonResponse

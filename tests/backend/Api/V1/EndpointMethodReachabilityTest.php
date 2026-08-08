@@ -71,6 +71,9 @@ class EndpointMethodReachabilityTest extends TestCase
             'set a user status'     => ['PUT', '/api/v1/admin/users/4/status'],
             'delete a user'         => ['DELETE', '/api/v1/admin/users/4'],
 
+            // Standalone term creation, replacing POST /word/new (#262).
+            'create a term for a language' => ['POST', '/api/v1/terms/for-language'],
+
             // The signed-in user's own profile (#262).
             'read own profile'      => ['GET', '/api/v1/profile'],
             'update own profile'    => ['PUT', '/api/v1/profile'],

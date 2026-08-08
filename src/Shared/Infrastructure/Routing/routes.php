@@ -205,8 +205,9 @@ function registerRoutes(Router $router): void
     // New word (TermEditController)
     // RESTful route: /words/new
     $router->get('/words/new', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@createWord', AUTH_MIDDLEWARE);
-    // Legacy route: /word/new
-    $router->registerWithMiddleware(
+    // Legacy route: /word/new. GET only — creation goes through
+    // POST /api/v1/terms/for-language, which validates the language.
+    $router->get(
         '/word/new',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@createWord',
         AUTH_MIDDLEWARE

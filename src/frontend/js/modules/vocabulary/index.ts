@@ -43,6 +43,7 @@ import '@shared/forms/bulk_actions';
 
 // Side-effect imports (pages)
 import './pages/word_list_app';
+import './pages/new_term_form';
 import './pages/bulk_translate';
 import './pages/word_upload';
 import './pages/expression_interactable';

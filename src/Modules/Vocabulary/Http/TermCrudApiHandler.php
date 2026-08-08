@@ -21,6 +21,7 @@ namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
@@ -28,7 +29,9 @@ use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
 use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
+use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
@@ -52,6 +55,8 @@ class TermCrudApiHandler
     private WordDiscoveryService $discoveryService;
     private WordLinkingService $linkingService;
     private WordBulkService $bulkService;
+    private WordCrudService $crudService;
+    private ExpressionService $expressionService;
 
     /**
      * Constructor.
@@ -68,7 +73,9 @@ class TermCrudApiHandler
         ?WordContextService $contextService = null,
         ?WordDiscoveryService $discoveryService = null,
         ?WordLinkingService $linkingService = null,
-        ?WordBulkService $bulkService = null
+        ?WordBulkService $bulkService = null,
+        ?WordCrudService $crudService = null,
+        ?ExpressionService $expressionService = null
     ) {
         $this->facade = $facade ?? new VocabularyFacade();
         $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
@@ -76,6 +83,8 @@ class TermCrudApiHandler
         $this->discoveryService = $discoveryService ?? new WordDiscoveryService();
         $this->linkingService = $linkingService ?? new WordLinkingService();
         $this->bulkService = $bulkService ?? new WordBulkService();
+        $this->crudService = $crudService ?? new WordCrudService();
+        $this->expressionService = $expressionService ?? new ExpressionService();
     }
 
     // =========================================================================
@@ -973,6 +982,92 @@ class TermCrudApiHandler
     public function formatGetTermForEdit(int $textId, int $position, ?int $wordId = null): array
     {
         return $this->getTermForEdit($textId, $position, $wordId);
+    }
+
+    /**
+     * Create a term for a language, outside any text.
+     *
+     * Backs the standalone "new term" page, which is not anchored to a
+     * position in a text the way {@see createTermFull()} is — so the language
+     * arrives from the client rather than from a scoped text lookup.
+     *
+     * That is exactly why the ownership check below exists. The retired
+     * `POST /word/new` read `WoLgID` from the request and passed it into the
+     * occurrence-linking path unvalidated; moving the read here puts it behind
+     * a gate instead of relying on the one inside WordLinkingService.
+     *
+     * @param array<string, mixed> $data Term fields
+     *
+     * @return array{success: bool, id?: int, error?: string}
+     */
+    public function createTermForLanguage(array $data): array
+    {
+        $langId = (int) ($data['language_id'] ?? 0);
+        if ($langId <= 0) {
+            return ['success' => false, 'error' => 'language_id is required'];
+        }
+
+        // languages is user-scoped, so somebody else's language finds nothing.
+        $ownsLanguage = QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->existsPrepared();
+        if (!$ownsLanguage) {
+            return ['success' => false, 'error' => 'Language not found'];
+        }
+
+        $text = trim((string) ($data['text'] ?? ''));
+        if ($text === '') {
+            return ['success' => false, 'error' => 'Term text is required'];
+        }
+
+        $status = (int) ($data['status'] ?? 1);
+        if (!TermStatusService::isValidStatus($status)) {
+            return ['success' => false, 'error' => 'Status must be 1-5, 98, or 99'];
+        }
+
+        $result = $this->crudService->create([
+            'WoLgID' => $langId,
+            'WoText' => $text,
+            'WoStatus' => $status,
+            'WoTranslation' => (string) ($data['translation'] ?? ''),
+            'WoRomanization' => (string) ($data['romanization'] ?? ''),
+            'WoSentence' => (string) ($data['sentence'] ?? ''),
+            'WoNotes' => (string) ($data['notes'] ?? ''),
+            'WoLemma' => (string) ($data['lemma'] ?? ''),
+        ]);
+
+        if (!$result['success']) {
+            return ['success' => false, 'error' => $result['message'] ?? 'Failed to create term'];
+        }
+
+        $wid = $result['id'];
+        $textLc = $result['textlc'];
+
+        /** @var mixed $rawTags */
+        $rawTags = $data['tags'] ?? null;
+        /** @var list<string> $tags */
+        $tags = [];
+        if (is_array($rawTags)) {
+            foreach (array_filter($rawTags, 'is_scalar') as $tag) {
+                $tags[] = (string) $tag;
+            }
+        }
+        if ($tags !== []) {
+            TagsFacade::saveWordTagsFromArray($wid, $tags);
+        }
+
+        Maintenance::initWordCount();
+
+        // A multi-word term needs its occurrences derived from the sentences it
+        // appears in; a single word just links to matching occurrences.
+        $length = $this->crudService->getWordCount($wid);
+        if ($length > 1) {
+            $this->expressionService->insertExpressions($textLc, $langId, $wid, $length, 1);
+        } else {
+            $this->linkingService->linkToTextItems($wid, $langId, $textLc);
+        }
+
+        return ['success' => true, 'id' => $wid];
     }
 
     /**

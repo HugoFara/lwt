@@ -136,8 +136,7 @@ class TermEditControllerTest extends TestCase
 
         $expectedMethods = [
             'renderEditorPage',
-            'getWordFormData',
-        ];
+                    ];
 
         foreach ($expectedMethods as $methodName) {
             $this->assertTrue(
@@ -477,44 +476,6 @@ class TermEditControllerTest extends TestCase
     // =========================================================================
     // getWordFormData tests via reflection
     // =========================================================================
-
-    #[Test]
-    public function getWordFormDataReturnsExpectedKeys(): void
-    {
-        $method = new \ReflectionMethod(TermEditController::class, 'getWordFormData');
-
-        $result = $method->invoke($this->controller);
-
-        $expectedKeys = [
-            'WoID', 'WoLgID', 'WoText', 'WoTextLC', 'WoStatus',
-            'WoOldStatus', 'WoTranslation', 'WoRomanization', 'WoSentence',
-            'tid', 'ord', 'len',
-        ];
-
-        foreach ($expectedKeys as $key) {
-            $this->assertArrayHasKey($key, $result, "getWordFormData should contain key: $key");
-        }
-    }
-
-    #[Test]
-    public function getWordFormDataReturnsCorrectCount(): void
-    {
-        $method = new \ReflectionMethod(TermEditController::class, 'getWordFormData');
-
-        $result = $method->invoke($this->controller);
-
-        $this->assertCount(12, $result);
-    }
-
-    #[Test]
-    public function getWordFormDataDefaultWoLgIDIsZero(): void
-    {
-        $method = new \ReflectionMethod(TermEditController::class, 'getWordFormData');
-
-        $result = $method->invoke($this->controller);
-
-        $this->assertSame(0, $result['WoLgID']);
-    }
 
     // =========================================================================
     // renderEditorPage tests via reflection

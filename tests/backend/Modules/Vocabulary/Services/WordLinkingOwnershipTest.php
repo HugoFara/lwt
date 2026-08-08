@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Modules\Vocabulary\Services;
 
 use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
+use Lwt\Modules\Vocabulary\Http\TermCrudApiHandler;
 use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\Attributes\Test;
@@ -172,6 +173,33 @@ class WordLinkingOwnershipTest extends TestCase
             $source,
             'The handler should link occurrences through WordLinkingService.'
         );
+    }
+
+    #[Test]
+    public function creatingATermForAForeignLanguageIsRefused(): void
+    {
+        // POST /terms/for-language replaces the POST branch of /word/new,
+        // which read WoLgID from the request and passed it through unchecked.
+        // The whole reason the endpoint exists is to validate it here.
+        $handler = new TermCrudApiHandler();
+
+        $result = $handler->createTermForLanguage([
+            'language_id' => self::FOREIGN_LANGUAGE_ID,
+            'text' => 'cyforeign' . substr(uniqid(), -6),
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Language not found', $result['error']);
+    }
+
+    #[Test]
+    public function creatingATermWithoutALanguageIsRefused(): void
+    {
+        $handler = new TermCrudApiHandler();
+
+        $result = $handler->createTermForLanguage(['text' => 'whatever']);
+
+        $this->assertFalse($result['success']);
     }
 
     /**
