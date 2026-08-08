@@ -75,6 +75,12 @@ class OwnerlessTableWriteTest extends TestCase
             'cascades from a text resolved through the user-scoped texts table',
         'src/Modules/Text/Application/UseCases/ArchiveText.php' =>
             'cascades from a text resolved through the user-scoped texts table',
+        'src/Modules/Vocabulary/Application/Services/WordLinkingService.php' =>
+            'linkToTextItems() bails unless ownsLanguage(); linkAllTextItems() '
+            . 'joins on Ti2LgID = WoLgID and a language row has one owner',
+        'src/Modules/Vocabulary/Application/Services/LemmaBatchService.php' =>
+            'item IDs come from fetchUnmatchedTextItems(), which joins texts '
+            . 'under scope; linkTextItemsByLemmaSql() scopes both words and texts',
     ];
 
     /**
@@ -85,8 +91,6 @@ class OwnerlessTableWriteTest extends TestCase
      * they are listed separately so nobody mistakes "grandfathered" for
      * "checked". Moving an entry up to VERIFIED requires reading the code and
      * writing down the mechanism; the list should only ever shrink.
-     *
-     * Two entries carry a specific doubt, noted inline.
      *
      * @var list<string>
      */
@@ -105,16 +109,8 @@ class OwnerlessTableWriteTest extends TestCase
         'src/Modules/Vocabulary/Application/Services/CompleteImportService.php',
         'src/Modules/Vocabulary/Application/Services/ExpressionService.php',
         'src/Modules/Vocabulary/Application/Services/ImportUtilities.php',
-        // UPDATE word_occurrences ... WHERE Ti2ID IN (?) — the IDs are passed
-        // in; whether every caller derives them under scope is unconfirmed.
-        'src/Modules/Vocabulary/Application/Services/LemmaBatchService.php',
         'src/Modules/Vocabulary/Application/Services/MultiWordService.php',
         'src/Modules/Vocabulary/Application/Services/WordCrudService.php',
-        // linkToTextItems() filters on Ti2LgID only. It is confined because a
-        // language row belongs to one user, NOT by the Ti2TxID -> texts FK its
-        // comment claims — and that holds only if $langId is validated as the
-        // caller's. Worth confirming.
-        'src/Modules/Vocabulary/Application/Services/WordLinkingService.php',
         'src/Modules/Vocabulary/Http/TermCrudApiHandler.php',
         'src/Modules/Vocabulary/Http/TermTranslationApiHandler.php',
         'src/Shared/Infrastructure/Database/Migrations.php',

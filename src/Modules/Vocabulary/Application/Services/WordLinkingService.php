@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace Lwt\Modules\Vocabulary\Application\Services;
 
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 
 /**
  * Service for managing word-to-text-item relationships.
@@ -60,12 +61,42 @@ class WordLinkingService
      */
     public function linkToTextItems(int $wordId, int $langId, string $textlc): void
     {
-        // word_occurrences inherits user context via Ti2TxID -> texts FK
+        // word_occurrences has no owner column and this statement does not
+        // join texts, so nothing here is filtered by user. What confines it is
+        // that a languages row belongs to exactly one user — which only holds
+        // once the language is known to be the caller's.
+        //
+        // Two callers derive it from a user-scoped text lookup, but
+        // TermEditController::createWord() takes it from the request, and
+        // /word/new is registered for every HTTP method. Without this check a
+        // POST carrying somebody else's WoLgID re-points their occurrences at
+        // the caller's word. ExpressionService::findStandardExpression() bails
+        // the same way on an unknown language; this had no equivalent.
+        if (!$this->ownsLanguage($langId)) {
+            return;
+        }
+
         Connection::preparedExecute(
             "UPDATE word_occurrences SET Ti2WoID = ?
              WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
             [$wordId, $langId, $textlc]
         );
+    }
+
+    /**
+     * Is this language visible to the current user?
+     *
+     * `languages` is user-scoped, so the lookup returns nothing for a language
+     * belonging to somebody else — and everything in single-user mode, where
+     * there is no ownership to enforce.
+     *
+     * @param int $langId Language ID
+     */
+    private function ownsLanguage(int $langId): bool
+    {
+        return QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->existsPrepared();
     }
 
     /**
