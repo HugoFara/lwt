@@ -26,6 +26,7 @@ use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\Infrastructure\Http\Cors;
 use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Modules\User\Http\ProfileApiHandler;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
@@ -103,6 +104,7 @@ class ApiV1
         'whisper'            => WhisperApiHandler::class,
         'activity'           => ActivityApiHandler::class,
         'admin'              => UserManagementApiHandler::class,
+        'profile'            => ProfileApiHandler::class,
     ];
 
     private Container $container;

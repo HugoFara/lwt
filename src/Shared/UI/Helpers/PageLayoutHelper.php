@@ -485,9 +485,22 @@ HTML;
             return ['admin'];
         }
 
-        // User preferences (needs admin module for theme selector component)
+        // User preferences: the settings form is the user module; the theme
+        // selector component still lives in admin.
         if (str_starts_with($path, '/profile/preferences')) {
+            return ['user', 'admin'];
+        }
+
+        // Statistics lives under /profile but is charts, not the profile form.
+        // The admin bundle owns statisticsApp and pulls in @modules/activity
+        // (streakDisplay, calendarHeatmap) itself.
+        if (str_starts_with($path, '/profile/statistics')) {
             return ['admin'];
+        }
+
+        // Profile page
+        if (str_starts_with($path, '/profile')) {
+            return ['user'];
         }
 
         // Auth pages

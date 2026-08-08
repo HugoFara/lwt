@@ -603,11 +603,10 @@ function registerRoutes(Router $router): void
     );
 
     // ==================== USER PROFILE (AUTH REQUIRED) ====================
+    // Profile and preferences save through PUT /api/v1/profile*; these routes
+    // only render the scaffolds those components bind to.
     $router->get('/profile', 'Lwt\\Modules\\User\\Http\\UserController@profileForm', AUTH_MIDDLEWARE);
-    $router->post('/profile', 'Lwt\\Modules\\User\\Http\\UserController@updateProfile', AUTH_MIDDLEWARE);
-    $router->post('/profile/password', 'Lwt\\Modules\\User\\Http\\UserController@changePassword', AUTH_MIDDLEWARE);
     $router->get('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@preferencesForm', AUTH_MIDDLEWARE);
-    $router->post('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@savePreferences', AUTH_MIDDLEWARE);
     $router->get(
         '/profile/statistics',
         'Lwt\\Modules\\User\\Http\\StatisticsController@show',

@@ -712,6 +712,18 @@ class UserFacade
         return (new SaveUserPreferences())->execute();
     }
 
+    /**
+     * Save user preferences from an array (API-friendly version).
+     *
+     * @param array<string, mixed> $data Settings keyed by name
+     *
+     * @return array{success: bool}
+     */
+    public function saveUserPreferencesFromData(array $data): array
+    {
+        return (new SaveUserPreferences())->executeFromData($data);
+    }
+
     // =========================================================================
     // Password Operations
     // =========================================================================

@@ -71,6 +71,13 @@ class EndpointMethodReachabilityTest extends TestCase
             'set a user status'     => ['PUT', '/api/v1/admin/users/4/status'],
             'delete a user'         => ['DELETE', '/api/v1/admin/users/4'],
 
+            // The signed-in user's own profile (#262).
+            'read own profile'      => ['GET', '/api/v1/profile'],
+            'update own profile'    => ['PUT', '/api/v1/profile'],
+            'change own password'   => ['PUT', '/api/v1/profile/password'],
+            'read preferences'      => ['GET', '/api/v1/profile/preferences'],
+            'save preferences'      => ['PUT', '/api/v1/profile/preferences'],
+
             // Anchors on surfaces that already work, so a regression in the
             // fallback itself is caught rather than only the books entry.
             'set a term status'     => ['PUT', '/api/v1/terms/5/status'],

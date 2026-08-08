@@ -119,6 +119,9 @@ class Endpoints
         // UserManagementApiHandler enforces the admin role itself.
         'admin' => ['GET', 'POST', 'PUT', 'DELETE'],
         'admin/users' => ['GET', 'POST'],
+        // The signed-in user's own profile; no ID in any path.
+        'profile' => ['GET', 'PUT'],
+        'profile/preferences' => ['GET', 'PUT'],
         'activity' => ['GET'],
         'activity/streak' => ['GET'],
         'activity/calendar' => ['GET'],
