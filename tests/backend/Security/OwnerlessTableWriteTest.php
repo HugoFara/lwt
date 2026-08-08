@@ -112,7 +112,6 @@ class OwnerlessTableWriteTest extends TestCase
         'src/Modules/Vocabulary/Application/Services/MultiWordService.php',
         'src/Modules/Vocabulary/Application/Services/WordCrudService.php',
         'src/Modules/Vocabulary/Http/TermCrudApiHandler.php',
-        'src/Modules/Vocabulary/Http/TermTranslationApiHandler.php',
         'src/Shared/Infrastructure/Database/Migrations.php',
         'src/Shared/Infrastructure/Database/Restore.php',
         'src/Shared/Infrastructure/Database/TokenPersistence.php',

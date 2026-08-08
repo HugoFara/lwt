@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Lwt\Tests\Modules\Vocabulary\Services;
 
 use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
+use Lwt\Modules\Vocabulary\Http\TermTranslationApiHandler;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -25,6 +26,10 @@ use PHPUnit\Framework\TestCase;
  * request (`InputValidator::getInt('WoLgID')`) and passes it straight through,
  * and `/word/new` is registered for every HTTP method — so `POST /word/new`
  * with somebody else's `WoLgID` reaches this update.
+ *
+ * `TermTranslationApiHandler` (POST /api/v1/terms/new) had a second copy of
+ * the same statement inline, reachable straight from the API, which the fix to
+ * the service did not cover until the copy was replaced by a call to it.
  */
 class WordLinkingOwnershipTest extends TestCase
 {
@@ -135,6 +140,37 @@ class WordLinkingOwnershipTest extends TestCase
             987654,
             $this->linkedWordId(9002),
             'A language the caller owns must still link normally.'
+        );
+    }
+
+    #[Test]
+    public function theTermsApiDelegatesLinkingRatherThanRepeatingIt(): void
+    {
+        // POST /api/v1/terms/new takes language_id straight from the request
+        // and used to carry its own copy of the linking UPDATE, without the
+        // ownership check — so fixing WordLinkingService did not fix it.
+        //
+        // A behavioural test cannot reach that code: the word INSERT fails on
+        // the languages foreign key before the linking runs, so it would pass
+        // against the unfixed version too. What actually protects the endpoint
+        // is that it delegates, so that is what this asserts.
+        $source = (string) file_get_contents(
+            dirname(__DIR__, 5) . '/src/Modules/Vocabulary/Http/TermTranslationApiHandler.php'
+        );
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/UPDATE\s+word_occurrences/i',
+            $source,
+            'TermTranslationApiHandler writes word_occurrences directly again. '
+            . 'That table has no owner column and the language ID comes from '
+            . 'the request, so the update must go through '
+            . 'WordLinkingService::linkToTextItems(), which holds the check.'
+        );
+
+        $this->assertStringContainsString(
+            'linkToTextItems(',
+            $source,
+            'The handler should link occurrences through WordLinkingService.'
         );
     }
 

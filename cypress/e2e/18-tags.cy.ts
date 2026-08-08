@@ -147,6 +147,49 @@ describe('Tags', () => {
     });
   });
 
+  it('ships a form scaffold with no server-filled values', () => {
+    cy.request('/tags/new').then((response) => {
+      const html = String(response.body);
+      expect(html).to.contain('tag-form-config');
+      expect(html).to.contain('x-data="tagFormApp"');
+      expect(html).to.contain('x-model="tagText"');
+    });
+  });
+
+  it('creates a tag through the form itself', () => {
+    // Replaces the same-origin POST to /tags/new (issue #262).
+    const text = `cyform${stamp()}`;
+
+    cy.visit('/tags/new');
+    cy.waitForAlpine();
+    cy.get('#TgText', { timeout: 10000 }).type(text);
+    cy.get('button[type=submit]').click();
+
+    cy.location('pathname', { timeout: 10000 }).should('eq', '/tags');
+
+    cy.request(`/api/v1/tags/term/list?query=${text}`).then((response) => {
+      const tags = response.body.tags as Array<{ id: number; text: string }>;
+      const made = tags.find((t) => t.text === text);
+      expect(made, 'the form should have created the tag').to.not.eq(undefined);
+      if (made) {
+        cy.apiRequest({
+          method: 'DELETE',
+          url: `/api/v1/tags/term/${made.id}`,
+          failOnStatusCode: false
+        });
+      }
+    });
+  });
+
+  it('loads an existing tag into the edit form', () => {
+    const text = `cyedit${stamp()}`;
+    makeTag('term', text).then((id) => {
+      cy.visit(`/tags/${id}/edit`);
+      cy.waitForAlpine();
+      cy.get('#TgText', { timeout: 10000 }).should('have.value', text);
+    });
+  });
+
   it('searches by substring, not exact match', () => {
     const text = `cyfind${stamp()}`;
     makeTag('term', text).then(() => {

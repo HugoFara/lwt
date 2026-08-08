@@ -67,21 +67,9 @@ class TextTagController extends AbstractCrudController
      */
     public function new(array $params): void
     {
+        // Creation goes through POST /api/v1/tags/{type}; this route only
+        // renders the scaffold the form component binds to.
         $this->render($this->pageTitle, $this->showMenu);
-
-        // Handle form submission
-        if ($this->param('op') === 'Save') {
-            $text = $this->param('T2Text', '');
-            $comment = $this->param('T2Comment', '');
-            $result = $this->facade->create($text, $comment);
-            $message = $result['success']
-                ? __('tags.flash.saved')
-                : __('tags.flash.error_prefix', [
-                    'message' => $result['error'] ?? __('tags.flash.unknown_error'),
-                ]);
-            $this->message($message, false);
-        }
-
         $this->renderCreateForm();
         $this->endRender();
     }
@@ -97,26 +85,9 @@ class TextTagController extends AbstractCrudController
      */
     public function edit(int $id): void
     {
+        // Saving goes through PUT /api/v1/tags/{type}/{id}; this route only
+        // renders the scaffold the form component binds to.
         $this->render($this->pageTitle, $this->showMenu);
-
-        // Handle form submission
-        if ($this->param('op') === 'Change') {
-            $text = $this->param('T2Text', '');
-            $comment = $this->param('T2Comment', '');
-            $result = $this->facade->update($id, $text, $comment);
-            if ($result['success']) {
-                // Redirect to list on success
-                header('Location: ' . url('/tags/text'));
-                exit;
-            }
-            $this->message(
-                __('tags.flash.error_prefix', [
-                    'message' => $result['error'] ?? __('tags.flash.unknown_error'),
-                ]),
-                false
-            );
-        }
-
         $this->renderEditForm($id);
         $this->endRender();
     }

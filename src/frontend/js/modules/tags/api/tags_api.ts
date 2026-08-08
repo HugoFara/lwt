@@ -49,6 +49,12 @@ export interface TagListResponse {
   baseUrl: string;
 }
 
+/** Envelope returned by `GET /tags/{type}/{id}`. */
+export interface TagGetResponse {
+  tag?: TagRecord;
+  error?: string;
+}
+
 /** Envelope returned by the mutating endpoints. */
 export interface TagMutationResponse {
   success: boolean;
@@ -79,6 +85,18 @@ export const TagsApi = {
       `/tags/${type}/list`,
       params as Record<string, string | number | boolean>
     );
+  },
+
+  /**
+   * Read one tag.
+   *
+   * @param type `term` or `text`
+   * @param id   Tag ID
+   *
+   * @returns Promise with the tag
+   */
+  async get(type: TagType, id: number): Promise<ApiResponse<TagGetResponse>> {
+    return apiGet<TagGetResponse>(`/tags/${type}/${id}`);
   },
 
   /**
