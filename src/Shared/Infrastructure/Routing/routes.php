@@ -343,11 +343,9 @@ function registerRoutes(Router $router): void
 
     // New language form (RESTful route): GET/POST /languages/new
     $router->get('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
-    $router->post('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
 
     // Edit language form (RESTful route): /languages/123/edit
     $router->get('/languages/{id:int}/edit', 'Lwt\\Modules\\Language\\Http\\LanguageController@edit', AUTH_MIDDLEWARE);
-    $router->post('/languages/{id:int}/edit', 'Lwt\\Modules\\Language\\Http\\LanguageController@edit', AUTH_MIDDLEWARE);
 
     // Delete language (RESTful route): DELETE /languages/123
     $router->delete(

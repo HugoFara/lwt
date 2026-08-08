@@ -56,6 +56,8 @@ export interface LanguageFull {
   rightToLeft: boolean;
   ttsVoiceApi: string;
   showRomanization: boolean;
+  parserType: string | null;
+  localDictMode: number;
 }
 
 /**
@@ -83,8 +85,8 @@ export interface LanguageCreateRequest {
   dict1PopUp?: boolean;
   dict2PopUp?: boolean;
   translatorPopUp?: boolean;
-  sourceLang?: string;
-  targetLang?: string;
+  sourceLang?: string | null;
+  targetLang?: string | null;
   exportTemplate?: string;
   textSize?: number;
   characterSubstitutions?: string;
@@ -96,6 +98,8 @@ export interface LanguageCreateRequest {
   rightToLeft?: boolean;
   ttsVoiceApi?: string;
   showRomanization?: boolean;
+  parserType?: string | null;
+  localDictMode?: number;
 }
 
 /**

@@ -50,6 +50,10 @@ class EndpointMethodReachabilityTest extends TestCase
             'extract articles to edit'   => ['POST', '/api/v1/feeds/articles/extract'],
             'save edited articles'       => ['POST', '/api/v1/feeds/articles/create-texts'],
 
+            // Language edit: routePut() -> formatUpdate() has always existed,
+            // but ROUTES listed languages as GET/POST/DELETE only.
+            'update a language'     => ['PUT', '/api/v1/languages/5'],
+
             // Anchors on surfaces that already work, so a regression in the
             // fallback itself is caught rather than only the books entry.
             'set a term status'     => ['PUT', '/api/v1/terms/5/status'],

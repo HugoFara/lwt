@@ -77,19 +77,8 @@ class LanguageController extends BaseController
      */
     public function new(array $params): void
     {
-        // Handle new language creation with redirect (before any output)
-        if ($this->param('op') === 'Save') {
-            $result = $this->languageFacade->create();
-            if ($result['success']) {
-                // Set the newly created language as the current language
-                Settings::save('currentlanguage', (string)$result['id']);
-                // Redirect to starter vocabulary page after successful language creation
-                header('Location: ' . url('/languages/' . $result['id'] . '/starter-vocab'));
-                exit;
-            }
-            // On error, fall through to show the form with error message
-        }
-
+        // Creation itself goes through POST /api/v1/languages; this route only
+        // renders the scaffold the editor component binds to.
         PageLayoutHelper::renderPageStart(__('language.page_title'), true);
         $this->showNewForm();
         PageLayoutHelper::renderPageEnd();
@@ -106,28 +95,9 @@ class LanguageController extends BaseController
      */
     public function edit(int $id): void
     {
+        // Saving goes through PUT /api/v1/languages/{id}; this route only
+        // renders the scaffold the editor component binds to.
         PageLayoutHelper::renderPageStart(__('language.page_title'), true);
-
-        $message = '';
-
-        // Handle update operation
-        $op = $this->param('op');
-        if ($op === 'Change') {
-            $lgId = $this->paramInt('LgID', 0) ?? 0;
-            $result = $this->languageFacade->update($lgId);
-            if ($result['error'] !== null) {
-                $message = $result['error'];
-            } elseif ($result['reparsed'] !== null) {
-                $message = __('language.flash.updated_with_reparse', ['count' => $result['reparsed']]);
-            } else {
-                $message = __('language.flash.updated_no_reparse');
-            }
-            // After successful update, redirect to languages list
-            if ($result['error'] === null) {
-                header('Location: ' . url('/languages'));
-                exit;
-            }
-        }
 
         $this->showEditForm($id);
 

@@ -461,6 +461,35 @@ export function checkDuplicateLanguage(
 }
 
 /**
+ * Set an input's value and tell Alpine about it.
+ *
+ * The language fields are bound with `x-model`, which reads from the DOM only
+ * when an input/change event fires. Assigning `.value` alone updates what the
+ * user sees but leaves `lang` holding the old value, so the preset would be
+ * discarded the moment the form is saved.
+ *
+ * @param input Field to write to, if it exists
+ * @param value Value to set
+ */
+function setBoundValue(input: HTMLInputElement | null, value: string): void {
+  if (!input) return;
+  input.value = value;
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/**
+ * Check or uncheck a bound checkbox and tell Alpine about it.
+ *
+ * @param input   Checkbox to write to, if it exists
+ * @param checked Desired state
+ */
+function setBoundChecked(input: HTMLInputElement | null, checked: boolean): void {
+  if (!input) return;
+  input.checked = checked;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+/**
  * Apply wizard preset data to the form.
  */
 function applyWizardPreset(): void {
@@ -501,93 +530,66 @@ function applyWizardPreset(): void {
     if (!lgForm) return;
 
     // Set the language name
-    const nameInput = lgForm.elements.namedItem('LgName') as HTMLInputElement | null;
-    if (nameInput) {
-      nameInput.value = data.l2;
-      nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    setBoundValue(lgForm.elements.namedItem('LgName') as HTMLInputElement | null, data.l2);
 
     // Set dictionary URL (Glosbe)
     const l1Code = l1Def?.glosbeIso || 'en';
     const l2Code = l2Def.glosbeIso;
-    const dict1Input = lgForm.elements.namedItem('LgDict1URI') as HTMLInputElement | null;
-    if (dict1Input) {
-      dict1Input.value = `https://glosbe.com/${l2Code}/${l1Code}/lwt_term`;
-    }
+    setBoundValue(
+      lgForm.elements.namedItem('LgDict1URI') as HTMLInputElement | null,
+      `https://glosbe.com/${l2Code}/${l1Code}/lwt_term`
+    );
 
     // Set dictionary popup (enabled by default for wizard)
-    const dict1PopUp = lgForm.elements.namedItem('LgDict1PopUp') as HTMLInputElement | null;
-    if (dict1PopUp) {
-      dict1PopUp.checked = true;
-    }
+    setBoundChecked(lgForm.elements.namedItem('LgDict1PopUp') as HTMLInputElement | null, true);
 
     // Set translator URL
     const l1GoogleCode = l1Def?.googleIso || 'en';
     const l2GoogleCode = l2Def.googleIso;
-    const translatorInput = lgForm.elements.namedItem(
-      'LgGoogleTranslateURI'
-    ) as HTMLInputElement | null;
-    if (translatorInput) {
-      translatorInput.value = `https://translate.google.com/?sl=${l2GoogleCode}&tl=${l1GoogleCode}&text=lwt_term&op=translate`;
-    }
+    setBoundValue(
+      lgForm.elements.namedItem('LgGoogleTranslateURI') as HTMLInputElement | null,
+      `https://translate.google.com/?sl=${l2GoogleCode}&tl=${l1GoogleCode}&text=lwt_term&op=translate`
+    );
 
     // Set translator popup (enabled by default for wizard)
-    const translatorPopUp = lgForm.elements.namedItem('LgGoogleTranslatePopUp') as HTMLInputElement | null;
-    if (translatorPopUp) {
-      translatorPopUp.checked = true;
-    }
+    setBoundChecked(
+      lgForm.elements.namedItem('LgGoogleTranslatePopUp') as HTMLInputElement | null,
+      true
+    );
 
     // Set source/target language codes
-    const sourceLangInput = lgForm.elements.namedItem('LgSourceLang') as HTMLInputElement | null;
-    if (sourceLangInput) {
-      sourceLangInput.value = l2GoogleCode;
-    }
-    const targetLangInput = lgForm.elements.namedItem('LgTargetLang') as HTMLInputElement | null;
-    if (targetLangInput) {
-      targetLangInput.value = l1GoogleCode;
-    }
+    setBoundValue(lgForm.elements.namedItem('LgSourceLang') as HTMLInputElement | null, l2GoogleCode);
+    setBoundValue(lgForm.elements.namedItem('LgTargetLang') as HTMLInputElement | null, l1GoogleCode);
 
     // Set text size based on language
-    const textSizeInput = lgForm.elements.namedItem('LgTextSize') as HTMLInputElement | null;
-    if (textSizeInput) {
-      textSizeInput.value = l2Def.biggerFont ? '150' : '100';
-      textSizeInput.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    setBoundValue(
+      lgForm.elements.namedItem('LgTextSize') as HTMLInputElement | null,
+      l2Def.biggerFont ? '150' : '100'
+    );
 
     // Set parsing rules
-    const regexpSentInput = lgForm.elements.namedItem(
-      'LgRegexpSplitSentences'
-    ) as HTMLInputElement | null;
-    if (regexpSentInput) {
-      regexpSentInput.value = l2Def.sentSplRegExp;
-    }
-
-    const regexpWordInput = lgForm.elements.namedItem(
-      'LgRegexpWordCharacters'
-    ) as HTMLInputElement | null;
-    if (regexpWordInput) {
-      regexpWordInput.value = l2Def.wordCharRegExp;
-    }
+    setBoundValue(
+      lgForm.elements.namedItem('LgRegexpSplitSentences') as HTMLInputElement | null,
+      l2Def.sentSplRegExp
+    );
+    setBoundValue(
+      lgForm.elements.namedItem('LgRegexpWordCharacters') as HTMLInputElement | null,
+      l2Def.wordCharRegExp
+    );
 
     // Set checkboxes
-    const splitEachCharInput = lgForm.elements.namedItem(
-      'LgSplitEachChar'
-    ) as HTMLInputElement | null;
-    if (splitEachCharInput) {
-      splitEachCharInput.checked = l2Def.makeCharacterWord;
-    }
-
-    const removeSpacesInput = lgForm.elements.namedItem(
-      'LgRemoveSpaces'
-    ) as HTMLInputElement | null;
-    if (removeSpacesInput) {
-      removeSpacesInput.checked = l2Def.removeSpaces;
-    }
-
-    const rtlInput = lgForm.elements.namedItem('LgRightToLeft') as HTMLInputElement | null;
-    if (rtlInput) {
-      rtlInput.checked = l2Def.rightToLeft;
-    }
+    setBoundChecked(
+      lgForm.elements.namedItem('LgSplitEachChar') as HTMLInputElement | null,
+      l2Def.makeCharacterWord
+    );
+    setBoundChecked(
+      lgForm.elements.namedItem('LgRemoveSpaces') as HTMLInputElement | null,
+      l2Def.removeSpaces
+    );
+    setBoundChecked(
+      lgForm.elements.namedItem('LgRightToLeft') as HTMLInputElement | null,
+      l2Def.rightToLeft
+    );
 
     console.log(`Applied wizard preset for ${data.l2} (L1: ${data.l1})`);
   } catch (e) {

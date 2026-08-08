@@ -24,4 +24,5 @@ import '@shared/components/searchable_select';
 // Side-effect imports (pages)
 import './pages/language_list';
 import './pages/language_form';
+import './pages/language_editor';
 import './pages/language_wizard';

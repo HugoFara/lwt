@@ -308,6 +308,12 @@ class LanguageApiHandler implements ApiRoutableInterface
             return null;
         }
 
+        // Every key here must be one PUT /languages/{id} accepts, and every
+        // key it accepts must appear here. A field the writer takes but the
+        // reader omits is silently reset the first time a client round-trips
+        // the language through this endpoint — the seven below (parserType
+        // through localDictMode) were exactly that until the form moved off
+        // server-rendered values. LanguageFieldRoundTripTest guards the pair.
         return [
             'language' => [
                 'id' => $language->id()->toInt(),
@@ -326,6 +332,13 @@ class LanguageApiHandler implements ApiRoutableInterface
                 'rightToLeft' => $language->rightToLeft(),
                 'ttsVoiceApi' => $language->ttsVoiceApi(),
                 'showRomanization' => $language->showRomanization(),
+                'parserType' => $language->parserType(),
+                'sourceLang' => $language->sourceLang(),
+                'targetLang' => $language->targetLang(),
+                'dict1PopUp' => $language->isDict1PopUp(),
+                'dict2PopUp' => $language->isDict2PopUp(),
+                'translatorPopUp' => $language->isTranslatorPopUp(),
+                'localDictMode' => $language->localDictMode(),
             ],
             'allLanguages' => $this->languageFacade->getAllLanguages()
         ];

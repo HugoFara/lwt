@@ -223,6 +223,21 @@ class UpdateLanguage
      *
      * @return string|null Trimmed value or null if empty
      */
+    /**
+     * Trim a value without turning an empty one into null.
+     *
+     * Companion to {@see emptyToNull()} for columns declared NOT NULL, where
+     * an empty string is a legitimate value and null is a fatal one.
+     *
+     * @param string $value Raw value
+     *
+     * @return string Trimmed value
+     */
+    private function trimmed(string $value): string
+    {
+        return trim($value);
+    }
+
     private function emptyToNull(?string $value): ?string
     {
         if ($value === null) {
@@ -285,7 +300,10 @@ class UpdateLanguage
 
         $params = [
             $this->emptyToNull($this->getString($data, "LgName")),
-            $this->emptyToNull($this->getString($data, "LgDict1URI")),
+            // NOT NULL with no default: nulling an empty value here is what
+            // made POST /languages {"name":"X"} — the minimal payload
+            // formatCreate() advertises — fail with a database error.
+            $this->trimmed($this->getString($data, "LgDict1URI")),
             $this->emptyToNull($this->getString($data, "LgDict2URI")),
             $this->emptyToNull($this->getString($data, "LgGoogleTranslateURI")),
             (int)($data["LgDict1PopUp"] ?? false),
@@ -294,11 +312,11 @@ class UpdateLanguage
             $this->emptyToNull($this->getStringOrNull($data, "LgSourceLang")),
             $this->emptyToNull($this->getStringOrNull($data, "LgTargetLang")),
             $this->emptyToNull($this->getString($data, "LgExportTemplate")),
-            $this->emptyToNull($this->getString($data, "LgTextSize")),
+            $this->trimmed($this->getString($data, "LgTextSize")),
             $this->getString($data, "LgCharacterSubstitutions"),
-            $this->emptyToNull($this->getString($data, "LgRegexpSplitSentences")),
+            $this->trimmed($this->getString($data, "LgRegexpSplitSentences")),
             $this->getString($data, "LgExceptionsSplitSentences"),
-            $this->emptyToNull($this->getString($data, "LgRegexpWordCharacters")),
+            $this->trimmed($this->getString($data, "LgRegexpWordCharacters")),
             $this->getStringOrNull($data, "LgParserType"),
             (int)($data["LgRemoveSpaces"] ?? false),
             (int)($data["LgSplitEachChar"] ?? false),
