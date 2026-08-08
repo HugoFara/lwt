@@ -34,7 +34,6 @@ use Lwt\Shared\Infrastructure\Http\FlashMessageService;
 class FeedController
 {
     private FeedFacade $feedFacade;
-    private FeedIndexController $indexController;
     private FeedEditController $editController;
     private FeedLoadController $loadController;
 
@@ -45,11 +44,6 @@ class FeedController
         ?FlashMessageService $flashService = null
     ) {
         $this->feedFacade = $feedFacade;
-        $this->indexController = new FeedIndexController(
-            $feedFacade,
-            $languageFacade,
-            $flashService
-        );
         $this->editController = new FeedEditController(
             $feedFacade,
             $languageFacade,
@@ -77,32 +71,35 @@ class FeedController
     // =========================================================================
 
     /**
-     * Article browser.
+     * Legacy server-rendered feed pages — now all the SPA.
      *
-     * Kept server-rendered: it is the only entry to the edit-before-import
-     * flow (a feed with the `edit_text` option renders `edit_text_form.php`
-     * instead of importing straight away), and the SPA has no equivalent yet.
+     * `/feeds` (the article browser), `/feeds/edit` and `/feeds/multi-load`
+     * were a second implementation of what `/feeds/manage` already does
+     * entirely from `/api/v1`, including the edit-before-import flow that
+     * kept the browser alive. They redirect rather than 404 so existing
+     * bookmarks keep working.
      *
      * @param array<string, string> $params Route parameters
      */
     public function index(array $params): void
     {
-        $this->indexController->index($params);
+        $this->redirectToManager();
     }
 
-    /**
-     * Legacy feeds-list entry — now the SPA.
-     *
-     * `/feeds/edit` and `/feeds/multi-load` were a second, server-rendered
-     * implementation of what `/feeds/manage` already does entirely from
-     * `/api/v1`. They redirect rather than 404 so existing bookmarks keep
-     * working.
-     *
-     * @param array<string, string> $params Route parameters
-     */
+    /** @param array<string, string> $params Route parameters */
     public function edit(array $params): void
     {
         $this->redirectToManager();
+    }
+
+    /**
+     * Refresh feeds that are due for auto-update.
+     *
+     * @param array<string, string> $params Route parameters
+     */
+    public function autoupdate(array $params): void
+    {
+        $this->loadController->autoupdateRoute();
     }
 
     /**

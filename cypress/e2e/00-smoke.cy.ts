@@ -35,9 +35,10 @@ const publicRoutes: Array<{ path: string; name: string }> = [
   { path: '/tags', name: 'Term tags' },
   { path: '/tags/text', name: 'Text tags' },
 
-  // Feeds
-  { path: '/feeds', name: 'Feeds list' },
-  { path: '/feeds/edit', name: 'Edit feeds' },
+  // Feeds — /feeds and /feeds/edit are retired and redirect to the manager
+  { path: '/feeds', name: 'Feeds (redirects to manager)' },
+  { path: '/feeds/edit', name: 'Edit feeds (redirects to manager)' },
+  { path: '/feeds/manage', name: 'Feeds manager' },
 
   // Admin
   { path: '/admin/statistics', name: 'Statistics' },

@@ -473,6 +473,9 @@ class FeedApiHandler implements ApiRoutableInterface
         if ($frag1 === 'articles' && $frag2 === 'extract') {
             return Response::success($this->article->extractArticles($params));
         }
+        if ($frag1 === 'articles' && $frag2 === 'create-texts') {
+            return Response::success($this->article->createTextsFromEdited($params));
+        }
         if ($frag1 === '') {
             return Response::success($this->crud->formatCreateFeed($params));
         }
@@ -485,7 +488,11 @@ class FeedApiHandler implements ApiRoutableInterface
             ));
         }
 
-        return Response::error('Expected "articles/import", feed data, or "{id}/load"', 404);
+        return Response::error(
+            'Expected "articles/import", "articles/extract", "articles/create-texts", '
+            . 'feed data, or "{id}/load"',
+            404
+        );
     }
 
     public function routePut(array $fragments, array $params): JsonResponse

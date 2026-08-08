@@ -81,7 +81,7 @@ describe('user_interactions.ts', () => {
 
     it('redirects to feeds page for rss_import value', () => {
       quickMenuRedirection('rss_import');
-      expect(window.top!.location.href).toBe('/feeds');
+      expect(window.top!.location.href).toBe('/feeds/manage');
     });
 
     it('redirects to clean URL for edit_texts value', () => {

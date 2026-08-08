@@ -180,54 +180,6 @@ class FeedEditController
         exit;
     }
 
-            /**
-     * Handle update feed form submission.
-     *
-     * @return void
-     */
-    private function handleUpdateFeed(): void
-    {
-        if (!InputValidator::has('update_feed')) {
-            return;
-        }
-
-        $feedId = InputValidator::getInt('NfID', 0) ?? 0;
-
-        $data = [
-            'NfLgID' => InputValidator::getString('NfLgID'),
-            'NfName' => InputValidator::getString('NfName'),
-            'NfSourceURI' => InputValidator::getString('NfSourceURI'),
-            'NfArticleSectionTags' => InputValidator::getString('NfArticleSectionTags'),
-            'NfFilterTags' => InputValidator::getString('NfFilterTags'),
-            'NfOptions' => rtrim(InputValidator::getString('NfOptions'), ','),
-        ];
-
-        $this->feedFacade->updateFeed($feedId, $data);
-    }
-
-    /**
-     * Handle save new feed form submission.
-     *
-     * @return void
-     */
-    private function handleSaveFeed(): void
-    {
-        if (!InputValidator::has('save_feed')) {
-            return;
-        }
-
-        $data = [
-            'NfLgID' => InputValidator::getString('NfLgID'),
-            'NfName' => InputValidator::getString('NfName'),
-            'NfSourceURI' => InputValidator::getString('NfSourceURI'),
-            'NfArticleSectionTags' => InputValidator::getString('NfArticleSectionTags'),
-            'NfFilterTags' => InputValidator::getString('NfFilterTags'),
-            'NfOptions' => rtrim(InputValidator::getString('NfOptions'), ','),
-        ];
-
-        $this->feedFacade->createFeed($data);
-    }
-
     /**
      * Show the new feed form (wizard step 1 with 3 tabs).
      *

@@ -154,6 +154,48 @@ export interface ImportResponse {
   errors: string[];
 }
 
+/**
+ * A text extracted from an article, before the user edits it.
+ */
+export interface ExtractedText {
+  TxTitle: string;
+  TxText: string;
+  TxAudioURI: string;
+  TxSourceURI: string;
+}
+
+/**
+ * Response for the extract-articles operation.
+ */
+export interface ExtractResponse {
+  success: boolean;
+  texts: ExtractedText[];
+  language_id: number;
+  errors: string[];
+}
+
+/**
+ * A text row submitted back after editing.
+ */
+export interface EditedText {
+  title: string;
+  text: string;
+  source_uri: string;
+  audio_uri: string;
+  language_id: number;
+}
+
+/**
+ * Response for the create-texts operation.
+ */
+export interface CreateTextsResponse {
+  success: boolean;
+  created: number;
+  archived: number;
+  errors: string[];
+  error?: string;
+}
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -253,6 +295,31 @@ export async function importArticles(
   articleIds: number[]
 ): Promise<ApiResponse<ImportResponse>> {
   return apiPost('/feeds/articles/import', { article_ids: articleIds });
+}
+
+/**
+ * Extract articles into editable texts without importing them.
+ *
+ * Used for feeds carrying the `edit_text` option, where the user reviews
+ * each text before it is written.
+ */
+export async function extractArticles(
+  articleIds: number[]
+): Promise<ApiResponse<ExtractResponse>> {
+  return apiPost('/feeds/articles/extract', { article_ids: articleIds });
+}
+
+/**
+ * Create texts from articles the user has edited.
+ *
+ * The tag and the max-texts limit are derived server-side from the feed's
+ * options, so they are deliberately not part of the payload.
+ */
+export async function createTextsFromEdited(
+  feedId: number,
+  texts: EditedText[]
+): Promise<ApiResponse<CreateTextsResponse>> {
+  return apiPost('/feeds/articles/create-texts', { feed_id: feedId, texts });
 }
 
 /**

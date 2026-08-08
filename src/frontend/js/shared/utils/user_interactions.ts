@@ -55,7 +55,7 @@ const quickMenuRoutes: Record<string, string> = {
   edit_tags: '/tags',
   upload_words: '/word/upload',
   statistics: '/profile/statistics',
-  rss_import: '/feeds',
+  rss_import: '/feeds/manage',
   backup_restore: '/admin/backup',
   settings: '/admin/settings',
   INFO: '/docs/'

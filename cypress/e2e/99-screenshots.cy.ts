@@ -182,22 +182,22 @@ On disait dans le livre: "Les serpents boas avalent leur proie tout enti\u00e8re
 
   describe('Feeds', () => {
     it('feed-list - List of RSS feeds', () => {
-      // Use the feeds browse page
-      cy.visit('/feeds?lang=1');
+      // The browse page is retired; the manager SPA is the feeds entry point
+      cy.visit('/feeds/manage');
       cy.wait(2000);
       cy.get('body').should('be.visible');
       cy.screenshot('feed-list', { capture: 'viewport' });
     });
 
     it('feed-manage - Manage feeds page', () => {
-      cy.visit('/feeds?lang=1');
+      cy.visit('/feeds/manage');
       cy.wait(2000);
       cy.get('body').should('be.visible');
       cy.screenshot('feed-manage', { capture: 'viewport' });
     });
 
     it('feed-edit - Feed edit form', () => {
-      cy.visit('/feeds/edit?new_feed=1');
+      cy.visit('/feeds/new');
       cy.wait(1000);
       cy.get('body').should('be.visible');
       cy.screenshot('feed-edit', { capture: 'viewport' });

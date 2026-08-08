@@ -444,7 +444,14 @@ function registerRoutes(Router $router): void
     // Multi-load feeds interface (RESTful route)
     $router->get('/feeds/multi-load', 'Lwt\\Modules\\Feed\\Http\\FeedController@multiLoad', AUTH_MIDDLEWARE);
 
-    // Feeds list
+    // Refresh feeds due for auto-update
+    $router->get(
+        '/feeds/autoupdate',
+        'Lwt\\Modules\\Feed\\Http\\FeedController@autoupdate',
+        AUTH_MIDDLEWARE
+    );
+
+    // Legacy article browser - redirects to the manager SPA
     $router->registerWithMiddleware('/feeds', 'Lwt\\Modules\\Feed\\Http\\FeedController@index', AUTH_MIDDLEWARE);
 
     // Edit feeds (legacy route - handles query params)

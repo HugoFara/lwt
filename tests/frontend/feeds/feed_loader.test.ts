@@ -45,7 +45,7 @@ describe('feed_loader_component.ts', () => {
       const component = feedLoaderData();
 
       expect(component.feeds).toEqual([]);
-      expect(component.redirectUrl).toBe('/feeds');
+      expect(component.redirectUrl).toBe('/feeds/manage');
       expect(component.loadedCount).toBe(0);
       expect(component.isComplete).toBe(false);
     });
@@ -108,7 +108,7 @@ describe('feed_loader_component.ts', () => {
       component.init();
 
       expect(component.feeds).toEqual([]);
-      expect(component.redirectUrl).toBe('/feeds');
+      expect(component.redirectUrl).toBe('/feeds/manage');
     });
 
     it('handles invalid JSON gracefully', () => {
@@ -416,7 +416,7 @@ describe('feed_loader_component.ts', () => {
 
       component.handleContinue();
 
-      expect(window.location.replace).toHaveBeenCalledWith('/feeds');
+      expect(window.location.replace).toHaveBeenCalledWith('/feeds/manage');
     });
   });
 });

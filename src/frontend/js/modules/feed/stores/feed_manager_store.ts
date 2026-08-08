@@ -17,7 +17,8 @@ import type {
   FeedListParams,
   ArticleParams,
   FeedData,
-  LoadFeedResponse
+  LoadFeedResponse,
+  EditedText
 } from '@modules/feed/api/feeds_api';
 import * as feedsApi from '@modules/feed/api/feeds_api';
 
@@ -28,7 +29,17 @@ import * as feedsApi from '@modules/feed/api/feeds_api';
 /**
  * View modes for the feed manager.
  */
-export type ViewMode = 'list' | 'articles' | 'edit' | 'create';
+export type ViewMode = 'list' | 'articles' | 'edit' | 'create' | 'edit-texts';
+
+/**
+ * A text being reviewed before import.
+ *
+ * `selected` is local to the review screen: deselected rows are simply not
+ * sent, so the server never has to be told about them.
+ */
+export interface PendingText extends EditedText {
+  selected: boolean;
+}
 
 /**
  * Notification message.
@@ -74,6 +85,10 @@ export interface FeedManagerStoreState {
   // === Form ===
   editingFeed: Partial<FeedData> | null;
 
+  // === Edit-before-import ===
+  pendingTexts: PendingText[];
+  pendingFeedId: number;
+
   // === Notifications ===
   notifications: Notification[];
 
@@ -88,6 +103,11 @@ export interface FeedManagerStoreState {
   loadFeedContent(feed: Feed): Promise<LoadFeedResponse | null>;
   loadSelectedFeeds(): Promise<void>;
   importSelectedArticles(): Promise<boolean>;
+  extractSelectedArticles(): Promise<boolean>;
+  savePendingTexts(): Promise<boolean>;
+  cancelPendingTexts(): void;
+  togglePendingText(index: number): void;
+  selectedPendingCount(): number;
   deleteSelectedArticles(): Promise<boolean>;
   deleteAllArticles(): Promise<boolean>;
   resetErrorArticles(): Promise<boolean>;
@@ -167,6 +187,10 @@ function createFeedManagerStore(): FeedManagerStoreState {
 
     // === Form ===
     editingFeed: null,
+
+    // === Edit-before-import ===
+    pendingTexts: [],
+    pendingFeedId: 0,
 
     // === Notifications ===
     notifications: [],
@@ -362,6 +386,12 @@ function createFeedManagerStore(): FeedManagerStoreState {
         return false;
       }
 
+      // A feed configured with edit_text wants its texts reviewed before they
+      // are written, so importing straight away would ignore the setting.
+      if (this.currentFeed?.options?.edit_text) {
+        return await this.extractSelectedArticles();
+      }
+
       this.isSubmitting = true;
 
       const response = await feedsApi.importArticles(this.selectedArticleIds);
@@ -388,6 +418,121 @@ function createFeedManagerStore(): FeedManagerStoreState {
         this.isSubmitting = false;
         return false;
       }
+    },
+
+    /**
+     * Pull the selected articles into the review screen without writing them.
+     */
+    async extractSelectedArticles(): Promise<boolean> {
+      if (!this.currentFeed || this.selectedArticleIds.length === 0) {
+        this.notify('warning', 'No articles selected');
+        return false;
+      }
+
+      this.isSubmitting = true;
+      const response = await feedsApi.extractArticles(this.selectedArticleIds);
+      this.isSubmitting = false;
+
+      if (!response.data?.success) {
+        this.notify('error', response.error || 'Failed to extract articles');
+        return false;
+      }
+
+      const { texts, language_id: languageId, errors } = response.data;
+      if (errors.length > 0) {
+        this.notify('warning', `Some articles could not be read: ${errors.join(', ')}`);
+      }
+
+      if (texts.length === 0) {
+        this.notify('warning', 'Nothing could be extracted from the selected articles');
+        return false;
+      }
+
+      this.pendingFeedId = this.currentFeed.id;
+      this.pendingTexts = texts.map(text => ({
+        title: text.TxTitle,
+        text: text.TxText,
+        source_uri: text.TxSourceURI,
+        audio_uri: text.TxAudioURI,
+        // The feed's language is the default; the row picker can override it.
+        language_id: languageId || this.currentFeed?.langId || 0,
+        selected: true
+      }));
+      this.viewMode = 'edit-texts';
+      return true;
+    },
+
+    /**
+     * Write the reviewed texts. Deselected and blank rows are never sent.
+     */
+    async savePendingTexts(): Promise<boolean> {
+      // `selected` is review-screen state; the endpoint takes text rows only.
+      const rows: EditedText[] = this.pendingTexts
+        .filter(pending => pending.selected)
+        .map(pending => ({
+          title: pending.title,
+          text: pending.text,
+          source_uri: pending.source_uri,
+          audio_uri: pending.audio_uri,
+          language_id: pending.language_id
+        }));
+
+      if (rows.length === 0) {
+        this.notify('warning', 'No texts selected');
+        return false;
+      }
+
+      const blank = rows.find(row => row.title.trim() === '' || row.text.trim() === '');
+      if (blank) {
+        this.notify('error', 'Every selected text needs a title and a body');
+        return false;
+      }
+
+      this.isSubmitting = true;
+      const response = await feedsApi.createTextsFromEdited(this.pendingFeedId, rows);
+      this.isSubmitting = false;
+
+      if (!response.data?.success) {
+        this.notify('error', response.data?.error || response.error || 'Failed to save texts');
+        return false;
+      }
+
+      const { created, archived, errors } = response.data;
+      const summary = archived > 0
+        ? `Created ${created} text(s), archived ${archived}`
+        : `Created ${created} text(s)`;
+
+      if (errors.length > 0) {
+        this.notify('warning', `${summary}. ${errors.join(', ')}`);
+      } else {
+        this.notify('success', summary);
+      }
+
+      this.pendingTexts = [];
+      this.pendingFeedId = 0;
+      this.clearArticleSelection();
+      this.viewMode = 'articles';
+      if (this.currentFeed) {
+        await this.loadArticles(this.currentFeed.id);
+      }
+      return true;
+    },
+
+    cancelPendingTexts(): void {
+      this.pendingTexts = [];
+      this.pendingFeedId = 0;
+      this.viewMode = 'articles';
+    },
+
+    togglePendingText(index: number): void {
+      const pending = this.pendingTexts[index];
+      if (pending) {
+        pending.selected = !pending.selected;
+      }
+    },
+
+    selectedPendingCount(): number {
+      return this.pendingTexts.filter(pending => pending.selected).length;
     },
 
     async deleteSelectedArticles(): Promise<boolean> {

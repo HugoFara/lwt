@@ -29,10 +29,8 @@ import '@shared/components/sorttable';
 import '@shared/forms/bulk_actions';
 
 // Components (side effects — register Alpine.data)
-import './components/feed_browse_component';
 import './components/feed_form_component';
 import './components/feed_loader_component';
-import './components/feed_text_edit_component';
 export { feedWizardStep1Data, initFeedWizardStep1Alpine } from './components/feed_wizard_step1';
 export { feedWizardStep2Data, initFeedWizardStep2Alpine } from './components/feed_wizard_step2';
 export { feedWizardStep3Data, initFeedWizardStep3Alpine } from './components/feed_wizard_step3';

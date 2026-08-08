@@ -11,8 +11,8 @@
 import { onDomReady } from '@shared/utils/dom_ready';
 import Alpine from 'alpinejs';
 import { initFeedManagerStore, getFeedManagerStore } from '../stores/feed_manager_store';
-import type { FeedManagerStoreState } from '../stores/feed_manager_store';
-import type { Feed, Article } from '@modules/feed/api/feeds_api';
+import type { FeedManagerStoreState, PendingText } from '../stores/feed_manager_store';
+import type { Feed, Article, Language } from '@modules/feed/api/feeds_api';
 import { getStatusBadgeClass, getStatusLabel, formatAutoUpdate } from '@modules/feed/api/feeds_api';
 
 // ============================================================================
@@ -234,6 +234,56 @@ function articleListComponent() {
 }
 
 /**
+ * Review screen for feeds carrying the `edit_text` option.
+ *
+ * Each row is edited in place on the store's `pendingTexts`, so no field
+ * names are involved — the rows are posted as JSON, not as a form.
+ */
+function pendingTextListComponent() {
+  return {
+    get store(): FeedManagerStoreState {
+      return getFeedManagerStore();
+    },
+
+    get texts(): PendingText[] {
+      return this.store.pendingTexts;
+    },
+
+    get languages(): Language[] {
+      return this.store.languages;
+    },
+
+    get isSubmitting(): boolean {
+      return this.store.isSubmitting;
+    },
+
+    get selectedCount(): number {
+      return this.store.selectedPendingCount();
+    },
+
+    toggle(index: number): void {
+      this.store.togglePendingText(index);
+    },
+
+    /** Alpine's CSP build has no `parseInt`, so the cast happens here. */
+    setLanguage(index: number, value: string): void {
+      const pending = this.store.pendingTexts[index];
+      if (pending) {
+        pending.language_id = parseInt(value, 10) || 0;
+      }
+    },
+
+    async save(): Promise<void> {
+      await this.store.savePendingTexts();
+    },
+
+    cancel(): void {
+      this.store.cancelPendingTexts();
+    }
+  };
+}
+
+/**
  * Article filter component data.
  */
 function articleFilterComponent() {
@@ -366,6 +416,7 @@ export function initFeedManagerApp(): void {
   Alpine.data('feedFilter', feedFilterComponent);
   Alpine.data('articleList', articleListComponent);
   Alpine.data('articleFilter', articleFilterComponent);
+  Alpine.data('pendingTextList', pendingTextListComponent);
   Alpine.data('feedForm', feedFormComponent);
   Alpine.data('feedNotifications', notificationComponent);
 

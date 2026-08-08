@@ -299,6 +299,143 @@ class FeedArticleApiHandler
     }
 
     /**
+     * Create texts from articles the caller has already edited.
+     *
+     * The write half of {@see extractArticles()}. `importArticles()` extracts
+     * and writes in a single step, so it has no way to accept a title or body
+     * the user changed in between; this takes the edited rows instead.
+     *
+     * The tag and the max-texts limit come from the feed's own options, never
+     * from the payload. The retired `edit_text_form.php` posted `Nf_Max_Texts`
+     * as a hidden field, so a caller could opt out of archiving by editing it;
+     * it also never posted a tag at all, which is why texts created through
+     * that form came out untagged.
+     *
+     * @param array<string, mixed> $data Payload carrying `feed_id` and `texts`
+     *
+     * @return array{success: bool, created: int, archived: int,
+     *               errors: list<string>, error?: string}
+     */
+    public function createTextsFromEdited(array $data): array
+    {
+        $feedId = (int)($data['feed_id'] ?? 0);
+        $rows = $data['texts'] ?? [];
+
+        if ($feedId <= 0 || !is_array($rows) || count($rows) === 0) {
+            return [
+                'success' => false,
+                'created' => 0,
+                'archived' => 0,
+                'errors' => [],
+                'error' => 'feed_id and a non-empty texts list are required',
+            ];
+        }
+
+        // getFeedById is user-scoped, so a feed owned by somebody else comes
+        // back null and nothing is written. Every text created below is
+        // tagged and counted against *this* feed, so skipping the check
+        // would let any authenticated caller write into another user's feed.
+        $feed = $this->feedFacade->getFeedById($feedId);
+        if ($feed === null) {
+            return [
+                'success' => false,
+                'created' => 0,
+                'archived' => 0,
+                'errors' => [],
+                'error' => 'Feed not found',
+            ];
+        }
+
+        [$tagName, $maxTexts] = $this->resolveFeedTagAndLimit($feed);
+        $feedLangId = $feed['NfLgID'];
+
+        // The row may name a different language than the feed's, because the
+        // retired form offered a per-row picker. Only the caller's own
+        // languages are accepted; anything else falls back to the feed's.
+        /** @var list<int> $ownLanguageIds */
+        $ownLanguageIds = [];
+        /** @var array<array-key, array<string, mixed>> $languages */
+        $languages = $this->feedFacade->getLanguages();
+        foreach ($languages as $language) {
+            $ownLanguageIds[] = (int)$language['LgID'];
+        }
+
+        $created = 0;
+        /** @var list<string> $errors */
+        $errors = [];
+
+        foreach ($rows as $index => $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $title = trim((string)($row['title'] ?? ''));
+            $text = (string)($row['text'] ?? '');
+            if ($title === '' || trim($text) === '') {
+                $errors[] = sprintf('Row %d skipped: title and text are both required', (int)$index + 1);
+                continue;
+            }
+
+            $langId = (int)($row['language_id'] ?? 0);
+            if ($langId <= 0 || !in_array($langId, $ownLanguageIds, true)) {
+                $langId = $feedLangId;
+            }
+
+            $this->feedFacade->createTextFromFeed([
+                'TxLgID' => $langId,
+                'TxTitle' => $title,
+                'TxText' => $text,
+                'TxAudioURI' => (string)($row['audio_uri'] ?? ''),
+                'TxSourceURI' => (string)($row['source_uri'] ?? ''),
+            ], $tagName);
+            $created++;
+        }
+
+        $archived = 0;
+        if ($created > 0) {
+            $stats = $this->feedFacade->archiveOldTexts($tagName, $maxTexts);
+            $archived = $stats['archived'];
+        }
+
+        return [
+            'success' => true,
+            'created' => $created,
+            'archived' => $archived,
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * Resolve the tag name and max-texts limit a feed's options imply.
+     *
+     * Both fall back the same way the import path has always done: an unset
+     * tag becomes the feed name truncated to 20 characters, and an unset
+     * limit becomes the global `set-max-texts-per-feed` setting.
+     *
+     * @param array<string, mixed> $row Feed record carrying NfOptions/NfName
+     *
+     * @return array{0: string, 1: int} Tag name and max texts
+     */
+    private function resolveFeedTagAndLimit(array $row): array
+    {
+        $feedOptions = (string)($row['NfOptions'] ?? '');
+        $feedName = (string)($row['NfName'] ?? '');
+
+        $tagNameRaw = $this->feedFacade->getFeedOption($feedOptions, 'tag');
+        $tagName = is_string($tagNameRaw) && $tagNameRaw !== ''
+            ? $tagNameRaw
+            : mb_substr($feedName, 0, 20, 'utf-8');
+
+        $maxTextsRaw = $this->feedFacade->getFeedOption($feedOptions, 'max_texts');
+        $maxTexts = is_string($maxTextsRaw) ? (int)$maxTextsRaw : 0;
+        if (!$maxTexts) {
+            $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
+        }
+
+        return [$tagName, $maxTexts];
+    }
+
+    /**
      * Import articles as texts.
      *
      * @param array $data Import data:
@@ -322,18 +459,7 @@ class FeedArticleApiHandler
         foreach ($feedLinks as $row) {
             /** @var array<string, mixed> $row */
             $feedOptions = (string)($row['NfOptions'] ?? '');
-            $feedName = (string)($row['NfName'] ?? '');
-
-            $tagNameRaw = $this->feedFacade->getFeedOption($feedOptions, 'tag');
-            $tagName = is_string($tagNameRaw) && $tagNameRaw !== ''
-                ? $tagNameRaw
-                : mb_substr($feedName, 0, 20, 'utf-8');
-
-            $maxTextsRaw = $this->feedFacade->getFeedOption($feedOptions, 'max_texts');
-            $maxTexts = is_string($maxTextsRaw) ? (int)$maxTextsRaw : 0;
-            if (!$maxTexts) {
-                $maxTexts = (int)Settings::getWithDefault('set-max-texts-per-feed');
-            }
+            [$tagName, $maxTexts] = $this->resolveFeedTagAndLimit($row);
 
             $flLink = (string)($row['FlLink'] ?? '');
             $flId = (string)($row['FlID'] ?? '');

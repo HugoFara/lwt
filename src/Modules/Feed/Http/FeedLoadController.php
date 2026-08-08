@@ -76,6 +76,35 @@ class FeedLoadController
     }
 
     /**
+     * Refresh every feed whose auto-update interval has elapsed.
+     *
+     * Route: GET /feeds/autoupdate
+     *
+     * This used to hang off `/feeds?check_autoupdate=1`, which meant the
+     * retired browse page had to stay routable just to carry the flag. The
+     * language page links straight here instead.
+     *
+     * @return void
+     */
+    public function autoupdateRoute(): void
+    {
+        $currentLang = Validation::language(
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
+        );
+
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('Updating Feeds - ' . $langName, true);
+
+        $this->feedFacade->renderFeedLoadInterfaceModern(
+            InputValidator::getIntParam('selected_feed', 0, 0),
+            true,
+            '/feeds/manage'
+        );
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
      * Load/refresh a single feed.
      *
      * Route: GET /feeds/{id}/load

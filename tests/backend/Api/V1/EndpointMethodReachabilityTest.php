@@ -48,6 +48,7 @@ class EndpointMethodReachabilityTest extends TestCase
             // Reads added for the bulk-translate and feed-article-edit pages.
             'unknown words to translate' => ['GET', '/api/v1/terms/unknown-for-translate'],
             'extract articles to edit'   => ['POST', '/api/v1/feeds/articles/extract'],
+            'save edited articles'       => ['POST', '/api/v1/feeds/articles/create-texts'],
 
             // Anchors on surfaces that already work, so a regression in the
             // fallback itself is caught rather than only the books entry.

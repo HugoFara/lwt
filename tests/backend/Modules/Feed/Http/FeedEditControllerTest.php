@@ -193,7 +193,6 @@ class FeedEditControllerTest extends TestCase
         $reflection = new \ReflectionClass(FeedEditController::class);
 
         $expectedMethods = [
-            'handleUpdateFeed', 'handleSaveFeed',
             'showNewForm', 'showEditForm',
             'loadCuratedFeeds'
         ];
@@ -209,127 +208,6 @@ class FeedEditControllerTest extends TestCase
                 "Method $methodName should be private"
             );
         }
-    }
-
-    // =========================================================================
-    // handleMarkAction tests (via reflection)
-    // =========================================================================
-
-
-    // =========================================================================
-    // formatMarkActionMessage tests
-    // =========================================================================
-
-
-    // =========================================================================
-    // handleUpdateFeed tests
-    // =========================================================================
-
-    #[Test]
-    public function handleUpdateFeedDoesNothingWithoutParam(): void
-    {
-        $_REQUEST = [];
-
-        $this->feedFacade->expects($this->never())
-            ->method('updateFeed');
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->invoke($this->controller);
-    }
-
-    #[Test]
-    public function handleUpdateFeedCallsFacadeWithFormData(): void
-    {
-        $_REQUEST = [
-            'update_feed' => '1',
-            'NfID' => '42',
-            'NfLgID' => '1',
-            'NfName' => 'Updated Feed',
-            'NfSourceURI' => 'http://example.com/rss',
-            'NfArticleSectionTags' => 'article',
-            'NfFilterTags' => 'script',
-            'NfOptions' => 'tag:news,',
-        ];
-
-        $this->feedFacade->expects($this->once())
-            ->method('updateFeed')
-            ->with(
-                42,
-                $this->callback(function (array $data) {
-                    return $data['NfName'] === 'Updated Feed'
-                        && $data['NfOptions'] === 'tag:news';
-                })
-            );
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->invoke($this->controller);
-    }
-
-    #[Test]
-    public function handleUpdateFeedTrimsTrailingCommaFromOptions(): void
-    {
-        $_REQUEST = [
-            'update_feed' => '1',
-            'NfID' => '1',
-            'NfLgID' => '1',
-            'NfName' => 'Test',
-            'NfSourceURI' => 'http://test.com',
-            'NfArticleSectionTags' => '',
-            'NfFilterTags' => '',
-            'NfOptions' => 'opt1:val1,opt2:val2,',
-        ];
-
-        $this->feedFacade->expects($this->once())
-            ->method('updateFeed')
-            ->with(
-                $this->anything(),
-                $this->callback(function (array $data) {
-                    return $data['NfOptions'] === 'opt1:val1,opt2:val2';
-                })
-            );
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->invoke($this->controller);
-    }
-
-    // =========================================================================
-    // handleSaveFeed tests
-    // =========================================================================
-
-    #[Test]
-    public function handleSaveFeedDoesNothingWithoutParam(): void
-    {
-        $_REQUEST = [];
-
-        $this->feedFacade->expects($this->never())
-            ->method('createFeed');
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleSaveFeed');
-        $method->invoke($this->controller);
-    }
-
-    #[Test]
-    public function handleSaveFeedCallsFacadeWithFormData(): void
-    {
-        $_REQUEST = [
-            'save_feed' => '1',
-            'NfLgID' => '2',
-            'NfName' => 'New Feed',
-            'NfSourceURI' => 'http://example.com/rss',
-            'NfArticleSectionTags' => '',
-            'NfFilterTags' => '',
-            'NfOptions' => '',
-        ];
-
-        $this->feedFacade->expects($this->once())
-            ->method('createFeed')
-            ->with($this->callback(function (array $data) {
-                return $data['NfName'] === 'New Feed'
-                    && $data['NfLgID'] === '2';
-            }));
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleSaveFeed');
-        $method->invoke($this->controller);
     }
 
     // =========================================================================
@@ -628,5 +506,4 @@ class FeedEditControllerTest extends TestCase
         $this->assertCount(1, $params);
         $this->assertSame('id', $params[0]->getName());
     }
-
 }

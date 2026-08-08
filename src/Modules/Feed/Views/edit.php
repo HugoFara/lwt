@@ -38,7 +38,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  */
 
 $actions = [
-    ['url' => '/feeds?page=1', 'label' => __('feed.edit_action_feeds'), 'icon' => 'list'],
+    ['url' => '/feeds/manage', 'label' => __('feed.edit_action_feeds'), 'icon' => 'list'],
     [
         'url' => '/feeds/wizard?step=2&edit_feed=' . (int)$feed['NfID'],
         'label' => __('feed.edit_action_wizard'),
