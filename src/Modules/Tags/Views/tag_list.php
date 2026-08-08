@@ -1,13 +1,14 @@
 <?php
 
 /**
- * Tag List View - Display list of tags with filtering and pagination
+ * Tag List View - scaffold for the client-rendered tag list.
+ *
+ * Rows, pagination and the sort options all come from
+ * `GET /api/v1/tags/{type}/list`; the bulk actions post to the matching
+ * DELETE routes. See tag_list_app.ts.
  *
  * Variables expected:
  * - $message: Status/error message to display
- * - $tags: Array of tag records
- * - $totalCount: Total number of tags matching filter
- * - $pagination: Array with 'pages', 'currentPage', 'perPage'
  * - $currentQuery: Current filter query
  * - $currentSort: Current sort index
  * - $service: TagsFacade instance
@@ -31,36 +32,28 @@ namespace Lwt\Modules\Tags\Views;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
-use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
-use Lwt\Shared\UI\Helpers\FormHelper;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
 /**
  * @var string $message
- * @var array<int, array{id: int, text: string, comment: string, usageCount: int, archivedUsageCount?: int}> $tags
- * @var int $totalCount
- * @var array{pages: int, currentPage: int, perPage: int} $pagination
  * @var string $currentQuery
  * @var int $currentSort
  * @var TagsFacade $service
  * @var bool $isTextTag
  */
 
-// Ensure variables are properly typed for Psalm
 assert(is_string($message));
-assert(is_array($tags));
-assert(is_int($totalCount));
-assert(is_array($pagination));
 assert(is_string($currentQuery));
 assert(is_int($currentSort));
 assert($service instanceof TagsFacade);
 assert(is_bool($isTextTag));
 
 $baseUrl = $service->getBaseUrl();
-/** @var array<int, array{value: int, text: string}> $sortOptions */
-$sortOptions = $service->getSortOptions();
 $itemLabel = $isTextTag ? __('tags.items_label_texts') : __('tags.items_label_terms');
 $newTagLabel = $isTextTag ? __('tags.list_new_text_tag') : __('tags.list_new_term_tag');
+$itemsColLabel = $isTextTag
+    ? __('tags.list_col_items_with_tag_texts')
+    : __('tags.list_col_items_with_tag_terms');
 
 PageLayoutHelper::renderMessage($message, false);
 
@@ -74,74 +67,69 @@ echo PageLayoutHelper::buildActionCard([
 ]);
 ?>
 
-<!-- NOTE: Search bar planned for future UI refactoring.
-     Planned features:
-     - Search across tag text and comments
-     - Autocomplete suggestions
--->
-<form name="form1" action="#" data-search-placeholder="tags">
+<script type="application/json" id="tag-list-config">
+<?php echo json_encode([
+    'type' => $isTextTag ? 'text' : 'term',
+    'isTextTag' => $isTextTag,
+    'query' => $currentQuery,
+    'sort' => $currentSort,
+    'page' => 1,
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
+</script>
+
+<div x-data="tagListApp">
+    <div x-show="error" x-cloak class="notification is-danger">
+        <span x-text="error"></span>
+    </div>
+
+    <!-- Filter bar -->
     <div class="box mb-4">
         <div class="field has-addons">
             <div class="control is-expanded has-icons-left">
                 <input type="text"
-                       name="query"
                        class="input"
-                       value="<?php echo htmlspecialchars($currentQuery, ENT_QUOTES, 'UTF-8'); ?>"
-                       placeholder="<?= htmlspecialchars(__('tags.list_search_placeholder'), ENT_QUOTES, 'UTF-8') ?>"
-                       disabled />
+                       x-model="searchInput"
+                       @keyup.enter="search()"
+                       placeholder="<?= htmlspecialchars(
+                           __('tags.list_search_placeholder'),
+                           ENT_QUOTES,
+                           'UTF-8'
+                       ) ?>" />
                 <span class="icon is-left">
                     <?php echo IconHelper::render('search', ['alt' => 'Search']); ?>
                 </span>
             </div>
             <div class="control">
-                <button type="button" class="button is-info" disabled>
-                    <?= __('tags.list_search_button') ?>
+                <button type="button" class="button is-info" @click="search()">
+                    <?= __e('tags.list_search_button') ?>
+                </button>
+            </div>
+            <div class="control" x-show="searchInput" x-cloak>
+                <button type="button" class="button" @click="clearSearch()">
+                    <?php echo IconHelper::render('x', ['alt' => 'Clear']); ?>
                 </button>
             </div>
         </div>
-        <p class="help has-text-grey">
-            <?php echo IconHelper::render('info', ['alt' => 'Info', 'class' => 'icon-inline']); ?>
-            <?= __('tags.list_search_redesign_notice') ?>
-        </p>
 
-        <?php if ($totalCount > 0) : ?>
-        <!-- Results Summary & Pagination -->
-        <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
+        <div class="level mt-4 pt-4" style="border-top: 1px solid #dbdbdb;"
+             x-show="pagination.total > 0" x-cloak>
             <div class="level-left">
                 <div class="level-item">
-                    <span class="tag is-info is-medium">
-                        <?= $totalCount === 1
-                            ? __('tags.list_count_one', ['count' => $totalCount])
-                            : __('tags.list_count_many', ['count' => $totalCount]) ?>
-                    </span>
+                    <span class="tag is-info is-medium" x-text="pagination.total"></span>
                 </div>
-            </div>
-            <div class="level-item">
-                <?php
-                echo PageLayoutHelper::buildPager(
-                    $pagination['currentPage'],
-                    $pagination['pages'],
-                    $baseUrl,
-                    'form1',
-                    ['query' => $currentQuery, 'sort' => $currentSort]
-                );
-                ?>
             </div>
             <div class="level-right">
                 <div class="level-item">
                     <div class="field has-addons">
                         <div class="control">
-                            <span class="button is-static is-small"><?= __('tags.list_sort') ?></span>
+                            <span class="button is-static is-small"><?= __e('tags.list_sort') ?></span>
                         </div>
                         <div class="control">
                             <div class="select is-small">
-                                <select name="sort" data-action="sort">
-                                    <?php foreach ($sortOptions as $option) : ?>
-                                    <option
-                                        value="<?php echo $option['value']; ?>"
-                                        <?php echo $currentSort == $option['value'] ? ' selected="selected"' : ''; ?>
-                                    ><?php echo $option['text']; ?></option>
-                                    <?php endforeach; ?>
+                                <select :value="sort" @change="setSort($event.target.value)">
+                                    <template x-for="option in sortOptions" :key="option.value">
+                                        <option :value="option.value" x-text="option.text"></option>
+                                    </template>
                                 </select>
                             </div>
                         </div>
@@ -149,269 +137,223 @@ echo PageLayoutHelper::buildActionCard([
                 </div>
             </div>
         </div>
-        <?php endif; ?>
-    </div>
-</form>
-
-<?php if ($totalCount == 0) : ?>
-<p class="has-text-grey"><?= __('tags.list_no_tags') ?></p>
-<?php else : ?>
-<form name="form2" action="<?php echo $baseUrl; ?>" method="post">
-    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-<input type="hidden" name="data" value="" />
-
-<!-- Multi Actions Section -->
-<div class="box mb-4">
-    <div class="level is-mobile mb-3">
-        <div class="level-left">
-            <div class="level-item">
-                <span class="icon-text">
-                    <?php echo IconHelper::render('zap', ['title' => 'Multi Actions', 'alt' => 'Multi Actions']); ?>
-                    <span class="has-text-weight-semibold ml-1"><?= __('tags.list_multi_actions') ?></span>
-                </span>
-            </div>
-        </div>
     </div>
 
-    <div class="field is-grouped is-grouped-multiline">
-        <div class="control">
-            <div class="field has-addons">
-                <div class="control">
-                    <span class="button is-static is-small">
-                        <strong><?= __('tags.list_all_label') ?></strong>&nbsp;<?= $totalCount === 1
-                            ? __('tags.list_all_count_one')
-                            : __('tags.list_all_count_many', ['count' => $totalCount]) ?>
-                    </span>
-                </div>
-                <div class="control">
-                    <div class="select is-small">
-                        <select name="allaction" data-action="all-action" data-recno="<?php echo $totalCount; ?>">
-                            <?php echo SelectOptionsBuilder::forAllTagsActions(); ?>
-                        </select>
+    <div x-show="isLoading" x-cloak class="has-text-centered py-4">
+        <?= __e('tags.list_loading') ?>
+    </div>
+
+    <p x-show="isEmpty()" x-cloak class="has-text-grey"><?= __e('tags.list_no_tags') ?></p>
+
+    <div x-show="tags.length > 0" x-cloak>
+        <!-- Multi Actions -->
+        <div class="box mb-4">
+            <div class="level is-mobile mb-3">
+                <div class="level-left">
+                    <div class="level-item">
+                        <span class="icon-text">
+                            <?php echo IconHelper::render(
+                                'zap',
+                                ['title' => 'Multi Actions', 'alt' => 'Multi Actions']
+                            ); ?>
+                            <span class="has-text-weight-semibold ml-1"><?= __e('tags.list_multi_actions') ?></span>
+                        </span>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="field is-grouped is-grouped-multiline mt-3">
-        <div class="control">
-            <div class="buttons are-small">
-                <button type="button" class="button is-light" data-action="mark-all">
-                    <?php echo IconHelper::render('check-check', ['alt' => 'Mark All']); ?>
-                    <span class="ml-1"><?= __('tags.list_mark_all') ?></span>
-                </button>
-                <button type="button" class="button is-light" data-action="mark-none">
-                    <?php echo IconHelper::render('x', ['alt' => 'Mark None']); ?>
-                    <span class="ml-1"><?= __('tags.list_mark_none') ?></span>
-                </button>
-            </div>
-        </div>
-        <div class="control">
-            <div class="field has-addons">
+            <div class="field is-grouped is-grouped-multiline">
                 <div class="control">
-                    <span class="button is-static is-small"><?= __('tags.list_marked_tags') ?></span>
-                </div>
-                <div class="control">
-                    <div class="select is-small">
-                        <select name="markaction" id="markaction" disabled="disabled" data-action="mark-action">
-                            <?php echo SelectOptionsBuilder::forMultipleTagsActions(); ?>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Desktop Table View -->
-<div class="table-container is-hidden-mobile">
-<table class="table is-striped is-hoverable is-fullwidth sortable">
-<thead>
-<tr>
-    <th class="has-text-centered sorttable_nosort" style="width: 3em;"><?= __('tags.list_col_mark') ?></th>
-    <th class="has-text-centered sorttable_nosort" style="width: 6em;"><?= __('tags.list_col_actions') ?></th>
-    <th class="clickable"><?= __('tags.list_col_text') ?></th>
-    <th class="clickable"><?= __('tags.list_col_comment') ?></th>
-    <th class="has-text-centered clickable"><?= $isTextTag
-        ? __('tags.list_col_items_with_tag_texts')
-        : __('tags.list_col_items_with_tag_terms') ?></th>
-    <?php if ($isTextTag) : ?>
-    <th class="has-text-centered clickable"><?= __('tags.list_col_archived_with_tag') ?></th>
-    <?php endif; ?>
-</tr>
-</thead>
-<tbody>
-    <?php foreach ($tags as $tag) : ?>
-<tr>
-    <td class="has-text-centered">
-        <a name="rec<?php echo $tag['id']; ?>">
-            <input
-                name="marked[]"
-                type="checkbox"
-                class="markcheck"
-                value="<?php echo $tag['id']; ?>"
-                <?php echo FormHelper::checkInRequest($tag['id'], 'marked'); ?>
-            />
-        </a>
-    </td>
-    <td class="has-text-centered" style="white-space: nowrap;">
-        <div class="buttons are-small is-centered">
-            <a
-                href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>/edit"
-                class="button is-small is-ghost"
-                title="Edit"
-            >
-                <?php echo IconHelper::render('file-pen', ['title' => 'Edit', 'alt' => 'Edit']); ?>
-            </a>
-            <a
-                class="button is-small is-ghost confirmdelete"
-                href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>"
-                data-method="delete"
-                title="Delete"
-            >
-                <?php echo IconHelper::render('circle-minus', ['title' => 'Delete', 'alt' => 'Delete']); ?>
-            </a>
-        </div>
-    </td>
-    <td>
-        <span class="tag is-medium is-light">
-            <?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-        </span>
-    </td>
-    <td class="has-text-grey"><?php echo htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-    <td class="has-text-centered">
-        <?php if ($tag['usageCount'] > 0) : ?>
-        <a href="<?php echo $service->getItemsUrl($tag['id']); ?>" class="tag is-link is-light">
-            <?php echo $tag['usageCount']; ?>
-        </a>
-        <?php else : ?>
-        <span class="tag is-light">0</span>
-        <?php endif; ?>
-    </td>
-        <?php if ($isTextTag) : ?>
-    <td class="has-text-centered">
-            <?php $archivedCount = $tag['archivedUsageCount'] ?? 0; ?>
-            <?php if ($archivedCount > 0) : ?>
-        <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link is-light">
-                <?php echo $archivedCount; ?>
-        </a>
-            <?php else : ?>
-        <span class="tag is-light">0</span>
-            <?php endif; ?>
-    </td>
-        <?php endif; ?>
-</tr>
-    <?php endforeach; ?>
-</tbody>
-</table>
-</div>
-
-<!-- Mobile Card View -->
-<div class="is-hidden-tablet">
-    <?php foreach ($tags as $tag) : ?>
-<div class="card mb-3">
-    <div class="card-content">
-        <div class="level is-mobile mb-2">
-            <div class="level-left">
-                <div class="level-item">
-                    <label class="checkbox">
-                        <input
-                            name="marked[]"
-                            type="checkbox"
-                            class="markcheck"
-                            value="<?php echo $tag['id']; ?>"
-                            <?php echo FormHelper::checkInRequest($tag['id'], 'marked'); ?>
-                        />
-                    </label>
-                </div>
-                <div class="level-item">
-                    <span class="tag is-medium is-info is-light">
-                        <?php echo htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-                    </span>
-                </div>
-            </div>
-            <div class="level-right">
-                <div class="level-item">
                     <div class="buttons are-small">
-                        <a
-                            href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>/edit"
-                            class="button is-small is-info is-light"
-                        >
-                            <?php echo IconHelper::render('file-pen', ['alt' => 'Edit']); ?>
-                        </a>
-                        <a
-                            class="button is-small is-danger is-light confirmdelete"
-                            href="<?php echo $baseUrl; ?>/<?php echo $tag['id']; ?>"
-                            data-method="delete"
-                        >
+                        <button type="button" class="button is-light" @click="markAll()">
+                            <?php echo IconHelper::render('check-check', ['alt' => 'Mark All']); ?>
+                            <span class="ml-1"><?= __e('tags.list_mark_all') ?></span>
+                        </button>
+                        <button type="button" class="button is-light" @click="markNone()">
+                            <?php echo IconHelper::render('x', ['alt' => 'Mark None']); ?>
+                            <span class="ml-1"><?= __e('tags.list_mark_none') ?></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="control">
+                    <div class="buttons are-small">
+                        <button type="button" class="button is-danger is-light"
+                                :disabled="selectedIds.length === 0 || isBusy"
+                                @click="deleteSelected()">
                             <?php echo IconHelper::render('circle-minus', ['alt' => 'Delete']); ?>
-                        </a>
+                            <span class="ml-1"><?= __e('tags.list_delete_marked') ?></span>
+                        </button>
+                        <button type="button" class="button is-danger"
+                                :disabled="pagination.total === 0 || isBusy"
+                                @click="deleteAllMatching()">
+                            <?php echo IconHelper::render('trash', ['alt' => 'Delete All']); ?>
+                            <span class="ml-1"><?= __e('tags.list_delete_all') ?></span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <?php if ($tag['comment'] !== '') : ?>
-        <p class="has-text-grey mb-2"><?php echo htmlspecialchars($tag['comment'], ENT_QUOTES, 'UTF-8'); ?></p>
-        <?php endif; ?>
-
-        <div class="is-flex is-flex-wrap-wrap" style="gap: 0.5rem;">
-            <div class="tags has-addons mb-0">
-                <span class="tag is-dark"><?php echo $itemLabel; ?></span>
-                <?php if ($tag['usageCount'] > 0) : ?>
-                <a href="<?php echo $service->getItemsUrl($tag['id']); ?>" class="tag is-link">
-                    <?php echo $tag['usageCount']; ?>
-                </a>
-                <?php else : ?>
-                <span class="tag is-light">0</span>
-                <?php endif; ?>
-            </div>
-            <?php if ($isTextTag) : ?>
-            <div class="tags has-addons mb-0">
-                <span class="tag is-dark"><?= __('tags.label_archived') ?></span>
-                <?php $archivedCountMobile = $tag['archivedUsageCount'] ?? 0; ?>
-                <?php if ($archivedCountMobile > 0) : ?>
-                <a href="<?php echo $service->getArchivedItemsUrl($tag['id']); ?>" class="tag is-link">
-                    <?php echo $archivedCountMobile; ?>
-                </a>
-                <?php else : ?>
-                <span class="tag is-light">0</span>
-                <?php endif; ?>
-            </div>
-            <?php endif; ?>
+        <!-- Desktop Table View -->
+        <div class="table-container is-hidden-mobile">
+            <table class="table is-striped is-hoverable is-fullwidth">
+                <thead>
+                    <tr>
+                        <th class="has-text-centered" style="width: 3em;">
+                            <input type="checkbox" :checked="allSelected()"
+                                   @change="allSelected() ? markNone() : markAll()" />
+                        </th>
+                        <th class="has-text-centered" style="width: 6em;"><?= __e('tags.list_col_actions') ?></th>
+                        <th><?= __e('tags.list_col_text') ?></th>
+                        <th><?= __e('tags.list_col_comment') ?></th>
+                        <th class="has-text-centered"><?php echo htmlspecialchars(
+                            $itemsColLabel,
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ); ?></th>
+                        <?php if ($isTextTag) : ?>
+                        <th class="has-text-centered"><?= __e('tags.list_col_archived_with_tag') ?></th>
+                        <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="tag in tags" :key="tag.id">
+                        <tr>
+                            <td class="has-text-centered">
+                                <input type="checkbox" class="markcheck"
+                                       :checked="isSelected(tag.id)" @change="toggle(tag.id)" />
+                            </td>
+                            <td class="has-text-centered" style="white-space: nowrap;">
+                                <div class="buttons are-small is-centered">
+                                    <a :href="editUrl(tag)" class="button is-small is-ghost" title="Edit">
+                                        <?php echo IconHelper::render(
+                                            'file-pen',
+                                            ['title' => 'Edit', 'alt' => 'Edit']
+                                        ); ?>
+                                    </a>
+                                    <button type="button" class="button is-small is-ghost"
+                                            :disabled="isBusy" @click="deleteOne(tag)" title="Delete">
+                                        <?php echo IconHelper::render(
+                                            'circle-minus',
+                                            ['title' => 'Delete', 'alt' => 'Delete']
+                                        ); ?>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="tag is-medium is-light" x-text="tag.text"></span>
+                            </td>
+                            <td class="has-text-grey" x-text="tag.comment"></td>
+                            <td class="has-text-centered">
+                                <template x-if="hasUsage(tag)">
+                                    <a :href="tag.itemsUrl" class="tag is-link is-light"
+                                       x-text="tag.usageCount"></a>
+                                </template>
+                                <template x-if="!hasUsage(tag)">
+                                    <span class="tag is-light">0</span>
+                                </template>
+                            </td>
+                            <?php if ($isTextTag) : ?>
+                            <td class="has-text-centered">
+                                <template x-if="hasArchived(tag)">
+                                    <a :href="tag.archivedItemsUrl" class="tag is-link is-light"
+                                       x-text="archivedCount(tag)"></a>
+                                </template>
+                                <template x-if="!hasArchived(tag)">
+                                    <span class="tag is-light">0</span>
+                                </template>
+                            </td>
+                            <?php endif; ?>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
         </div>
+
+        <!-- Mobile Card View -->
+        <div class="is-hidden-tablet">
+            <template x-for="tag in tags" :key="tag.id">
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="level is-mobile mb-2">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <label class="checkbox">
+                                        <input type="checkbox" class="markcheck"
+                                               :checked="isSelected(tag.id)" @change="toggle(tag.id)" />
+                                    </label>
+                                </div>
+                                <div class="level-item">
+                                    <span class="tag is-medium is-info is-light" x-text="tag.text"></span>
+                                </div>
+                            </div>
+                            <div class="level-right">
+                                <div class="level-item">
+                                    <div class="buttons are-small">
+                                        <a :href="editUrl(tag)" class="button is-small is-info is-light">
+                                            <?php echo IconHelper::render('file-pen', ['alt' => 'Edit']); ?>
+                                        </a>
+                                        <button type="button" class="button is-small is-danger is-light"
+                                                :disabled="isBusy" @click="deleteOne(tag)">
+                                            <?php echo IconHelper::render('circle-minus', ['alt' => 'Delete']); ?>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="has-text-grey mb-2" x-show="tag.comment" x-text="tag.comment"></p>
+
+                        <div class="is-flex is-flex-wrap-wrap" style="gap: 0.5rem;">
+                            <div class="tags has-addons mb-0">
+                                <span class="tag is-dark"><?php echo htmlspecialchars(
+                                    $itemLabel,
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ); ?></span>
+                                <template x-if="hasUsage(tag)">
+                                    <a :href="tag.itemsUrl" class="tag is-link" x-text="tag.usageCount"></a>
+                                </template>
+                                <template x-if="!hasUsage(tag)">
+                                    <span class="tag is-light">0</span>
+                                </template>
+                            </div>
+                            <?php if ($isTextTag) : ?>
+                            <div class="tags has-addons mb-0">
+                                <span class="tag is-dark"><?= __e('tags.label_archived') ?></span>
+                                <template x-if="hasArchived(tag)">
+                                    <a :href="tag.archivedItemsUrl" class="tag is-link"
+                                       x-text="archivedCount(tag)"></a>
+                                </template>
+                                <template x-if="!hasArchived(tag)">
+                                    <span class="tag is-light">0</span>
+                                </template>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="pagination is-centered mt-4" role="navigation" x-show="hasPages()" x-cloak>
+            <button class="pagination-previous" :disabled="pagination.page <= 1"
+                    @click="goToPage(pagination.page - 1)">
+                <?= __e('tags.list_previous') ?>
+            </button>
+            <button class="pagination-next" :disabled="pagination.page >= pagination.total_pages"
+                    @click="goToPage(pagination.page + 1)">
+                <?= __e('tags.list_next') ?>
+            </button>
+            <ul class="pagination-list">
+                <template x-for="p in pagination.total_pages" :key="p">
+                    <li>
+                        <button class="pagination-link" :class="{ 'is-current': p === pagination.page }"
+                                @click="goToPage(p)" x-text="p"></button>
+                    </li>
+                </template>
+            </ul>
+        </nav>
     </div>
 </div>
-    <?php endforeach; ?>
-</div>
-
-    <?php if ($pagination['pages'] > 1) : ?>
-<!-- Pagination -->
-<nav class="level mt-4">
-    <div class="level-left">
-        <div class="level-item">
-            <span class="tag is-info is-medium">
-                <?= $totalCount === 1
-                    ? __('tags.list_count_one', ['count' => $totalCount])
-                    : __('tags.list_count_many', ['count' => $totalCount]) ?>
-            </span>
-        </div>
-    </div>
-    <div class="level-right">
-        <div class="level-item">
-            <?php
-            echo PageLayoutHelper::buildPager(
-                $pagination['currentPage'],
-                $pagination['pages'],
-                $baseUrl,
-                'form2',
-                ['query' => $currentQuery, 'sort' => $currentSort]
-            );
-            ?>
-        </div>
-    </div>
-</nav>
-    <?php endif; ?>
-</form>
-<?php endif; ?>

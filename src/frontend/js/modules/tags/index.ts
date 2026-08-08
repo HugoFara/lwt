@@ -5,5 +5,9 @@
  * @since   3.0.0
  */
 
+// API
+export * from './api/tags_api';
+
 // Side-effect imports (pages)
 import './pages/tag_list';
+import './pages/tag_list_app';

@@ -54,6 +54,13 @@ class EndpointMethodReachabilityTest extends TestCase
             // but ROUTES listed languages as GET/POST/DELETE only.
             'update a language'     => ['PUT', '/api/v1/languages/5'],
 
+            // Tag management: the list page's CRUD.
+            'list term tags'        => ['GET', '/api/v1/tags/term/list'],
+            'create a term tag'     => ['POST', '/api/v1/tags/term'],
+            'update a term tag'     => ['PUT', '/api/v1/tags/term/7'],
+            'delete a term tag'     => ['DELETE', '/api/v1/tags/term/7'],
+            'delete text tags'      => ['DELETE', '/api/v1/tags/text'],
+
             // Anchors on surfaces that already work, so a regression in the
             // fallback itself is caught rather than only the books entry.
             'set a term status'     => ['PUT', '/api/v1/terms/5/status'],
@@ -88,10 +95,10 @@ class EndpointMethodReachabilityTest extends TestCase
     #[Test]
     public function theRegistryStillRejectsUnsupportedMethods(): void
     {
-        // Nothing in the API accepts PUT on the bare tags collection.
+        // Nothing in the API accepts PATCH anywhere.
         $this->assertNotIsString(
-            Endpoints::resolve('DELETE', '/api/v1/tags'),
-            'tags is registered GET-only; DELETE should not resolve.'
+            Endpoints::resolve('PATCH', '/api/v1/tags'),
+            'No endpoint registers PATCH; it should not resolve.'
         );
     }
 

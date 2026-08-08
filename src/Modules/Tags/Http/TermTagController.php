@@ -273,22 +273,9 @@ class TermTagController extends AbstractCrudController
 
         TagsFacade::getAllTermTags(true); // Refresh cache
 
-        // Get counts and pagination
-        $totalCount = $this->facade->getCount($this->currentQuery);
-        $pagination = $this->facade->getPagination($totalCount, $this->currentPage);
-
-        // Get sort column
-        $sortColumn = $this->facade->getSortColumn($this->currentSort);
-
-        // Get tags list
-        $tags = $this->facade->getList(
-            $this->currentQuery,
-            $sortColumn,
-            $pagination['currentPage'],
-            $pagination['perPage']
-        );
-
-        // Set view variables
+        // Rows, counts and pagination all come from
+        // GET /api/v1/tags/{type}/list; only the initial filter and sort
+        // travel with the page so a bookmarked URL still opens on them.
         $currentQuery = $this->currentQuery;
         $currentSort = $this->currentSort;
         $isTextTag = false;

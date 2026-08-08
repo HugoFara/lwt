@@ -57,9 +57,12 @@ class Endpoints
         'settings' => ['POST'],
         'settings/theme-path' => ['GET'],
         'statuses' => ['GET'],
-        'tags' => ['GET'],
-        'tags/term' => ['GET'],
-        'tags/text' => ['GET'],
+        // A URL carrying an ID never matches these sub-keys exactly, so
+        // getMethodsForEndpoint() falls back to the bare 'tags' entry; that
+        // entry has to permit every method any tags/... route uses.
+        'tags' => ['GET', 'POST', 'PUT', 'DELETE'],
+        'tags/term' => ['GET', 'POST', 'DELETE'],
+        'tags/text' => ['GET', 'POST', 'DELETE'],
         'terms' => ['GET', 'POST', 'PUT', 'DELETE'],
         'terms/imported' => ['GET'],
         'terms/new' => ['POST'],
