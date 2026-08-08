@@ -114,6 +114,11 @@ class Endpoints
         'local-dictionaries/preview' => ['POST'],
         'local-dictionaries/import-curated' => ['POST'],
         'local-dictionaries/entries' => ['GET', 'POST', 'PUT', 'DELETE'],
+        // Admin-only user management. The bare 'admin' entry is what a URL
+        // carrying an ID actually matches, so it has to permit every method;
+        // UserManagementApiHandler enforces the admin role itself.
+        'admin' => ['GET', 'POST', 'PUT', 'DELETE'],
+        'admin/users' => ['GET', 'POST'],
         'activity' => ['GET'],
         'activity/streak' => ['GET'],
         'activity/calendar' => ['GET'],

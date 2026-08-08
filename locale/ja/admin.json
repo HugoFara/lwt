@@ -177,5 +177,12 @@
     "users.flash.deleted": "ユーザーが削除されました",
     "users.flash.not_found": "エラー：ユーザーが見つかりません",
     "users.flash.error_prefix": "エラー：{message}",
-    "users.flash.unknown_error": "不明なエラー"
+    "users.flash.unknown_error": "不明なエラー",
+    "users_loading": "ユーザーを読み込んでいます...",
+    "users_previous": "前へ",
+    "users_next": "次へ",
+    "users.errors.load_failed": "ユーザーを読み込めませんでした",
+    "users.errors.action_failed": "操作に失敗しました",
+    "users.confirm_delete": "ユーザー「{username}」を削除しますか？元に戻せません。",
+    "users.confirm_role": "{username} を {role} に変更しますか？"
 }

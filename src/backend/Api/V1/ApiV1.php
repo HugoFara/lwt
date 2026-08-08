@@ -31,6 +31,7 @@ use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 use Lwt\Modules\Tags\Http\TagApiHandler;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
+use Lwt\Modules\Admin\Http\UserManagementApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiRouter;
 use Lwt\Modules\Vocabulary\Http\WordFamilyApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
@@ -101,6 +102,7 @@ class ApiV1
         'tts'                => NlpServiceHandler::class,
         'whisper'            => WhisperApiHandler::class,
         'activity'           => ActivityApiHandler::class,
+        'admin'              => UserManagementApiHandler::class,
     ];
 
     private Container $container;

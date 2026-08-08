@@ -61,6 +61,16 @@ class EndpointMethodReachabilityTest extends TestCase
             'delete a term tag'     => ['DELETE', '/api/v1/tags/term/7'],
             'delete text tags'      => ['DELETE', '/api/v1/tags/text'],
 
+            // Admin user management. The handler enforces the admin role
+            // itself; these only assert the registry lets the request through.
+            'list users'            => ['GET', '/api/v1/admin/users'],
+            'read one user'         => ['GET', '/api/v1/admin/users/4'],
+            'create a user'         => ['POST', '/api/v1/admin/users'],
+            'update a user'         => ['PUT', '/api/v1/admin/users/4'],
+            'set a user role'       => ['PUT', '/api/v1/admin/users/4/role'],
+            'set a user status'     => ['PUT', '/api/v1/admin/users/4/status'],
+            'delete a user'         => ['DELETE', '/api/v1/admin/users/4'],
+
             // Anchors on surfaces that already work, so a regression in the
             // fallback itself is caught rather than only the books entry.
             'set a term status'     => ['PUT', '/api/v1/terms/5/status'],

@@ -177,5 +177,12 @@
     "users.flash.deleted": "Utente eliminato con successo",
     "users.flash.not_found": "Errore: utente non trovato",
     "users.flash.error_prefix": "Errore: {message}",
-    "users.flash.unknown_error": "Errore sconosciuto"
+    "users.flash.unknown_error": "Errore sconosciuto",
+    "users_loading": "Caricamento utenti...",
+    "users_previous": "Precedente",
+    "users_next": "Successivo",
+    "users.errors.load_failed": "Impossibile caricare gli utenti",
+    "users.errors.action_failed": "Azione non riuscita",
+    "users.confirm_delete": "Eliminare l’utente «{username}»? L’operazione è irreversibile.",
+    "users.confirm_role": "Cambiare {username} in {role}?"
 }

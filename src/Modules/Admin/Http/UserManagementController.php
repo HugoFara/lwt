@@ -46,84 +46,39 @@ class UserManagementController extends BaseController
     }
 
     /**
-     * List users with pagination and search.
+     * Render the user list scaffold.
+     *
+     * Rows, statistics and paging come from GET /api/v1/admin/users; only the
+     * initial search and sort travel with the page so a bookmarked URL still
+     * opens on them.
      *
      * @psalm-suppress UnusedVariable, UnresolvableInclude
      */
     public function index(array $params): void
     {
-        $page = $this->paramInt('page', 1, 1);
-        $perPage = $this->paramInt('per_page', 20, 1, 100);
-        $sortBy = $this->param('sort', 'username');
-        $direction = $this->param('dir', 'ASC');
-        $search = $this->param('search');
-        $currentAdminId = Globals::getCurrentUserId();
-
-        $data = $this->listUsers->execute(
-            $page ?? 1,
-            $perPage ?? 20,
-            $sortBy,
-            $direction,
-            $search
-        );
-        $data['current_admin_id'] = $currentAdminId;
-        $data['search'] = $search;
-        $data['sort'] = $sortBy;
-        $data['dir'] = $direction;
-
-        $message = $this->param('message');
+        $data = [
+            'search' => $this->param('search'),
+            'sort' => $this->param('sort', 'username'),
+            'dir' => $this->param('dir', 'ASC'),
+        ];
 
         $this->render('User Management', true);
-        $this->message($message, true);
+        $this->message($this->param('message'), true);
         include $this->viewPath . 'list.php';
         $this->endRender();
     }
 
     /**
-     * Show create form or process new user creation.
+     * Render the create-user scaffold.
      *
-     * @psalm-suppress UnusedVariable, UnresolvableInclude, InvalidReturnStatement
+     * Creation itself goes through POST /api/v1/admin/users.
+     *
+     * @psalm-suppress UnusedVariable, UnresolvableInclude
      */
     public function create(array $params): void
     {
-        if ($this->isPost()) {
-            $result = $this->createUser->execute(
-                $this->param('username'),
-                $this->param('email'),
-                $this->param('password'),
-                $this->param('role', 'user'),
-                $this->hasParam('is_active')
-            );
-
-            if ($result['success']) {
-                $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.created')))->send();
-                return;
-            }
-
-            $errors = $result['errors'] ?? [];
-            $formData = [
-                'username' => $this->param('username'),
-                'email' => $this->param('email'),
-                'role' => $this->param('role', 'user'),
-                'is_active' => $this->hasParam('is_active'),
-            ];
-
-            $isEdit = false;
-            $user = null;
-            $currentAdminId = Globals::getCurrentUserId();
-
-            $this->render('Create User', true);
-            $this->message(__('admin.users.flash.error_prefix', ['message' => implode('. ', $errors)]), false);
-            include $this->viewPath . 'form.php';
-            $this->endRender();
-            return;
-        }
-
         $isEdit = false;
         $user = null;
-        $errors = [];
-        $formData = ['username' => '', 'email' => '', 'role' => 'user', 'is_active' => true];
-        $currentAdminId = Globals::getCurrentUserId();
 
         $this->render('Create User', true);
         include $this->viewPath . 'form.php';
@@ -131,135 +86,27 @@ class UserManagementController extends BaseController
     }
 
     /**
-     * Show edit form or process user update.
+     * Render the edit-user scaffold.
      *
-     * @psalm-suppress UnusedVariable, UnresolvableInclude, InvalidReturnStatement
+     * Saving goes through PUT /api/v1/admin/users/{id}. The user is looked up
+     * here only to 404 early on a bad ID; the form's values come from the API.
+     *
+     * @psalm-suppress UnusedVariable, UnresolvableInclude
      */
     public function edit(array $params): void
     {
         $userId = (int) ($params['id'] ?? 0);
-        $currentAdminId = Globals::getCurrentUserId() ?? 0;
-
-        if ($this->isPost()) {
-            $result = $this->updateUser->execute(
-                $userId,
-                $currentAdminId,
-                $this->param('username'),
-                $this->param('email'),
-                $this->param('password'),
-                $this->param('role', 'user'),
-                $this->hasParam('is_active')
-            );
-
-            if ($result['success']) {
-                $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.updated')))->send();
-                return;
-            }
-
-            $errors = $result['errors'] ?? [];
-            $user = $this->userRepository->find($userId);
-
-            if ($user === null) {
-                $this->redirect(
-                    '/admin/users?message=' . urlencode(__('admin.users.flash.not_found'))
-                )->send();
-                return;
-            }
-
-            $formData = [
-                'username' => $this->param('username'),
-                'email' => $this->param('email'),
-                'role' => $this->param('role', 'user'),
-                'is_active' => $this->hasParam('is_active'),
-            ];
-            $isEdit = true;
-
-            $this->render('Edit User', true);
-            $this->message(__('admin.users.flash.error_prefix', ['message' => implode('. ', $errors)]), false);
-            include $this->viewPath . 'form.php';
-            $this->endRender();
-            return;
-        }
-
         $user = $this->userRepository->find($userId);
+
         if ($user === null) {
             $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.not_found')))->send();
             return;
         }
 
         $isEdit = true;
-        $errors = [];
-        $formData = [
-            'username' => $user->username(),
-            'email' => $user->email(),
-            'role' => $user->role(),
-            'is_active' => $user->isActive(),
-        ];
 
         $this->render('Edit User', true);
         include $this->viewPath . 'form.php';
         $this->endRender();
-    }
-
-    /**
-     * Delete a user (POST only).
-     */
-    public function delete(array $params): void
-    {
-        $userId = (int) ($params['id'] ?? 0);
-        $currentAdminId = Globals::getCurrentUserId() ?? 0;
-
-        $result = $this->deleteUser->execute($userId, $currentAdminId);
-
-        if ($result['success']) {
-            $this->redirect('/admin/users?message=' . urlencode(__('admin.users.flash.deleted')))->send();
-        } else {
-            $error = $result['error'] ?? __('admin.users.flash.unknown_error');
-            $this->redirect(
-                '/admin/users?message=' . urlencode(__('admin.users.flash.error_prefix', ['message' => $error]))
-            )->send();
-        }
-    }
-
-    /**
-     * Activate a user (POST, JSON response).
-     */
-    public function activate(array $params): void
-    {
-        $userId = (int) ($params['id'] ?? 0);
-        $currentAdminId = Globals::getCurrentUserId() ?? 0;
-
-        $result = $this->toggleUserStatus->activate($userId, $currentAdminId);
-        $this->json($result, $result['success'] ? 200 : 400)->send();
-    }
-
-    /**
-     * Deactivate a user (POST, JSON response).
-     */
-    public function deactivate(array $params): void
-    {
-        $userId = (int) ($params['id'] ?? 0);
-        $currentAdminId = Globals::getCurrentUserId() ?? 0;
-
-        $result = $this->toggleUserStatus->deactivate($userId, $currentAdminId);
-        $this->json($result, $result['success'] ? 200 : 400)->send();
-    }
-
-    /**
-     * Set user role (POST, JSON response).
-     */
-    public function setRole(array $params): void
-    {
-        $userId = (int) ($params['id'] ?? 0);
-        $currentAdminId = Globals::getCurrentUserId() ?? 0;
-        $action = $this->param('action', 'demote');
-
-        if ($action === 'promote') {
-            $result = $this->toggleUserRole->promote($userId, $currentAdminId);
-        } else {
-            $result = $this->toggleUserRole->demote($userId, $currentAdminId);
-        }
-
-        $this->json($result, $result['success'] ? 200 : 400)->send();
     }
 }

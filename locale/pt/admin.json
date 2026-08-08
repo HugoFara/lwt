@@ -177,5 +177,12 @@
     "users.flash.deleted": "Usuário excluído com sucesso",
     "users.flash.not_found": "Erro: Usuário não encontrado",
     "users.flash.error_prefix": "Erro: {message}",
-    "users.flash.unknown_error": "Erro desconhecido"
+    "users.flash.unknown_error": "Erro desconhecido",
+    "users_loading": "Carregando usuários...",
+    "users_previous": "Anterior",
+    "users_next": "Próximo",
+    "users.errors.load_failed": "Não foi possível carregar os usuários",
+    "users.errors.action_failed": "A ação falhou",
+    "users.confirm_delete": "Excluir o usuário \"{username}\"? Isso não pode ser desfeito.",
+    "users.confirm_role": "Alterar {username} para {role}?"
 }

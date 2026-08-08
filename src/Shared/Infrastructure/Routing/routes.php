@@ -591,39 +591,14 @@ function registerRoutes(Router $router): void
         ADMIN_MIDDLEWARE
     );
 
-    // User Management (Admin module)
+    // User Management (Admin module). Only the three page routes remain:
+    // every mutation now goes through /api/v1/admin/users, which enforces the
+    // admin role itself rather than relying on ADMIN_MIDDLEWARE.
     $router->get('/admin/users', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@index', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@index', ADMIN_MIDDLEWARE);
     $router->get('/admin/users/new', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@create', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users/new', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@create', ADMIN_MIDDLEWARE);
     $router->get(
         '/admin/users/{id:int}/edit',
         'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/edit',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/delete',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@delete',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/activate',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@activate',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/deactivate',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@deactivate',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/role',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@setRole',
         ADMIN_MIDDLEWARE
     );
 

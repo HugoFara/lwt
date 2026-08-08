@@ -177,5 +177,12 @@
     "users.flash.deleted": "User deleted successfully",
     "users.flash.not_found": "Error: User not found",
     "users.flash.error_prefix": "Error: {message}",
-    "users.flash.unknown_error": "Unknown error"
+    "users.flash.unknown_error": "Unknown error",
+    "users_loading": "Loading users...",
+    "users_previous": "Previous",
+    "users_next": "Next",
+    "users.errors.load_failed": "Could not load users",
+    "users.errors.action_failed": "The action failed",
+    "users.confirm_delete": "Delete the user \"{username}\"? This cannot be undone.",
+    "users.confirm_role": "Change {username} to {role}?"
 }

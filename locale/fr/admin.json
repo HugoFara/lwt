@@ -177,5 +177,12 @@
     "users.flash.deleted": "Utilisateur supprimé avec succès",
     "users.flash.not_found": "Erreur : utilisateur non trouvé",
     "users.flash.error_prefix": "Erreur : {message}",
-    "users.flash.unknown_error": "Erreur inconnue"
+    "users.flash.unknown_error": "Erreur inconnue",
+    "users_loading": "Chargement des utilisateurs...",
+    "users_previous": "Précédent",
+    "users_next": "Suivant",
+    "users.errors.load_failed": "Impossible de charger les utilisateurs",
+    "users.errors.action_failed": "L’action a échoué",
+    "users.confirm_delete": "Supprimer l’utilisateur « {username} » ? Cette action est irréversible.",
+    "users.confirm_role": "Changer {username} en {role} ?"
 }
