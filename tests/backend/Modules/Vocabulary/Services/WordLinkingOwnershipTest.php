@@ -45,12 +45,43 @@ class WordLinkingOwnershipTest extends TestCase
     /** A text ID used only by this test's fixtures. */
     private const FIXTURE_TEXT_ID = 32100;
 
+    /** Language the fixtures hang off, or null when the database has none. */
+    private ?int $languageId = null;
+
+    /** Sentence the fixture occurrences point at. */
+    private ?int $sentenceId = null;
+
+    /** Word the linking is expected to point occurrences at. */
+    private ?int $wordId = null;
+
     protected function setUp(): void
     {
         if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
             $this->markTestSkipped('Database connection required');
         }
         $this->service = new WordLinkingService();
+
+        // word_occurrences carries foreign keys on Ti2TxID, Ti2SeID and
+        // Ti2WoID, so the fixtures need real parent rows rather than made-up
+        // IDs.
+        $this->languageId = $this->firstOwnedLanguageId();
+        if ($this->languageId === null) {
+            return;
+        }
+
+        Connection::preparedExecute(
+            'INSERT IGNORE INTO texts (TxID, TxLgID, TxTitle, TxText) VALUES (?, ?, ?, ?)',
+            [self::FIXTURE_TEXT_ID, $this->languageId, 'WordLinkingOwnershipTest', 'fixture']
+        );
+        $this->sentenceId = (int) Connection::preparedInsert(
+            'INSERT INTO sentences (SeLgID, SeTxID, SeOrder, SeText, SeFirstPos)
+             VALUES (?, ?, 1, ?, 1)',
+            [$this->languageId, self::FIXTURE_TEXT_ID, 'fixture']
+        );
+        $this->wordId = (int) Connection::preparedInsert(
+            'INSERT INTO words (WoLgID, WoText, WoTextLC, WoStatus) VALUES (?, ?, ?, 1)',
+            [$this->languageId, 'cylinkfixture', 'cylinkfixture' . substr(uniqid(), -6)]
+        );
     }
 
     protected function tearDown(): void
@@ -62,6 +93,16 @@ class WordLinkingOwnershipTest extends TestCase
             );
         }
         $this->rows = [];
+
+        if ($this->wordId !== null) {
+            Connection::preparedExecute('DELETE FROM words WHERE WoID = ?', [$this->wordId]);
+        }
+        if ($this->sentenceId !== null) {
+            Connection::preparedExecute('DELETE FROM sentences WHERE SeID = ?', [$this->sentenceId]);
+        }
+        Connection::preparedExecute('DELETE FROM texts WHERE TxID = ?', [self::FIXTURE_TEXT_ID]);
+        $this->wordId = null;
+        $this->sentenceId = null;
     }
 
     /**
@@ -75,8 +116,8 @@ class WordLinkingOwnershipTest extends TestCase
         Connection::preparedExecute(
             'INSERT INTO word_occurrences
              (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
-             VALUES (NULL, ?, ?, 1, ?, 1, ?)',
-            [self::FOREIGN_LANGUAGE_ID, self::FIXTURE_TEXT_ID, $order, $text]
+             VALUES (NULL, ?, ?, ?, ?, 1, ?)',
+            [self::FOREIGN_LANGUAGE_ID, self::FIXTURE_TEXT_ID, $this->sentenceId, $order, $text]
         );
         $this->rows[] = [self::FIXTURE_TEXT_ID, $order];
     }
@@ -99,12 +140,16 @@ class WordLinkingOwnershipTest extends TestCase
     #[Test]
     public function linkingDoesNotTouchOccurrencesOfAForeignLanguage(): void
     {
+        if ($this->languageId === null) {
+            $this->markTestSkipped('No language available in the test database');
+        }
+
         $term = 'cylinktest' . substr(uniqid(), -6);
         $this->makeForeignOccurrence(9001, $term);
 
-        // 987654 stands in for a word the caller just created. The language,
+        // The word stands in for one the caller just created. The language,
         // however, is not theirs.
-        $this->service->linkToTextItems(987654, self::FOREIGN_LANGUAGE_ID, $term);
+        $this->service->linkToTextItems((int) $this->wordId, self::FOREIGN_LANGUAGE_ID, $term);
 
         $this->assertNull(
             $this->linkedWordId(9001),
@@ -121,7 +166,7 @@ class WordLinkingOwnershipTest extends TestCase
     {
         // The gate must not break the ordinary path. In single-user mode every
         // language is the caller's, which is how most installs run.
-        $langId = $this->firstOwnedLanguageId();
+        $langId = $this->languageId;
         if ($langId === null) {
             $this->markTestSkipped('No language available in the test database');
         }
@@ -130,15 +175,15 @@ class WordLinkingOwnershipTest extends TestCase
         Connection::preparedExecute(
             'INSERT INTO word_occurrences
              (Ti2WoID, Ti2LgID, Ti2TxID, Ti2SeID, Ti2Order, Ti2WordCount, Ti2Text)
-             VALUES (NULL, ?, ?, 1, ?, 1, ?)',
-            [$langId, self::FIXTURE_TEXT_ID, 9002, $term]
+             VALUES (NULL, ?, ?, ?, ?, 1, ?)',
+            [$langId, self::FIXTURE_TEXT_ID, $this->sentenceId, 9002, $term]
         );
         $this->rows[] = [self::FIXTURE_TEXT_ID, 9002];
 
-        $this->service->linkToTextItems(987654, $langId, $term);
+        $this->service->linkToTextItems((int) $this->wordId, $langId, $term);
 
         $this->assertSame(
-            987654,
+            $this->wordId,
             $this->linkedWordId(9002),
             'A language the caller owns must still link normally.'
         );

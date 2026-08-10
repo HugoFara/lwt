@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace Lwt\Shared\Infrastructure\Database;
 
 use Lwt\Shared\Infrastructure\ApplicationInfo;
+use Lwt\Shared\Infrastructure\Exception\DatabaseException;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Utilities\ErrorHandler;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
@@ -33,6 +34,45 @@ use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
  */
 class Migrations
 {
+    /**
+     * Status recorded for a migration whose statements all succeeded.
+     */
+    public const STATUS_APPLIED = 'applied';
+
+    /**
+     * Status recorded for a migration that had at least one failing statement.
+     */
+    public const STATUS_FAILED = 'failed';
+
+    /**
+     * How many times a failed migration is retried before being given up on.
+     *
+     * Retries only happen when new migrations appear (see update()), so this
+     * counts upgrades, not requests.
+     */
+    public const MAX_ATTEMPTS = 3;
+
+    /**
+     * MySQL error codes that mean "nothing to do here", not "this broke".
+     *
+     * Old migrations rename or alter tables that a fresh install never had,
+     * because db/schema/baseline.sql already creates the modern schema. Those
+     * statements fail by design, so they must not be reported as failures —
+     * otherwise every healthy install would show migration errors.
+     *
+     * @var array<int>
+     */
+    private const HARMLESS_SQL_ERRORS = [
+        1007, // ER_DB_CREATE_EXISTS
+        1022, // ER_DUP_KEY
+        1050, // ER_TABLE_EXISTS_ERROR
+        1060, // ER_DUP_FIELDNAME: baseline already has the column
+        1061, // ER_DUP_KEYNAME
+        1091, // ER_CANT_DROP_FIELD_OR_KEY: already dropped
+        1146, // ER_NO_SUCH_TABLE: legacy table a fresh install never had
+        1826, // ER_FK_DUP_NAME
+    ];
+
     /**
      * Drop all foreign key constraints from all tables in the database.
      *
@@ -71,6 +111,123 @@ class Migrations
                 );
             } catch (\RuntimeException $e) {
                 // FK might already be dropped, continue
+            }
+        }
+    }
+
+    /**
+     * Make every reference column use the same integer type as the key it
+     * points at.
+     *
+     * LWT names foreign key columns after the primary key they reference:
+     * `texts.TxLgID` points at `languages.LgID`, `word_occurrences.Ti2TxID` at
+     * `texts.TxID`, and so on. Over the years several of those primary keys
+     * were widened (`languages.LgID` went from `tinyint(3)` to `int(11)` in
+     * 20251221_120000_add_inter_table_foreign_keys.sql) without every
+     * referencing column following along.
+     *
+     * A mismatched pair makes InnoDB reject the foreign key with errno 150,
+     * "Foreign key constraint is incorrectly formed" — even under
+     * FOREIGN_KEY_CHECKS = 0. When the constraint sits inside a CREATE TABLE,
+     * the whole table is never created, which is how installs ended up without
+     * `books` or `local_dictionaries` and crashed with "Table 'books' doesn't
+     * exist" (issue #247).
+     *
+     * Each family is aligned on its widest member, so a column is only ever
+     * widened, never narrowed: no value can be truncated. Families that
+     * already agree are left alone, making this a no-op on healthy installs.
+     *
+     * Callers must have dropped foreign keys first — ALTER TABLE MODIFY is
+     * refused on a column an FK points at.
+     *
+     * @return void
+     */
+    public static function alignReferenceColumnTypes(): void
+    {
+        // Primary keys other tables reference, by suffix. Any column whose name
+        // ends with the suffix belongs to that family.
+        $keySuffixes = [
+            'LgID', 'TxID', 'WoID', 'SeID', 'TgID', 'T2ID', 'UsID', 'NfID', 'BkID', 'LdID',
+        ];
+
+        foreach ($keySuffixes as $suffix) {
+            self::alignColumnFamily($suffix);
+        }
+    }
+
+    /**
+     * Align one family of reference columns on its widest integer type.
+     *
+     * @param string $suffix Column name suffix identifying the family (e.g. 'LgID')
+     *
+     * @return void
+     */
+    private static function alignColumnFamily(string $suffix): void
+    {
+        $columns = Connection::preparedFetchAll(
+            "SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, IS_NULLABLE, EXTRA
+             FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = ? AND COLUMN_NAME LIKE ?",
+            [Globals::getDatabaseName(), '%' . $suffix]
+        );
+
+        // Integer types from narrowest to widest; anything else is left alone.
+        $widths = [
+            'tinyint' => 1, 'smallint' => 2, 'mediumint' => 3, 'int' => 4, 'bigint' => 5,
+        ];
+
+        $family = [];
+        $widest = null;
+        foreach ($columns as $column) {
+            $dataType = is_string($column['DATA_TYPE'] ?? null)
+                ? strtolower((string) $column['DATA_TYPE'])
+                : '';
+            if (!isset($widths[$dataType])) {
+                continue;
+            }
+            $family[] = $column;
+            if ($widest === null || $widths[$dataType] > $widths[$widest['type']]) {
+                $widest = [
+                    'type' => $dataType,
+                    'columnType' => is_string($column['COLUMN_TYPE'] ?? null)
+                        ? (string) $column['COLUMN_TYPE']
+                        : '',
+                ];
+            }
+        }
+
+        if ($widest === null || $widest['columnType'] === '') {
+            return;
+        }
+
+        foreach ($family as $column) {
+            $table = $column['TABLE_NAME'] ?? null;
+            $name = $column['COLUMN_NAME'] ?? null;
+            $dataType = is_string($column['DATA_TYPE'] ?? null)
+                ? strtolower((string) $column['DATA_TYPE'])
+                : '';
+            if (!is_string($table) || !is_string($name) || $dataType === $widest['type']) {
+                continue;
+            }
+
+            $escapedTable = '`' . str_replace('`', '``', $table) . '`';
+            $escapedColumn = '`' . str_replace('`', '``', $name) . '`';
+            // Preserve nullability and AUTO_INCREMENT; only the width changes.
+            $nullable = ($column['IS_NULLABLE'] ?? 'YES') === 'YES' ? 'NULL' : 'NOT NULL';
+            $extra = is_string($column['EXTRA'] ?? null)
+                && stripos((string) $column['EXTRA'], 'auto_increment') !== false
+                ? ' AUTO_INCREMENT'
+                : '';
+
+            try {
+                Connection::execute(
+                    "ALTER TABLE $escapedTable
+                     MODIFY COLUMN $escapedColumn {$widest['columnType']} $nullable$extra"
+                );
+            } catch (\RuntimeException $e) {
+                error_log(
+                    "Could not align $table.$name to {$widest['columnType']} - " . $e->getMessage()
+                );
             }
         }
     }
@@ -155,40 +312,195 @@ class Migrations
     }
 
     /**
-     * Get list of migrations that have already been applied.
+     * Get list of migrations that ran without any failing statement.
      *
-     * @return array<string> List of applied migration filenames
+     * @return array<string> List of successfully applied migration filenames
      */
     public static function getAppliedMigrations(): array
     {
+        return self::fetchMigrationNames(
+            "SELECT filename FROM _migrations WHERE status = '" . self::STATUS_APPLIED . "'"
+        );
+    }
+
+    /**
+     * Get list of migrations that have an entry in `_migrations`, whatever
+     * their outcome.
+     *
+     * These are the migrations that have already been attempted at least once,
+     * so they are not "new" any more.
+     *
+     * @return array<string> List of recorded migration filenames
+     */
+    public static function getRecordedMigrations(): array
+    {
+        return self::fetchMigrationNames("SELECT filename FROM _migrations");
+    }
+
+    /**
+     * Get migrations that failed and are still worth retrying.
+     *
+     * A migration is retried until MAX_ATTEMPTS is reached; past that it stays
+     * on record as failed so an administrator can investigate.
+     *
+     * @return array<string> List of failed migration filenames
+     */
+    public static function getRetryableMigrations(): array
+    {
+        return self::fetchMigrationNames(
+            "SELECT filename FROM _migrations
+             WHERE status = '" . self::STATUS_FAILED . "' AND attempts < " . self::MAX_ATTEMPTS
+        );
+    }
+
+    /**
+     * Get the migrations that failed, with the error that made them fail.
+     *
+     * Meant for administrative reporting: a non-empty result means the schema
+     * is incomplete and some features will fail at runtime.
+     *
+     * @return array<array{filename: string, attempts: int, error: string}> Failed migrations
+     */
+    public static function getFailedMigrations(): array
+    {
         try {
-            $rows = Connection::fetchAll("SELECT filename FROM _migrations");
-            $filenames = [];
-            foreach ($rows as $row) {
-                if (isset($row['filename']) && is_string($row['filename'])) {
-                    $filenames[] = $row['filename'];
-                }
+            $rows = Connection::fetchAll(
+                "SELECT filename, attempts, error FROM _migrations
+                 WHERE status = '" . self::STATUS_FAILED . "'
+                 ORDER BY filename"
+            );
+        } catch (\RuntimeException $e) {
+            // Table or columns don't exist yet
+            return [];
+        }
+
+        $failed = [];
+        foreach ($rows as $row) {
+            if (!isset($row['filename']) || !is_string($row['filename'])) {
+                continue;
             }
-            return $filenames;
+            $attempts = $row['attempts'] ?? 0;
+            $error = $row['error'] ?? '';
+            $failed[] = [
+                'filename' => $row['filename'],
+                'attempts' => is_numeric($attempts) ? (int) $attempts : 0,
+                'error'    => is_string($error) ? $error : '',
+            ];
+        }
+        return $failed;
+    }
+
+    /**
+     * Run a query returning a `filename` column and collect the values.
+     *
+     * @param string $sql Query selecting the filename column
+     *
+     * @return array<string> List of migration filenames
+     */
+    private static function fetchMigrationNames(string $sql): array
+    {
+        try {
+            $rows = Connection::fetchAll($sql);
         } catch (\RuntimeException $e) {
             // Table doesn't exist yet
             return [];
         }
+
+        $filenames = [];
+        foreach ($rows as $row) {
+            if (isset($row['filename']) && is_string($row['filename'])) {
+                $filenames[] = $row['filename'];
+            }
+        }
+        return $filenames;
     }
 
     /**
-     * Record a migration as applied with its checksum.
+     * Run every statement of one migration file.
      *
-     * @param string $filename The migration filename
-     * @param string $checksum SHA-256 hash of the migration file
+     * Statements are independent: one failing statement does not stop the
+     * others, because a migration often mixes work that is still needed with
+     * work a fresh install already has.
+     *
+     * @param string $filepath Full path to the migration file
+     * @param string $filename Migration filename, for logging
+     *
+     * @return string|null The first real error, or null when nothing broke
+     */
+    private static function runMigrationFile(string $filepath, string $filename): ?string
+    {
+        $firstError = null;
+        foreach (SqlFileParser::parseFile($filepath) as $sql_query) {
+            if (trim($sql_query) === '') {
+                continue;
+            }
+            try {
+                Connection::execute($sql_query);
+            } catch (\RuntimeException $e) {
+                // Log per-statement failure but continue with remaining
+                // statements. This handles fresh installs where baseline
+                // creates modern tables and legacy migrations reference
+                // old table names that no longer exist.
+                error_log("Migration failed: $filename - " . $e->getMessage());
+                if ($firstError === null && !self::isHarmlessFailure($e)) {
+                    $firstError = $e->getMessage();
+                }
+            }
+        }
+        return $firstError;
+    }
+
+    /**
+     * Tell an expected statement failure apart from a real one.
+     *
+     * @param \RuntimeException $e Exception raised while running a statement
+     *
+     * @return bool True when the failure can be safely ignored
+     */
+    private static function isHarmlessFailure(\RuntimeException $e): bool
+    {
+        if (!$e instanceof DatabaseException) {
+            return false;
+        }
+        $code = $e->getSqlErrorCode();
+        return $code !== null && in_array($code, self::HARMLESS_SQL_ERRORS, true);
+    }
+
+    /**
+     * Record the outcome of a migration run.
+     *
+     * Re-recording the same migration keeps a single row: the status and error
+     * are overwritten and the attempt counter is incremented, so a migration
+     * that failed once and succeeds on a later upgrade ends up as applied.
+     *
+     * @param string      $filename The migration filename
+     * @param string      $checksum SHA-256 hash of the migration file
+     * @param string      $status   STATUS_APPLIED or STATUS_FAILED
+     * @param string|null $error    Error message when the migration failed
      *
      * @return void
      */
-    public static function recordMigration(string $filename, string $checksum = ''): void
-    {
+    public static function recordMigration(
+        string $filename,
+        string $checksum = '',
+        string $status = self::STATUS_APPLIED,
+        ?string $error = null
+    ): void {
+        // Keep the message short enough to stay readable in the admin report.
+        if ($error !== null && mb_strlen($error) > 1000) {
+            $error = mb_substr($error, 0, 1000) . '…';
+        }
+
         Connection::preparedExecute(
-            "INSERT IGNORE INTO _migrations (filename, applied_at, checksum) VALUES (?, NOW(), ?)",
-            [$filename, $checksum]
+            "INSERT INTO _migrations (filename, applied_at, checksum, status, attempts, error)
+             VALUES (?, NOW(), ?, ?, 1, ?)
+             ON DUPLICATE KEY UPDATE
+                applied_at = NOW(),
+                checksum = VALUES(checksum),
+                status = VALUES(status),
+                attempts = attempts + 1,
+                error = VALUES(error)",
+            [$filename, $checksum, $status, $error]
         );
     }
 
@@ -287,6 +599,27 @@ class Migrations
                 "ALTER TABLE _migrations ADD COLUMN checksum VARCHAR(64) DEFAULT NULL"
             );
         }
+
+        if (!in_array('status', $columnNames)) {
+            // Track whether the migration actually ran through. Rows written
+            // before this column existed are assumed to have succeeded.
+            Connection::execute(
+                "ALTER TABLE _migrations
+                 ADD COLUMN status VARCHAR(16) NOT NULL DEFAULT '" . self::STATUS_APPLIED . "'"
+            );
+        }
+
+        if (!in_array('attempts', $columnNames)) {
+            Connection::execute(
+                "ALTER TABLE _migrations ADD COLUMN attempts INT UNSIGNED NOT NULL DEFAULT 1"
+            );
+        }
+
+        if (!in_array('error', $columnNames)) {
+            Connection::execute(
+                "ALTER TABLE _migrations ADD COLUMN error TEXT DEFAULT NULL"
+            );
+        }
     }
 
     /**
@@ -319,8 +652,23 @@ class Migrations
         // Always check for pending migrations, even if dbversion is current.
         // This handles fix migrations added after a version was released.
         $allMigrations = self::getMigrationFiles();
-        $appliedMigrations = self::getAppliedMigrations();
-        $pendingMigrations = array_diff($allMigrations, $appliedMigrations);
+        $newMigrations = array_diff($allMigrations, self::getRecordedMigrations());
+
+        // A migration that failed before gets another chance whenever an
+        // upgrade brings new migrations along: the reason it failed is often a
+        // missing prerequisite that a later migration repairs. Retrying only on
+        // upgrades (and never more than MAX_ATTEMPTS times) keeps ordinary
+        // requests from re-running broken SQL over and over.
+        $retryMigrations = [];
+        if (count($newMigrations) > 0) {
+            $retryMigrations = array_intersect(
+                self::getRetryableMigrations(),
+                $allMigrations
+            );
+        }
+
+        $pendingMigrations = array_merge($newMigrations, $retryMigrations);
+        sort($pendingMigrations);
 
         // Do DB Updates if tables seem to be old versions
         $needsVersionUpdate = $dbversion < $currversion;
@@ -364,28 +712,59 @@ class Migrations
             // The migrations will recreate FKs as needed.
             self::dropAllForeignKeys();
 
+            // With the FKs out of the way, repair reference columns that drifted
+            // from the key they point at. A migration creating a table with an
+            // FK on a mismatched column fails outright, so this has to happen
+            // before they run.
+            self::alignReferenceColumnTypes();
+
             // Disable FK checks during migrations to handle legacy data
             // that may not satisfy new FK constraints until fully migrated
             Connection::execute("SET FOREIGN_KEY_CHECKS = 0");
             try {
+                $errors = [];
                 foreach ($pendingMigrations as $filename) {
-                    $filepath = $migrationsDir . $filename;
-                    $queries = SqlFileParser::parseFile($filepath);
-                    foreach ($queries as $sql_query) {
-                        try {
-                            Connection::execute($sql_query);
-                        } catch (\RuntimeException $e) {
-                            // Log per-statement failure but continue with remaining
-                            // statements. This handles fresh installs where baseline
-                            // creates modern tables and legacy migrations reference
-                            // old table names that no longer exist.
-                            error_log("Migration failed: $filename - " . $e->getMessage());
+                    $error = self::runMigrationFile($migrationsDir . $filename, $filename);
+                    if ($error !== null) {
+                        $errors[$filename] = $error;
+                    }
+                }
+
+                // Migrations widen keys as they go, so a column can end up out
+                // of step with the key it references only *after* the run — that
+                // is what leaves fresh installs without some of their foreign
+                // keys. Realign and give the failures one more go before writing
+                // them down as failed.
+                //
+                // The foreign keys created by the run above are deliberately
+                // left in place: a column that already carries one is by
+                // definition type-compatible with its key and needs no
+                // realignment, and dropping them here would throw away the work
+                // the successful migrations just did.
+                if ($errors !== []) {
+                    self::alignReferenceColumnTypes();
+                    foreach (array_keys($errors) as $filename) {
+                        $error = self::runMigrationFile($migrationsDir . $filename, $filename);
+                        if ($error === null) {
+                            unset($errors[$filename]);
+                        } else {
+                            $errors[$filename] = $error;
                         }
                     }
-                    // Always record the migration so it won't be retried on every
-                    // request. Failed statements are logged for investigation.
-                    $checksum = self::calculateChecksum($filepath);
-                    self::recordMigration($filename, $checksum);
+                }
+
+                foreach ($pendingMigrations as $filename) {
+                    // Record the outcome. A migration with a failing statement is
+                    // recorded as failed rather than applied: marking it applied
+                    // would freeze a half-created schema in place forever, with
+                    // the missing tables only surfacing as runtime errors much
+                    // later (see issue #247).
+                    self::recordMigration(
+                        $filename,
+                        self::calculateChecksum($migrationsDir . $filename),
+                        isset($errors[$filename]) ? self::STATUS_FAILED : self::STATUS_APPLIED,
+                        $errors[$filename] ?? null
+                    );
                 }
             } finally {
                 Connection::execute("SET FOREIGN_KEY_CHECKS = 1");

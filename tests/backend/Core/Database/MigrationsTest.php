@@ -25,6 +25,9 @@ class MigrationsTest extends TestCase
     {
         $config = EnvLoader::getDatabaseConfig();
         $testDbname = "test_" . $config['dbname'];
+        // Other test classes overwrite the global database name; the schema
+        // queries below (INFORMATION_SCHEMA lookups) need it to be ours.
+        Globals::setDatabaseName($testDbname);
 
         if (!Globals::getDbConnection()) {
             try {
@@ -487,6 +490,141 @@ class MigrationsTest extends TestCase
         $columnNames = array_column($columns, 'COLUMN_NAME');
 
         $this->assertContains('applied_at', $columnNames, '_migrations should have applied_at column');
+    }
+
+    public function testRecordMigrationStoresFailureWithError(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        Migrations::upgradeMigrationsTable();
+        $testFilename = 'test_failed_' . time() . '.sql';
+
+        Migrations::recordMigration(
+            $testFilename,
+            '',
+            Migrations::STATUS_FAILED,
+            "Can't create table (errno: 150)"
+        );
+
+        $failed = Migrations::getFailedMigrations();
+        $filenames = array_column($failed, 'filename');
+        $this->assertContains($testFilename, $filenames, 'Failed migration should be reported as failed');
+
+        // A failed migration must not count as applied, otherwise the missing
+        // schema is frozen in place forever (issue #247).
+        $this->assertNotContains(
+            $testFilename,
+            Migrations::getAppliedMigrations(),
+            'Failed migration should not be listed as applied'
+        );
+        $this->assertContains(
+            $testFilename,
+            Migrations::getRecordedMigrations(),
+            'Failed migration should still be recorded'
+        );
+        $this->assertContains(
+            $testFilename,
+            Migrations::getRetryableMigrations(),
+            'A first failure should still be retryable'
+        );
+
+        Connection::preparedExecute("DELETE FROM _migrations WHERE filename = ?", [$testFilename]);
+    }
+
+    public function testRetryStopsAfterMaxAttempts(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        Migrations::upgradeMigrationsTable();
+        $testFilename = 'test_exhausted_' . time() . '.sql';
+
+        for ($i = 0; $i < Migrations::MAX_ATTEMPTS; $i++) {
+            Migrations::recordMigration($testFilename, '', Migrations::STATUS_FAILED, 'boom');
+        }
+
+        $this->assertNotContains(
+            $testFilename,
+            Migrations::getRetryableMigrations(),
+            'A migration should stop being retried after MAX_ATTEMPTS'
+        );
+        $this->assertContains(
+            $testFilename,
+            array_column(Migrations::getFailedMigrations(), 'filename'),
+            'An exhausted migration should still be reported to the admin'
+        );
+
+        Connection::preparedExecute("DELETE FROM _migrations WHERE filename = ?", [$testFilename]);
+    }
+
+    public function testRecordMigrationPromotesFailureToApplied(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        Migrations::upgradeMigrationsTable();
+        $testFilename = 'test_recovered_' . time() . '.sql';
+
+        Migrations::recordMigration($testFilename, '', Migrations::STATUS_FAILED, 'boom');
+        Migrations::recordMigration($testFilename, 'abc', Migrations::STATUS_APPLIED);
+
+        $this->assertContains(
+            $testFilename,
+            Migrations::getAppliedMigrations(),
+            'A migration that succeeds on retry should end up applied'
+        );
+        $this->assertNotContains(
+            $testFilename,
+            array_column(Migrations::getFailedMigrations(), 'filename'),
+            'A recovered migration should no longer be reported as failed'
+        );
+
+        Connection::preparedExecute("DELETE FROM _migrations WHERE filename = ?", [$testFilename]);
+    }
+
+    #[DataProvider('providerReferenceKeySuffixes')]
+    public function testReferenceColumnsShareTheSameType(string $suffix): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        Migrations::alignReferenceColumnTypes();
+
+        $columns = Connection::preparedFetchAll(
+            "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE
+             FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = ? AND COLUMN_NAME LIKE ?",
+            [Globals::getDatabaseName(), '%' . $suffix]
+        );
+
+        $this->assertNotEmpty($columns, "Expected to find $suffix columns in the test schema");
+        $expected = (string) $columns[0]['DATA_TYPE'];
+        foreach ($columns as $column) {
+            // A mismatch here makes any CREATE TABLE carrying a foreign key on
+            // that column fail with errno 150, so the table is never created
+            // (issue #247).
+            $this->assertEqualsIgnoringCase(
+                $expected,
+                $column['DATA_TYPE'],
+                "{$column['TABLE_NAME']}.{$column['COLUMN_NAME']} should match the $suffix key"
+            );
+        }
+    }
+
+    public static function providerReferenceKeySuffixes(): array
+    {
+        return [
+            'languages' => ['LgID'],
+            'texts' => ['TxID'],
+            'words' => ['WoID'],
+            'sentences' => ['SeID'],
+            'users' => ['UsID'],
+        ];
     }
 
     public function testMigrationsOnlyRunOnce(): void

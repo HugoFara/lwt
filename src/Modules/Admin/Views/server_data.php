@@ -33,10 +33,12 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  *     php?: string,
  *     db_name?: string,
  *     db_size?: float|int|string,
- *     mysql?: string
+ *     mysql?: string,
+ *     failed_migrations?: array<array{filename: string, attempts: int, error: string}>
  * } $data Server data from ServerDataService::getServerData()
  */
 $data = is_array($data ?? null) ? $data : [];
+$failedMigrations = $data['failed_migrations'] ?? [];
 
 ?>
 <div class="container" x-data="serverDataApp()">
@@ -126,6 +128,31 @@ $data = is_array($data ?? null) ? $data : [];
                 </tr>
             </tbody>
         </table>
+        <?php if ($failedMigrations !== []) { ?>
+            <article class="message is-danger">
+                <div class="message-header">
+                    <p><?= __('admin.server_data_failed_migrations') ?></p>
+                </div>
+                <div class="message-body">
+                    <p class="mb-3"><?= __('admin.server_data_failed_migrations_warning') ?></p>
+                    <ul>
+                        <?php foreach ($failedMigrations as $migration) {
+                            $name = htmlspecialchars($migration['filename'], ENT_QUOTES, 'UTF-8');
+                            $error = htmlspecialchars($migration['error'], ENT_QUOTES, 'UTF-8');
+                            $attempts = $migration['attempts'];
+                            ?>
+                            <li>
+                                <code><?php echo $name; ?></code>
+                                (<?php echo $attempts; ?>
+                                <?= __('admin.server_data_failed_migrations_attempts') ?>)
+                                <br>
+                                <small><?php echo $error; ?></small>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+            </article>
+        <?php } ?>
     </div>
 
     <!-- Client API Section -->
