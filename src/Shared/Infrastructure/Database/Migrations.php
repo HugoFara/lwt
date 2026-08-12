@@ -402,19 +402,39 @@ class Migrations
             'LgID', 'TxID', 'WoID', 'SeID', 'TgID', 'T2ID', 'UsID', 'NfID', 'BkID', 'LdID',
         ];
 
+        // Collect first, alter once per table. MODIFY COLUMN rewrites the whole
+        // table, and word_occurrences carries four of these columns: altering
+        // them one at a time rebuilt a three-million-row table four times over
+        // (~8s each) where a single statement does it once.
+        $changes = [];
         foreach ($keySuffixes as $suffix) {
-            self::alignColumnFamily($suffix);
+            foreach (self::columnFamilyChanges($suffix) as $table => $clauses) {
+                foreach ($clauses as $clause) {
+                    $changes[$table][] = $clause;
+                }
+            }
+        }
+
+        foreach ($changes as $table => $clauses) {
+            $escapedTable = '`' . str_replace('`', '``', $table) . '`';
+            try {
+                Connection::execute(
+                    "ALTER TABLE $escapedTable " . implode(', ', $clauses)
+                );
+            } catch (\RuntimeException $e) {
+                error_log("Could not align columns on $table - " . $e->getMessage());
+            }
         }
     }
 
     /**
-     * Align one family of reference columns on its widest integer type.
+     * Work out which columns of one family are out of step with their key.
      *
      * @param string $suffix Column name suffix identifying the family (e.g. 'LgID')
      *
-     * @return void
+     * @return array<string, array<string>> MODIFY clauses, keyed by table
      */
-    private static function alignColumnFamily(string $suffix): void
+    private static function columnFamilyChanges(string $suffix): array
     {
         $columns = Connection::preparedFetchAll(
             "SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, IS_NULLABLE, EXTRA
@@ -449,9 +469,10 @@ class Migrations
         }
 
         if ($widest === null || $widest['columnType'] === '') {
-            return;
+            return [];
         }
 
+        $changes = [];
         foreach ($family as $column) {
             $table = $column['TABLE_NAME'] ?? null;
             $name = $column['COLUMN_NAME'] ?? null;
@@ -462,7 +483,6 @@ class Migrations
                 continue;
             }
 
-            $escapedTable = '`' . str_replace('`', '``', $table) . '`';
             $escapedColumn = '`' . str_replace('`', '``', $name) . '`';
             // Preserve nullability and AUTO_INCREMENT; only the width changes.
             $nullable = ($column['IS_NULLABLE'] ?? 'YES') === 'YES' ? 'NULL' : 'NOT NULL';
@@ -471,17 +491,11 @@ class Migrations
                 ? ' AUTO_INCREMENT'
                 : '';
 
-            try {
-                Connection::execute(
-                    "ALTER TABLE $escapedTable
-                     MODIFY COLUMN $escapedColumn {$widest['columnType']} $nullable$extra"
-                );
-            } catch (\RuntimeException $e) {
-                error_log(
-                    "Could not align $table.$name to {$widest['columnType']} - " . $e->getMessage()
-                );
-            }
+            $changes[$table][] =
+                "MODIFY COLUMN $escapedColumn {$widest['columnType']} $nullable$extra";
         }
+
+        return $changes;
     }
 
     /**
