@@ -7,7 +7,49 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.4.0-fork] - 2026-08-12
+
 ### Fixed
+
+* **A migration that failed was recorded as applied, so the schema silently
+  stayed broken** (#247, #271). `Migrations::update()` logged each failing
+  statement and wrote the migration down as applied anyway, so it was never
+  retried and the gap only surfaced much later as a 500 in whatever feature
+  needed the missing table.
+
+  That is how installs ended up without `books` and `local_dictionaries`. Both
+  declare a foreign key on `languages(LgID)` typed `INT(11) UNSIGNED`, and where
+  `languages.LgID` was still `tinyint(3)` — the widening in
+  `20251221_120000_add_inter_table_foreign_keys.sql` having never taken effect —
+  InnoDB refused the whole `CREATE TABLE` with errno 150, even under
+  `FOREIGN_KEY_CHECKS = 0`. EPUB import, Edit Language and dictionary import
+  then crashed with *Table 'books' doesn't exist*.
+
+  The runner now records the real outcome (`status`, `attempts` and `error` on
+  `_migrations`) and retries a failure when a later upgrade may have fixed its
+  prerequisite, capped so ordinary requests never re-run broken SQL. Reference
+  columns are realigned with the key they point at, on the widest member of each
+  family, so a column is only ever widened and no value can be truncated; that
+  runs again after the migrations, which widen keys as they go. Errors that mean
+  "nothing to do" (a legacy table a fresh install never had, a column baseline
+  already creates) are not counted as failures. A repair migration recreates the
+  tables and columns the failed migrations never created, so an affected
+  database mends itself on first boot with no manual SQL. Anything still failing
+  is listed on the admin **Server Data** page instead of only in `error_log`.
+
+* **Upgrading dropped every foreign key and only put some back** (#272).
+  `update()` clears the constraints before running migrations, because
+  `ALTER TABLE MODIFY` is refused on a column one points at, but only *pending*
+  migrations recreate theirs — and the migrations that created the rest were
+  applied long ago. A 3.3.0 database upgraded to this release went from 14
+  constraints to none. Nothing looked broken, which is why it went unnoticed,
+  but cascade deletes and orphan protection were gone.
+
+  The set is now captured before the drop and whatever the run did not recreate
+  is restored after it, under the same `FOREIGN_KEY_CHECKS = 0` the migrations
+  create their keys under. Keys whose table or column has since been renamed are
+  skipped, since the migration that renamed them owns the new shape. Restoring a
+  backup does the same around its own migration run.
 
 * **`DELETE /api/v1/books/{id}` and `PUT /api/v1/books/{id}/progress` returned
   405 despite being fully implemented.** `Endpoints::ROUTES` is keyed by path,
