@@ -7,6 +7,36 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Fixed
+
+* **Finishing the RSS feed wizard saved nothing** (#262). The wizard's last
+  step posted the finished feed to `/feeds/edit`, and that route became a
+  redirect to the feeds manager in 3.4.0 when the duplicated server-rendered
+  feeds list was retired. A redirect discards the body, so the wizard ran to
+  completion and produced no feed. Affects 3.4.0 and 3.4.1. The manual "add a
+  feed" tab and the curated-source browser were unaffected.
+
+### Changed
+
+* **The text editor and the feed forms save through `/api/v1`** (#262).
+  Creating or editing a text now uses `POST /api/v1/texts` and
+  `PUT /api/v1/texts/{id}`; the feed forms use `POST /api/v1/feeds` and
+  `PUT /api/v1/feeds/{id}`. Both surfaces work against a configurable API base
+  URL rather than the page origin, which is what a bundled mobile client needs.
+  The text editor's "Check" button still asks the server for its parsing
+  report, and the feed wizard's URL steps still drive the server-side session.
+
+### Security
+
+* **The language on a new text or feed is checked for ownership** (#262).
+  `texts.TxLgID` and `news_feeds.NfLgID` have foreign keys to `languages`, but
+  a foreign key proves the row exists, not that the caller owns it, and the
+  form handlers passed the submitted value straight through. On a multi-user
+  install a crafted request could file a text or feed under another user's
+  language. The API endpoints these forms now use check ownership, and the
+  form-POST routes that skipped the check are retired. Single-user installs
+  were never affected.
+
 ## [3.4.1-fork] - 2026-08-12
 
 ### Fixed
