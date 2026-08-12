@@ -11,6 +11,7 @@
 import Alpine from 'alpinejs';
 import type { FeedWizardStoreState, FeedOptions } from '../types/feed_wizard_types';
 import { getFeedWizardStore } from '../stores/feed_wizard_store';
+import { saveFeed } from '../api/save_feed';
 
 /**
  * Step 4 component configuration from PHP.
@@ -56,6 +57,10 @@ export interface FeedWizardStep4Data {
   tagEnabled: boolean;
   tag: string;
 
+  // Save state
+  saving: boolean;
+  saveError: string;
+
   // Computed
   readonly store: FeedWizardStoreState;
   readonly isEditMode: boolean;
@@ -68,7 +73,8 @@ export interface FeedWizardStep4Data {
   toggleOption(option: string): void;
   buildOptionsString(): string;
   goBack(): void;
-  handleSubmit(): void;
+  hasSaveError(): boolean;
+  handleSubmit(event: Event): void;
   cancel(): void;
 }
 
@@ -140,6 +146,9 @@ export function feedWizardStep4Data(): FeedWizardStep4Data {
     charset: config.options?.charset?.value || '',
     tagEnabled: config.options?.tag?.enabled || false,
     tag: config.options?.tag?.value || '',
+
+    saving: false,
+    saveError: '',
 
     get store(): FeedWizardStoreState {
       return getFeedWizardStore();
@@ -248,18 +257,47 @@ export function feedWizardStep4Data(): FeedWizardStep4Data {
       window.location.href = url;
     },
 
-    handleSubmit(): void {
-      // Update the hidden NfOptions field before form submission
-      const optionsInput = document.querySelector<HTMLInputElement>('input[name="NfOptions"]');
-      if (optionsInput) {
-        optionsInput.value = this.buildOptionsString();
-      }
+    hasSaveError(): boolean {
+      return this.saveError !== '';
+    },
 
-      // Update action name based on edit mode
-      const saveInput = document.querySelector<HTMLInputElement>('input[name="save_feed"]');
-      if (saveInput && this.isEditMode) {
-        saveInput.name = 'update_feed';
-      }
+    /**
+     * Save the finished feed through the API.
+     *
+     * This form used to post itself to /feeds/edit. That route stopped saving
+     * anything when the server-rendered feeds list was retired in favour of
+     * the manager SPA — it 302s to /feeds/manage — so finishing the wizard
+     * silently discarded the feed. Saving through the API both fixes that and
+     * puts the submitted language behind the ownership check the controller
+     * never had (#262).
+     *
+     * @param event Submit event
+     */
+    handleSubmit(event: Event): void {
+      event.preventDefault();
+      if (this.saving) return;
+
+      this.saveError = '';
+      this.saving = true;
+
+      const data = {
+        langId: Number(this.languageId) || 0,
+        name: this.feedName,
+        sourceUri: this.sourceUri,
+        articleSectionTags: this.articleSection,
+        filterTags: this.filterTags,
+        options: this.buildOptionsString()
+      };
+
+      void saveFeed(data, this.config.editFeedId).then((result) => {
+        if (result.feedId === null) {
+          this.saveError = result.error;
+          this.saving = false;
+          return;
+        }
+        this.store.reset();
+        window.location.href = '/feeds/manage';
+      });
     },
 
     cancel(): void {

@@ -95,4 +95,83 @@ describe('Feeds', () => {
       });
     });
   });
+
+  /**
+   * The manual "add a feed" form and the edit form save through /api/v1 rather
+   * than posting themselves (#262).
+   */
+  describe('feed forms', () => {
+    it('creates a feed from the manual tab', () => {
+      const name = `Manual Feed ${Date.now()}`;
+      cy.intercept('POST', '**/api/v1/feeds').as('createFeed');
+
+      cy.visit('/feeds/new');
+      cy.contains('a, button, .is-clickable', /manual/i).click();
+
+      cy.get('input[name="NfName"]').should('be.visible').type(name);
+      cy.get('input[name="NfSourceURI"]').type('https://example.com/manual.xml');
+      cy.get('input[name="NfArticleSectionTags"]').type('//div');
+      cy.get('form').filter(':visible').contains('button[type="submit"]', /save/i).click();
+
+      cy.wait('@createFeed').its('response.statusCode').should('eq', 200);
+      cy.location('pathname').should('match', /\/feeds\/\d+\/edit/);
+      cy.get('input[name="NfName"]').should('have.value', name);
+    });
+
+    it('saves an edit through the API', () => {
+      const name = `Edit Feed ${Date.now()}`;
+      const renamed = `${name} (renamed)`;
+
+      cy.apiRequest({
+        method: 'POST',
+        url: '/api/v1/feeds',
+        body: {
+          langId: 1,
+          name,
+          sourceUri: 'https://example.com/edit.xml',
+          articleSectionTags: '//div',
+          filterTags: '',
+          options: 'edit_text=1'
+        }
+      }).then((response) => {
+        const feedId = response.body.feed.id;
+        cy.intercept('PUT', `**/api/v1/feeds/${feedId}`).as('updateFeed');
+
+        cy.visit(`/feeds/${feedId}/edit`);
+        cy.get('input[name="NfName"]').should('have.value', name).clear();
+        cy.get('input[name="NfName"]').type(renamed);
+        cy.contains('button[type="submit"]', /update|save/i).click();
+
+        // A form POST would never produce this request — and /feeds/{id}/edit
+        // no longer accepts one.
+        cy.wait('@updateFeed').its('response.statusCode').should('eq', 200);
+        cy.location('pathname').should('eq', '/feeds/manage');
+
+        cy.visit(`/feeds/${feedId}/edit`);
+        cy.get('input[name="NfName"]').should('have.value', renamed);
+      });
+    });
+
+    it('no longer accepts a form POST on the page routes', () => {
+      cy.request({ method: 'POST', url: '/feeds/new', failOnStatusCode: false })
+        .its('status')
+        .should('eq', 404);
+    });
+
+    /**
+     * The wizard's last step used to post to /feeds/edit. That route has
+     * redirected to the manager since the server-rendered feeds list was
+     * retired, so finishing the wizard discarded the feed. Walking the whole
+     * wizard needs a live RSS URL, so what is asserted here is that the form
+     * no longer targets the route that swallowed it.
+     */
+    it('does not point the wizard finish at the retired route', () => {
+      cy.request('/feeds/wizard?step=4').then((response) => {
+        const html = String(response.body);
+        expect(html).to.contain('x-data="feedWizardStep4"');
+        expect(html).to.not.contain('action="/feeds/edit"');
+        expect(html).to.not.contain('name="save_feed"');
+      });
+    });
+  });
 });

@@ -62,7 +62,14 @@ class FeedEditController
     /**
      * New feed form (wizard with 3 tabs: Browse, URL Wizard, Manual).
      *
-     * Route: GET/POST /feeds/new
+     * Route: GET /feeds/new
+     *
+     * Renders the scaffold only. The Browse and Manual tabs save through
+     * POST /api/v1/feeds (#262), which is also the only path that checks the
+     * submitted NfLgID belongs to the caller — the save branch that used to
+     * live here passed it straight to the facade. The URL Wizard tab still
+     * posts to /feeds/wizard, which drives a server-side session state machine
+     * rather than saving a feed.
      *
      * @param array<string, string> $params Route parameters
      *
@@ -70,23 +77,6 @@ class FeedEditController
      */
     public function newFeed(array $params): void
     {
-        // Handle form submission before any output
-        if (InputValidator::has('save_feed')) {
-            $data = [
-                'NfLgID' => InputValidator::getString('NfLgID'),
-                'NfName' => InputValidator::getString('NfName'),
-                'NfSourceURI' => InputValidator::getString('NfSourceURI'),
-                'NfArticleSectionTags' => InputValidator::getString('NfArticleSectionTags'),
-                'NfFilterTags' => InputValidator::getString('NfFilterTags'),
-                'NfOptions' => rtrim(InputValidator::getString('NfOptions'), ','),
-            ];
-
-            $feedId = $this->feedFacade->createFeed($data);
-            $this->flashService->success(__('feed.flash.created'));
-            $this->redirect(url('/feeds/' . $feedId . '/edit'));
-            return;
-        }
-
         // Clear wizard session if exists (must be before any output)
         if ($this->wizardSession->exists()) {
             $this->wizardSession->clear();
@@ -101,7 +91,10 @@ class FeedEditController
     /**
      * Edit feed form.
      *
-     * Route: GET/POST /feeds/{id}/edit
+     * Route: GET /feeds/{id}/edit
+     *
+     * Renders the scaffold only; the form saves through
+     * PUT /api/v1/feeds/{id} (#262).
      *
      * @param int $id Feed ID from route parameter
      *
@@ -113,23 +106,6 @@ class FeedEditController
 
         if ($feed === null) {
             $this->flashService->error(__('feed.flash.not_found'));
-            $this->redirect(url('/feeds/manage'));
-            return;
-        }
-
-        // Handle form submission before any output
-        if (InputValidator::has('update_feed')) {
-            $data = [
-                'NfLgID' => InputValidator::getString('NfLgID'),
-                'NfName' => InputValidator::getString('NfName'),
-                'NfSourceURI' => InputValidator::getString('NfSourceURI'),
-                'NfArticleSectionTags' => InputValidator::getString('NfArticleSectionTags'),
-                'NfFilterTags' => InputValidator::getString('NfFilterTags'),
-                'NfOptions' => rtrim(InputValidator::getString('NfOptions'), ','),
-            ];
-
-            $this->feedFacade->updateFeed($id, $data);
-            $this->flashService->success(__('feed.flash.updated'));
             $this->redirect(url('/feeds/manage'));
             return;
         }
