@@ -54,7 +54,8 @@ class GetServerData
      *   mysql: string,
      *   lwt_version: string,
      *   server_location: string,
-     *   failed_migrations: array<array{filename: string, attempts: int, error: string}>
+     *   failed_migrations: array<array{filename: string, attempts: int, error: string}>,
+     *   missing_foreign_keys: array<array{name: string, table: string}>
      * }
      */
     public function execute(): array
@@ -72,6 +73,9 @@ class GetServerData
             // incomplete, which only shows up later as "table doesn't exist"
             // errors in whichever feature needed it (issue #247).
             'failed_migrations' => Migrations::getFailedMigrations(),
+            // Constraints the schema declares but the database does not have:
+            // writes that should be refused are being accepted (issue #273).
+            'missing_foreign_keys' => Migrations::getMissingForeignKeys(),
         ];
     }
 

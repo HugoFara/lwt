@@ -12,6 +12,46 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.4.1-fork] - 2026-08-12
+
+### Fixed
+
+* **Foreign keys earlier upgrades had already dropped are now put back**
+  (#273). 3.4.0 stopped an upgrade from destroying constraints, but it could
+  only preserve what a database still had: everything lost to a previous
+  release stayed lost, because the migration that created it is recorded as
+  applied and never runs again. A 3.3.0 database upgraded to 3.4.0 ended up
+  with 14 of the 28 constraints the schema declares — no cascade from a text to
+  its occurrences or sentences, no orphan protection on `word_tag_map`,
+  `books`, `local_dictionaries`, `news_feeds` or `whisper_jobs`.
+
+  `SchemaConstraints::FOREIGN_KEYS` now states what the current schema should
+  have, and the upgrade adds whatever is absent. Both rehearsal databases — a
+  healthy 3.3.0 and one broken the way #247 described — come out of the upgrade
+  with all 28, and deleting a text once again takes its 2269 occurrences with
+  it.
+
+  Rows that a missing constraint would have prevented are already in these
+  databases, so constraints are added under `FOREIGN_KEY_CHECKS = 0`: existing
+  data is left alone and writes are gated from here on. A constraint InnoDB
+  still refuses is logged and listed on the admin **Server Data** page rather
+  than failing the upgrade.
+
+  `SchemaConstraintsTest` reads the same definitions back out of
+  `db/schema/baseline.sql` and `db/migrations/*.sql` and fails if the list and
+  the schema disagree, so a new table's foreign keys cannot quietly skip the
+  repair.
+
+  **Timed on a large database** (3.05M occurrences, 155k terms, 760 texts,
+  210 MB): the whole upgrade takes **8 seconds**, once, and later upgrades on
+  the same database finish in under a second. Creating the constraints is not
+  what costs — each takes well under a second, because the columns already
+  carry a covering index. The cost is the column realignment, which rewrites
+  the table, so all the columns of one table are now realigned in a single
+  `ALTER` instead of one each: `word_occurrences` has four of them, and
+  rewriting a three-million-row table four times took 27 seconds where one pass
+  takes 8.
+
 ## [3.4.0-fork] - 2026-08-12
 
 ### Fixed
