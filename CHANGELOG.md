@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.4.1-fork] - 2026-08-12
+
 ### Fixed
 
 * **Foreign keys earlier upgrades had already dropped are now put back**
@@ -36,14 +38,16 @@ ones are marked like "v1.0.0-fork".
   repair.
 
   **Timed on a large database** (3.05M occurrences, 155k terms, 760 texts,
-  210 MB): the whole upgrade takes **8 seconds**, once, and later upgrades on
-  the same database finish in under a second. Creating the constraints is not
-  what costs — each takes well under a second, because the columns already
-  carry a covering index. The cost is the column realignment, which rewrites
-  the table, so all the columns of one table are now realigned in a single
-  `ALTER` instead of one each: `word_occurrences` has four of them, and
-  rewriting a three-million-row table four times took 27 seconds where one pass
-  takes 8.
+  210 MB): the whole upgrade takes **8 to 10 seconds**, once, and later
+  upgrades on the same database finish in under a second. Creating the
+  constraints is not what costs — each takes well under a second, because the
+  columns already carry a covering index. The cost is the column realignment,
+  which rewrites the table, so all the columns of one table are now realigned
+  in a single `ALTER` instead of one each: `word_occurrences` has four of them,
+  and rewriting a three-million-row table four times took 27 seconds where one
+  pass takes under ten. Should a column be un-alterable — a foreign key still
+  pointing at it — the batch falls back to a statement per column rather than
+  leaving the whole table unaligned.
 
 ## [3.4.0-fork] - 2026-08-12
 
