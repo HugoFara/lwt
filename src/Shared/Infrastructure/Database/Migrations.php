@@ -422,7 +422,19 @@ class Migrations
                     "ALTER TABLE $escapedTable " . implode(', ', $clauses)
                 );
             } catch (\RuntimeException $e) {
-                error_log("Could not align columns on $table - " . $e->getMessage());
+                // One column MySQL will not touch — a foreign key still points
+                // at it, say — would otherwise take the whole table's batch
+                // down with it. Fall back to a statement per column so the rest
+                // still get aligned; the table is rewritten more than once, but
+                // only where the fast path failed.
+                error_log("Could not align columns on $table in one pass - " . $e->getMessage());
+                foreach ($clauses as $clause) {
+                    try {
+                        Connection::execute("ALTER TABLE $escapedTable $clause");
+                    } catch (\RuntimeException $inner) {
+                        error_log("Could not align $table - $clause - " . $inner->getMessage());
+                    }
+                }
             }
         }
     }

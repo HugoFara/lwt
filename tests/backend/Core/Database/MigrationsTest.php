@@ -49,6 +49,30 @@ class MigrationsTest extends TestCase
         }
     }
 
+    public static function tearDownAfterClass(): void
+    {
+        if (!self::$dbConnected) {
+            return;
+        }
+
+        // Several tests here drop constraints and realign columns on purpose.
+        // Leave the schema as declared, so whatever runs next — ForeignKeyTest
+        // asserting cascades, or a second run of this suite — starts from a
+        // whole database rather than from the wreckage. This is the order
+        // update() uses: constraints out of the way, columns aligned, then
+        // everything put back.
+        $foreignKeys = Migrations::captureForeignKeys();
+        Migrations::dropAllForeignKeys();
+        Connection::execute('SET FOREIGN_KEY_CHECKS = 0');
+        try {
+            Migrations::alignReferenceColumnTypes();
+            Migrations::restoreForeignKeys($foreignKeys);
+            Migrations::reconcileForeignKeys();
+        } finally {
+            Connection::execute('SET FOREIGN_KEY_CHECKS = 1');
+        }
+    }
+
     // ===== prefixQuery() tests =====
     #[DataProvider('providerPrefixQueryInsert')]
     public function testPrefixQueryInsert(string $sql, string $prefix, string $expected): void
@@ -740,7 +764,19 @@ class MigrationsTest extends TestCase
             $this->markTestSkipped('Database connection required');
         }
 
-        Migrations::alignReferenceColumnTypes();
+        // ALTER TABLE MODIFY is refused on a column a foreign key points at,
+        // which is why update() drops them first. Do the same here, or the
+        // alignment silently does nothing and the assertion below turns into a
+        // test of whichever constraints happened to exist.
+        $foreignKeys = Migrations::captureForeignKeys();
+        Migrations::dropAllForeignKeys();
+        try {
+            Migrations::alignReferenceColumnTypes();
+        } finally {
+            Connection::execute('SET FOREIGN_KEY_CHECKS = 0');
+            Migrations::restoreForeignKeys($foreignKeys);
+            Connection::execute('SET FOREIGN_KEY_CHECKS = 1');
+        }
 
         $columns = Connection::preparedFetchAll(
             "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE
