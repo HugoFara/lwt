@@ -75,7 +75,7 @@ status** instead — useful for a deck you have fully mastered (set everything t
 Anki fields are HTML, and real decks lean on it. Before storing a term LWT
 removes formatting tags, converts `<br>` and block boundaries to spaces, decodes
 entities like `&nbsp;` and `&eacute;`, drops `[sound:…]` media references, and
-keeps the answer out of `{{c1::…}}` cloze markers. Without that, markup would end
+keeps the answer out of <code v-pre>{{c1::…}}</code> cloze markers. Without that, markup would end
 up in the reading view and terms would never match the words in your texts.
 
 ## Importing twice is safe
