@@ -110,9 +110,26 @@ Track the mobile-critical flows, not the file count.
 rendered by Alpine.js." So Phase 1 is **cutting the server-shell umbilical, not
 converting pages**.
 
-**Status (re-audited 2026-08-07): complete.** Every mobile-critical surface is
-shell-free, and the legacy-fragment cleanup that was the last open item
-([#266](https://github.com/HugoFara/lwt/issues/266)) has shipped.
+**Status (re-audited 2026-08-07): complete *as scoped*.** Every mobile-critical
+surface is shell-free, and the legacy-fragment cleanup — the last open item in
+this phase — has shipped.
+
+**This does not close [#266](https://github.com/HugoFara/lwt/issues/266).** That
+issue asks for PHP to emit "only data for hydration", which is a wider bar than
+Phase 1's. The *data* half is met (config blobs carry boot parameters —
+`['textId' => …, 'langId' => …]` — and everything else is fetched from
+`/api/v1`), but PHP still owns the markup half (audited 2026-08-08):
+
+| PHP still owns | Where | Scale |
+| --- | --- | --- |
+| DOM scaffold | `x-data` in views | 53 views |
+| Which JS modules load | `PageLayoutHelper::getRequiredModules()` → `<meta name="lwt-modules">` | every page |
+| i18n injection | `PageLayoutHelper::buildI18nScript()` | every page |
+| Icons | `IconHelper::render()` → server-rendered `<i data-lucide>` | throughout |
+
+The bundled client works around all four with a build-time transpiler
+(`build/php-view-prerender.mjs`) rather than removing them — see Phase 2. #266
+stays open against that markup half; it is not a Phase 1 deliverable.
 
 - [x] **(Phase 0 gate) Injectable API base URL.** Done in Phase 0 — same seam.
       `@shared/api/client` resolves an injectable **absolute** server root and
@@ -203,9 +220,50 @@ shell-free, and the legacy-fragment cleanup that was the last open item
       keys were decorative, and the bare `books` entry allowed only GET and
       POST. `EndpointMethodReachabilityTest` now asserts real request shapes
       resolve, so the next drift fails a test instead of a feature.
+- [x] **Form POSTs — the write half, for the surfaces above**
+      ([#262](https://github.com/HugoFara/lwt/issues/262)). Those surfaces
+      *read* from `/api/v1`; several still *wrote* by posting a form to the page
+      origin, which a client pointed at a different server cannot do.
+      Converted: tags, user profile/password/preferences,
+      standalone term creation, the **text editor**
+      (`POST /api/v1/texts`, `PUT /api/v1/texts/{id}` — neither endpoint
+      existed; `TextsApi.create()` had been calling a 404 since it was written),
+      and the **feed forms** (`POST`/`PUT /api/v1/feeds`).
+
+      Two mass-assignment holes closed on the way: `texts.TxLgID` and
+      `news_feeds.NfLgID` are client-supplied references into `languages`, and
+      a foreign key proves the row exists, not that the caller owns it. Both
+      form handlers passed the submitted value straight to the facade; the API
+      endpoints check ownership, and the form-POST routes that skipped it are
+      retired. Multi-user installs only.
+
+      Fourteen views still post, down from sixteen: admin (4), the imports
+      (`import_epub_form`, `upload_form`, `bulk_translate_form`), the feed
+      wizard's navigation steps (3), the archived-text and check forms, the
+      Microsoft link confirmation, and `edit_form` for its Check button alone.
+      Every one of those is a surface this phase deliberately leaves
+      server-rendered (below), so what remains of #262 is scoped by that list
+      rather than by view count.
 
 **Out of Phase 1** (leave server-rendered, fine in a WebView online): imports
 (file/web/youtube/whisper), admin/settings, language config, feeds.
+
+Two exceptions inside that list, both because the work was a fix rather than a
+conversion:
+
+- **The feed create/edit forms** went to `/api/v1` even though feeds are out of
+  scope, because tracing them turned up that **finishing the RSS wizard had
+  saved nothing since 2026-08-08** (`1e2216bb6`). Step 4 posted to
+  `/feeds/edit`, and that commit made the route a 302 to the manager SPA when
+  the duplicated feeds list was retired; a redirect discards the body. Present
+  in 3.4.0 and 3.4.1. Verified both ways against a live BBC RSS feed: on the
+  parent commit the walk ends with `news_feeds` empty, on the fix it writes the
+  row. The wizard's *navigation* steps (2 and 3) still post to `/feeds/wizard`
+  — they drive a server-side session state machine that renders HTML previews
+  of the fetched page, and moving that to the client is its own project.
+- **The text editor's "Check" button** still posts. It asks for a
+  server-rendered parsing report rather than saving, so it names its own target
+  with `formaction` while the form itself carries no action.
 
 **Definition of done per surface:** renders entirely from `/api/v1` JSON, no
 server-rendered partial carrying data, works against a configurable API base URL.
