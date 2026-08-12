@@ -56,6 +56,12 @@ class FeedLoadOwnershipTest extends TestCase
 
     protected function tearDown(): void
     {
+        // tearDown still runs when setUp skipped the test, and CI has no
+        // database, so nothing here may reach one unguarded.
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            return;
+        }
+
         foreach ($this->createdFeeds as $feedId) {
             Connection::preparedExecute('DELETE FROM feed_links WHERE FlNfID = ?', [$feedId]);
             Connection::preparedExecute('DELETE FROM news_feeds WHERE NfID = ?', [$feedId]);
