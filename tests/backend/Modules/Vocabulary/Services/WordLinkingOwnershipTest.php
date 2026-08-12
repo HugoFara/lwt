@@ -86,6 +86,12 @@ class WordLinkingOwnershipTest extends TestCase
 
     protected function tearDown(): void
     {
+        // tearDown still runs when setUp skipped the test, and CI has no
+        // database, so nothing here may reach one unguarded.
+        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
+            return;
+        }
+
         foreach ($this->rows as [$textId, $order]) {
             Connection::preparedExecute(
                 'DELETE FROM word_occurrences WHERE Ti2TxID = ? AND Ti2Order = ?',
