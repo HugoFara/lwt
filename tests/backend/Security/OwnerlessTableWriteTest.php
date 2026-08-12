@@ -160,7 +160,11 @@ class OwnerlessTableWriteTest extends TestCase
             if (!$this->containsMutation($contents, $pattern)) {
                 continue;
             }
-            $sites[] = str_replace($root . '/', '', $file->getPathname());
+            // getPathname() uses the platform separator, so on Windows every
+            // path would read as `src\Modules\…` and match nothing in the
+            // allowlist below — which is written, and compared, with slashes.
+            $path = str_replace('\\', '/', $file->getPathname());
+            $sites[] = str_replace(str_replace('\\', '/', $root) . '/', '', $path);
         }
 
         sort($sites);
