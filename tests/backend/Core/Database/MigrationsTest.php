@@ -586,6 +586,72 @@ class MigrationsTest extends TestCase
         Connection::preparedExecute("DELETE FROM _migrations WHERE filename = ?", [$testFilename]);
     }
 
+    public function testForeignKeysSurviveDropAndRestore(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $before = Migrations::captureForeignKeys();
+        if ($before === []) {
+            $this->markTestSkipped('Test database has no foreign keys to preserve');
+        }
+
+        // What update() does around a migration run: drop everything, then put
+        // back whatever the run did not recreate. Losing keys here means every
+        // upgrade silently strips the database of its cascade deletes and
+        // orphan protection.
+        Migrations::dropAllForeignKeys();
+        $this->assertSame([], Migrations::captureForeignKeys(), 'FKs should be gone after the drop');
+
+        Migrations::restoreForeignKeys($before);
+        $after = Migrations::captureForeignKeys();
+
+        $names = static fn(array $keys): array => array_map(
+            static fn(array $key): string => $key['table'] . '.' . $key['name'],
+            $keys
+        );
+        $expected = $names($before);
+        $actual = $names($after);
+        sort($expected);
+        sort($actual);
+        $this->assertSame($expected, $actual, 'Every foreign key should be back');
+
+        // The definition has to survive too, not just the name.
+        $byName = [];
+        foreach ($after as $key) {
+            $byName[$key['table'] . '.' . $key['name']] = $key;
+        }
+        foreach ($before as $key) {
+            $restored = $byName[$key['table'] . '.' . $key['name']];
+            $this->assertSame($key['columns'], $restored['columns']);
+            $this->assertSame($key['refTable'], $restored['refTable']);
+            $this->assertSame($key['refColumns'], $restored['refColumns']);
+            $this->assertSame($key['onDelete'], $restored['onDelete']);
+        }
+    }
+
+    public function testRestoringSkipsKeysWhoseColumnIsGone(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        // A migration that renamed the table or column owns the new shape, so a
+        // stale captured key must be skipped rather than fail the upgrade.
+        $stale = [[
+            'name' => 'fk_test_vanished',
+            'table' => 'texts',
+            'columns' => ['TxColumnThatNeverExisted'],
+            'refTable' => 'languages',
+            'refColumns' => ['LgID'],
+            'onUpdate' => 'RESTRICT',
+            'onDelete' => 'CASCADE',
+        ]];
+
+        $this->assertSame(0, Migrations::restoreForeignKeys($stale));
+    }
+
     #[DataProvider('providerReferenceKeySuffixes')]
     public function testReferenceColumnsShareTheSameType(string $suffix): void
     {

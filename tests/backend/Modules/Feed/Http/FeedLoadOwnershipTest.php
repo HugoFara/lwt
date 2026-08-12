@@ -35,6 +35,9 @@ class FeedLoadOwnershipTest extends TestCase
     /** @var list<int> */
     private array $createdFeeds = [];
 
+    /** Somebody who is not the current caller. */
+    private ?int $otherUserId = null;
+
     protected function setUp(): void
     {
         if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
@@ -42,6 +45,13 @@ class FeedLoadOwnershipTest extends TestCase
         }
         $this->feedFacade = $this->createMock(FeedFacade::class);
         $this->handler = new FeedLoadApiHandler($this->feedFacade);
+
+        // news_feeds.NfUsID has a foreign key on users, so the "other user"
+        // this test hands feeds to has to be a real row.
+        $this->otherUserId = (int) Connection::preparedInsert(
+            'INSERT INTO users (UsUsername, UsPasswordHash) VALUES (?, ?)',
+            ['feed-owner-' . uniqid(), 'x']
+        );
     }
 
     protected function tearDown(): void
@@ -51,6 +61,11 @@ class FeedLoadOwnershipTest extends TestCase
             Connection::preparedExecute('DELETE FROM news_feeds WHERE NfID = ?', [$feedId]);
         }
         $this->createdFeeds = [];
+
+        if ($this->otherUserId !== null) {
+            Connection::preparedExecute('DELETE FROM users WHERE UsID = ?', [$this->otherUserId]);
+            $this->otherUserId = null;
+        }
     }
 
     /**
@@ -90,9 +105,9 @@ class FeedLoadOwnershipTest extends TestCase
     #[Test]
     public function loadingAFeedTheCallerDoesNotOwnWritesNothing(): void
     {
-        // Owner id 4242 is nobody in this session, so the feed is "someone
-        // else's" from the current caller's point of view.
-        $victimFeedId = $this->makeFeedOwnedBy(4242);
+        // The feed belongs to another user, so it is "someone else's" from
+        // the current caller's point of view.
+        $victimFeedId = $this->makeFeedOwnedBy($this->otherUserId);
 
         $this->feedFacade->method('getFeedOption')->willReturn(null);
         // getFeedById is user-scoped; for a feed owned by someone else it
@@ -119,7 +134,7 @@ class FeedLoadOwnershipTest extends TestCase
     #[Test]
     public function loadingAFeedTheCallerDoesNotOwnReportsFailure(): void
     {
-        $victimFeedId = $this->makeFeedOwnedBy(4242);
+        $victimFeedId = $this->makeFeedOwnedBy($this->otherUserId);
 
         $this->feedFacade->method('getFeedOption')->willReturn(null);
         // getFeedById is user-scoped; for a feed owned by someone else it

@@ -74,11 +74,191 @@ class Migrations
     ];
 
     /**
+     * Read back every foreign key in the database, in enough detail to rebuild it.
+     *
+     * `dropAllForeignKeys()` clears the way for the migration run, but only the
+     * migrations that happen to be pending put constraints back. Everything
+     * created by an already-applied migration would be gone for good, so an
+     * upgrade used to strip the database of its referential integrity
+     * (cascade deletes, orphan protection) without a word. Capturing the set
+     * first is what lets `restoreForeignKeys()` put back what the run did not.
+     *
+     * @return array<array{
+     *     name: string, table: string, columns: array<string>,
+     *     refTable: string, refColumns: array<string>,
+     *     onUpdate: string, onDelete: string
+     * }> The database's foreign keys
+     */
+    public static function captureForeignKeys(): array
+    {
+        $rows = Connection::preparedFetchAll(
+            "SELECT k.CONSTRAINT_NAME, k.TABLE_NAME, k.COLUMN_NAME,
+                    k.REFERENCED_TABLE_NAME, k.REFERENCED_COLUMN_NAME,
+                    r.UPDATE_RULE, r.DELETE_RULE
+             FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE k
+             JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS r
+               ON r.CONSTRAINT_SCHEMA = k.CONSTRAINT_SCHEMA
+              AND r.CONSTRAINT_NAME = k.CONSTRAINT_NAME
+              AND r.TABLE_NAME = k.TABLE_NAME
+             WHERE k.CONSTRAINT_SCHEMA = ? AND k.REFERENCED_TABLE_NAME IS NOT NULL
+             ORDER BY k.TABLE_NAME, k.CONSTRAINT_NAME, k.ORDINAL_POSITION",
+            [Globals::getDatabaseName()]
+        );
+
+        $keys = [];
+        foreach ($rows as $row) {
+            $name = $row['CONSTRAINT_NAME'] ?? null;
+            $table = $row['TABLE_NAME'] ?? null;
+            $column = $row['COLUMN_NAME'] ?? null;
+            $refTable = $row['REFERENCED_TABLE_NAME'] ?? null;
+            $refColumn = $row['REFERENCED_COLUMN_NAME'] ?? null;
+            if (
+                !is_string($name) || !is_string($table) || !is_string($column)
+                || !is_string($refTable) || !is_string($refColumn)
+            ) {
+                continue;
+            }
+
+            // A composite key spans several rows, one per column.
+            $id = $table . '.' . $name;
+            if (!isset($keys[$id])) {
+                $keys[$id] = [
+                    'name' => $name,
+                    'table' => $table,
+                    'columns' => [],
+                    'refTable' => $refTable,
+                    'refColumns' => [],
+                    'onUpdate' => is_string($row['UPDATE_RULE'] ?? null)
+                        ? (string) $row['UPDATE_RULE']
+                        : 'RESTRICT',
+                    'onDelete' => is_string($row['DELETE_RULE'] ?? null)
+                        ? (string) $row['DELETE_RULE']
+                        : 'RESTRICT',
+                ];
+            }
+            $keys[$id]['columns'][] = $column;
+            $keys[$id]['refColumns'][] = $refColumn;
+        }
+
+        return array_values($keys);
+    }
+
+    /**
+     * Recreate captured foreign keys that are no longer there.
+     *
+     * Anything the migration run already put back, under the same name, is left
+     * alone. A key whose table or column has since been renamed or dropped is
+     * skipped: the migration that renamed it owns the new shape.
+     *
+     * @param array<array{
+     *     name: string, table: string, columns: array<string>,
+     *     refTable: string, refColumns: array<string>,
+     *     onUpdate: string, onDelete: string
+     * }> $keys Foreign keys from captureForeignKeys()
+     *
+     * @return int How many were restored
+     */
+    public static function restoreForeignKeys(array $keys): int
+    {
+        $existing = [];
+        foreach (self::captureForeignKeys() as $key) {
+            $existing[$key['table'] . '.' . $key['name']] = true;
+        }
+
+        $restored = 0;
+        foreach ($keys as $key) {
+            if (isset($existing[$key['table'] . '.' . $key['name']])) {
+                continue;
+            }
+            if (!self::columnsStillExist($key['table'], $key['columns'])) {
+                continue;
+            }
+            if (!self::columnsStillExist($key['refTable'], $key['refColumns'])) {
+                continue;
+            }
+
+            $quote = static fn(string $identifier): string
+                => '`' . str_replace('`', '``', $identifier) . '`';
+            $columns = implode(', ', array_map($quote, $key['columns']));
+            $refColumns = implode(', ', array_map($quote, $key['refColumns']));
+
+            try {
+                Connection::execute(
+                    'ALTER TABLE ' . $quote($key['table']) .
+                    ' ADD CONSTRAINT ' . $quote($key['name']) .
+                    " FOREIGN KEY ($columns) REFERENCES " . $quote($key['refTable']) .
+                    " ($refColumns)" .
+                    ' ON DELETE ' . self::sanitizeReferentialAction($key['onDelete']) .
+                    ' ON UPDATE ' . self::sanitizeReferentialAction($key['onUpdate'])
+                );
+                $restored++;
+            } catch (\RuntimeException $e) {
+                error_log(
+                    "Could not restore foreign key {$key['name']} on {$key['table']} - "
+                    . $e->getMessage()
+                );
+            }
+        }
+
+        return $restored;
+    }
+
+    /**
+     * Check that a table still has all of the given columns.
+     *
+     * @param string        $table   Table name
+     * @param array<string> $columns Column names
+     *
+     * @return bool True when every column is present
+     */
+    private static function columnsStillExist(string $table, array $columns): bool
+    {
+        if ($columns === []) {
+            return false;
+        }
+        $bindings = [Globals::getDatabaseName(), $table];
+        $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+        foreach ($columns as $column) {
+            $bindings[] = $column;
+        }
+
+        /** @var mixed $found */
+        $found = Connection::preparedFetchValue(
+            "SELECT COUNT(*) AS n FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME IN ($placeholders)",
+            $bindings,
+            'n'
+        );
+
+        return is_numeric($found) && (int) $found === count($columns);
+    }
+
+    /**
+     * Keep a referential action to the values MySQL accepts.
+     *
+     * The value comes from INFORMATION_SCHEMA rather than user input, but it is
+     * interpolated into DDL, so it is checked against the allowed set anyway.
+     *
+     * @param string $action Action read back from the database
+     *
+     * @return string A safe ON DELETE/ON UPDATE action
+     */
+    private static function sanitizeReferentialAction(string $action): string
+    {
+        $allowed = ['CASCADE', 'SET NULL', 'RESTRICT', 'NO ACTION', 'SET DEFAULT'];
+        $action = strtoupper(trim($action));
+        return in_array($action, $allowed, true) ? $action : 'RESTRICT';
+    }
+
+    /**
      * Drop all foreign key constraints from all tables in the database.
      *
      * This is needed before running migrations from scratch because
      * SET FOREIGN_KEY_CHECKS = 0 only affects INSERT/UPDATE/DELETE and DROP TABLE,
      * not ALTER TABLE MODIFY on columns referenced by FKs.
+     *
+     * Callers that drop keys to make way for schema changes must capture them
+     * first (see captureForeignKeys()) and restore them afterwards.
      *
      * @return void
      */
@@ -709,7 +889,9 @@ class Migrations
             // Drop all FK constraints before running migrations.
             // SET FOREIGN_KEY_CHECKS = 0 only affects INSERT/UPDATE/DELETE and DROP TABLE,
             // not ALTER TABLE MODIFY on columns referenced by FKs.
-            // The migrations will recreate FKs as needed.
+            // The migrations recreate the ones they own; everything else is put
+            // back from this snapshot once the run is over.
+            $foreignKeys = self::captureForeignKeys();
             self::dropAllForeignKeys();
 
             // With the FKs out of the way, repair reference columns that drifted
@@ -767,6 +949,12 @@ class Migrations
                     );
                 }
             } finally {
+                // Put back every constraint the run did not recreate itself.
+                // Still under FOREIGN_KEY_CHECKS = 0, the same conditions the
+                // migrations create their keys under, so legacy rows that
+                // violate a constraint do not cost the database its integrity
+                // rules on every later write.
+                self::restoreForeignKeys($foreignKeys);
                 Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
             }
         }
