@@ -34,11 +34,13 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  *     db_name?: string,
  *     db_size?: float|int|string,
  *     mysql?: string,
- *     failed_migrations?: array<array{filename: string, attempts: int, error: string}>
+ *     failed_migrations?: array<array{filename: string, attempts: int, error: string}>,
+ *     missing_foreign_keys?: array<array{name: string, table: string}>
  * } $data Server data from ServerDataService::getServerData()
  */
 $data = is_array($data ?? null) ? $data : [];
 $failedMigrations = $data['failed_migrations'] ?? [];
+$missingForeignKeys = $data['missing_foreign_keys'] ?? [];
 
 ?>
 <div class="container" x-data="serverDataApp()">
@@ -148,6 +150,24 @@ $failedMigrations = $data['failed_migrations'] ?? [];
                                 <br>
                                 <small><?php echo $error; ?></small>
                             </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+            </article>
+        <?php } ?>
+        <?php if ($missingForeignKeys !== []) { ?>
+            <article class="message is-warning">
+                <div class="message-header">
+                    <p><?= __('admin.server_data_missing_foreign_keys') ?></p>
+                </div>
+                <div class="message-body">
+                    <p class="mb-3"><?= __('admin.server_data_missing_foreign_keys_warning') ?></p>
+                    <ul>
+                        <?php foreach ($missingForeignKeys as $key) {
+                            $constraint = htmlspecialchars($key['name'], ENT_QUOTES, 'UTF-8');
+                            $table = htmlspecialchars($key['table'], ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <li><code><?php echo $constraint; ?></code> (<?php echo $table; ?>)</li>
                         <?php } ?>
                     </ul>
                 </div>

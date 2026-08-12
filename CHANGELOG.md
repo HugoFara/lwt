@@ -7,6 +7,34 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Fixed
+
+* **Foreign keys earlier upgrades had already dropped are now put back**
+  (#273). 3.4.0 stopped an upgrade from destroying constraints, but it could
+  only preserve what a database still had: everything lost to a previous
+  release stayed lost, because the migration that created it is recorded as
+  applied and never runs again. A 3.3.0 database upgraded to 3.4.0 ended up
+  with 14 of the 28 constraints the schema declares — no cascade from a text to
+  its occurrences or sentences, no orphan protection on `word_tag_map`,
+  `books`, `local_dictionaries`, `news_feeds` or `whisper_jobs`.
+
+  `SchemaConstraints::FOREIGN_KEYS` now states what the current schema should
+  have, and the upgrade adds whatever is absent. Both rehearsal databases — a
+  healthy 3.3.0 and one broken the way #247 described — come out of the upgrade
+  with all 28, and deleting a text once again takes its 2269 occurrences with
+  it.
+
+  Rows that a missing constraint would have prevented are already in these
+  databases, so constraints are added under `FOREIGN_KEY_CHECKS = 0`: existing
+  data is left alone and writes are gated from here on. A constraint InnoDB
+  still refuses is logged and listed on the admin **Server Data** page rather
+  than failing the upgrade.
+
+  `SchemaConstraintsTest` reads the same definitions back out of
+  `db/schema/baseline.sql` and `db/migrations/*.sql` and fails if the list and
+  the schema disagree, so a new table's foreign keys cannot quietly skip the
+  repair.
+
 ## [3.4.0-fork] - 2026-08-12
 
 ### Fixed

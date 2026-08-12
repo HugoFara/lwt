@@ -160,12 +160,86 @@ class Migrations
      */
     public static function restoreForeignKeys(array $keys): int
     {
+        return self::addMissingForeignKeys($keys);
+    }
+
+    /**
+     * Add back the declared constraints an install has lost along the way.
+     *
+     * Restoring a snapshot only preserves what a database still has. Releases
+     * before 3.4.0 dropped the constraints for every migration run and put back
+     * only the ones owned by pending migrations, so long-lived installs are
+     * missing constraints no snapshot can recover — half of them on a 3.3.0
+     * database (#273). SchemaConstraints::FOREIGN_KEYS says what should be
+     * there; whatever is absent is added.
+     *
+     * Rows that a missing constraint would have prevented are already in the
+     * database. Adding under FOREIGN_KEY_CHECKS = 0 accepts them and gates
+     * writes from here on; a constraint InnoDB still refuses is logged and
+     * reported by getMissingForeignKeys() rather than failing the upgrade.
+     *
+     * @return int How many were added
+     */
+    public static function reconcileForeignKeys(): int
+    {
+        return self::addMissingForeignKeys(SchemaConstraints::FOREIGN_KEYS);
+    }
+
+    /**
+     * The declared constraints that are still not there.
+     *
+     * A non-empty result means writes that should be refused are being
+     * accepted, so it is worth showing to an administrator.
+     *
+     * @return array<array{name: string, table: string}> Missing constraints
+     */
+    public static function getMissingForeignKeys(): array
+    {
         $existing = [];
         foreach (self::captureForeignKeys() as $key) {
             $existing[$key['table'] . '.' . $key['name']] = true;
         }
 
-        $restored = 0;
+        $missing = [];
+        foreach (SchemaConstraints::FOREIGN_KEYS as $key) {
+            if (isset($existing[$key['table'] . '.' . $key['name']])) {
+                continue;
+            }
+            // A table this install does not have is not a missing constraint.
+            if (!self::columnsStillExist($key['table'], $key['columns'])) {
+                continue;
+            }
+            $missing[] = ['name' => $key['name'], 'table' => $key['table']];
+        }
+        return $missing;
+    }
+
+    /**
+     * Create each of the given foreign keys that is not already there.
+     *
+     * A key whose table or column is missing is skipped: on an install that
+     * never had the table, or where a migration renamed it, the constraint is
+     * not this method's business.
+     *
+     * @param array<array{
+     *     name: string, table: string, columns: array<string>,
+     *     refTable: string, refColumns: array<string>,
+     *     onUpdate: string, onDelete: string
+     * }> $keys Constraints to ensure
+     *
+     * @return int How many were created
+     */
+    private static function addMissingForeignKeys(array $keys): int
+    {
+        $existing = [];
+        foreach (self::captureForeignKeys() as $key) {
+            $existing[$key['table'] . '.' . $key['name']] = true;
+        }
+
+        $quote = static fn(string $identifier): string
+            => '`' . str_replace('`', '``', $identifier) . '`';
+
+        $added = 0;
         foreach ($keys as $key) {
             if (isset($existing[$key['table'] . '.' . $key['name']])) {
                 continue;
@@ -177,8 +251,6 @@ class Migrations
                 continue;
             }
 
-            $quote = static fn(string $identifier): string
-                => '`' . str_replace('`', '``', $identifier) . '`';
             $columns = implode(', ', array_map($quote, $key['columns']));
             $refColumns = implode(', ', array_map($quote, $key['refColumns']));
 
@@ -191,16 +263,16 @@ class Migrations
                     ' ON DELETE ' . self::sanitizeReferentialAction($key['onDelete']) .
                     ' ON UPDATE ' . self::sanitizeReferentialAction($key['onUpdate'])
                 );
-                $restored++;
+                $added++;
             } catch (\RuntimeException $e) {
                 error_log(
-                    "Could not restore foreign key {$key['name']} on {$key['table']} - "
+                    "Could not create foreign key {$key['name']} on {$key['table']} - "
                     . $e->getMessage()
                 );
             }
         }
 
-        return $restored;
+        return $added;
     }
 
     /**
@@ -949,12 +1021,14 @@ class Migrations
                     );
                 }
             } finally {
-                // Put back every constraint the run did not recreate itself.
-                // Still under FOREIGN_KEY_CHECKS = 0, the same conditions the
+                // Put back every constraint the run did not recreate itself,
+                // then add any the install lost to an earlier upgrade. Still
+                // under FOREIGN_KEY_CHECKS = 0, the same conditions the
                 // migrations create their keys under, so legacy rows that
                 // violate a constraint do not cost the database its integrity
                 // rules on every later write.
                 self::restoreForeignKeys($foreignKeys);
+                self::reconcileForeignKeys();
                 Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
             }
         }

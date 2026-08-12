@@ -7,6 +7,7 @@ namespace Lwt\Tests\Core\Database;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Migrations;
+use Lwt\Shared\Infrastructure\Database\SchemaConstraints;
 use Lwt\Shared\Infrastructure\Database\Configuration;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use PHPUnit\Framework\TestCase;
@@ -629,6 +630,86 @@ class MigrationsTest extends TestCase
             $this->assertSame($key['refColumns'], $restored['refColumns']);
             $this->assertSame($key['onDelete'], $restored['onDelete']);
         }
+    }
+
+    public function testReconcileAddsBackAConstraintTheDatabaseLost(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        $declared = SchemaConstraints::FOREIGN_KEYS;
+        $target = null;
+        foreach ($declared as $key) {
+            // Pick one the test database actually carries.
+            foreach (Migrations::captureForeignKeys() as $present) {
+                if ($present['name'] === $key['name'] && $present['table'] === $key['table']) {
+                    $target = $key;
+                    break 2;
+                }
+            }
+        }
+        if ($target === null) {
+            $this->markTestSkipped('No declared constraint present to drop');
+        }
+
+        // Losing one is what every upgrade before 3.4.0 did; nothing replays
+        // the migration that created it, so only the declared set can bring it
+        // back (#273).
+        Connection::execute(
+            'ALTER TABLE `' . $target['table'] . '` DROP FOREIGN KEY `' . $target['name'] . '`'
+        );
+        $this->assertContains(
+            $target['name'],
+            array_column(Migrations::getMissingForeignKeys(), 'name'),
+            'A dropped constraint should be reported as missing'
+        );
+
+        Connection::execute('SET FOREIGN_KEY_CHECKS = 0');
+        try {
+            $added = Migrations::reconcileForeignKeys();
+        } finally {
+            Connection::execute('SET FOREIGN_KEY_CHECKS = 1');
+        }
+
+        $this->assertGreaterThanOrEqual(1, $added);
+        $this->assertNotContains(
+            $target['name'],
+            array_column(Migrations::getMissingForeignKeys(), 'name'),
+            'Reconciling should have recreated it'
+        );
+
+        $restored = null;
+        foreach (Migrations::captureForeignKeys() as $key) {
+            if ($key['name'] === $target['name']) {
+                $restored = $key;
+            }
+        }
+        $this->assertNotNull($restored);
+        $this->assertSame($target['columns'], $restored['columns']);
+        $this->assertSame($target['refTable'], $restored['refTable']);
+        // InnoDB treats RESTRICT and NO ACTION as the same rule and reports it
+        // back as NO ACTION, so compare the behaviour, not the spelling.
+        $normalise = static fn(string $action): string
+            => $action === 'NO ACTION' ? 'RESTRICT' : $action;
+        $this->assertSame($normalise($target['onDelete']), $normalise($restored['onDelete']));
+    }
+
+    public function testReconcileIsANoOpWhenNothingIsMissing(): void
+    {
+        if (!self::$dbConnected) {
+            $this->markTestSkipped('Database connection required');
+        }
+
+        Connection::execute('SET FOREIGN_KEY_CHECKS = 0');
+        try {
+            Migrations::reconcileForeignKeys();
+            $second = Migrations::reconcileForeignKeys();
+        } finally {
+            Connection::execute('SET FOREIGN_KEY_CHECKS = 1');
+        }
+
+        $this->assertSame(0, $second, 'A healthy database should need no repair');
     }
 
     public function testRestoringSkipsKeysWhoseColumnIsGone(): void

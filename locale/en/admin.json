@@ -48,6 +48,8 @@
     "server_data_failed_migrations": "Failed migrations",
     "server_data_failed_migrations_warning": "Some database migrations did not run through. The schema is incomplete, so features relying on the missing tables or columns will fail. Please report this with the details below.",
     "server_data_failed_migrations_attempts": "attempts",
+    "server_data_missing_foreign_keys": "Missing foreign keys",
+    "server_data_missing_foreign_keys_warning": "The database is missing foreign key constraints the schema declares, so writes that should be refused are being accepted. They are recreated automatically on the next upgrade; report this if it persists.",
     "server_data_section_client_api": "Client API",
     "server_data_loading_api": "Loading API information...",
     "server_data_error_loading": "Error loading API information",
