@@ -27,8 +27,6 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\Infrastructure\Http\RedirectResponse;
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
-use Lwt\Shared\Infrastructure\Container\Container;
-use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Language\CurrentLanguage;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 
@@ -335,7 +333,17 @@ class TextCrudController extends BaseController
     }
 
     /**
-     * Handle text save/update operations.
+     * Handle the text editor's "Check" button.
+     *
+     * Saving moved to POST /api/v1/texts and PUT /api/v1/texts/{id} (#262), so
+     * `Save`, `Save and Open`, `Change` and `Change and Open` no longer arrive
+     * here — nor does the subtitle upload the save path used to accept, which
+     * file_import.ts has parsed in the browser for some time.
+     *
+     * "Check" stays a form POST because it renders a parsing report of whatever
+     * is in the box rather than saving anything, and that report is
+     * server-rendered HTML. The button names this route with formaction, so the
+     * form itself carries no action.
      *
      * @param string     $op          Operation name
      * @param bool       $noPagestart Whether to skip page start
@@ -348,174 +356,29 @@ class TextCrudController extends BaseController
         bool $noPagestart,
         string|int $currentLang
     ): array|RedirectResponse {
+        if ($op !== 'Check') {
+            return ['message' => '', 'redirect' => false];
+        }
+
         $txText = $this->param('TxText');
         $txLgId = $this->paramInt('TxLgID', 0) ?? 0;
-        $txTitle = $this->param('TxTitle');
-        $txAudioUri = $this->param('TxAudioURI');
-        $txSourceUri = $this->param('TxSourceURI');
 
-        $importFile = InputValidator::getUploadedFile('importFile');
-        if ($importFile !== null) {
-            $extension = strtolower(pathinfo($importFile['name'], PATHINFO_EXTENSION));
-            if ($extension === 'srt' || $extension === 'vtt') {
-                // Subtitle files are tiny in practice — a feature-length
-                // movie's SRT is ~50 KB. 10 MB is two orders of magnitude
-                // above any legitimate input, low enough that a hostile
-                // upload can't OOM the worker via file_get_contents.
-                $maxSubtitleSize = 10 * 1024 * 1024;
-                $tmpName = $importFile['tmp_name'];
-                $actualSize = filesize($tmpName);
-                if ($actualSize === false || $actualSize > $maxSubtitleSize) {
-                    return [
-                        'message' => __('text.flash.error_prefix', [
-                            'message' => 'Subtitle file exceeds the '
-                                . intdiv($maxSubtitleSize, 1024 * 1024) . ' MB limit.'
-                        ]),
-                        'redirect' => false,
-                    ];
-                }
-                $subtitleService = new \Lwt\Modules\Text\Application\Services\SubtitleParserService();
-                $fileContent = file_get_contents($tmpName);
-                if ($fileContent !== false) {
-                    $format = $subtitleService->detectFormat($importFile['name'], $fileContent);
-                    if ($format !== null) {
-                        $parseResult = $subtitleService->parse($fileContent, $format);
-                        if ($parseResult['success']) {
-                            $txText = $parseResult['text'];
-                            if ($txTitle === '') {
-                                $txTitle = pathinfo($importFile['name'], PATHINFO_FILENAME);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        $needsAutoSplit = false;
-        try {
-            $bookFacade = Container::getInstance()->getTyped(
-                \Lwt\Modules\Book\Application\BookFacade::class
-            );
-            $needsAutoSplit = $bookFacade->needsSplit($txText);
-        } catch (\Throwable $e) {
-            $needsAutoSplit = false;
-        }
-
-        if (!$needsAutoSplit && !$this->textService->validateTextLength($txText)) {
+        if (!$this->textService->validateTextLength($txText)) {
             return [
                 'message' => __('text.flash.error_prefix', ['message' => __('text.flash.text_too_long')]),
                 'redirect' => false,
             ];
         }
 
-        if ($op == 'Check') {
-            echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
-            $this->textService->checkText(
-                StringUtils::removeSoftHyphens($txText),
-                $txLgId
-            );
-            echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
-            PageLayoutHelper::renderPageEnd();
-            return ['message' => '', 'redirect' => true];
-        }
-
-        $textId = $this->paramInt('TxID', 0) ?? 0;
-        $isNew = str_starts_with($op, 'Save');
-
-        if ($needsAutoSplit && $isNew) {
-            return $this->handleAutoSplitImport(
-                $txLgId,
-                $txTitle,
-                $txText,
-                $txAudioUri,
-                $txSourceUri,
-                str_ends_with($op, "and Open")
-            );
-        }
-
-        $result = $this->textService->saveTextAndReparse(
-            $isNew ? 0 : $textId,
-            $txLgId,
-            $txTitle,
-            $txText,
-            $txAudioUri,
-            $txSourceUri
+        echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
+        $this->textService->checkText(
+            StringUtils::removeSoftHyphens($txText),
+            $txLgId
         );
+        echo '<p><input type="button" value="&lt;&lt; Back" data-action="history-back" /></p>';
+        PageLayoutHelper::renderPageEnd();
 
-        if (str_ends_with($op, "and Open")) {
-            return $this->redirect('/text/' . $result['textId'] . '/read');
-        }
-
-        return ['message' => $result['message'], 'redirect' => false];
-    }
-
-    /**
-     * Handle auto-split import for long texts.
-     *
-     * @param int    $languageId Language ID
-     * @param string $title      Text title
-     * @param string $text       Text content
-     * @param string $audioUri   Audio URI
-     * @param string $sourceUri  Source URI
-     * @param bool   $openAfter  Whether to open the first chapter after import
-     *
-     * @return array{message: string, redirect: bool}|RedirectResponse
-     */
-    private function handleAutoSplitImport(
-        int $languageId,
-        string $title,
-        string $text,
-        string $audioUri,
-        string $sourceUri,
-        bool $openAfter
-    ): array|RedirectResponse {
-        try {
-            $bookFacade = Container::getInstance()->getTyped(
-                \Lwt\Modules\Book\Application\BookFacade::class
-            );
-
-            $tagIds = [];
-            $tagInput = $this->param('TextTags');
-            if ($tagInput !== null && $tagInput !== '') {
-                $tagIds = array_map('intval', explode(',', $tagInput));
-                $tagIds = array_filter($tagIds, fn($id) => $id > 0);
-            }
-
-            $userId = Globals::getCurrentUserId();
-
-            $result = $bookFacade->createBookFromText(
-                $languageId,
-                $title,
-                $text,
-                null,
-                $audioUri,
-                $sourceUri,
-                $tagIds,
-                $userId
-            );
-
-            if (!$result['success']) {
-                return [
-                    'message' => __('text.flash.error_prefix', ['message' => $result['message']]),
-                    'redirect' => false,
-                ];
-            }
-
-            if ($openAfter && isset($result['textIds']) && count($result['textIds']) > 0) {
-                return $this->redirect('/text/' . $result['textIds'][0] . '/read');
-            }
-
-            if ($result['bookId'] !== null) {
-                return $this->redirect('/book/' . $result['bookId']);
-            }
-
-            return ['message' => $result['message'], 'redirect' => true];
-        } catch (\Throwable $e) {
-            return [
-                'message' => __('text.flash.error_creating_book', ['error' => $e->getMessage()]),
-                'redirect' => false,
-            ];
-        }
+        return ['message' => '', 'redirect' => true];
     }
 
     /**

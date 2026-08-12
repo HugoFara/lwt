@@ -26,6 +26,7 @@ use Lwt\Modules\Text\Application\Services\DifficultyEstimationService;
 use Lwt\Modules\Text\Application\Services\GdlImportService;
 use Lwt\Modules\Text\Application\Services\GutenbergSuggestionService;
 use Lwt\Modules\Book\Application\BookFacade;
+use Lwt\Modules\Tags\Application\TagsFacade;
 use Lwt\Modules\Text\Application\TextFacade;
 use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Database\Settings;
@@ -320,7 +321,11 @@ class TextApiHandler implements ApiRoutableInterface
             return $this->handleExtractEpubUrl($params);
         }
 
-        if ($frag1 === '' || !ctype_digit($frag1)) {
+        if ($frag1 === '') {
+            return $this->handleSaveText(0, $params);
+        }
+
+        if (!ctype_digit($frag1)) {
             return Response::error('Text ID (Integer) Expected', 404);
         }
 
@@ -363,6 +368,10 @@ class TextApiHandler implements ApiRoutableInterface
 
         $textId = (int) $frag1;
 
+        if ($frag2 === '') {
+            return $this->handleSaveText($textId, $params);
+        }
+
         switch ($frag2) {
             case 'display-mode':
                 return Response::success($this->formatSetDisplayMode($textId, $params));
@@ -373,6 +382,187 @@ class TextApiHandler implements ApiRoutableInterface
             default:
                 return Response::error('Expected "display-mode", "mark-all-wellknown", or "mark-all-ignored"', 404);
         }
+    }
+
+    /**
+     * Handle POST /texts (create) and PUT /texts/{id} (update).
+     *
+     * The JSON counterpart of the `op=Save`/`op=Change` form POST the text
+     * editor used to make, so the editor works against a configurable API base
+     * URL rather than the page origin (#262).
+     *
+     * Two things the form path left implicit are explicit here:
+     *
+     * The language is checked for ownership. `texts.TxLgID` has a foreign key
+     * to `languages`, but a foreign key proves the row exists, not that the
+     * caller owns it — the same gap `createTermForLanguage()` closes, and the
+     * form path never closed because `$this->param('TxLgID')` went straight
+     * into the INSERT. On update the text itself is user-scoped by
+     * QueryBuilder, so a foreign id simply matches no row.
+     *
+     * Tags arrive as names in the payload instead of being read back out of
+     * `$_REQUEST` by TagsFacade, which a JSON request does not populate.
+     *
+     * @param int                  $textId Text id, or 0 to create
+     * @param array<string, mixed> $params Request body
+     */
+    private function handleSaveText(int $textId, array $params): JsonResponse
+    {
+        $title = trim((string) ($params['title'] ?? ''));
+        if ($title === '') {
+            return Response::error('title is required', 400);
+        }
+
+        $text = (string) ($params['text'] ?? '');
+        if (trim($text) === '') {
+            return Response::error('text is required', 400);
+        }
+
+        $languageId = (int) ($params['language_id'] ?? 0);
+        if ($languageId <= 0) {
+            return Response::error('language_id is required', 400);
+        }
+        // languages is user-scoped, so somebody else's language finds nothing.
+        $ownsLanguage = QueryBuilder::table('languages')
+            ->where('LgID', '=', $languageId)
+            ->existsPrepared();
+        if (!$ownsLanguage) {
+            return Response::error('Language not found', 404);
+        }
+
+        $audioUri = (string) ($params['audio_uri'] ?? '');
+        $sourceUri = (string) ($params['source_uri'] ?? '');
+        $tags = $this->tagNames($params);
+
+        $facade = Container::getInstance()->getTyped(TextFacade::class);
+
+        // A text long enough to need splitting becomes a book of chapters
+        // rather than one oversized text — but only on create. Splitting an
+        // existing text would orphan its id, so an update that grew too long
+        // is refused instead.
+        if ($textId === 0 && $this->needsSplit($text)) {
+            return $this->createBookFromText($languageId, $title, $text, $audioUri, $sourceUri, $tags);
+        }
+
+        if (!$facade->validateTextLength($text)) {
+            return Response::error(__('text.flash.text_too_long'), 422);
+        }
+
+        $result = $facade->saveTextAndReparse(
+            $textId,
+            $languageId,
+            $title,
+            $text,
+            $audioUri,
+            $sourceUri,
+            $tags
+        );
+
+        return Response::success([
+            'textId' => $result['textId'],
+            'bookId' => null,
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Read the tag names out of a save payload.
+     *
+     * Accepts `tags: ["a", "b"]`. Anything that is not a non-empty string is
+     * dropped rather than stored, so a malformed entry cannot create a tag.
+     *
+     * @param array<string, mixed> $params Request body
+     *
+     * @return string[]
+     */
+    private function tagNames(array $params): array
+    {
+        /** @var mixed $raw */
+        $raw = $params['tags'] ?? [];
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $names = [];
+        /** @var mixed $entry */
+        foreach ($raw as $entry) {
+            if (!is_string($entry)) {
+                continue;
+            }
+            $name = trim($entry);
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        return $names;
+    }
+
+    /**
+     * Whether a text is long enough that it should be split into a book.
+     *
+     * Returns false when the Book module is unavailable, which keeps a save
+     * working on an install where the split feature cannot load.
+     */
+    private function needsSplit(string $text): bool
+    {
+        try {
+            return Container::getInstance()->getTyped(BookFacade::class)->needsSplit($text);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Turn an over-long text into a book of chapters.
+     *
+     * @param string[] $tags Tag names to apply to every chapter
+     */
+    private function createBookFromText(
+        int $languageId,
+        string $title,
+        string $text,
+        string $audioUri,
+        string $sourceUri,
+        array $tags
+    ): JsonResponse {
+        try {
+            $bookFacade = Container::getInstance()->getTyped(BookFacade::class);
+            $result = $bookFacade->createBookFromText(
+                $languageId,
+                $title,
+                $text,
+                null,
+                $audioUri,
+                $sourceUri,
+                [],
+                \Lwt\Shared\Infrastructure\Globals::getCurrentUserId()
+            );
+        } catch (\Throwable $e) {
+            return Response::error(
+                __('text.flash.error_creating_book', ['error' => $e->getMessage()]),
+                500
+            );
+        }
+
+        if (!$result['success']) {
+            return Response::error($result['message'], 422);
+        }
+
+        $textIds = $result['textIds'] ?? [];
+
+        // createBookFromText() takes tag *ids*, which the editor does not have
+        // — it works in names, like every other tag surface. Applying them
+        // afterwards costs one statement per name rather than per chapter.
+        foreach ($tags as $tag) {
+            TagsFacade::addTagToTexts($tag, $textIds);
+        }
+
+        return Response::success([
+            'textId' => $textIds[0] ?? null,
+            'bookId' => $result['bookId'],
+            'message' => $result['message'],
+        ]);
     }
 
     /**

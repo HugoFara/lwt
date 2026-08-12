@@ -87,7 +87,10 @@ if (!$isNew) {
 
 ?>
 <script type="application/json" id="text-edit-config">
-<?php echo json_encode(['languageData' => $languageData], JSON_HEX_TAG | JSON_HEX_AMP); ?>
+<?php echo json_encode(
+    ['languageData' => $languageData, 'textId' => $textIdTyped],
+    JSON_HEX_TAG | JSON_HEX_AMP
+); ?>
 </script>
 
 <?php if (!$isNew) : ?>
@@ -103,15 +106,19 @@ if (!$isNew) {
     <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 <?php endif; ?>
 
-<form class="validate" method="post" enctype="multipart/form-data"
-      action="<?php echo $isNew ? '/texts/new' : '/texts#rec' . $textIdTyped; ?>"
+<!--
+    Saving goes through /api/v1/texts (#262), so the form carries no action of
+    its own. The edit form's "Check" button is the one exception and names its
+    own target with formaction/formmethod: it asks for a server-rendered
+    parsing report rather than saving anything.
+-->
+<form class="validate"
+      @submit="handleSubmit($event)"
       <?php if ($isNew) : ?>
       x-data="textNewForm"
-      :action="formAction()"
-      @submit="handleSubmit($event)"
       @webpage-imported="goToReview()"
       <?php else : ?>
-      x-data
+      x-data="textEditForm"
       <?php endif; ?>>
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
     <input type="hidden" name="TxID" value="<?php echo $textIdTyped; ?>" />
@@ -964,9 +971,9 @@ if (!$isNew) {
                 </span>
             </div>
 
-            <!-- EPUB import failure, reported by the books API -->
-            <div x-show="hasEpubError()" class="notification is-danger" x-cloak>
-                <span x-text="epubError"></span>
+            <!-- Save or EPUB import failure, reported by the API -->
+            <div x-show="hasSaveError()" class="notification is-danger" x-cloak>
+                <span x-text="saveError"></span>
             </div>
 
             <!-- Save / Import Button -->
@@ -1192,6 +1199,11 @@ if (!$isNew) {
         </div>
     </div>
 
+    <!-- Save failure, reported by the API -->
+    <div x-show="hasSaveError()" class="notification is-danger" x-cloak>
+        <span x-text="saveError"></span>
+    </div>
+
     <!-- Form Actions (Edit mode) -->
     <div class="field is-grouped is-grouped-right">
         <div class="control">
@@ -1203,7 +1215,9 @@ if (!$isNew) {
             </button>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="Check" class="button is-info is-outlined">
+            <button type="submit" name="op" value="Check" class="button is-info is-outlined"
+                    formmethod="post"
+                    formaction="/texts/<?php echo $textIdTyped; ?>/edit">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('check', ['alt' => __('text.common.check')]); ?>
                 </span>
@@ -1211,7 +1225,8 @@ if (!$isNew) {
             </button>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="Change" class="button is-primary">
+            <button type="submit" name="op" value="Change" class="button is-primary"
+                    :disabled="saving" :class="{ 'is-loading': saving }">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => __('text.common.save')]); ?>
                 </span>
@@ -1219,7 +1234,8 @@ if (!$isNew) {
             </button>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="Change and Open" class="button is-success">
+            <button type="submit" name="op" value="Change and Open" class="button is-success"
+                    :disabled="saving" :class="{ 'is-loading': saving }">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('book-open', ['alt' => __('text.common.save_and_open')]); ?>
                 </span>

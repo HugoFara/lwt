@@ -153,6 +153,58 @@ describe('Texts Management', () => {
         }
       });
     });
+
+    /**
+     * The edit form saves through PUT /api/v1/texts/{id} rather than posting
+     * itself (#262). Create the text first so the case does not depend on
+     * whatever text 1 happens to be, then rename it and read the title back.
+     */
+    it('should save an edit through the API', () => {
+      const original = `Edit Me ${Date.now()}`;
+      const renamed = `${original} (renamed)`;
+
+      startPastedText();
+      cy.get('input[name="TxTitle"]').type(original);
+      cy.get('textarea[name="TxText"]').type('Ein Satz. Noch ein Satz.');
+      cy.get('button[name="op"][value="Save and Open"]').click();
+
+      cy.url()
+        .should('match', /\/text\/\d+\/read/)
+        .then((url) => {
+          const textId = /\/text\/(\d+)\/read/.exec(url)?.[1];
+          expect(textId, 'created text id').to.match(/^\d+$/);
+
+          cy.intercept('PUT', `**/api/v1/texts/${textId}`).as('saveText');
+
+          cy.visit(`/texts/${textId}/edit`);
+          cy.get('input[name="TxTitle"]').should('have.value', original).clear();
+          cy.get('input[name="TxTitle"]').type(renamed);
+          cy.get('button[name="op"][value="Change"]').click();
+
+          // A form POST would never produce this request.
+          cy.wait('@saveText').its('response.statusCode').should('eq', 200);
+
+          cy.visit(`/texts/${textId}/edit`);
+          cy.get('input[name="TxTitle"]').should('have.value', renamed);
+        });
+    });
+
+    /**
+     * "Check" is the one button still posting the form: it asks for a
+     * server-rendered parsing report instead of saving.
+     */
+    it('should still render the server-side check report', () => {
+      cy.visit('/texts/1/edit');
+      cy.get('body').then(($body) => {
+        if ($body.text().includes('not found')) return;
+
+        cy.get('button[name="op"][value="Check"]').click();
+
+        // The report is the parse of the text: its sentences and its terms.
+        cy.contains('h4', /sentences/i).should('exist');
+        cy.get('[data-action="history-back"]').should('exist');
+      });
+    });
   });
 
   describe('Archive Text', () => {

@@ -805,12 +805,14 @@ class TextFacade
     /**
      * Save text and reparse it (with additional return data).
      *
-     * @param int    $textId    Text ID (0 for new)
-     * @param int    $lgId      Language ID
-     * @param string $title     Text title
-     * @param string $text      Text content
-     * @param string $audioUri  Audio URI
-     * @param string $sourceUri Source URI
+     * @param int           $textId    Text ID (0 for new)
+     * @param int           $lgId      Language ID
+     * @param string        $title     Text title
+     * @param string        $text      Text content
+     * @param string        $audioUri  Audio URI
+     * @param string        $sourceUri Source URI
+     * @param string[]|null $tagNames  Tag names to set, or null to read the
+     *                                 request's TextTags field (form callers)
      *
      * @return array{message: string, textId: int, redirect: bool}
      */
@@ -820,7 +822,8 @@ class TextFacade
         string $title,
         string $text,
         string $audioUri,
-        string $sourceUri
+        string $sourceUri,
+        ?array $tagNames = null
     ): array {
         $cleanText = str_replace("\xC2\xAD", "", $text);
 
@@ -863,7 +866,13 @@ class TextFacade
             );
         }
 
-        TagsFacade::saveTextTagsFromForm($textId);
+        // A JSON caller passes the names it wants; a form caller passes null and
+        // the tag widget's TextTags[TagList][] field is read from the request.
+        if ($tagNames === null) {
+            TagsFacade::saveTextTagsFromForm($textId);
+        } else {
+            TagsFacade::saveTextTags($textId, $tagNames);
+        }
 
         $sentencesDeleted = QueryBuilder::table('sentences')
             ->where('SeTxID', '=', $textId)

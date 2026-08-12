@@ -96,7 +96,7 @@ describe('api/texts.ts', () => {
 
   describe('TextsApi.create', () => {
     it('calls apiPost with correct endpoint', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       await TextsApi.create({
         title: 'Test Text',
@@ -108,7 +108,7 @@ describe('api/texts.ts', () => {
     });
 
     it('sends correct basic data', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       await TextsApi.create({
         title: 'Test Text',
@@ -127,7 +127,7 @@ describe('api/texts.ts', () => {
     });
 
     it('sends optional fields when provided', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       await TextsApi.create({
         title: 'Test Text',
@@ -149,7 +149,7 @@ describe('api/texts.ts', () => {
     });
 
     it('returns new text ID on success', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 42 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 42, bookId: null, message: '' } });
 
       const result = await TextsApi.create({
         title: 'Test',
@@ -157,7 +157,7 @@ describe('api/texts.ts', () => {
         text: 'Content'
       });
 
-      expect(result.data?.id).toBe(42);
+      expect(result.data?.textId).toBe(42);
     });
 
     it('returns error on failure', async () => {
@@ -173,7 +173,7 @@ describe('api/texts.ts', () => {
     });
 
     it('handles empty title', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       await TextsApi.create({
         title: '',
@@ -187,7 +187,7 @@ describe('api/texts.ts', () => {
     });
 
     it('handles long text content', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       const longText = 'A'.repeat(10000);
       await TextsApi.create({
@@ -202,7 +202,7 @@ describe('api/texts.ts', () => {
     });
 
     it('handles Unicode content', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       await TextsApi.create({
         title: '日本語のテキスト',
@@ -214,6 +214,58 @@ describe('api/texts.ts', () => {
         title: '日本語のテキスト',
         text: 'こんにちは世界'
       }));
+    });
+  });
+
+  // ===========================================================================
+  // update Tests
+  // ===========================================================================
+
+  describe('TextsApi.update', () => {
+    it('puts to the text its own URL', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { textId: 9, bookId: null, message: '' } });
+
+      await TextsApi.update(9, { title: 'T', langId: 1, text: 'Words' });
+
+      expect(apiPut).toHaveBeenCalledWith('/texts/9', expect.any(Object));
+    });
+
+    it('sends the same payload shape as create', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { textId: 9, bookId: null, message: '' } });
+
+      await TextsApi.update(9, {
+        title: 'T',
+        langId: 1,
+        text: 'Words',
+        sourceUri: 'https://example.com',
+        audioUri: 'media/a.mp3',
+        tags: ['news']
+      });
+
+      expect(apiPut).toHaveBeenCalledWith('/texts/9', {
+        title: 'T',
+        language_id: 1,
+        text: 'Words',
+        source_uri: 'https://example.com',
+        audio_uri: 'media/a.mp3',
+        tags: ['news']
+      });
+    });
+
+    it('returns the saved text ID', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { textId: 9, bookId: null, message: 'saved' } });
+
+      const result = await TextsApi.update(9, { title: 'T', langId: 1, text: 'Words' });
+
+      expect(result.data?.textId).toBe(9);
+    });
+
+    it('returns error on failure', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ error: 'Text not found' });
+
+      const result = await TextsApi.update(999, { title: 'T', langId: 1, text: 'Words' });
+
+      expect(result.error).toBe('Text not found');
     });
   });
 
@@ -360,7 +412,7 @@ describe('api/texts.ts', () => {
     });
 
     it('create handles special characters in title', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       await TextsApi.create({
         title: 'Test "Title" with <special> & characters',
@@ -374,7 +426,7 @@ describe('api/texts.ts', () => {
     });
 
     it('create handles newlines in text', async () => {
-      vi.mocked(apiPost).mockResolvedValue({ data: { id: 1 } });
+      vi.mocked(apiPost).mockResolvedValue({ data: { textId: 1, bookId: null, message: '' } });
 
       await TextsApi.create({
         title: 'Multi-line',
