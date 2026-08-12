@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -144,40 +144,6 @@ class TermStatusController extends VocabularyBaseController
 
         PageLayoutHelper::renderPageStartNobody('Error');
         echo '<p>No status operation specified</p>';
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Mark all words with status (well-known or ignore).
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
-     *
-     * @return void
-     */
-    public function markAllWords(array $params): void
-    {
-        $textId = InputValidator::getInt('text');
-        if ($textId === null) {
-            return;
-        }
-
-        $status = InputValidator::getInt('stat', 99) ?? 99;
-
-        if ($status == 98) {
-            PageLayoutHelper::renderPageStart("Setting all blue words to Ignore", false);
-        } else {
-            PageLayoutHelper::renderPageStart("Setting all blue words to Well-known", false);
-        }
-
-        $discoveryService = $this->getDiscoveryService();
-        list($count, $wordsData) = $discoveryService->markAllWordsWithStatus($textId, $status);
-        $useTooltips = Settings::getWithDefault('set-tooltip-mode') == 1;
-        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($textId);
-
-        include $this->viewPath . 'all_wellknown_result.php';
-
         PageLayoutHelper::renderPageEnd();
     }
 }

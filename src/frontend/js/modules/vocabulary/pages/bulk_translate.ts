@@ -13,6 +13,8 @@ import Alpine from 'alpinejs';
 import { createTheDictUrl, openDictionaryPopup } from '@modules/vocabulary/services/dictionary';
 import { selectToggle } from '@shared/forms/bulk_actions';
 import { setDictionaryLinks } from '@modules/language/stores/language_config';
+import { apiGet, apiPost } from '@shared/api/client';
+import { t } from '@shared/i18n/translator';
 
 declare global {
   interface Window {
@@ -37,6 +39,93 @@ declare global {
   };
 }
 
+/** Response from POST /terms/bulk. */
+interface BulkSaveResponse {
+  success?: boolean;
+  saved?: number;
+  error?: string;
+}
+
+/** One term row as the bulk endpoint expects it. */
+interface BulkTerm {
+  lg: number;
+  text: string;
+  status: number;
+  trans: string;
+}
+
+/**
+ * Gather the `term[N][field]` inputs into a list.
+ *
+ * The translation inputs are injected client-side once Google Translate has
+ * populated the cells, so reading the live FormData is what picks them up.
+ *
+ * @param data Submitted form data
+ *
+ * @returns Terms with a text and a language, in row order
+ */
+function collectTerms(data: FormData): BulkTerm[] {
+  const rows = new Map<string, Record<string, string>>();
+
+  for (const [key, value] of data.entries()) {
+    const match = /^term\[(\d+)\]\[(\w+)\]$/.exec(key);
+    if (!match) continue;
+    const [, index, field] = match;
+    const row = rows.get(index) ?? {};
+    row[field] = String(value);
+    rows.set(index, row);
+  }
+
+  const terms: BulkTerm[] = [];
+  for (const row of rows.values()) {
+    const text = (row.text ?? '').trim();
+    const lg = parseInt(row.lg ?? '0', 10);
+    if (text === '' || !Number.isFinite(lg) || lg <= 0) continue;
+    terms.push({
+      lg,
+      text,
+      status: parseInt(row.status ?? '1', 10),
+      trans: (row.trans ?? '').trim()
+    });
+  }
+  return terms;
+}
+
+/**
+ * URL of the next batch, or null when this was the last one.
+ *
+ * Saved terms leave the unknown-word set, so the next offset moves back by
+ * however many were just saved — the same arithmetic the controller did.
+ *
+ * @param form  The submitted form
+ * @param saved Number of terms saved
+ *
+ * @returns Next batch URL, or null when the form carried no offset
+ */
+function nextBatchUrl(form: HTMLFormElement, saved: number): string | null {
+  const data = new FormData(form);
+  const rawOffset = data.get('offset');
+  if (rawOffset === null) {
+    return null;
+  }
+
+  const offset = parseInt(String(rawOffset), 10);
+  if (!Number.isFinite(offset)) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    tid: String(data.get('tid') ?? ''),
+    offset: String(Math.max(0, offset - saved))
+  });
+  const sl = data.get('sl');
+  const tl = data.get('tl');
+  if (sl !== null) params.set('sl', String(sl));
+  if (tl !== null) params.set('tl', String(tl));
+
+  return `/word/bulk-translate?${params.toString()}`;
+}
+
 /**
  * Configuration for bulk translate component.
  */
@@ -48,6 +137,16 @@ export interface BulkTranslateConfig {
   };
   sourceLanguage: string;
   targetLanguage: string;
+  textId: number;
+  offset: number;
+  limit: number;
+}
+
+/** One unknown word as GET /terms/unknown-for-translate returns it. */
+export interface UnknownTerm {
+  word: string;
+  Ti2LgID: number;
+  pos: number;
 }
 
 
@@ -67,7 +166,35 @@ export interface BulkTranslateData {
   // State
   isGoogleTranslateReady: boolean;
   submitButtonText: string;
+  isSaving: boolean;
+  savedCount: number;
+  saveError: string;
+  isDone(): boolean;
+  hasSaveError(): boolean;
+  savedMessage(): string;
+  saveButtonClass(): string;
+  submitTerms(event: Event): Promise<void>;
   hasOffset: boolean;
+
+  // Terms fetched from /api/v1/terms/unknown-for-translate
+  terms: UnknownTerm[];
+  isLoadingTerms: boolean;
+  termsError: string;
+  textId: number;
+  offset: number;
+  limit: number;
+  nextOffset: number | null;
+  loadTerms(): Promise<void>;
+  rowIndex(index: number): number;
+  markedName(index: number): string;
+  statusName(index: number): string;
+  textName(index: number): string;
+  langName(index: number): string;
+  termCellId(index: number): string;
+  transCellId(index: number): string;
+  statusFieldId(index: number): string;
+  textFieldId(index: number): string;
+  lowercaseOf(term: UnknownTerm): string;
 
   // Methods
   init(): void;
@@ -90,7 +217,10 @@ export interface BulkTranslateData {
 export function bulkTranslateApp(config: BulkTranslateConfig = {
   dictionaries: { dict1: '', dict2: '', translate: '' },
   sourceLanguage: 'en',
-  targetLanguage: 'en'
+  targetLanguage: 'en',
+  textId: 0,
+  offset: 0,
+  limit: 100
 }): BulkTranslateData {
   return {
     // Config
@@ -105,7 +235,18 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
     // State
     isGoogleTranslateReady: false,
     submitButtonText: 'Save',
+    isSaving: false,
+    savedCount: -1,
+    saveError: '',
     hasOffset: false,
+
+    terms: [],
+    isLoadingTerms: true,
+    termsError: '',
+    textId: config.textId,
+    offset: config.offset,
+    limit: config.limit,
+    nextOffset: null,
 
     /**
      * Initialize the component.
@@ -123,13 +264,17 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
           };
           this.sourceLanguage = jsonConfig.sourceLanguage ?? 'en';
           this.targetLanguage = jsonConfig.targetLanguage ?? 'en';
+          this.textId = Number(jsonConfig.textId) || 0;
+          this.offset = Number(jsonConfig.offset) || 0;
+          this.limit = Number(jsonConfig.limit) || 100;
         } catch {
           // Invalid JSON, use defaults
         }
       }
 
-      // Check if there's an offset input (for pagination)
-      this.hasOffset = document.querySelector('input[name="offset"]') !== null;
+      // Terms arrive from the API; the rows are rendered by x-for, and the
+      // hidden inputs they carry keep the existing FormData save path intact.
+      void this.loadTerms();
 
       // Set dictionary links in language config for legacy support
       setDictionaryLinks(this.dictConfig);
@@ -149,21 +294,191 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
       window.addEventListener('load', () => this.setupInteractions());
     },
 
+    /**
+     * Fetch this text's still-unknown words for the current page.
+     */
+    async loadTerms(): Promise<void> {
+      this.isLoadingTerms = true;
+      this.termsError = '';
+
+      const response = await apiGet<{
+        terms: UnknownTerm[];
+        has_more: boolean;
+        next_offset: number | null;
+      }>('/terms/unknown-for-translate', {
+        text_id: this.textId,
+        offset: this.offset,
+        limit: this.limit
+      });
+
+      this.isLoadingTerms = false;
+
+      if (response.error || !response.data) {
+        this.termsError = response.error || 'Could not load terms';
+        this.terms = [];
+        return;
+      }
+
+      this.terms = response.data.terms ?? [];
+      this.nextOffset = response.data.next_offset;
+      // The save handler reads this to decide whether another batch follows.
+      this.hasOffset = this.nextOffset !== null;
+
+      // Google Translate and the dictionary handlers bind to rows, so they
+      // can only run once the rows exist.
+      void Alpine.nextTick(() => this.setupInteractions());
+    },
+
+    /**
+     * Row numbers are 1-based: the field names the save path parses were
+     * generated by a PHP counter starting at 1.
+     *
+     * @param index Zero-based x-for index
+     *
+     * @returns The 1-based row number
+     */
+    rowIndex(index: number): number {
+      return index + 1;
+    },
+
+    markedName(index: number): string {
+      return `marked[${index + 1}]`;
+    },
+
+    statusName(index: number): string {
+      return `term[${index + 1}][status]`;
+    },
+
+    textName(index: number): string {
+      return `term[${index + 1}][text]`;
+    },
+
+    langName(index: number): string {
+      return `term[${index + 1}][lg]`;
+    },
+
+    termCellId(index: number): string {
+      return `Term_${index + 1}`;
+    },
+
+    transCellId(index: number): string {
+      return `Trans_${index + 1}`;
+    },
+
+    statusFieldId(index: number): string {
+      return `Stat_${index + 1}`;
+    },
+
+    textFieldId(index: number): string {
+      return `Text_${index + 1}`;
+    },
+
+    /**
+     * The pre-filled translation cell starts as the lowercased term, matching
+     * what the server-rendered table used to emit.
+     *
+     * @param term Term row
+     *
+     * @returns The term lowercased
+     */
+    lowercaseOf(term: UnknownTerm): string {
+      return (term.word ?? '').toLowerCase();
+    },
+
+
+    /**
+     * Whether a save has completed and there is no further page of terms.
+     *
+     * @returns True once the final batch has been saved
+     */
+    isDone(): boolean {
+      return this.savedCount >= 0;
+    },
+
+    /**
+     * Whether the last save failed.
+     *
+     * @returns True when an error should be shown
+     */
+    hasSaveError(): boolean {
+      return this.saveError !== '';
+    },
+
+    /**
+     * Confirmation text for the final batch.
+     *
+     * @returns Localised "saved N terms" message
+     */
+    savedMessage(): string {
+      return t('vocabulary.result.bulk_saved', { count: this.savedCount });
+    },
+
+    /**
+     * Loading modifier for the save button.
+     *
+     * @returns Bulma class list
+     */
+    saveButtonClass(): string {
+      return this.isSaving ? 'is-loading' : '';
+    },
+
+    /**
+     * Save the batch through the API instead of posting the form.
+     *
+     * The server used to save, echo a confirmation, and render the next batch
+     * in the same response. Now the save is an API call and the next batch is
+     * a plain GET, so no HTML comes back from the write.
+     *
+     * @param event Submit event
+     */
+    async submitTerms(event: Event): Promise<void> {
+      event.preventDefault();
+
+      const form = event.target as HTMLFormElement | null;
+      if (!form || this.isSaving) return;
+
+      // A term row being edited holds its real name in data_name.
+      const currentTranslation = document.querySelector<HTMLElement>('[name="WoTranslation"]');
+      if (currentTranslation) {
+        currentTranslation.setAttribute('name', currentTranslation.getAttribute('data_name') ?? '');
+      }
+
+      const terms = collectTerms(new FormData(form));
+      if (terms.length === 0) {
+        this.saveError = 'No terms to save';
+        return;
+      }
+
+      this.isSaving = true;
+      this.saveError = '';
+
+      const response = await apiPost<BulkSaveResponse>('/terms/bulk', { terms });
+      const payload = response.data;
+
+      if (response.error || !payload || payload.success !== true) {
+        this.saveError = response.error || payload?.error || 'Failed to save terms';
+        this.isSaving = false;
+        return;
+      }
+
+      const saved = payload.saved ?? terms.length;
+      const nextUrl = nextBatchUrl(form, saved);
+
+      if (nextUrl !== null) {
+        window.location.href = nextUrl;
+        return;
+      }
+
+      // Last batch: report it here rather than on a server-rendered page.
+      this.savedCount = saved;
+      this.isSaving = false;
+    },
 
     /**
      * Setup form submission handler.
      */
     setupFormSubmission(): void {
-      const form1 = document.querySelector<HTMLFormElement>('[name="form1"]');
-      if (form1) {
-        form1.addEventListener('submit', () => {
-          const currentTranslation = document.querySelector<HTMLElement>('[name="WoTranslation"]');
-          if (currentTranslation) {
-            currentTranslation.setAttribute('name', currentTranslation.getAttribute('data_name') ?? '');
-          }
-          return true;
-        });
-      }
+      // Submission is bound in the template via @submit; nothing to do here.
     },
 
     /**
@@ -182,9 +497,21 @@ export function bulkTranslateApp(config: BulkTranslateConfig = {
             const cnt = (trans.id || '').replace('Trans_', '');
 
             trans.classList.add('notranslate');
-            trans.innerHTML =
-              `<input type="text" name="term[${cnt}][trans]" value="${txt}" maxlength="100" class="respinput">` +
-              '<div class="del_trans"></div>';
+
+            // Built through the DOM, not a markup string: the translation is
+            // third-party text, and a quote in it would otherwise close the
+            // value attribute and let the rest inject attributes.
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = `term[${cnt}][trans]`;
+            input.value = txt;
+            input.maxLength = 100;
+            input.className = 'respinput';
+
+            const delTrans = document.createElement('div');
+            delTrans.className = 'del_trans';
+
+            trans.replaceChildren(input, delTrans);
           });
 
           // Add dictionary links after each term

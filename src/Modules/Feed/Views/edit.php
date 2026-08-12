@@ -14,7 +14,7 @@
  *
  * @category Lwt
  * @package  Lwt\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -38,7 +38,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  */
 
 $actions = [
-    ['url' => '/feeds?page=1', 'label' => __('feed.edit_action_feeds'), 'icon' => 'list'],
+    ['url' => '/feeds/manage', 'label' => __('feed.edit_action_feeds'), 'icon' => 'list'],
     [
         'url' => '/feeds/wizard?step=2&edit_feed=' . (int)$feed['NfID'],
         'label' => __('feed.edit_action_wizard'),

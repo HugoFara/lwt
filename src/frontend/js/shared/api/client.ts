@@ -634,6 +634,47 @@ export async function apiDelete<T>(
 }
 
 /**
+ * Make a multipart/form-data POST request, for endpoints taking a file upload.
+ *
+ * @param endpoint API endpoint
+ * @param formData Form data, including any File entries
+ * @returns Promise resolving to ApiResponse with data or error
+ */
+export async function apiPostMultipart<T>(
+  endpoint: string,
+  formData: FormData
+): Promise<ApiResponse<T>> {
+  try {
+    // Deliberately no Content-Type: the browser has to set it so it can append
+    // the multipart boundary. Supplying one here truncates the upload.
+    const response = await apiFetch(defaultConfig.baseUrl + endpoint, {
+      method: 'POST',
+      headers: withAuth(withCsrf({ Accept: 'application/json' })),
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await parseResponse<{ message?: unknown; error?: unknown }>(response);
+      // An error envelope may carry `error: true` alongside the real text in
+      // `message`, so only a string is usable as the message itself.
+      const fromError = typeof errorData.error === 'string' ? errorData.error : '';
+      const fromMessage = typeof errorData.message === 'string' ? errorData.message : '';
+      return {
+        error:
+          fromError ||
+          fromMessage ||
+          `HTTP ${response.status}: ${response.statusText}`
+      };
+    }
+
+    const data = await parseResponse<T>(response);
+    return { data };
+  } catch (error) {
+    return { error: String(error) };
+  }
+}
+
+/**
  * Make a form-urlencoded POST request (for legacy compatibility).
  *
  * Some existing endpoints expect form data rather than JSON.

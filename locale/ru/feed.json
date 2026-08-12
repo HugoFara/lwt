@@ -103,6 +103,7 @@
     "edit_text_form_deselected": "Текст отменён — отметьте флажок, чтобы включить",
     "edit_text_footer_save": "Сохранить",
     "edit_text_footer_cancel": "Отмена",
+    "edit_texts_title": "Проверьте тексты перед импортом",
     "multi_load_mark_all": "Отметить все",
     "multi_load_mark_none": "Снять отметки",
     "multi_load_col_mark": "Отметка",

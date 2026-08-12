@@ -7,7 +7,7 @@
  * - Curated dictionary browser
  * - Manual upload (CSV/TSV file, paste, dictionary file)
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0 Extracted from PHP inline scripts
  * @since   3.1.0 Migrated to Alpine.js component
@@ -325,6 +325,7 @@ export interface WordUploadResultData {
   init(): void;
   loadPage(page: number): Promise<void>;
   goToPage(page: number): void;
+  goToPageFromEvent(event: Event): void;
   goFirst(): void;
   goPrev(): void;
   goNext(): void;
@@ -416,6 +417,22 @@ export function wordUploadResultApp(config: UploadResultConfig = { lastUpdate: '
     goToPage(page: number): void {
       if (page >= 1 && page <= this.totalPages) {
         this.loadPage(page);
+      }
+    },
+
+    /**
+     * Navigate to the page chosen in the picker.
+     *
+     * The number parsing lives here because the CSP Alpine build has no access
+     * to JS globals such as parseInt inside an inline expression.
+     *
+     * @param event Change event from the page select
+     */
+    goToPageFromEvent(event: Event): void {
+      const select = event.target as HTMLSelectElement | null;
+      const page = parseInt(select?.value ?? '', 10);
+      if (Number.isFinite(page)) {
+        this.goToPage(page);
       }
     },
 

@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Admin\Application\UseCases\ServerData
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -20,6 +20,7 @@ namespace Lwt\Modules\Admin\Application\UseCases\ServerData;
 use Lwt\Shared\Infrastructure\ApplicationInfo;
 use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Migrations;
 use Lwt\Shared\Infrastructure\Http\UrlUtilities;
 
 /**
@@ -52,7 +53,8 @@ class GetServerData
      *   php: string|false,
      *   mysql: string,
      *   lwt_version: string,
-     *   server_location: string
+     *   server_location: string,
+     *   failed_migrations: array<array{filename: string, attempts: int, error: string}>
      * }
      */
     public function execute(): array
@@ -66,6 +68,10 @@ class GetServerData
             'mysql' => (string) Connection::fetchValue("SELECT VERSION() AS version", 'version'),
             'lwt_version' => ApplicationInfo::getVersionNumber(),
             'server_location' => UrlUtilities::getAppOrigin(),
+            // A migration that did not run through leaves the schema
+            // incomplete, which only shows up later as "table doesn't exist"
+            // errors in whichever feature needed it (issue #247).
+            'failed_migrations' => Migrations::getFailedMigrations(),
         ];
     }
 

@@ -16,7 +16,7 @@ declare(strict_types=1);
  *
  * @category Lwt
  * @package  Lwt\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -108,6 +108,7 @@ if (!$isNew) {
       <?php if ($isNew) : ?>
       x-data="textNewForm"
       :action="formAction()"
+      @submit="handleSubmit($event)"
       @webpage-imported="goToReview()"
       <?php else : ?>
       x-data
@@ -961,6 +962,11 @@ if (!$isNew) {
                     </span>
                     <span><?= __e('text.new.file.epub_detected') ?></span>
                 </span>
+            </div>
+
+            <!-- EPUB import failure, reported by the books API -->
+            <div x-show="hasEpubError()" class="notification is-danger" x-cloak>
+                <span x-text="epubError"></span>
             </div>
 
             <!-- Save / Import Button -->

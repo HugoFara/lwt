@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Tags\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -67,21 +67,9 @@ class TextTagController extends AbstractCrudController
      */
     public function new(array $params): void
     {
+        // Creation goes through POST /api/v1/tags/{type}; this route only
+        // renders the scaffold the form component binds to.
         $this->render($this->pageTitle, $this->showMenu);
-
-        // Handle form submission
-        if ($this->param('op') === 'Save') {
-            $text = $this->param('T2Text', '');
-            $comment = $this->param('T2Comment', '');
-            $result = $this->facade->create($text, $comment);
-            $message = $result['success']
-                ? __('tags.flash.saved')
-                : __('tags.flash.error_prefix', [
-                    'message' => $result['error'] ?? __('tags.flash.unknown_error'),
-                ]);
-            $this->message($message, false);
-        }
-
         $this->renderCreateForm();
         $this->endRender();
     }
@@ -97,26 +85,9 @@ class TextTagController extends AbstractCrudController
      */
     public function edit(int $id): void
     {
+        // Saving goes through PUT /api/v1/tags/{type}/{id}; this route only
+        // renders the scaffold the form component binds to.
         $this->render($this->pageTitle, $this->showMenu);
-
-        // Handle form submission
-        if ($this->param('op') === 'Change') {
-            $text = $this->param('T2Text', '');
-            $comment = $this->param('T2Comment', '');
-            $result = $this->facade->update($id, $text, $comment);
-            if ($result['success']) {
-                // Redirect to list on success
-                header('Location: ' . url('/tags/text'));
-                exit;
-            }
-            $this->message(
-                __('tags.flash.error_prefix', [
-                    'message' => $result['error'] ?? __('tags.flash.unknown_error'),
-                ]),
-                false
-            );
-        }
-
         $this->renderEditForm($id);
         $this->endRender();
     }
@@ -271,22 +242,9 @@ class TextTagController extends AbstractCrudController
 
         TagsFacade::getAllTextTags(true); // Refresh cache
 
-        // Get counts and pagination
-        $totalCount = $this->facade->getCount($this->currentQuery);
-        $pagination = $this->facade->getPagination($totalCount, $this->currentPage);
-
-        // Get sort column
-        $sortColumn = $this->facade->getSortColumn($this->currentSort);
-
-        // Get tags list
-        $tags = $this->facade->getList(
-            $this->currentQuery,
-            $sortColumn,
-            $pagination['currentPage'],
-            $pagination['perPage']
-        );
-
-        // Set view variables
+        // Rows, counts and pagination all come from
+        // GET /api/v1/tags/{type}/list; only the initial filter and sort
+        // travel with the page so a bookmarked URL still opens on them.
         $currentQuery = $this->currentQuery;
         $currentSort = $this->currentSort;
         $isTextTag = true;

@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\User\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -424,90 +424,6 @@ class UserController extends BaseController
         return null;
     }
 
-    /**
-     * Process profile update.
-     *
-     * POST /profile
-     *
-     * @return ResponseInterface
-     */
-    public function updateProfile(): ResponseInterface
-    {
-        if (!$this->isPost()) {
-            return $this->redirect('/profile');
-        }
-
-        $user = $this->userFacade->getCurrentUser();
-        if ($user === null) {
-            return $this->redirect('/login');
-        }
-
-        $username = $this->post('username');
-        $email = $this->post('email');
-
-        if (empty($username) || empty($email)) {
-            $this->flash->error(__('user.flash.profile_missing_fields'));
-            return $this->redirect('/profile');
-        }
-
-        try {
-            $emailChanged = $this->userFacade->updateProfile($user, $username, $email);
-
-            if ($emailChanged) {
-                $this->userFacade->sendVerificationEmail($user);
-                $this->flash->success(__('user.flash.profile_updated_verify'));
-            } else {
-                $this->flash->success(__('user.flash.profile_updated'));
-            }
-        } catch (\InvalidArgumentException $e) {
-            $this->flash->error($e->getMessage());
-        }
-
-        return $this->redirect('/profile');
-    }
-
-    /**
-     * Process password change.
-     *
-     * POST /profile/password
-     *
-     * @return ResponseInterface
-     */
-    public function changePassword(): ResponseInterface
-    {
-        if (!$this->isPost()) {
-            return $this->redirect('/profile');
-        }
-
-        $user = $this->userFacade->getCurrentUser();
-        if ($user === null) {
-            return $this->redirect('/login');
-        }
-
-        $currentPassword = $this->post('current_password');
-        $newPassword = $this->post('new_password');
-        $confirmPassword = $this->post('new_password_confirm');
-
-        if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-            $this->flash->error(__('user.flash.password_missing_fields'));
-            return $this->redirect('/profile');
-        }
-
-        if ($newPassword !== $confirmPassword) {
-            $this->flash->error(__('user.flash.password_mismatch'));
-            return $this->redirect('/profile');
-        }
-
-        try {
-            $this->userFacade->changePassword($user, $currentPassword, $newPassword);
-            $this->flash->success(__('user.flash.password_changed'));
-        } catch (\InvalidArgumentException $e) {
-            $this->flash->error($e->getMessage());
-        }
-
-        return $this->redirect('/profile');
-    }
-
     // =========================================================================
     // Preferences Methods
     // =========================================================================
@@ -555,32 +471,6 @@ class UserController extends BaseController
 
         require __DIR__ . '/../Views/preferences.php';
         $this->endRender();
-    }
-
-    /**
-     * Save user preferences.
-     *
-     * POST /profile/preferences
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return ResponseInterface
-     */
-    public function savePreferences(array $params = []): ResponseInterface
-    {
-        if (!$this->isPost()) {
-            return $this->redirect('/profile/preferences');
-        }
-
-        $result = $this->userFacade->saveUserPreferences();
-
-        if ($result['success']) {
-            $this->flash->success(__('user.flash.preferences_saved'));
-        } else {
-            $this->flash->error(__('user.flash.preferences_failed'));
-        }
-
-        return $this->redirect('/profile/preferences');
     }
 
     // =========================================================================

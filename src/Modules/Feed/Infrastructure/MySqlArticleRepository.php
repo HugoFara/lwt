@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Feed\Infrastructure
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -485,13 +485,19 @@ class MySqlArticleRepository extends AbstractRepository implements ArticleReposi
             return 0;
         }
 
+        /** @var array<int, mixed> $bindings */
         $bindings = [];
         $feedInClause = Connection::buildPreparedInClause($feedIds, $bindings);
+        // feed_links carries no owner column, so filtering on FlNfID alone
+        // would let any authenticated user reset another user's articles by
+        // guessing a feed ID. deleteByFeeds()/deleteByIds() gate the same
+        // table this way; this write was the one that did not.
+        $scope = $this->feedOwnerScope($bindings);
 
         // Use raw SQL for TRIM() expression
         return Connection::preparedExecute(
             "UPDATE feed_links SET FlLink = TRIM(FlLink)
-             WHERE FlNfID IN {$feedInClause}",
+             WHERE FlNfID IN {$feedInClause}" . $scope,
             $bindings
         );
     }

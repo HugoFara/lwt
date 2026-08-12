@@ -17,3 +17,6 @@ import './pages/table_management';
 import './pages/tts_settings';
 import './pages/server_data';
 import './pages/user_management';
+
+// API
+export * from './api/users_api';

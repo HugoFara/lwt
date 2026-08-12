@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Admin
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -35,6 +35,7 @@ use Lwt\Modules\Admin\Application\Services\SessionCleaner;
 // Http
 use Lwt\Modules\Admin\Http\AdminController;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
+use Lwt\Modules\Admin\Http\UserManagementApiHandler;
 use Lwt\Modules\Admin\Http\UserManagementController;
 // Application Services
 use Lwt\Modules\Admin\Application\Services\TtsService;
@@ -147,6 +148,18 @@ class AdminServiceProvider implements ServiceProviderInterface
 
         $container->bind(UserManagementController::class, function (Container $c) {
             return new UserManagementController(
+                $c->getTyped(ListUsers::class),
+                $c->getTyped(CreateUser::class),
+                $c->getTyped(UpdateUser::class),
+                $c->getTyped(DeleteUser::class),
+                $c->getTyped(ToggleUserStatus::class),
+                $c->getTyped(ToggleUserRole::class),
+                $c->getTyped(UserRepositoryInterface::class)
+            );
+        });
+
+        $container->bind(UserManagementApiHandler::class, function (Container $c) {
+            return new UserManagementApiHandler(
                 $c->getTyped(ListUsers::class),
                 $c->getTyped(CreateUser::class),
                 $c->getTyped(UpdateUser::class),

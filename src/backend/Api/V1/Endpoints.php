@@ -7,7 +7,7 @@
  *
  * @category Api
  * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -39,7 +39,7 @@ class Endpoints
         'auth/logout' => ['POST'],
         'auth/me' => ['GET'],
 
-        'languages' => ['GET', 'POST', 'DELETE'],
+        'languages' => ['GET', 'POST', 'PUT', 'DELETE'],
         'languages/definitions' => ['GET'],
         'languages/with-texts' => ['GET'],
         'languages/with-archived-texts' => ['GET'],
@@ -57,15 +57,21 @@ class Endpoints
         'settings' => ['POST'],
         'settings/theme-path' => ['GET'],
         'statuses' => ['GET'],
-        'tags' => ['GET'],
-        'tags/term' => ['GET'],
-        'tags/text' => ['GET'],
+        // A URL carrying an ID never matches these sub-keys exactly, so
+        // getMethodsForEndpoint() falls back to the bare 'tags' entry; that
+        // entry has to permit every method any tags/... route uses.
+        'tags' => ['GET', 'POST', 'PUT', 'DELETE'],
+        'tags/term' => ['GET', 'POST', 'DELETE'],
+        'tags/text' => ['GET', 'POST', 'DELETE'],
         'terms' => ['GET', 'POST', 'PUT', 'DELETE'],
         'terms/imported' => ['GET'],
         'terms/new' => ['POST'],
         'terms/quick' => ['POST'],
         'terms/full' => ['POST'],
+        'terms/for-language' => ['POST'],
+        'terms/bulk' => ['POST'],
         'terms/for-edit' => ['GET'],
+        'terms/unknown-for-translate' => ['GET'],
         'terms/bulk-status' => ['PUT'],
         'terms/list' => ['GET'],
         'terms/filter-options' => ['GET'],
@@ -94,7 +100,14 @@ class Endpoints
         'feeds/list' => ['GET'],
         'feeds/articles' => ['GET'],
         'feeds/articles/import' => ['POST'],
-        'books' => ['GET'],
+        'feeds/articles/extract' => ['POST'],
+        'feeds/articles/create-texts' => ['POST'],
+        // A URL carrying an ID (books/12/progress) never matches a key here
+        // exactly, so getMethodsForEndpoint() falls back to the first segment.
+        // The bare 'books' entry therefore has to permit every method any
+        // books/{id}/... route uses, or that route 405s before reaching the
+        // handler. The two sub-keys below are documentation, not enforcement.
+        'books' => ['GET', 'POST', 'PUT', 'DELETE'],
         'books/chapters' => ['GET'],
         'books/progress' => ['PUT'],
         'local-dictionaries' => ['GET', 'POST', 'PUT', 'DELETE'],
@@ -102,6 +115,14 @@ class Endpoints
         'local-dictionaries/preview' => ['POST'],
         'local-dictionaries/import-curated' => ['POST'],
         'local-dictionaries/entries' => ['GET', 'POST', 'PUT', 'DELETE'],
+        // Admin-only user management. The bare 'admin' entry is what a URL
+        // carrying an ID actually matches, so it has to permit every method;
+        // UserManagementApiHandler enforces the admin role itself.
+        'admin' => ['GET', 'POST', 'PUT', 'DELETE'],
+        'admin/users' => ['GET', 'POST'],
+        // The signed-in user's own profile; no ID in any path.
+        'profile' => ['GET', 'PUT'],
+        'profile/preferences' => ['GET', 'PUT'],
         'activity' => ['GET'],
         'activity/streak' => ['GET'],
         'activity/calendar' => ['GET'],

@@ -103,6 +103,7 @@
     "edit_text_form_deselected": "テキストが選択解除されています - 含めるにはチェックを入れてください",
     "edit_text_footer_save": "保存",
     "edit_text_footer_cancel": "キャンセル",
+    "edit_texts_title": "インポート前にテキストを確認",
     "multi_load_mark_all": "すべて選択",
     "multi_load_mark_none": "選択解除",
     "multi_load_col_mark": "選択",

@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\User\Application
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -710,6 +710,18 @@ class UserFacade
     public function saveUserPreferences(): array
     {
         return (new SaveUserPreferences())->execute();
+    }
+
+    /**
+     * Save user preferences from an array (API-friendly version).
+     *
+     * @param array<string, mixed> $data Settings keyed by name
+     *
+     * @return array{success: bool}
+     */
+    public function saveUserPreferencesFromData(array $data): array
+    {
+        return (new SaveUserPreferences())->executeFromData($data);
     }
 
     // =========================================================================

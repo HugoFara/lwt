@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -48,7 +48,16 @@ class WordBulkService
             return 0;
         }
 
-        $ids = array_map('intval', $wordIds);
+        // Restrict to IDs the caller owns before touching word_occurrences.
+        // That table has no UsID column, so a whereIn on Ti2WoID alone would
+        // delete another user's multi-word occurrences — and because the
+        // words delete below *is* scoped, their terms would survive, leaving
+        // a silent partial corruption rather than a visible failure.
+        // WordListService::deleteByIdList() gates the same pair this way.
+        $ids = $this->filterOwnedWordIds($wordIds);
+        if (empty($ids)) {
+            return 0;
+        }
 
         // Delete multi-word text items first (before word deletion triggers FK SET NULL)
         QueryBuilder::table('word_occurrences')
@@ -64,6 +73,43 @@ class WordBulkService
             ->deletePrepared();
 
         return $count;
+    }
+
+    /**
+     * Narrow a list of word IDs to the ones the current user owns.
+     *
+     * `words` is user-scoped, so this is the bridge that lets an unscoped
+     * child table (word_occurrences) be written safely.
+     *
+     * @param int[] $ids Candidate word IDs
+     *
+     * @return list<int> The subset the caller owns; all of them when
+     *                   multi-user mode is off
+     */
+    private function filterOwnedWordIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        /** @var array<int, mixed> $bindings */
+        $bindings = [];
+        $inClause = Connection::buildPreparedInClause(array_map('intval', $ids), $bindings);
+        $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
+        if ($userScope === '') {
+            return array_values(array_map('intval', $ids));
+        }
+
+        $rows = Connection::preparedFetchAll(
+            'SELECT WoID FROM words WHERE WoID in ' . $inClause . $userScope,
+            $bindings
+        );
+
+        $owned = [];
+        foreach ($rows as $row) {
+            $owned[] = (int) $row['WoID'];
+        }
+        return $owned;
     }
 
     /**

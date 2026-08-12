@@ -75,23 +75,12 @@
             </errorLevel>
         </MixedArgument>
 
-        <MixedArrayAccess>
-            <errorLevel type="suppress">
-                <directory name="src/Modules/Book/Views" />
-            </errorLevel>
-        </MixedArrayAccess>
-
-        <MixedAssignment>
-            <errorLevel type="suppress">
-                <directory name="src/Modules/Book/Views" />
-            </errorLevel>
-        </MixedAssignment>
-
-        <MixedOperand>
-            <errorLevel type="suppress">
-                <directory name="src/Modules/Book/Views" />
-            </errorLevel>
-        </MixedOperand>
+        <!--
+            MixedArrayAccess / MixedAssignment / MixedOperand suppressions for
+            src/Modules/Book/Views were dropped when the book views stopped
+            rendering data: they now emit a scaffold plus a typed config blob,
+            so there is no untyped row data to walk.
+        -->
 
         <!-- Type checks for safety with dynamic data -->
         <RedundantCondition>

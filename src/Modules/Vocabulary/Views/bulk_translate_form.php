@@ -9,14 +9,16 @@
  * - $tl: string|null - Target language code
  * - $pos: int - Current offset position
  * - $dictionaries: array - Dictionary URIs with keys: dict1, dict2, translate
- * - $terms: array - Array of terms to translate with keys: word, Ti2LgID
- * - $nextOffset: int|null - Next offset if more terms exist, null if last page
+ * - $limit: int - Page size the client should request
+ *
+ * The term rows themselves are fetched by the bulkTranslateApp component from
+ * GET /api/v1/terms/unknown-for-translate.
  *
  * PHP version 8.1
  *
  * @category Lwt
  * @package  Lwt\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -33,9 +35,7 @@ assert(is_int($tid));
 assert($sl === null || is_string($sl));
 assert($tl === null || is_string($tl));
 assert(is_array($dictionaries));
-/** @var list<array{word: string, Ti2LgID: int|string}> $terms */
-assert(is_array($terms));
-assert($nextOffset === null || is_int($nextOffset));
+assert(is_int($limit));
 
 $altMarkAll = __('vocabulary.multi.mark_all');
 $altMarkNone = __('vocabulary.multi.mark_none');
@@ -46,13 +46,30 @@ $lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUO
 <?php echo json_encode([
     'dictionaries' => $dictionaries,
     'sourceLanguage' => $sl,
-    'targetLanguage' => $tl
+    'targetLanguage' => $tl,
+    'textId' => $tid,
+    'offset' => $pos,
+    'limit' => $limit
 ], JSON_HEX_TAG | JSON_HEX_AMP); ?></script>
 <script type="text/javascript"
         src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<form name="form1" action="/word/bulk-translate" method="post"
-      x-data="bulkTranslateApp()">
+<form name="form1" method="post"
+      x-data="bulkTranslateApp()"
+      @submit="submitTerms($event)">
+
+    <!-- Save outcome, rendered from the API response -->
+    <template x-if="hasSaveError()">
+        <div class="notification is-danger">
+            <span x-text="saveError"></span>
+        </div>
+    </template>
+    <template x-if="isDone()">
+        <div class="notification is-success">
+            <span x-text="savedMessage()"></span>
+        </div>
+    </template>
+
     <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
 
     <!-- Controls Panel -->
@@ -109,7 +126,8 @@ $lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUO
                             </div>
                         </div>
                         <div class="control">
-                            <button type="submit" class="button is-primary is-small">
+                            <button type="submit" class="button is-primary is-small"
+                                    :class="saveButtonClass()" :disabled="isSaving">
                                 <span class="icon is-small">
                                     <?php echo IconHelper::render('save', ['alt' => __('vocabulary.common.save')]); ?>
                                 </span>
@@ -134,31 +152,24 @@ $lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUO
                 </tr>
             </thead>
             <tbody>
-            <?php
-            $cnt = 0;
-            foreach ($terms as $record) {
-                $cnt++;
-                $value = \htmlspecialchars($record['word'] ?? '', ENT_QUOTES, 'UTF-8');
-                ?>
+                <template x-for="(term, i) in terms" :key="i">
                 <tr>
                     <td class="has-text-centered notranslate">
                         <label class="checkbox">
-                            <input name="marked[<?php echo $cnt ?>]"
+                            <input :name="markedName(i)"
                                    type="checkbox"
                                    class="markcheck"
                                    checked
-                                   value="<?php echo $cnt ?>" />
+                                   :value="rowIndex(i)" />
                         </label>
                     </td>
-                    <td id="Term_<?php echo $cnt ?>" class="notranslate">
-                        <span class="term tag is-medium is-light"><?php echo $value ?></span>
+                    <td :id="termCellId(i)" class="notranslate">
+                        <span class="term tag is-medium is-light" x-text="term.word"></span>
                     </td>
-                    <td class="trans" id="Trans_<?php echo $cnt ?>">
-                        <?php echo mb_strtolower($value, 'UTF-8') ?>
-                    </td>
+                    <td class="trans" :id="transCellId(i)" x-text="lowercaseOf(term)"></td>
                     <td class="has-text-centered notranslate">
                         <div class="select is-small">
-                            <select id="Stat_<?php echo $cnt ?>" name="term[<?php echo $cnt ?>][status]">
+                            <select :id="statusFieldId(i)" :name="statusName(i)">
                                 <option value="1" selected>[1]</option>
                                 <option value="2">[2]</option>
                                 <option value="3">[3]</option>
@@ -168,29 +179,22 @@ $lblChangeStatus = htmlspecialchars(__('vocabulary.bulk.change_status'), ENT_QUO
                                 <option value="98"><?= __e('common.status_ignored') ?></option>
                             </select>
                         </div>
-                        <input type="hidden"
-                               id="Text_<?php echo $cnt ?>"
-                               name="term[<?php echo $cnt ?>][text]"
-                               value="<?php echo $value ?>" />
-                        <input type="hidden"
-                               name="term[<?php echo $cnt ?>][lg]"
-                               value="<?php
-                                   echo \htmlspecialchars((string)($record['Ti2LgID'] ?? ''), ENT_QUOTES, 'UTF-8');
-                                ?>" />
+                        <input type="hidden" :id="textFieldId(i)" :name="textName(i)" :value="term.word" />
+                        <input type="hidden" :name="langName(i)" :value="term.Ti2LgID" />
                     </td>
                 </tr>
-                <?php
-            }
-            ?>
+                </template>
             </tbody>
         </table>
     </div>
 
     <!-- Hidden fields -->
     <input type="hidden" name="tid" value="<?php echo $tid ?>" />
-    <?php if ($nextOffset !== null) : ?>
-    <input type="hidden" name="offset" value="<?php echo $nextOffset ?>" />
-    <input type="hidden" name="sl" value="<?php echo $sl ?>" />
-    <input type="hidden" name="tl" value="<?php echo $tl ?>" />
-    <?php endif; ?>
+    <template x-if="nextOffset !== null">
+        <span>
+            <input type="hidden" name="offset" :value="nextOffset" />
+            <input type="hidden" name="sl" value="<?php echo htmlspecialchars((string)$sl, ENT_QUOTES) ?>" />
+            <input type="hidden" name="tl" value="<?php echo htmlspecialchars((string)$tl, ENT_QUOTES) ?>" />
+        </span>
+    </template>
 </form>

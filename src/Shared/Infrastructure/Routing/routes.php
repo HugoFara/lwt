@@ -10,7 +10,7 @@
  *
  * @category Lwt
  * @package  Lwt\Shared\Infrastructure\Routing
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 All routes now use controller methods
@@ -160,15 +160,16 @@ function registerRoutes(Router $router): void
     // Split into focused controllers: TermEditController, TermDisplayController,
     // TermStatusController, TermApiController, TermImportController, MultiWordController
 
-    // Edit word (TermEditController)
-    $router->registerWithMiddleware(
+    // Edit word (TermEditController). The editor is client-rendered against
+    // /api/v1/terms/*, so these only ever serve a page — never a submission.
+    $router->get(
         '/word/edit',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWord',
         AUTH_MIDDLEWARE
     );
 
     // Edit term while testing (TermEditController)
-    $router->registerWithMiddleware(
+    $router->get(
         '/word/edit-term',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editTerm',
         AUTH_MIDDLEWARE
@@ -180,12 +181,6 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
         AUTH_MIDDLEWARE
     );
-    $router->post(
-        '/words/{id:int}/edit',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@editWordById',
-        AUTH_MIDDLEWARE
-    );
-
     // Delete word (RESTful route): DELETE /words/123
     $router->delete(
         '/words/{id:int}',
@@ -200,13 +195,6 @@ function registerRoutes(Router $router): void
         AUTH_MIDDLEWARE
     );
 
-    // Edit multi-word (MultiWordController)
-    $router->registerWithMiddleware(
-        '/word/edit-multi',
-        'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController@editMulti',
-        AUTH_MIDDLEWARE
-    );
-
     // All words (list view) - Alpine.js SPA version (TermDisplayController)
     $router->registerWithMiddleware(
         '/words',
@@ -217,8 +205,9 @@ function registerRoutes(Router $router): void
     // New word (TermEditController)
     // RESTful route: /words/new
     $router->get('/words/new', 'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@createWord', AUTH_MIDDLEWARE);
-    // Legacy route: /word/new
-    $router->registerWithMiddleware(
+    // Legacy route: /word/new. GET only — creation goes through
+    // POST /api/v1/terms/for-language, which validates the language.
+    $router->get(
         '/word/new',
         'Lwt\\Modules\\Vocabulary\\Http\\TermEditController@createWord',
         AUTH_MIDDLEWARE
@@ -240,13 +229,6 @@ function registerRoutes(Router $router): void
     $router->registerWithMiddleware(
         '/word/bulk-translate',
         'Lwt\\Modules\\Vocabulary\\Http\\TermImportController@bulkTranslate',
-        AUTH_MIDDLEWARE
-    );
-
-    // Create term from hover (TermDisplayController)
-    $router->registerWithMiddleware(
-        '/vocabulary/term-hover',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController@hoverCreate',
         AUTH_MIDDLEWARE
     );
 
@@ -295,13 +277,6 @@ function registerRoutes(Router $router): void
         'Lwt\\Modules\\Vocabulary\\Http\\TermApiController@delete',
         AUTH_MIDDLEWARE,
         'POST'
-    );
-
-    // Set all words status (wellknown/ignore) (TermStatusController)
-    $router->registerWithMiddleware(
-        '/word/set-all-status',
-        'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController@markAllWords',
-        AUTH_MIDDLEWARE
     );
 
     // Upload words (TermImportController)
@@ -369,11 +344,9 @@ function registerRoutes(Router $router): void
 
     // New language form (RESTful route): GET/POST /languages/new
     $router->get('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
-    $router->post('/languages/new', 'Lwt\\Modules\\Language\\Http\\LanguageController@new', AUTH_MIDDLEWARE);
 
     // Edit language form (RESTful route): /languages/123/edit
     $router->get('/languages/{id:int}/edit', 'Lwt\\Modules\\Language\\Http\\LanguageController@edit', AUTH_MIDDLEWARE);
-    $router->post('/languages/{id:int}/edit', 'Lwt\\Modules\\Language\\Http\\LanguageController@edit', AUTH_MIDDLEWARE);
 
     // Delete language (RESTful route): DELETE /languages/123
     $router->delete(
@@ -470,7 +443,14 @@ function registerRoutes(Router $router): void
     // Multi-load feeds interface (RESTful route)
     $router->get('/feeds/multi-load', 'Lwt\\Modules\\Feed\\Http\\FeedController@multiLoad', AUTH_MIDDLEWARE);
 
-    // Feeds list
+    // Refresh feeds due for auto-update
+    $router->get(
+        '/feeds/autoupdate',
+        'Lwt\\Modules\\Feed\\Http\\FeedController@autoupdate',
+        AUTH_MIDDLEWARE
+    );
+
+    // Legacy article browser - redirects to the manager SPA
     $router->registerWithMiddleware('/feeds', 'Lwt\\Modules\\Feed\\Http\\FeedController@index', AUTH_MIDDLEWARE);
 
     // Edit feeds (legacy route - handles query params)
@@ -612,48 +592,22 @@ function registerRoutes(Router $router): void
         ADMIN_MIDDLEWARE
     );
 
-    // User Management (Admin module)
+    // User Management (Admin module). Only the three page routes remain:
+    // every mutation now goes through /api/v1/admin/users, which enforces the
+    // admin role itself rather than relying on ADMIN_MIDDLEWARE.
     $router->get('/admin/users', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@index', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@index', ADMIN_MIDDLEWARE);
     $router->get('/admin/users/new', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@create', ADMIN_MIDDLEWARE);
-    $router->post('/admin/users/new', 'Lwt\\Modules\\Admin\\Http\\UserManagementController@create', ADMIN_MIDDLEWARE);
     $router->get(
         '/admin/users/{id:int}/edit',
         'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit',
         ADMIN_MIDDLEWARE
     );
-    $router->post(
-        '/admin/users/{id:int}/edit',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@edit',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/delete',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@delete',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/activate',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@activate',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/deactivate',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@deactivate',
-        ADMIN_MIDDLEWARE
-    );
-    $router->post(
-        '/admin/users/{id:int}/role',
-        'Lwt\\Modules\\Admin\\Http\\UserManagementController@setRole',
-        ADMIN_MIDDLEWARE
-    );
 
     // ==================== USER PROFILE (AUTH REQUIRED) ====================
+    // Profile and preferences save through PUT /api/v1/profile*; these routes
+    // only render the scaffolds those components bind to.
     $router->get('/profile', 'Lwt\\Modules\\User\\Http\\UserController@profileForm', AUTH_MIDDLEWARE);
-    $router->post('/profile', 'Lwt\\Modules\\User\\Http\\UserController@updateProfile', AUTH_MIDDLEWARE);
-    $router->post('/profile/password', 'Lwt\\Modules\\User\\Http\\UserController@changePassword', AUTH_MIDDLEWARE);
     $router->get('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@preferencesForm', AUTH_MIDDLEWARE);
-    $router->post('/profile/preferences', 'Lwt\\Modules\\User\\Http\\UserController@savePreferences', AUTH_MIDDLEWARE);
     $router->get(
         '/profile/statistics',
         'Lwt\\Modules\\User\\Http\\StatisticsController@show',

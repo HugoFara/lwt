@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Book\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -17,19 +17,20 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Book\Application\Services;
 
-use Kiwilan\Ebook\Ebook;
-use Kiwilan\Ebook\Formats\Epub\EpubModule;
-use Kiwilan\Ebook\Formats\Epub\Parser\EpubChapter;
-use Kiwilan\Ebook\Formats\Epub\Parser\EpubHtml;
-use Kiwilan\Ebook\Models\BookAuthor;
+use Lwt\Modules\Book\Infrastructure\Epub\EpubBook;
+use Lwt\Modules\Book\Infrastructure\Epub\EpubChapter;
+use Lwt\Modules\Book\Infrastructure\Epub\EpubDocument;
+use Lwt\Modules\Book\Infrastructure\Epub\EpubReader;
 use InvalidArgumentException;
 use RuntimeException;
 
 /**
  * Service for parsing EPUB files and extracting content.
  *
- * Uses the kiwilan/php-ebook library to read EPUB files and extract
- * metadata and chapter content for import into LWT.
+ * Reads EPUB files through the in-tree {@see EpubReader} and extracts metadata
+ * and chapter content for import into LWT. LWT bundled its own reader in 3.4.0
+ * so that EPUB import, a core feature, no longer depends on an external
+ * Composer package (#263).
  *
  * @since 3.0.0
  */
@@ -110,22 +111,14 @@ class EpubParserService
         $this->assertZipWithinLimits($filePath);
 
         try {
-            $ebook = Ebook::read($filePath, $this->resolveFormat($filePath, $originalName));
-            if ($ebook === null) {
-                throw new RuntimeException(
-                    "Failed to read EPUB file: {$filePath}. "
-                    . "The file may be corrupted or not a valid EPUB format."
-                );
-            }
+            $ebook = EpubReader::read($filePath);
         } catch (\Throwable $e) {
-            // Provide more specific error messages
-            $message = $e->getMessage();
-            if (str_contains($message, 'getManifest() on null')) {
-                $message = "EPUB file appears to be corrupted or has an invalid internal structure (missing manifest).";
-            } elseif (str_contains($message, 'ZIP')) {
-                $message = "EPUB file could not be read as a ZIP archive. The file may be corrupted.";
-            }
-            throw new RuntimeException("Failed to parse EPUB file: {$message}", 0, $e);
+            $label = $originalName !== '' ? $originalName : $filePath;
+            throw new RuntimeException(
+                "Failed to parse EPUB file '{$label}': " . $e->getMessage(),
+                0,
+                $e
+            );
         }
 
         $metadata = [
@@ -147,64 +140,44 @@ class EpubParserService
     /**
      * Extract the primary author name from an ebook.
      *
-     * @param Ebook $ebook The ebook object
+     * @param EpubBook $ebook The parsed ebook
      *
      * @return string|null Author name or null if not found
      */
-    private function extractAuthor(Ebook $ebook): ?string
+    private function extractAuthor(EpubBook $ebook): ?string
     {
-        $author = $ebook->getAuthorMain();
-        if ($author !== null) {
-            return $author->getName();
-        }
-
-        /** @var BookAuthor[] $authors */
-        $authors = $ebook->getAuthors();
-        if (!empty($authors)) {
-            return $authors[0]->getName();
-        }
-
-        return null;
+        return $ebook->getAuthorMain();
     }
 
     /**
      * Extract chapters from an ebook.
      *
-     * @param Ebook $ebook The ebook object
+     * @param EpubBook $ebook The parsed ebook
      *
      * @return array<array{num: int, title: string, content: string}>
      */
-    private function extractChapters(Ebook $ebook): array
+    private function extractChapters(EpubBook $ebook): array
     {
         $chapters = [];
         $chapterNum = 1;
 
-        // Try to get chapters from the ebook via the EPUB parser
-        $epubModule = $this->getEpubModule($ebook);
-        if ($epubModule !== null) {
-            try {
-                /** @var EpubChapter[] $ebookChapters */
-                $ebookChapters = $epubModule->getChapters();
+        /** @var EpubChapter[] $ebookChapters */
+        $ebookChapters = $ebook->getChapters();
 
-                foreach ($ebookChapters as $chapter) {
-                    $content = $this->cleanHtmlContent($chapter->getContent());
+        foreach ($ebookChapters as $chapter) {
+            $content = $this->cleanHtmlContent($chapter->getContent());
 
-                    // Skip empty chapters
-                    if (trim($content) === '') {
-                        continue;
-                    }
-
-                    $chapters[] = [
-                        'num' => $chapterNum,
-                        'title' => $chapter->getLabel() ?: "Chapter {$chapterNum}",
-                        'content' => $content,
-                    ];
-                    $chapterNum++;
-                }
-            } catch (\Throwable $e) {
-                // If chapter extraction fails, log the error and continue with HTML fallback
-                error_log("EPUB chapter extraction failed, trying HTML fallback: " . $e->getMessage());
+            // Skip empty chapters
+            if (trim($content) === '') {
+                continue;
             }
+
+            $chapters[] = [
+                'num' => $chapterNum,
+                'title' => $chapter->getLabel() ?: "Chapter {$chapterNum}",
+                'content' => $content,
+            ];
+            $chapterNum++;
         }
 
         // If no chapters found, try to extract from HTML files
@@ -216,63 +189,37 @@ class EpubParserService
     }
 
     /**
-     * Get the EpubModule from an Ebook.
-     *
-     * @param Ebook $ebook The ebook object
-     *
-     * @return EpubModule|null The EPUB module or null if not an EPUB
-     */
-    private function getEpubModule(Ebook $ebook): ?EpubModule
-    {
-        $parser = $ebook->getParser();
-        if ($parser === null) {
-            return null;
-        }
-        return $parser->getEpub();
-    }
-
-    /**
      * Extract content from HTML files in the EPUB as fallback.
      *
-     * @param Ebook $ebook The ebook object
+     * @param EpubBook $ebook The parsed ebook
      *
      * @return array<array{num: int, title: string, content: string}>
      */
-    private function extractFromHtmlFiles(Ebook $ebook): array
+    private function extractFromHtmlFiles(EpubBook $ebook): array
     {
         $chapters = [];
         $chapterNum = 1;
 
-        // Try to get HTML content via the EPUB module
-        $epubModule = $this->getEpubModule($ebook);
-        if ($epubModule !== null) {
-            try {
-                /** @var EpubHtml[] $htmlFiles */
-                $htmlFiles = $epubModule->getHtml();
-                foreach ($htmlFiles as $htmlFile) {
-                    if ($this->isNavigationFile($htmlFile)) {
-                        continue;
-                    }
-
-                    $content = $this->cleanHtmlContent($htmlFile->getBody() ?? '');
-
-                    if (trim($content) === '') {
-                        continue;
-                    }
-
-                    // Try to extract title from content
-                    $title = $this->extractTitleFromContent($content, $chapterNum);
-
-                    $chapters[] = [
-                        'num' => $chapterNum,
-                        'title' => $title,
-                        'content' => $content,
-                    ];
-                    $chapterNum++;
-                }
-            } catch (\Throwable $e) {
-                error_log("EPUB HTML extraction fallback failed: " . $e->getMessage());
+        foreach ($ebook->getHtml() as $htmlFile) {
+            if ($this->isNavigationFile($htmlFile)) {
+                continue;
             }
+
+            $content = $this->cleanHtmlContent($htmlFile->getBody());
+
+            if (trim($content) === '') {
+                continue;
+            }
+
+            // Try to extract title from content
+            $title = $this->extractTitleFromContent($content, $chapterNum);
+
+            $chapters[] = [
+                'num' => $chapterNum,
+                'title' => $title,
+                'content' => $content,
+            ];
+            $chapterNum++;
         }
 
         return $chapters;
@@ -282,14 +229,14 @@ class EpubParserService
      * Detect EPUB 3 navigation / TOC documents that should not appear as
      * chapters.
      *
-     * The kiwilan library's NCX-based getChapters() ignores nav.xhtml, but
-     * when an EPUB ships without an NCX the HTML fallback would otherwise
-     * include the nav document as a phantom chapter. Filename heuristics
-     * cover the common cases (nav.xhtml, toc.xhtml); the body sniff catches
-     * less conventionally-named EPUB 3 nav documents identified by the
+     * The TOC-driven getChapters() path ignores nav.xhtml, but when an EPUB
+     * ships without a usable table of contents the HTML fallback would
+     * otherwise include the nav document as a phantom chapter. Filename
+     * heuristics cover the common cases (nav.xhtml, toc.xhtml); the body sniff
+     * catches less conventionally-named EPUB 3 nav documents identified by the
      * `epub:type="toc"` (or related) attribute on a `<nav>` element.
      */
-    public function isNavigationFile(EpubHtml $htmlFile): bool
+    public function isNavigationFile(EpubDocument $htmlFile): bool
     {
         $filename = strtolower(basename($htmlFile->getFilename()));
         if (preg_match('/^(nav|toc|navigation|contents)(\.|-|_)/', $filename) === 1) {
@@ -299,7 +246,7 @@ class EpubParserService
             return true;
         }
 
-        $body = $htmlFile->getBody() ?? '';
+        $body = $htmlFile->getBody();
         if ($body === '') {
             return false;
         }
@@ -529,10 +476,7 @@ class EpubParserService
         }
 
         try {
-            $ebook = Ebook::read($filePath, $this->resolveFormat($filePath, $originalName));
-            if ($ebook === null) {
-                return null;
-            }
+            $ebook = EpubReader::read($filePath);
 
             return [
                 'title' => $ebook->getTitle() ?? 'Unknown Title',
@@ -541,24 +485,9 @@ class EpubParserService
                 'language' => $ebook->getLanguage(),
             ];
         } catch (\Throwable $e) {
-            error_log("EpubParserService::getMetadata failed for '$filePath': " . $e->getMessage());
+            $label = $originalName !== '' ? $originalName : $filePath;
+            error_log("EpubParserService::getMetadata failed for '$label': " . $e->getMessage());
             return null;
         }
-    }
-
-    /**
-     * Resolve the format hint for the underlying ebook library.
-     *
-     * Falls back to the original filename's extension when the path itself
-     * has none (PHP upload temp paths look like /tmp/phpXXXXXX). Returns
-     * null when no extension can be determined, letting the library decide.
-     */
-    private function resolveFormat(string $filePath, string $originalName): ?string
-    {
-        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-        if ($extension === '' && $originalName !== '') {
-            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        }
-        return $extension === '' ? null : $extension;
     }
 }

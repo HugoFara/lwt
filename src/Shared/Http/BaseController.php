@@ -8,7 +8,7 @@
  *
  * @category Lwt
  * @package  Lwt\Shared\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @link    https://hugofara.github.io/lwt/developer/api
  * @since   3.0.0
@@ -33,7 +33,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  *
  * @category Lwt
  * @package  Lwt\Shared\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0

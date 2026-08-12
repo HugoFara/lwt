@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Book\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -23,7 +23,6 @@ use Lwt\Shared\Infrastructure\Container\Container;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\UI\Helpers\SelectOptionsBuilder;
-use Lwt\Shared\Infrastructure\Globals;
 
 /**
  * Controller for book management operations.
@@ -62,27 +61,12 @@ class BookController
      */
     public function index(array $params): void
     {
-        $userId = Globals::getCurrentUserId();
-        $languageId = InputValidator::getInt('lg_id');
-        $pageParam = InputValidator::getInt('page');
-        $page = max(1, $pageParam ?? 1);
-
-        $result = $this->bookFacade->getBooks($userId, $languageId, $page);
-        $books = $result['books'];
-        $pagination = [
-            'total' => $result['total'],
-            'page' => $result['page'],
-            'perPage' => $result['perPage'],
-            'totalPages' => $result['totalPages'],
-        ];
-
-        // Get languages for filter dropdown
-        $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
-        $languages = $languageFacade->getLanguagesForSelect();
-        $languagesOption = SelectOptionsBuilder::forLanguages($languages, $languageId, __('book.all_languages_option'));
-
-        // Extract flash message from query string
-        $message = InputValidator::getString('message');
+        // The list, the language filter and the pagination are all fetched by
+        // the bookList component from /api/v1. Only the query-string state is
+        // handed over, so a bookmarked ?lg_id=&page= still opens where the
+        // reader left off.
+        $languageId = InputValidator::getInt('lg_id') ?? 0;
+        $page = max(1, InputValidator::getInt('page') ?? 1);
 
         PageLayoutHelper::renderPageStart(__('book.my_books'), true, 'books');
         include $this->viewPath . 'index.php';
@@ -105,24 +89,19 @@ class BookController
             exit;
         }
 
-        $result = $this->bookFacade->getBook($bookId);
-
-        if ($result === null) {
-            header('Location: /books');
-            exit;
-        }
-
-        $book = $result['book'];
-        $chapters = $result['chapters'];
-        $bookTitle = $book['title'];
-
-        PageLayoutHelper::renderPageStart($bookTitle, true, 'books');
+        // The bookDetail component fetches the book from /api/v1 and reports a
+        // missing one itself, so no lookup happens here. The page title is
+        // generic because the title is not known server-side any more.
+        PageLayoutHelper::renderPageStart(__('book.my_books'), true, 'books');
         include $this->viewPath . 'show.php';
         PageLayoutHelper::renderPageEnd();
     }
 
     /**
-     * Show EPUB import form or handle import submission.
+     * Show the EPUB import form.
+     *
+     * The upload itself goes to POST /api/v1/books and the outcome is
+     * rendered client-side, so this only ever serves the form.
      *
      * @param array<string, mixed> $params Route parameters
      *
@@ -130,14 +109,6 @@ class BookController
      */
     public function import(array $params): void
     {
-        $op = InputValidator::getString('op');
-
-        if ($op === 'Import') {
-            $this->processImport();
-            return;
-        }
-
-        // Show import form
         $languageFacade = Container::getInstance()->getTyped(LanguageFacade::class);
         $languages = $languageFacade->getLanguagesForSelect();
         $languagesOption = SelectOptionsBuilder::forLanguages($languages, null, __('book.choose_option'));
@@ -147,83 +118,6 @@ class BookController
 
         PageLayoutHelper::renderPageStart(__('book.import_epub'), true, 'books');
         include $this->viewPath . 'import_epub_form.php';
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Process EPUB import submission.
-     *
-     * @return void
-     */
-    private function processImport(): void
-    {
-        // Accept both the legacy /book/import field names (LgID, thefile) and the
-        // /texts/new form's names (TxLgID, importFile) so the inline EPUB flow
-        // can post here without renaming any client-side fields.
-        $languageId = InputValidator::getInt('LgID');
-        if ($languageId <= 0) {
-            $languageId = InputValidator::getInt('TxLgID');
-        }
-        $overrideTitle = InputValidator::getString('TxTitle');
-        $uploadedFile = InputValidator::getUploadedFile('thefile')
-            ?? InputValidator::getUploadedFile('importFile');
-        $userId = Globals::getCurrentUserId();
-
-        // Get tag IDs if any
-        $tagIds = [];
-        $tagList = InputValidator::getString('TextTags');
-        if ($tagList !== '') {
-            $tagIds = array_map('intval', explode(',', $tagList));
-        }
-
-        if ($languageId <= 0) {
-            $message = __('book.flash.select_language');
-            $messageType = 'is-danger';
-            $this->showImportResult($message, $messageType, null);
-            return;
-        }
-
-        if ($uploadedFile === null || !isset($uploadedFile['tmp_name']) || $uploadedFile['tmp_name'] === '') {
-            $message = __('book.flash.select_epub');
-            $messageType = 'is-danger';
-            $this->showImportResult($message, $messageType, null);
-            return;
-        }
-
-        $result = $this->bookFacade->importEpub(
-            $languageId,
-            $uploadedFile,
-            $overrideTitle !== '' ? $overrideTitle : null,
-            $tagIds,
-            $userId
-        );
-
-        if ($result['success']) {
-            $message = $result['message'];
-            $messageType = 'is-success';
-            $bookId = $result['bookId'];
-        } else {
-            $message = $result['message'];
-            $messageType = 'is-danger';
-            $bookId = null;
-        }
-
-        $this->showImportResult($message, $messageType, $bookId);
-    }
-
-    /**
-     * Show import result page.
-     *
-     * @param string   $message     Result message
-     * @param string   $messageType Bulma notification class
-     * @param int|null $bookId      Book ID if successful
-     *
-     * @return void
-     */
-    private function showImportResult(string $message, string $messageType, ?int $bookId): void
-    {
-        PageLayoutHelper::renderPageStart(__('book.import_result_title'), true, 'books');
-        include $this->viewPath . 'import_result.php';
         PageLayoutHelper::renderPageEnd();
     }
 

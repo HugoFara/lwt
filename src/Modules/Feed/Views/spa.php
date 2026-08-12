@@ -13,7 +13,7 @@
  *
  * @category Lwt
  * @package  Lwt\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -438,6 +438,148 @@ use Lwt\Shared\UI\Helpers\IconHelper;
                     </template>
                 </ul>
             </nav>
+        </div>
+    </template>
+
+    <!-- ===================================================================
+         EDIT-BEFORE-IMPORT VIEW
+
+         Reached only for feeds carrying the `edit_text` option. The rows are
+         extracted by POST /feeds/articles/extract and written back by
+         POST /feeds/articles/create-texts; the tag and the max-texts limit
+         are resolved server-side from the feed, so they are not editable.
+         =================================================================== -->
+    <template x-if="$store.feedManager.viewMode === 'edit-texts'">
+        <div x-data="pendingTextList">
+            <div class="level mb-4">
+                <div class="level-left">
+                    <div class="level-item">
+                        <button class="button" @click="cancel()">
+                            <?php echo IconHelper::render('arrow-left', ['class' => 'icon-sm']); ?>
+                            <span x-text="$t('feed.spa_back')"></span>
+                        </button>
+                    </div>
+                    <div class="level-item">
+                        <h2 class="title is-4"><?php echo __e('feed.edit_texts_title'); ?></h2>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <span class="tag is-info is-medium"
+                              x-text="selectedCount + ' ' + $t('feed.spa_selected_label')"></span>
+                    </div>
+                </div>
+            </div>
+
+            <template x-for="(pending, i) in texts" :key="i">
+                <div class="box mb-4">
+                    <div class="field is-horizontal">
+                        <div class="field-label is-normal">
+                            <label class="checkbox">
+                                <input type="checkbox" :checked="pending.selected" @change="toggle(i)" />
+                            </label>
+                        </div>
+                        <div class="field-body">
+                            <div class="field">
+                                <div class="control is-expanded">
+                                    <input type="text" class="input" x-model="pending.title"
+                                           maxlength="200"
+                                           placeholder="<?php echo __e('feed.edit_text_form_title_placeholder'); ?>"
+                                           :disabled="!pending.selected" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="pending.selected" x-transition x-cloak>
+                        <div class="field is-horizontal">
+                            <div class="field-label is-normal">
+                                <label class="label"><?php echo __e('feed.edit_text_form_language'); ?></label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select :value="pending.language_id"
+                                                    @change="setLanguage(i, $event.target.value)">
+                                                <template x-for="language in languages" :key="language.id">
+                                                    <option :value="language.id"
+                                                            :selected="language.id === pending.language_id"
+                                                            x-text="language.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field is-horizontal">
+                            <div class="field-label is-normal">
+                                <label class="label"><?php echo __e('feed.edit_text_form_text'); ?></label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control is-expanded">
+                                        <textarea class="textarea" rows="12" x-model="pending.text"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field is-horizontal">
+                            <div class="field-label is-normal">
+                                <label class="label"><?php echo __e('feed.edit_text_form_source_uri'); ?></label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control">
+                                        <input type="url" class="input" x-model="pending.source_uri"
+                                               maxlength="1000" placeholder="https://..." />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field is-horizontal">
+                            <div class="field-label is-normal">
+                                <label class="label"><?php echo __e('feed.edit_text_form_audio_uri'); ?></label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control">
+                                        <input type="text" class="input" x-model="pending.audio_uri"
+                                               maxlength="200"
+                                               placeholder="<?php echo __e('feed.edit_text_form_audio_placeholder'); ?>"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="!pending.selected" x-transition class="has-text-grey-light is-italic">
+                        <span class="icon is-small">
+                            <?php
+                            $hiddenAlt = __('feed.edit_text_form_hidden_alt');
+                            echo IconHelper::render('eye-off', ['alt' => $hiddenAlt]);
+                            ?>
+                        </span>
+                        <?php echo __e('feed.edit_text_form_deselected'); ?>
+                    </div>
+                </div>
+            </template>
+
+            <div class="buttons">
+                <button class="button is-primary" @click="save()"
+                        :disabled="selectedCount === 0 || isSubmitting">
+                    <?php echo IconHelper::render('save', ['class' => 'icon-sm']); ?>
+                    <span><?php echo __e('feed.edit_text_footer_save'); ?></span>
+                </button>
+                <button class="button" @click="cancel()">
+                    <?php echo __e('feed.edit_text_footer_cancel'); ?>
+                </button>
+            </div>
         </div>
     </template>
 

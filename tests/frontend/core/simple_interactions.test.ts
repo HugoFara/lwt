@@ -10,12 +10,6 @@ vi.mock('../../../src/frontend/js/shared/forms/unloadformcheck', () => ({
   }
 }));
 
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  showRightFramesPanel: vi.fn(),
-  hideRightFrames: vi.fn(),
-  loadModalFrame: vi.fn()
-}));
-
 vi.mock('../../../src/frontend/js/shared/utils/ui_utilities', () => ({
   showAllwordsClick: vi.fn()
 }));

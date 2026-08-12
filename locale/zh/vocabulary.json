@@ -153,7 +153,6 @@
     "result.translation_label": "翻译：",
     "result.word_marked_well_known": "单词已标记为熟知。",
     "result.word_marked_ignored": "单词已标记为忽略。",
-    "result.updating_texts": "正在更新文本",
     "result.ignored_all": "已忽略全部 {count} 个单词！",
     "result.ignored_one": "已忽略 1 个单词。",
     "result.ignored_none": "未忽略新单词！",

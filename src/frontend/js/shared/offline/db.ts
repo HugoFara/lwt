@@ -4,7 +4,7 @@
  * Uses Dexie.js for IndexedDB management. Stores texts, words,
  * and language data for offline reading support.
  *
- * @author  HugoFara <Hugo.Farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

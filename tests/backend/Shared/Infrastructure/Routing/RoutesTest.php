@@ -172,18 +172,15 @@ class RoutesTest extends TestCase
         $termDisplayController = 'Lwt\\Modules\\Vocabulary\\Http\\TermDisplayController';
         $termStatusController = 'Lwt\\Modules\\Vocabulary\\Http\\TermStatusController';
         $termImportController = 'Lwt\\Modules\\Vocabulary\\Http\\TermImportController';
-        $multiWordController = 'Lwt\\Modules\\Vocabulary\\Http\\MultiWordController';
         return [
             'word edit' => ['/word/edit', "{$termEditController}@editWord"],
             'word edit-term' => ['/word/edit-term', "{$termEditController}@editTerm"],
             'words edit list' => ['/words/edit', "{$termDisplayController}@listEditAlpine"],
-            'word edit-multi' => ['/word/edit-multi', "{$multiWordController}@editMulti"],
             'words list' => ['/words', "{$termDisplayController}@listEditAlpine"],
             'word new' => ['/word/new', "{$termEditController}@createWord"],
             'word show' => ['/word/show', "{$termDisplayController}@showWord"],
             'word inline-edit' => ['/word/inline-edit', "{$termEditController}@inlineEdit"],
             'word bulk-translate' => ['/word/bulk-translate', "{$termImportController}@bulkTranslate"],
-            'word set-all-status' => ['/word/set-all-status', "{$termStatusController}@markAllWords"],
             'word upload' => ['/word/upload', "{$termImportController}@upload"],
         ];
     }
@@ -415,7 +412,6 @@ class RoutesTest extends TestCase
         // This test ensures naming conventions are followed
         $routes = [
             // New routes should use hyphens for word separation
-            '/word/edit-multi' => 'should use hyphens',
             '/word/inline-edit' => 'should use hyphens',
             '/word/bulk-translate' => 'should use hyphens',
             '/admin/install-demo' => 'should use hyphens',

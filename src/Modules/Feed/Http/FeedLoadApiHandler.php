@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Feed\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -163,6 +163,17 @@ class FeedLoadApiHandler
      */
     public function loadFeed(string $feedName, int $feedId, string $feedSourceUri, string $feedOptions): array
     {
+        // getFeedById is user-scoped, so somebody else's feed comes back null.
+        // This gate is what makes every feed_links write below safe: that
+        // table has no owner column, so filtering on FlNfID alone would let
+        // any authenticated caller inject articles into another user's feed
+        // and — via the max_links trim in getFeedResult() — delete theirs.
+        // news_feeds being scoped hides the problem: the timestamp update
+        // silently affects zero rows, so the call still looks like it worked.
+        if ($this->feedFacade->getFeedById($feedId) === null) {
+            return ['error' => 'Feed not found'];
+        }
+
         $articleSource = $this->feedFacade->getFeedOption($feedOptions, 'article_source');
         $feed = $this->feedFacade->parseRssFeed($feedSourceUri, is_string($articleSource) ? $articleSource : '');
         if (!is_array($feed) || count($feed) === 0) {

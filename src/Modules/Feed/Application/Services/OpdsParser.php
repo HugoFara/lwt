@@ -17,7 +17,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Feed\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.1.0

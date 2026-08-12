@@ -177,5 +177,12 @@
     "users.flash.deleted": "Пользователь успешно удалён",
     "users.flash.not_found": "Ошибка: пользователь не найден",
     "users.flash.error_prefix": "Ошибка: {message}",
-    "users.flash.unknown_error": "Неизвестная ошибка"
+    "users.flash.unknown_error": "Неизвестная ошибка",
+    "users_loading": "Загрузка пользователей...",
+    "users_previous": "Назад",
+    "users_next": "Вперёд",
+    "users.errors.load_failed": "Не удалось загрузить пользователей",
+    "users.errors.action_failed": "Не удалось выполнить действие",
+    "users.confirm_delete": "Удалить пользователя «{username}»? Это необратимо.",
+    "users.confirm_role": "Изменить роль {username} на {role}?"
 }

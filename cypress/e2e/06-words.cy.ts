@@ -320,3 +320,65 @@ describe('Words Management', () => {
     });
   });
 });
+
+/**
+ * The standalone new-term form saves through
+ * `POST /api/v1/terms/for-language` (issue #262).
+ *
+ * The endpoint validates the language against the caller's own, which is why
+ * it exists: the retired `POST /word/new` read `WoLgID` from the request and
+ * fed it straight into the occurrence-linking path.
+ */
+describe('New term form', () => {
+  it('ships a scaffold with no server-filled values', () => {
+    cy.request('/word/new?lang=1').then((response) => {
+      const html = String(response.body);
+      expect(html).to.contain('new-term-config');
+      expect(html).to.contain('x-data="newTermForm"');
+      expect(html).to.contain('x-model="text"');
+      expect(html).to.not.contain('action="/word/new"');
+    });
+  });
+
+  it('refuses a language the caller does not own', () => {
+    cy.apiRequest({
+      method: 'POST',
+      url: '/api/v1/terms/for-language',
+      body: { language_id: 999, text: 'cyforeign' },
+      failOnStatusCode: false
+    }).then((response) => {
+      expect(response.body.success).to.eq(false);
+      expect(response.body.error).to.eq('Language not found');
+    });
+  });
+
+  it('creates a term through the form itself', () => {
+    const term = `cynew${Date.now() % 100000}`;
+
+    cy.request('/api/v1/languages').then((langs) => {
+      const langId = langs.body.languages[0].id as number;
+
+      cy.visit(`/word/new?lang=${langId}`);
+      cy.waitForAlpine();
+      cy.get('#WoText', { timeout: 10000 }).type(term);
+      cy.get('button[type=submit]').first().click();
+
+      // The list endpoint returns `words`, each with a `text` field.
+      // then(), not should(): the cleanup enqueues a command, which should()
+      // would replay on every retry.
+      cy.request(`/api/v1/terms/list?query=${term}`).then((response) => {
+        const words = response.body.words as Array<{ id: number; text: string }>;
+        const made = words.find((w) => w.text === term);
+        expect(made, 'the form should have created the term').to.not.eq(undefined);
+
+        if (made) {
+          cy.apiRequest({
+            method: 'DELETE',
+            url: `/api/v1/terms/${made.id}`,
+            failOnStatusCode: false
+          });
+        }
+      });
+    });
+  });
+});

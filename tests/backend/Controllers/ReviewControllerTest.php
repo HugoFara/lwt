@@ -147,17 +147,6 @@ class ReviewControllerTest extends TestCase
         $this->assertTrue(method_exists($controller, 'header'));
     }
 
-    public function testControllerHasTableTestMethod(): void
-    {
-        if (!self::$dbConnected) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $controller = $this->createController();
-
-        $this->assertTrue(method_exists($controller, 'tableReview'));
-    }
-
     // ===== BaseController inheritance tests =====
 
     public function testControllerExtendsBaseController(): void

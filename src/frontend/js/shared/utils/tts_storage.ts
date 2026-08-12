@@ -4,7 +4,7 @@
  * Stores Text-to-Speech settings (voice, rate, pitch) per language
  * in localStorage instead of cookies.
  *
- * @author  HugoFara <Hugo.Farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Home\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -90,7 +90,8 @@ class HomeController extends BaseController
                 'id' => $currenttext,
                 'title' => isset($currentTextInfo['title']) ? (string) $currentTextInfo['title'] : '',
                 'language_id' => isset($currentTextInfo['language_id']) ? (int) $currentTextInfo['language_id'] : 0,
-                'language_name' => isset($currentTextInfo['language_name']) ? (string) $currentTextInfo['language_name'] : '',
+                'language_name' => isset($currentTextInfo['language_name'])
+                    ? (string) $currentTextInfo['language_name'] : '',
                 'annotated' => isset($currentTextInfo['annotated']) ? (bool) $currentTextInfo['annotated'] : false,
                 'stats' => $stats,
             ];

@@ -50,4 +50,3 @@ export * from './forms/bulk_actions';
 export * from './forms/unloadformcheck';
 export * from './forms/form_validation';
 export * from './forms/form_initialization';
-export * from './forms/word_form_auto';

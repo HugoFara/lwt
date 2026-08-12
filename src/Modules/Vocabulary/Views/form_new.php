@@ -16,7 +16,7 @@
  *
  * @category Lwt
  * @package  Lwt\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -57,11 +57,22 @@ $phNotes = htmlspecialchars(__('vocabulary.form.placeholder_notes'), ENT_QUOTES,
 
 ?>
 
-<form name="newword" class="validate" action="/word/new" method="post"
-data-lwt-clear-frame="true">
-    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-    <input type="hidden" name="WoLgID" id="langfield" value="<?php echo $lang; ?>" />
-    <input type="hidden" name="tid" value="<?php echo $textId; ?>" />
+<script type="application/json" id="new-term-config">
+<?php echo json_encode([
+    'languageId' => $lang,
+    'textId' => $textId,
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
+</script>
+
+<form name="newword" class="validate" data-lwt-clear-frame="true"
+      x-data="newTermForm" @submit.prevent="save()">
+
+    <div class="notification is-danger" x-show="error" x-cloak>
+        <span x-text="error"></span>
+    </div>
+
+    <!-- Kept for the dictionary-lookup helpers, which read the language by id. -->
+    <input type="hidden" id="langfield" value="<?php echo $lang; ?>" />
 
     <div class="box">
         <div class="field">
@@ -71,7 +82,7 @@ data-lwt-clear-frame="true">
                        class="input notempty setfocus checkoutsidebmp"
                        data_info="New Term"
                        type="text"
-                       name="WoText"
+                       x-model="text"
                        id="WoText"
                        value=""
                        maxlength="250"
@@ -93,7 +104,7 @@ data-lwt-clear-frame="true">
                        class="input checkoutsidebmp checklength"
                        data_maxlength="250"
                        data_info="Lemma"
-                       name="WoLemma"
+                       x-model="lemma"
                        id="WoLemma"
                        value=""
                        maxlength="250"
@@ -116,7 +127,7 @@ data-lwt-clear-frame="true">
                 <textarea class="textarea textarea-noreturn checklength checkoutsidebmp"
                           data_maxlength="500"
                           data_info="Translation"
-                          name="WoTranslation"
+                          x-model="translation"
                           rows="3"
                           placeholder="<?= $phTrans ?>"></textarea>
             </div>
@@ -136,7 +147,7 @@ data-lwt-clear-frame="true">
                 <input type="text"
                        class="input checkoutsidebmp"
                        data_info="Romanization"
-                       name="WoRomanization"
+                       x-model="romanization"
                        value=""
                        maxlength="100"
                        placeholder="<?= $phRom ?>" />
@@ -148,7 +159,7 @@ data-lwt-clear-frame="true">
             <label class="label"><?= __('vocabulary.form.sentence_label') ?></label>
             <div class="control">
                 <textarea <?php echo $scrdir; ?>
-                          name="WoSentence"
+                          x-model="sentence"
                           id="WoSentence"
                           rows="3"
                           class="textarea textarea-noreturn checklength checkoutsidebmp"
@@ -162,7 +173,7 @@ data-lwt-clear-frame="true">
         <div class="field">
             <label class="label"><?= __('vocabulary.common.notes') ?></label>
             <div class="control">
-                <textarea name="WoNotes"
+                <textarea x-model="notes"
                           id="WoNotes"
                           rows="3"
                           class="textarea textarea-noreturn checklength checkoutsidebmp"
@@ -188,7 +199,7 @@ data-lwt-clear-frame="true">
 
         <div class="field is-grouped is-grouped-right mt-5">
             <div class="control">
-                <button type="submit" name="op" value="Save" class="button is-primary">
+                <button type="submit" class="button is-primary" :disabled="isSaving">
                     <span class="icon is-small">
                         <?php echo IconHelper::render('save', ['alt' => __('vocabulary.common.save')]); ?>
                     </span>

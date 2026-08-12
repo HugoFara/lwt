@@ -7,7 +7,7 @@
  *
  * @category Infrastructure
  * @package  Lwt\Modules\Language\Infrastructure
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -21,6 +21,7 @@ use Lwt\Api\V1\Response;
 use Lwt\Shared\Http\ApiRoutableInterface;
 use Lwt\Shared\Http\ApiRoutableTrait;
 use Lwt\Shared\Infrastructure\Bootstrap\EnvLoader;
+use Lwt\Shared\Infrastructure\Globals;
 use Lwt\Shared\Infrastructure\Http\JsonResponse;
 
 /**
@@ -338,6 +339,26 @@ class NlpServiceHandler implements ApiRoutableInterface
     // API Routing Methods
     // =========================================================================
 
+    /**
+     * Reject the request unless the caller may manage shared voice models.
+     *
+     * Voices live on the NLP service and are shared by every user, so adding
+     * or removing one is a server-level operation, not a per-user one. The
+     * API's own gate only checks authentication, which would let any logged-in
+     * user delete a voice others depend on or fill the disk with downloads.
+     * Mirrors the inline admin check ApiV1 already applies to `media-files`,
+     * and — like AdminMiddleware — is a no-op when multi-user mode is off.
+     *
+     * @return JsonResponse|null Error response, or null when allowed
+     */
+    private function denyIfNotAdmin(): ?JsonResponse
+    {
+        if (Globals::isMultiUserEnabled() && !Globals::isCurrentUserAdmin()) {
+            return Response::error('Permission denied: admin only', 403);
+        }
+        return null;
+    }
+
     public function routeGet(array $fragments, array $params): JsonResponse
     {
         $frag1 = $this->frag($fragments, 1);
@@ -374,6 +395,10 @@ class NlpServiceHandler implements ApiRoutableInterface
 
             case 'voices':
                 if ($frag2 === 'download') {
+                    $denied = $this->denyIfNotAdmin();
+                    if ($denied !== null) {
+                        return $denied;
+                    }
                     $voiceId = (string) ($params['voice_id'] ?? '');
                     if ($voiceId === '') {
                         return Response::error('voice_id is required', 400);
@@ -397,6 +422,10 @@ class NlpServiceHandler implements ApiRoutableInterface
         $frag2 = $this->frag($fragments, 2);
 
         if ($frag1 === 'voices' && $frag2 !== '') {
+            $denied = $this->denyIfNotAdmin();
+            if ($denied !== null) {
+                return $denied;
+            }
             $success = $this->deleteVoice($frag2);
             if (!$success) {
                 return Response::error('Voice not found or deletion failed', 404);

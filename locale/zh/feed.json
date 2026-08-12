@@ -103,6 +103,7 @@
     "edit_text_form_deselected": "文本已取消选择 - 勾选复选框以包含",
     "edit_text_footer_save": "保存",
     "edit_text_footer_cancel": "取消",
+    "edit_texts_title": "导入前检查文本",
     "multi_load_mark_all": "全部标记",
     "multi_load_mark_none": "全部取消",
     "multi_load_col_mark": "标记",

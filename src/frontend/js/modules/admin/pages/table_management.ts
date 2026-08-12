@@ -4,7 +4,7 @@
  * Handles table set selection, creation, and deletion with
  * reactive validation and confirmation dialogs.
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

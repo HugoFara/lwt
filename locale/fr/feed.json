@@ -103,6 +103,7 @@
     "edit_text_form_deselected": "Texte désélectionné - cochez la case pour inclure",
     "edit_text_footer_save": "Enregistrer",
     "edit_text_footer_cancel": "Annuler",
+    "edit_texts_title": "Vérifier les textes avant l’importation",
     "multi_load_mark_all": "Tout cocher",
     "multi_load_mark_none": "Tout décocher",
     "multi_load_col_mark": "Cocher",

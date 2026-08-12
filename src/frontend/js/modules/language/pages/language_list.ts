@@ -8,6 +8,7 @@
 import { onDomReady } from '@shared/utils/dom_ready';
 import { SettingsApi } from '@modules/admin/api/settings_api';
 import { initIcons } from '@shared/icons/lucide_icons';
+import { escapeHtml } from '@shared/utils/html_utils';
 
 /**
  * Show a notification message on the languages page.
@@ -71,7 +72,8 @@ function updateLanguageCards(newLangId: string): void {
       const existingIcon = headerTitle.querySelector('[data-lucide="circle-alert"]');
       if (!existingIcon) {
         const langName = headerTitle.textContent?.trim() || '';
-        headerTitle.innerHTML = iconHtml('circle-alert', 18, 'Current Language') + ' ' + langName;
+        headerTitle.innerHTML =
+          iconHtml('circle-alert', 18, 'Current Language') + ' ' + escapeHtml(langName);
       }
 
       // Remove the "Set as Default" button
@@ -90,19 +92,19 @@ function updateLanguageCards(newLangId: string): void {
       const existingBtn = headerIcon.querySelector('.set-current-language-btn');
       if (!existingBtn) {
         const cardName = card.querySelector('.card-header-title')?.textContent?.trim() || '';
-        headerIcon.innerHTML = `
-          <button
-            type="button"
-            class="button is-small is-primary is-outlined set-current-language-btn"
-            data-action="set-current-language"
-            data-lang-id="${cardLangId}"
-            data-lang-name="${cardName}"
-            title="Set as Current Language"
-          >
-            ${iconHtml('circle-check', 14)}
-            <span>Set as Default</span>
-          </button>
-        `;
+
+        // The language name is user-supplied, so it goes in through
+        // setAttribute rather than through a markup string.
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'button is-small is-primary is-outlined set-current-language-btn';
+        button.dataset.action = 'set-current-language';
+        button.dataset.langId = cardLangId ?? '';
+        button.dataset.langName = cardName;
+        button.title = 'Set as Current Language';
+        button.innerHTML = `${iconHtml('circle-check', 14)}<span>Set as Default</span>`;
+
+        headerIcon.replaceChildren(button);
       }
     }
   });

@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -21,13 +21,17 @@ namespace Lwt\Modules\Vocabulary\Http;
 
 use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Database\Connection;
+use Lwt\Shared\Infrastructure\Database\Maintenance;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Vocabulary\Application\VocabularyFacade;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\WordBulkService;
 use Lwt\Modules\Tags\Application\TagsFacade;
+use Lwt\Modules\Vocabulary\Application\Services\ExpressionService;
 use Lwt\Modules\Vocabulary\Application\Services\WordContextService;
+use Lwt\Modules\Vocabulary\Application\Services\WordCrudService;
 use Lwt\Modules\Vocabulary\Application\Services\WordDiscoveryService;
 use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
 use Lwt\Modules\Vocabulary\Application\Helpers\StatusHelper;
@@ -50,6 +54,9 @@ class TermCrudApiHandler
     private WordContextService $contextService;
     private WordDiscoveryService $discoveryService;
     private WordLinkingService $linkingService;
+    private WordBulkService $bulkService;
+    private WordCrudService $crudService;
+    private ExpressionService $expressionService;
 
     /**
      * Constructor.
@@ -65,13 +72,19 @@ class TermCrudApiHandler
         ?FindSimilarTerms $findSimilarTerms = null,
         ?WordContextService $contextService = null,
         ?WordDiscoveryService $discoveryService = null,
-        ?WordLinkingService $linkingService = null
+        ?WordLinkingService $linkingService = null,
+        ?WordBulkService $bulkService = null,
+        ?WordCrudService $crudService = null,
+        ?ExpressionService $expressionService = null
     ) {
         $this->facade = $facade ?? new VocabularyFacade();
         $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
         $this->contextService = $contextService ?? new WordContextService();
         $this->discoveryService = $discoveryService ?? new WordDiscoveryService();
         $this->linkingService = $linkingService ?? new WordLinkingService();
+        $this->bulkService = $bulkService ?? new WordBulkService();
+        $this->crudService = $crudService ?? new WordCrudService();
+        $this->expressionService = $expressionService ?? new ExpressionService();
     }
 
     // =========================================================================
@@ -296,6 +309,39 @@ class TermCrudApiHandler
         return $this->deleteTerm($termId);
     }
 
+    /**
+     * List a text's still-unknown single words, for the bulk-translate page.
+     *
+     * Paginated by the caller-supplied offset. One extra row beyond `limit` is
+     * fetched so the response can report whether another page exists without a
+     * second COUNT query — the row itself is not returned.
+     *
+     * The underlying query is scoped through `Ti2TxID -> texts`, so a text
+     * belonging to another user yields nothing rather than leaking terms.
+     *
+     * @param int $textId Text whose unknown words to list
+     * @param int $offset Rows to skip
+     * @param int $limit  Rows to return (1-500)
+     *
+     * @return array{terms: list<array<string, mixed>>, has_more: bool, next_offset: int|null}
+     */
+    public function getUnknownWordsForTranslate(int $textId, int $offset, int $limit): array
+    {
+        $offset = max(0, $offset);
+        $limit = min(500, max(1, $limit));
+
+        $rows = $this->discoveryService->getUnknownWordsForBulkTranslate($textId, $offset, $limit + 1);
+
+        $hasMore = count($rows) > $limit;
+        $terms = $hasMore ? array_slice($rows, 0, $limit) : $rows;
+
+        return [
+            'terms' => array_values($terms),
+            'has_more' => $hasMore,
+            'next_offset' => $hasMore ? $offset + $limit : null,
+        ];
+    }
+
     // =========================================================================
     // Term Details (migrated from TermHandler)
     // =========================================================================
@@ -430,7 +476,11 @@ class TermCrudApiHandler
     /**
      * Get term data prepared for editing in modal.
      *
-     * @param int      $textId   Text ID
+     * An existing term carries its own language, so $textId may be 0 when
+     * $wordId is given. That is what lets callers with no reading context —
+     * the review screen, the term list — open the same editor.
+     *
+     * @param int      $textId   Text ID (may be 0 when $wordId is given)
      * @param int      $position Position in text
      * @param int|null $wordId   Word ID (for existing terms)
      *
@@ -438,17 +488,32 @@ class TermCrudApiHandler
      */
     public function getTermForEdit(int $textId, int $position, ?int $wordId = null): array
     {
-        // Get language ID and settings from text
-        $textData = QueryBuilder::table('texts')
-            ->select(['TxLgID', 'TxTitle'])
-            ->where('TxID', '=', $textId)
-            ->firstPrepared();
+        $hasWordId = $wordId !== null && $wordId > 0;
 
-        if ($textData === null) {
-            return ['error' => 'Text not found'];
+        if ($hasWordId) {
+            $wordLang = QueryBuilder::table('words')
+                ->select(['WoLgID'])
+                ->where('WoID', '=', $wordId)
+                ->firstPrepared();
+
+            if ($wordLang === null) {
+                return ['error' => 'Term not found'];
+            }
+
+            $langId = (int) $wordLang['WoLgID'];
+        } else {
+            // A new term is only identifiable through its position in a text.
+            $textData = QueryBuilder::table('texts')
+                ->select(['TxLgID', 'TxTitle'])
+                ->where('TxID', '=', $textId)
+                ->firstPrepared();
+
+            if ($textData === null) {
+                return ['error' => 'Text not found'];
+            }
+
+            $langId = (int) $textData['TxLgID'];
         }
-
-        $langId = (int) $textData['TxLgID'];
 
         // Get language settings
         $langData = QueryBuilder::table('languages')
@@ -472,7 +537,7 @@ class TermCrudApiHandler
         ];
 
         // If word ID provided, get existing term data
-        if ($wordId !== null && $wordId > 0) {
+        if ($hasWordId) {
             $termData = QueryBuilder::table('words')
                 ->select([
                     'WoID', 'WoText', 'WoTextLC', 'WoLemma', 'WoLemmaLC', 'WoTranslation',
@@ -771,6 +836,21 @@ class TermCrudApiHandler
             return ['error' => 'Status must be 1-5, 98, or 99'];
         }
 
+        $textLc = (string) $existing['WoTextLC'];
+
+        // The term text may only be recased, never rewritten: WoTextLC is what
+        // textitems2 is linked on, so changing it would orphan the occurrences.
+        $text = (string) $existing['WoText'];
+        if (isset($data['text']) && is_scalar($data['text'])) {
+            $candidate = trim((string) $data['text']);
+            if ($candidate !== '') {
+                if (mb_strtolower($candidate, 'UTF-8') !== $textLc) {
+                    return ['error' => 'Term in lowercase must be exactly "' . $textLc . '"'];
+                }
+                $text = $candidate;
+            }
+        }
+
         $translation = trim((string)($data['translation'] ?? ''));
         if ($translation === '') {
             $translation = '*';
@@ -786,9 +866,10 @@ class TermCrudApiHandler
         $scoreUpdate = TermStatusService::makeScoreRandomInsertUpdate('u');
 
         // Use raw SQL for dynamic score update
-        $bindings = [$translation, $romanization, $sentence, $notes, $lemma, $lemmaLc, $status, $termId];
+        $bindings = [$text, $translation, $romanization, $sentence, $notes, $lemma, $lemmaLc, $status, $termId];
         Connection::preparedExecute(
             "UPDATE words SET
+             WoText = ?,
              WoTranslation = ?,
              WoRomanization = ?,
              WoSentence = ?,
@@ -800,7 +881,7 @@ class TermCrudApiHandler
              {$scoreUpdate}
              WHERE WoID = ?"
             . UserScopedQuery::forTablePrepared('words', $bindings),
-            [$translation, $romanization, $sentence, $notes, $lemma, $lemmaLc, $status, $termId]
+            [$text, $translation, $romanization, $sentence, $notes, $lemma, $lemmaLc, $status, $termId]
         );
 
         // Save tags if provided
@@ -819,11 +900,11 @@ class TermCrudApiHandler
             'success' => true,
             'term' => [
                 'id' => $termId,
-                'text' => (string) $existing['WoText'],
-                'textLc' => (string) $existing['WoTextLC'],
+                'text' => $text,
+                'textLc' => $textLc,
                 'lemma' => $lemma ?? '',
                 'lemmaLc' => $lemmaLc ?? '',
-                'hex' => StringUtils::toClassName((string) $existing['WoTextLC']),
+                'hex' => StringUtils::toClassName($textLc),
                 'translation' => $translation === '*' ? '' : $translation,
                 'romanization' => $romanization,
                 'sentence' => $sentence,
@@ -831,6 +912,61 @@ class TermCrudApiHandler
                 'status' => $status,
                 'tags' => $tags
             ]
+        ];
+    }
+
+    /**
+     * Create several terms at once, as the bulk-translate page does.
+     *
+     * @param array $data Request body with a `terms` list of
+     *                    {lg, text, status, trans} entries
+     *
+     * @return array Response data
+     */
+    public function createTermsBulk(array $data): array
+    {
+        $rawTerms = $data['terms'] ?? null;
+        if (!is_array($rawTerms) || $rawTerms === []) {
+            return ['error' => 'No terms supplied'];
+        }
+
+        $terms = [];
+        /** @var mixed $row */
+        foreach ($rawTerms as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $text = trim((string) ($row['text'] ?? ''));
+            $langId = (int) ($row['lg'] ?? 0);
+            if ($text === '' || $langId <= 0) {
+                continue;
+            }
+            $status = (int) ($row['status'] ?? 1);
+            if (!TermStatusService::isValidStatus($status)) {
+                return ['error' => 'Status must be 1-5, 98, or 99'];
+            }
+            $terms[] = [
+                'lg' => $langId,
+                'text' => $text,
+                'status' => $status,
+                'trans' => trim((string) ($row['trans'] ?? '')),
+            ];
+        }
+
+        if ($terms === []) {
+            return ['error' => 'No terms supplied'];
+        }
+
+        $maxWoId = $this->bulkService->bulkSaveTerms($terms);
+        $newWords = $this->bulkService->getNewWordsAfter($maxWoId);
+
+        // Newly created terms have to be attached to their occurrences, or the
+        // reading view keeps showing them as unknown.
+        $this->linkingService->linkNewWordsToTextItems($maxWoId);
+
+        return [
+            'success' => true,
+            'saved' => count($newWords),
         ];
     }
 
@@ -846,6 +982,92 @@ class TermCrudApiHandler
     public function formatGetTermForEdit(int $textId, int $position, ?int $wordId = null): array
     {
         return $this->getTermForEdit($textId, $position, $wordId);
+    }
+
+    /**
+     * Create a term for a language, outside any text.
+     *
+     * Backs the standalone "new term" page, which is not anchored to a
+     * position in a text the way {@see createTermFull()} is — so the language
+     * arrives from the client rather than from a scoped text lookup.
+     *
+     * That is exactly why the ownership check below exists. The retired
+     * `POST /word/new` read `WoLgID` from the request and passed it into the
+     * occurrence-linking path unvalidated; moving the read here puts it behind
+     * a gate instead of relying on the one inside WordLinkingService.
+     *
+     * @param array<string, mixed> $data Term fields
+     *
+     * @return array{success: bool, id?: int, error?: string}
+     */
+    public function createTermForLanguage(array $data): array
+    {
+        $langId = (int) ($data['language_id'] ?? 0);
+        if ($langId <= 0) {
+            return ['success' => false, 'error' => 'language_id is required'];
+        }
+
+        // languages is user-scoped, so somebody else's language finds nothing.
+        $ownsLanguage = QueryBuilder::table('languages')
+            ->where('LgID', '=', $langId)
+            ->existsPrepared();
+        if (!$ownsLanguage) {
+            return ['success' => false, 'error' => 'Language not found'];
+        }
+
+        $text = trim((string) ($data['text'] ?? ''));
+        if ($text === '') {
+            return ['success' => false, 'error' => 'Term text is required'];
+        }
+
+        $status = (int) ($data['status'] ?? 1);
+        if (!TermStatusService::isValidStatus($status)) {
+            return ['success' => false, 'error' => 'Status must be 1-5, 98, or 99'];
+        }
+
+        $result = $this->crudService->create([
+            'WoLgID' => $langId,
+            'WoText' => $text,
+            'WoStatus' => $status,
+            'WoTranslation' => (string) ($data['translation'] ?? ''),
+            'WoRomanization' => (string) ($data['romanization'] ?? ''),
+            'WoSentence' => (string) ($data['sentence'] ?? ''),
+            'WoNotes' => (string) ($data['notes'] ?? ''),
+            'WoLemma' => (string) ($data['lemma'] ?? ''),
+        ]);
+
+        if (!$result['success']) {
+            return ['success' => false, 'error' => $result['message'] ?? 'Failed to create term'];
+        }
+
+        $wid = $result['id'];
+        $textLc = $result['textlc'];
+
+        /** @var mixed $rawTags */
+        $rawTags = $data['tags'] ?? null;
+        /** @var list<string> $tags */
+        $tags = [];
+        if (is_array($rawTags)) {
+            foreach (array_filter($rawTags, 'is_scalar') as $tag) {
+                $tags[] = (string) $tag;
+            }
+        }
+        if ($tags !== []) {
+            TagsFacade::saveWordTagsFromArray($wid, $tags);
+        }
+
+        Maintenance::initWordCount();
+
+        // A multi-word term needs its occurrences derived from the sentences it
+        // appears in; a single word just links to matching occurrences.
+        $length = $this->crudService->getWordCount($wid);
+        if ($length > 1) {
+            $this->expressionService->insertExpressions($textLc, $langId, $wid, $length, 1);
+        } else {
+            $this->linkingService->linkToTextItems($wid, $langId, $textLc);
+        }
+
+        return ['success' => true, 'id' => $wid];
     }
 
     /**

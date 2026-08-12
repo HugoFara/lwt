@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\User\Application\UseCases
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -49,6 +49,43 @@ class SaveUserPreferences
                 $value = InputValidator::getString($key);
             } else {
                 continue;
+            }
+
+            if ($userId !== null) {
+                Settings::saveForUser($key, $value, $userId);
+            } else {
+                Settings::save($key, $value);
+            }
+        }
+
+        return ['success' => true];
+    }
+
+    /**
+     * Save preferences from an array rather than the request.
+     *
+     * The API-friendly twin of {@see execute()}. Only keys the definitions
+     * declare as user-scoped are written, so an unexpected key in the payload
+     * is ignored rather than becoming a setting.
+     *
+     * @param array<string, mixed> $data Settings keyed by name
+     *
+     * @return array{success: bool}
+     */
+    public function executeFromData(array $data): array
+    {
+        $userId = Globals::getCurrentUserId();
+        $userKeys = SettingDefinitions::getUserKeys();
+
+        foreach ($userKeys as $key) {
+            if (!array_key_exists($key, $data)) {
+                continue;
+            }
+
+            if ($key === 'set-tts') {
+                $value = !empty($data[$key]) && $data[$key] !== '0' ? '1' : '0';
+            } else {
+                $value = (string) $data[$key];
             }
 
             if ($userId !== null) {

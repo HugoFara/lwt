@@ -35,6 +35,16 @@ declare global {
        * Read the current session's CSRF token from a rendered page.
        */
       csrfToken(): Chainable<string>;
+
+       /**
+        * Wait until Alpine has hydrated the page.
+        *
+        * Markup carrying x-data is server-rendered, so it exists long before
+        * the bundle mounts it. Asserting on x-data alone therefore passes even
+        * when Alpine never ran, and interacting before hydration silently
+        * misses the component's event listeners.
+        */
+      waitForAlpine(): Chainable<void>;
     }
   }
 }
@@ -85,6 +95,24 @@ Cypress.Commands.add('apiRequest', (options) => {
       ...options,
       headers: { ...(options.headers ?? {}), 'X-CSRF-TOKEN': token },
     });
+  });
+});
+
+// Hydration gate — see the declaration above for why this is needed.
+Cypress.Commands.add('waitForAlpine', () => {
+  cy.window({ timeout: 15000 }).should((win) => {
+    const w = win as unknown as { Alpine?: unknown; LWT_VITE_LOADED?: boolean };
+    expect(w.LWT_VITE_LOADED, 'bundle loaded').to.eq(true);
+    expect(Boolean(w.Alpine), 'Alpine started').to.eq(true);
+  });
+
+  // Alpine walks the DOM asynchronously after start(); wait for it to have
+  // claimed at least one component before letting a spec interact.
+  cy.get('[x-data]', { timeout: 15000 }).should(($els) => {
+    const claimed = Array.from($els).some((el) =>
+      Object.keys(el as unknown as Record<string, unknown>).some((k) => k.startsWith('_x'))
+    );
+    expect(claimed, 'Alpine mounted a component').to.eq(true);
   });
 });
 

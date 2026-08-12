@@ -89,7 +89,7 @@ class FeedLoadControllerTest extends TestCase
     {
         $reflection = new \ReflectionClass(FeedLoadController::class);
 
-        $expectedMethods = ['renderFeedLoadInterface', 'loadFeedRoute', 'multiLoad'];
+        $expectedMethods = ['renderFeedLoadInterface', 'loadFeedRoute'];
 
         foreach ($expectedMethods as $methodName) {
             $this->assertTrue(
@@ -104,14 +104,6 @@ class FeedLoadControllerTest extends TestCase
         }
     }
 
-    #[Test]
-    public function classHasPrivateShowMultiLoadForm(): void
-    {
-        $reflection = new \ReflectionClass(FeedLoadController::class);
-        $this->assertTrue($reflection->hasMethod('showMultiLoadForm'));
-        $method = $reflection->getMethod('showMultiLoadForm');
-        $this->assertTrue($method->isPrivate());
-    }
 
     #[Test]
     public function loadFeedRouteMethodAcceptsIntParam(): void
@@ -122,14 +114,6 @@ class FeedLoadControllerTest extends TestCase
         $this->assertSame('id', $params[0]->getName());
     }
 
-    #[Test]
-    public function multiLoadMethodAcceptsArrayParam(): void
-    {
-        $method = new \ReflectionMethod(FeedLoadController::class, 'multiLoad');
-        $params = $method->getParameters();
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
 
     #[Test]
     public function renderFeedLoadInterfaceAcceptsThreeParams(): void
@@ -294,85 +278,11 @@ class FeedLoadControllerTest extends TestCase
     // multiLoad tests
     // =========================================================================
 
-    #[Test]
-    public function multiLoadMethodReturnsVoid(): void
-    {
-        $method = new \ReflectionMethod(FeedLoadController::class, 'multiLoad');
-        $returnType = $method->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertSame('void', $returnType->getName());
-    }
 
     // =========================================================================
     // showMultiLoadForm tests
     // =========================================================================
 
-    #[Test]
-    public function showMultiLoadFormCallsFacadeForFeeds(): void
-    {
-        $this->feedFacade->expects($this->once())
-            ->method('getFeeds')
-            ->with(5)
-            ->willReturn([]);
-
-        $this->languageFacade->expects($this->once())
-            ->method('getLanguagesForSelect')
-            ->willReturn([]);
-
-        $method = new \ReflectionMethod(FeedLoadController::class, 'showMultiLoadForm');
-
-        ob_start();
-        try {
-            $method->invoke($this->controller, 5);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
-    }
-
-    #[Test]
-    public function showMultiLoadFormPassesNullForZeroLang(): void
-    {
-        $this->feedFacade->expects($this->once())
-            ->method('getFeeds')
-            ->with(null);
-
-        $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
-
-        $method = new \ReflectionMethod(FeedLoadController::class, 'showMultiLoadForm');
-
-        ob_start();
-        try {
-            $method->invoke($this->controller, 0);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
-    }
-
-    #[Test]
-    public function showMultiLoadFormWithActiveLang(): void
-    {
-        $this->feedFacade->expects($this->once())
-            ->method('getFeeds')
-            ->with(3)
-            ->willReturn([['NfID' => 1, 'NfName' => 'Feed']]);
-
-        $this->languageFacade->method('getLanguagesForSelect')
-            ->willReturn([['LgID' => 3, 'LgName' => 'Spanish']]);
-
-        $method = new \ReflectionMethod(FeedLoadController::class, 'showMultiLoadForm');
-
-        ob_start();
-        try {
-            $method->invoke($this->controller, 3);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
-
-        $this->assertTrue(true);
-    }
 
     // =========================================================================
     // Return type tests

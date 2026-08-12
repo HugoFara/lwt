@@ -60,6 +60,10 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedReturnsErrorWhenParsingFails(): void
     {
+        // loadFeed() refuses a feed the caller does not own; this test is
+        // about parsing, so give it one it owns. FeedLoadOwnershipTest covers
+        // the refusal.
+        $this->feedFacade->method('getFeedById')->willReturn(['NfID' => 1]);
         $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
@@ -73,6 +77,10 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedReturnsErrorWhenParsingReturnsEmptyArray(): void
     {
+        // loadFeed() refuses a feed the caller does not own; this test is
+        // about parsing, so give it one it owns. FeedLoadOwnershipTest covers
+        // the refusal.
+        $this->feedFacade->method('getFeedById')->willReturn(['NfID' => 1]);
         $this->feedFacade->method('getFeedOption')
             ->willReturn('');
         $this->feedFacade->method('parseRssFeed')
@@ -717,6 +725,10 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedErrorMessageContainsFeedName(): void
     {
+        // loadFeed() refuses a feed the caller does not own; this test is
+        // about parsing, so give it one it owns. FeedLoadOwnershipTest covers
+        // the refusal.
+        $this->feedFacade->method('getFeedById')->willReturn(['NfID' => 1]);
         $this->feedFacade->method('getFeedOption')->willReturn('');
         $this->feedFacade->method('parseRssFeed')->willReturn(false);
 
@@ -727,6 +739,10 @@ class FeedApiHandlerTest extends TestCase
 
     public function testLoadFeedPassesArticleSourceToParser(): void
     {
+        // loadFeed() refuses a feed the caller does not own; this test is
+        // about parsing, so give it one it owns. FeedLoadOwnershipTest covers
+        // the refusal.
+        $this->feedFacade->method('getFeedById')->willReturn(['NfID' => 1]);
         $this->feedFacade->method('getFeedOption')
             ->willReturnCallback(function (string $opts, string $option) {
                 if ($option === 'article_source') {

@@ -12,7 +12,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Feed\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -470,6 +470,12 @@ class FeedApiHandler implements ApiRoutableInterface
         if ($frag1 === 'articles' && $frag2 === 'import') {
             return Response::success($this->article->formatImportArticles($params));
         }
+        if ($frag1 === 'articles' && $frag2 === 'extract') {
+            return Response::success($this->article->extractArticles($params));
+        }
+        if ($frag1 === 'articles' && $frag2 === 'create-texts') {
+            return Response::success($this->article->createTextsFromEdited($params));
+        }
         if ($frag1 === '') {
             return Response::success($this->crud->formatCreateFeed($params));
         }
@@ -482,7 +488,11 @@ class FeedApiHandler implements ApiRoutableInterface
             ));
         }
 
-        return Response::error('Expected "articles/import", feed data, or "{id}/load"', 404);
+        return Response::error(
+            'Expected "articles/import", "articles/extract", "articles/create-texts", '
+            . 'feed data, or "{id}/load"',
+            404
+        );
     }
 
     public function routePut(array $fragments, array $params): JsonResponse

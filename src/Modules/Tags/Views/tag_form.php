@@ -13,7 +13,7 @@
  *
  * @category Lwt
  * @package  Lwt\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -46,12 +46,6 @@ $pageTitle = $isEdit ? __('tags.form_edit_title') : __('tags.form_new_title');
 $formName = $isEdit ? 'edittag' : 'newtag';
 $baseUrl = $service->getBaseUrl();
 $tagId = $tag !== null && isset($tag['id']) ? $tag['id'] : 0;
-$actionUrl = $isEdit && $tag !== null ?
-    $baseUrl . '/' . $tagId . '/edit#rec' . $tagId :
-    $baseUrl . '/new';
-$cancelUrl = $isEdit && $tag !== null ?
-    $baseUrl . '#rec' . $tagId :
-    $baseUrl;
 $submitValue = $isEdit ? __('tags.form_change') : __('tags.form_save');
 
 $placeholderTag = htmlspecialchars(__('tags.form_placeholder_tag'), ENT_QUOTES, 'UTF-8');
@@ -59,26 +53,31 @@ $placeholderComment = htmlspecialchars(__('tags.form_placeholder_comment'), ENT_
 $titleRequired = htmlspecialchars(__('tags.form_field_required'), ENT_QUOTES, 'UTF-8');
 $labelComment = __('tags.form_label_comment');
 
-$tagText = '';
-$tagComment = '';
-if ($isEdit && $tag !== null) {
-    $tagText = htmlspecialchars($tag['text'] ?? '', ENT_QUOTES, 'UTF-8');
-    $tagComment = htmlspecialchars($tag['comment'] ?? '', ENT_QUOTES, 'UTF-8');
-}
+// `Tg` for term tags, `T2` for text tags — the API takes the type by name.
+$tagType = $formFieldPrefix === 'T2' ? 'text' : 'term';
 
 ?>
 <h2 class="title is-4"><?php echo $pageTitle; ?></h2>
 
-<form name="<?php echo $formName; ?>" class="validate" action="<?php echo $actionUrl; ?>" method="post"
-      x-data="{
-          tagText: '<?php echo $tagText; ?>',
-          tagComment: '<?php echo $tagComment; ?>',
-          charCount: <?php echo strlen($tagComment); ?>
-      }">
-    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-    <?php if ($isEdit && $tag !== null) : ?>
-    <input type="hidden" name="<?php echo $formFieldPrefix; ?>ID" value="<?php echo $tagId; ?>" />
-    <?php endif; ?>
+<script type="application/json" id="tag-form-config">
+<?php echo json_encode([
+    'type' => $tagType,
+    'isEdit' => $isEdit,
+    'tagId' => $tagId,
+    'baseUrl' => $baseUrl,
+], JSON_HEX_TAG | JSON_HEX_AMP); ?>
+</script>
+
+<form name="<?php echo $formName; ?>" class="validate"
+      x-data="tagFormApp" @submit.prevent="save()">
+
+    <div x-show="error" x-cloak class="notification is-danger">
+        <span x-text="error"></span>
+    </div>
+
+    <div x-show="isLoading" x-cloak class="has-text-centered py-4">
+        <?php echo __e('tags.list_loading'); ?>
+    </div>
 
     <div class="box">
         <!-- Tag Name -->
@@ -96,7 +95,6 @@ if ($isEdit && $tag !== null) {
                                id="<?php echo $formFieldPrefix; ?>Text"
                                name="<?php echo $formFieldPrefix; ?>Text"
                                data_info="Tag"
-                               value="<?php echo $tagText; ?>"
                                maxlength="20"
                                placeholder="<?= $placeholderTag ?>"
                                x-model="tagText"
@@ -130,12 +128,10 @@ if ($isEdit && $tag !== null) {
                                   data_info="Comment"
                                   rows="3"
                                   placeholder="<?= $placeholderComment ?>"
-                                  x-model="tagComment"
-                                  @input="charCount = $event.target.value.length"><?php echo $tagComment; ?></textarea>
+                                  x-model="tagComment"></textarea>
                     </div>
                     <p class="help">
-                        <span :class="charCount > 200 ? 'has-text-danger' : 'has-text-grey'"
-                              x-text="charCount + '/200 characters'"></span>
+                        <span :class="charCountClass()" x-text="charCountLabel()"></span>
                     </p>
                 </div>
             </div>
@@ -145,15 +141,12 @@ if ($isEdit && $tag !== null) {
     <!-- Form Actions -->
     <div class="field is-grouped is-grouped-right">
         <div class="control">
-            <button type="button"
-                    class="button is-light"
-                    data-action="cancel-navigate"
-                    data-url="<?php echo htmlspecialchars($cancelUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                <?= __('tags.form_cancel') ?>
+            <button type="button" class="button is-light" @click="cancel()">
+                <?= __e('tags.form_cancel') ?>
             </button>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="<?php echo $submitValue; ?>" class="button is-primary">
+            <button type="submit" class="button is-primary" :disabled="isSaving">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>

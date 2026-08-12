@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\User
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -30,6 +30,7 @@ use Lwt\Modules\User\Application\UserFacade;
 use Lwt\Modules\User\Application\Services\PasswordHasher;
 // Http
 use Lwt\Modules\User\Http\UserController;
+use Lwt\Modules\User\Http\ProfileApiHandler;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\User\Http\WordPressController;
 use Lwt\Modules\User\Http\GoogleController;
@@ -102,6 +103,12 @@ class UserServiceProvider implements ServiceProviderInterface
         // Register API Handler
         $container->singleton(UserApiHandler::class, function (Container $c) {
             return new UserApiHandler(
+                $c->getTyped(UserFacade::class)
+            );
+        });
+
+        $container->singleton(ProfileApiHandler::class, function (Container $c) {
+            return new ProfileApiHandler(
                 $c->getTyped(UserFacade::class)
             );
         });

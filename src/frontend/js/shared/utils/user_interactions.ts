@@ -1,7 +1,7 @@
 /**
  * General file to control dynamic interactions with the user.
  *
- * @author  HugoFara <Hugo.Farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   2.0.3-fork
  */
@@ -55,7 +55,7 @@ const quickMenuRoutes: Record<string, string> = {
   edit_tags: '/tags',
   upload_words: '/word/upload',
   statistics: '/profile/statistics',
-  rss_import: '/feeds',
+  rss_import: '/feeds/manage',
   backup_restore: '/admin/backup',
   settings: '/admin/settings',
   INFO: '/docs/'
@@ -83,10 +83,11 @@ export function quickMenuRedirection(value: string): void {
 /**
  * Create an interactable to add a new expression.
  *
- * WARNING! This function was not properly tested!
- *
  * @param text         An array of words forming the expression
- * @param attrs        A group of attributes to add
+ * @param attrs        Attributes to set on the multi-word marker, by name.
+ *                     Passed as a map rather than a markup string so values
+ *                     carrying a quote (a translation, a romanization) cannot
+ *                     escape their attribute.
  * @param length       Number of words, should correspond to WoWordCount
  * @param hex          Lowercase formatted version of the text.
  * @param showallwords true: multi-word is a superscript, show mw index + words
@@ -96,7 +97,7 @@ export function quickMenuRedirection(value: string): void {
  */
 export function newExpressionInteractable(
   text: TextDictionary,
-  attrs: string,
+  attrs: Record<string, string | number>,
   length: number,
   hex: string,
   showallwords: boolean
@@ -123,16 +124,12 @@ export function newExpressionInteractable(
     if (nextTermEl) {
       const newSpan = document.createElement('span');
       newSpan.id = 'ID-' + key + '-' + length;
-      // Parse and set attributes from attrs string
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = '<span ' + attrs + '></span>';
-      const tempSpan = tempDiv.firstElementChild;
-      if (tempSpan) {
-        Array.from(tempSpan.attributes).forEach(attr => {
-          newSpan.setAttribute(attr.name, attr.value);
-        });
-      }
-      newSpan.innerHTML = text[key];
+      Object.entries(attrs).forEach(([name, value]) => {
+        newSpan.setAttribute(name, String(value));
+      });
+      // The marker label is plain text (the term, or a non-breaking-space
+      // index), never markup.
+      newSpan.textContent = text[key];
       nextTermEl.parentNode?.insertBefore(newSpan, nextTermEl);
     }
 

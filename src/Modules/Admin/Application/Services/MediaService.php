@@ -12,7 +12,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Admin\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -32,7 +32,7 @@ use Lwt\Shared\UI\Helpers\IconHelper;
  *
  * @category Lwt
  * @package  Lwt\Modules\Admin\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -519,7 +519,9 @@ allowfullscreen type="text/html">
     </audio>
 
     <!-- Config data -->
-    <script type="application/json" data-audio-config><?php echo json_encode($config); ?></script>
+    <script type="application/json" data-audio-config><?php
+    echo json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP);
+    ?></script>
 
     <!-- Player UI -->
     <div class="audio-player">

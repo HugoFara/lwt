@@ -177,5 +177,12 @@
     "users.flash.deleted": "用户删除成功",
     "users.flash.not_found": "错误：未找到用户",
     "users.flash.error_prefix": "错误：{message}",
-    "users.flash.unknown_error": "未知错误"
+    "users.flash.unknown_error": "未知错误",
+    "users_loading": "正在加载用户...",
+    "users_previous": "上一页",
+    "users_next": "下一页",
+    "users.errors.load_failed": "无法加载用户",
+    "users.errors.action_failed": "操作失败",
+    "users.confirm_delete": "删除用户“{username}”？此操作无法撤销。",
+    "users.confirm_role": "将 {username} 改为 {role}？"
 }

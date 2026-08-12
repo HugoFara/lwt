@@ -1,17 +1,20 @@
 <?php
 
 /**
- * Book Detail View
+ * Book Detail View — scaffold only.
+ *
+ * Carries the book ID and nothing else. The `bookDetail` Alpine component
+ * fetches the book and its chapters from `GET /api/v1/books/{id}` and
+ * `GET /api/v1/books/{id}/chapters`.
  *
  * Variables expected:
- * - $book: array - Book data
- * - $chapters: array - Array of chapter info
+ * - $bookId: int - The book being shown
  *
  * PHP version 8.1
  *
  * @category Lwt
  * @package  Lwt\Modules\Book\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -23,125 +26,122 @@ namespace Lwt\Views\Book;
 
 use Lwt\Shared\UI\Helpers\IconHelper;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
-use Lwt\Shared\UI\Helpers\FormHelper;
 
 $actions = [
     ['url' => '/books', 'label' => __('book.all_books'), 'icon' => 'library'],
     ['url' => '/texts/new', 'label' => __('book.import_epub'), 'icon' => 'file-up'],
 ];
-
 ?>
 
-<h2 class="title is-4">
-    <?php echo htmlspecialchars($book['title']); ?>
-</h2>
+<script type="application/json" id="book-detail-config"><?php
+echo json_encode(['bookId' => $bookId], JSON_HEX_TAG | JSON_HEX_AMP);
+?></script>
 
-<?php echo PageLayoutHelper::buildActionCard($actions); ?>
+<div x-data="bookDetail" x-init="init()">
 
-<div class="box">
-    <div class="columns">
-        <div class="column is-8">
-            <!-- Book Info -->
-            <div class="content">
-                <?php if ($book['author']) : ?>
-                <p><strong><?php echo __('common.author'); ?>:</strong>
-                    <?php echo htmlspecialchars($book['author']); ?></p>
-                <?php endif; ?>
+    <h2 class="title is-4" x-text="book ? book.title : ''"></h2>
 
-                <?php if ($book['description']) : ?>
-                <p><strong><?php echo __('common.description'); ?>:</strong>
-                    <?php echo htmlspecialchars($book['description']); ?></p>
-                <?php endif; ?>
+    <?php echo PageLayoutHelper::buildActionCard($actions); ?>
 
-                <p>
-                    <strong><?php echo __('book.source'); ?>:</strong>
-                    <span class="tag is-info"><?php echo strtoupper($book['sourceType']); ?></span>
-                </p>
+    <div x-show="error" class="notification is-danger is-light">
+        <span x-text="error"></span>
+    </div>
 
-                <p>
-                    <strong><?php echo __('book.col_progress'); ?>:</strong>
-                    <?php
-                    echo htmlspecialchars(
-                        __('book.chapter_x_of_y', [
-                            'current' => $book['currentChapter'],
-                            'total' => $book['totalChapters'],
-                        ]),
-                        ENT_QUOTES
-                    );
-                    ?>
-                    (<?php echo round($book['progress'], 1); ?>%)
-                </p>
+    <div x-show="isLoading" class="has-text-centered py-6">
+        <span class="icon is-large">
+            <i data-lucide="loader-2" class="animate-spin"></i>
+        </span>
+    </div>
 
-                <progress class="progress is-primary" value="<?php echo $book['progress']; ?>" max="100">
-                    <?php echo round($book['progress'], 1); ?>%
-                </progress>
+    <div x-show="!isLoading && book">
+        <div class="box">
+            <div class="columns">
+                <div class="column is-8">
+                    <div class="content">
+                        <p x-show="book && book.author">
+                            <strong><?php echo __('common.author'); ?>:</strong>
+                            <span x-text="book ? book.author : ''"></span>
+                        </p>
+
+                        <p x-show="book && book.description">
+                            <strong><?php echo __('common.description'); ?>:</strong>
+                            <span x-text="book ? book.description : ''"></span>
+                        </p>
+
+                        <p>
+                            <strong><?php echo __('book.source'); ?>:</strong>
+                            <span class="tag is-info" x-text="sourceLabel()"></span>
+                        </p>
+
+                        <p>
+                            <strong><?php echo __('book.col_progress'); ?>:</strong>
+                            <span x-text="chapterCountLabel()"></span>
+                            (<span x-text="progressLabel()"></span>)
+                        </p>
+
+                        <progress class="progress is-primary"
+                                  :value="book ? book.progress : 0"
+                                  max="100"
+                                  x-text="progressLabel()"></progress>
+                    </div>
+
+                    <a :href="continueHref()" class="button is-primary is-medium"
+                       x-show="chapters.length > 0">
+                        <?php echo IconHelper::render('book-open', ['alt' => __('book.continue_reading')]); ?>
+                        <span class="ml-2"><?php echo __('book.continue_reading'); ?></span>
+                    </a>
+                </div>
+
+                <div class="column is-4">
+                    <div class="buttons">
+                        <button type="button" class="button is-danger is-outlined" @click="remove()">
+                            <?php echo IconHelper::render('trash-2', ['alt' => __('common.delete')]); ?>
+                            <span class="ml-2"><?php echo __('book.delete_book'); ?></span>
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            <!-- Continue Reading Button -->
-            <?php if (!empty($chapters)) : ?>
-            <a href="/text/<?php echo $chapters[0]['id']; ?>/read" class="button is-primary is-medium">
-                <?php echo IconHelper::render('book-open', ['alt' => __('book.continue_reading')]); ?>
-                <span class="ml-2"><?php echo __('book.continue_reading'); ?></span>
-            </a>
-            <?php endif; ?>
         </div>
 
-        <div class="column is-4">
-            <!-- Actions -->
-            <div class="buttons">
-                <?php $confirmDelete = htmlspecialchars(__('book.confirm_delete_book'), ENT_QUOTES); ?>
-                <form method="post" action="/book/<?php echo $book['id']; ?>/delete"
-                      data-confirm="<?php echo $confirmDelete; ?>"
-                      @submit="if(!confirm($el.dataset.confirm)) $event.preventDefault()">
-                    <?php echo FormHelper::csrfField(); ?>
-                    <button type="submit" class="button is-danger is-outlined">
-                        <?php echo IconHelper::render('trash-2', ['alt' => __('common.delete')]); ?>
-                        <span class="ml-2"><?php echo __('book.delete_book'); ?></span>
-                    </button>
-                </form>
-            </div>
+        <!-- Chapters -->
+        <div class="box">
+            <h3 class="title is-5"><?php echo __('book.chapters'); ?></h3>
+
+            <p class="has-text-grey" x-show="chapters.length === 0">
+                <?php echo __('book.no_chapters_found'); ?>
+            </p>
+
+            <table class="table is-fullwidth is-hoverable" x-show="chapters.length > 0">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">#</th>
+                        <th><?php echo __('common.title'); ?></th>
+                        <th style="width: 100px;"><?php echo __('common.actions'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="chapter in chapters" :key="chapter.id">
+                        <tr :class="isCurrentChapter(chapter) ? 'is-selected' : ''">
+                            <td x-text="chapter.num"></td>
+                            <td>
+                                <a :href="readHref(chapter)" x-text="chapter.title"></a>
+                                <span class="tag is-small is-info ml-2"
+                                      x-show="isCurrentChapter(chapter)">
+                                    <?php echo __('common.current'); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <a :href="readHref(chapter)" class="button is-small is-primary">
+                                    <?php echo IconHelper::render('book-open', ['alt' => __('common.read')]); ?>
+                                </a>
+                                <a :href="editHref(chapter)" class="button is-small is-light">
+                                    <?php echo IconHelper::render('edit', ['alt' => __('common.edit')]); ?>
+                                </a>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
-
-<!-- Chapters List -->
-<div class="box">
-    <h3 class="title is-5"><?php echo __('book.chapters'); ?></h3>
-
-    <?php if (empty($chapters)) : ?>
-    <p class="has-text-grey"><?php echo __('book.no_chapters_found'); ?></p>
-    <?php else : ?>
-    <table class="table is-fullwidth is-hoverable">
-        <thead>
-            <tr>
-                <th style="width: 60px;">#</th>
-                <th><?php echo __('common.title'); ?></th>
-                <th style="width: 100px;"><?php echo __('common.actions'); ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($chapters as $chapter) : ?>
-            <tr class="<?php echo $chapter['num'] === $book['currentChapter'] ? 'is-selected' : ''; ?>">
-                <td><?php echo $chapter['num']; ?></td>
-                <td>
-                    <a href="/text/<?php echo $chapter['id']; ?>/read">
-                        <?php echo htmlspecialchars($chapter['title']); ?>
-                    </a>
-                    <?php if ($chapter['num'] === $book['currentChapter']) : ?>
-                    <span class="tag is-small is-info ml-2"><?php echo __('common.current'); ?></span>
-                    <?php endif; ?>
-                </td>
-                <td>
-                    <a href="/text/<?php echo $chapter['id']; ?>/read" class="button is-small is-primary">
-                        <?php echo IconHelper::render('book-open', ['alt' => __('common.read')]); ?>
-                    </a>
-                    <a href="/texts/<?php echo $chapter['id']; ?>/edit" class="button is-small is-light">
-                        <?php echo IconHelper::render('edit', ['alt' => __('common.edit')]); ?>
-                    </a>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <?php endif; ?>
 </div>

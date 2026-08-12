@@ -172,7 +172,7 @@ class FeedEditControllerTest extends TestCase
     {
         $reflection = new \ReflectionClass(FeedEditController::class);
 
-        $expectedMethods = ['edit', 'spa', 'newFeed', 'editFeed', 'deleteFeed'];
+        $expectedMethods = ['spa', 'newFeed', 'editFeed', 'deleteFeed'];
 
         foreach ($expectedMethods as $methodName) {
             $this->assertTrue(
@@ -193,9 +193,7 @@ class FeedEditControllerTest extends TestCase
         $reflection = new \ReflectionClass(FeedEditController::class);
 
         $expectedMethods = [
-            'handleMarkAction', 'formatMarkActionMessage',
-            'handleUpdateFeed', 'handleSaveFeed',
-            'showNewForm', 'showEditForm', 'showMultiLoadForm', 'showList',
+            'showNewForm', 'showEditForm',
             'loadCuratedFeeds'
         ];
 
@@ -210,249 +208,6 @@ class FeedEditControllerTest extends TestCase
                 "Method $methodName should be private"
             );
         }
-    }
-
-    // =========================================================================
-    // handleMarkAction tests (via reflection)
-    // =========================================================================
-
-    #[Test]
-    public function handleMarkActionReturnsNullWhenNoAction(): void
-    {
-        $_REQUEST = ['markaction' => '', 'selected_feed' => '5'];
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-
-        $result = $method->invoke($this->controller, '5');
-        $this->assertNull($result);
-    }
-
-    #[Test]
-    public function handleMarkActionReturnsNullWhenNoFeedSelected(): void
-    {
-        $_REQUEST = ['markaction' => 'del'];
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-
-        $result = $method->invoke($this->controller, '');
-        $this->assertNull($result);
-    }
-
-    #[Test]
-    public function handleMarkActionDeleteCallsFacade(): void
-    {
-        $_REQUEST = ['markaction' => 'del'];
-
-        $this->feedFacade->expects($this->once())
-            ->method('deleteFeeds')
-            ->with('5');
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-
-        $result = $method->invoke($this->controller, '5');
-        $this->assertSame(['action' => 'del', 'success' => true], $result);
-    }
-
-    #[Test]
-    public function handleMarkActionDeleteArticlesCallsFacade(): void
-    {
-        $_REQUEST = ['markaction' => 'del_art'];
-
-        $this->feedFacade->expects($this->once())
-            ->method('deleteArticles')
-            ->with('3');
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-
-        $result = $method->invoke($this->controller, '3');
-        $this->assertSame(['action' => 'del_art', 'success' => true], $result);
-    }
-
-    #[Test]
-    public function handleMarkActionResetArticlesCallsFacade(): void
-    {
-        $_REQUEST = ['markaction' => 'res_art'];
-
-        $this->feedFacade->expects($this->once())
-            ->method('resetUnloadableArticles')
-            ->with('7');
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-
-        $result = $method->invoke($this->controller, '7');
-        $this->assertSame(['action' => 'res_art', 'success' => true], $result);
-    }
-
-    #[Test]
-    public function handleMarkActionReturnsNullForUnknownAction(): void
-    {
-        $_REQUEST = ['markaction' => 'unknown'];
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleMarkAction');
-
-        $result = $method->invoke($this->controller, '5');
-        $this->assertNull($result);
-    }
-
-    // =========================================================================
-    // formatMarkActionMessage tests
-    // =========================================================================
-
-    #[Test]
-    public function formatMarkActionMessageReturnsEmptyForNull(): void
-    {
-        $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-
-        $result = $method->invoke($this->controller, null);
-        $this->assertSame('', $result);
-    }
-
-    #[Test]
-    public function formatMarkActionMessageReturnsDeleteMessage(): void
-    {
-        $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-
-        $result = $method->invoke($this->controller, ['action' => 'del', 'success' => true]);
-        $this->assertStringContainsString('deleted', $result);
-        $this->assertStringContainsString('Newsfeed', $result);
-    }
-
-    #[Test]
-    public function formatMarkActionMessageReturnsDeleteArticlesMessage(): void
-    {
-        $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-
-        $result = $method->invoke($this->controller, ['action' => 'del_art', 'success' => true]);
-        $this->assertSame('Article item(s) deleted', $result);
-    }
-
-    #[Test]
-    public function formatMarkActionMessageReturnsResetMessage(): void
-    {
-        $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-
-        $result = $method->invoke($this->controller, ['action' => 'res_art', 'success' => true]);
-        $this->assertSame('Article(s) reset', $result);
-    }
-
-    #[Test]
-    public function formatMarkActionMessageReturnsEmptyForUnknownAction(): void
-    {
-        $method = new \ReflectionMethod(FeedEditController::class, 'formatMarkActionMessage');
-
-        $result = $method->invoke($this->controller, ['action' => 'unknown', 'success' => true]);
-        $this->assertSame('', $result);
-    }
-
-    // =========================================================================
-    // handleUpdateFeed tests
-    // =========================================================================
-
-    #[Test]
-    public function handleUpdateFeedDoesNothingWithoutParam(): void
-    {
-        $_REQUEST = [];
-
-        $this->feedFacade->expects($this->never())
-            ->method('updateFeed');
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->invoke($this->controller);
-    }
-
-    #[Test]
-    public function handleUpdateFeedCallsFacadeWithFormData(): void
-    {
-        $_REQUEST = [
-            'update_feed' => '1',
-            'NfID' => '42',
-            'NfLgID' => '1',
-            'NfName' => 'Updated Feed',
-            'NfSourceURI' => 'http://example.com/rss',
-            'NfArticleSectionTags' => 'article',
-            'NfFilterTags' => 'script',
-            'NfOptions' => 'tag:news,',
-        ];
-
-        $this->feedFacade->expects($this->once())
-            ->method('updateFeed')
-            ->with(
-                42,
-                $this->callback(function (array $data) {
-                    return $data['NfName'] === 'Updated Feed'
-                        && $data['NfOptions'] === 'tag:news';
-                })
-            );
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->invoke($this->controller);
-    }
-
-    #[Test]
-    public function handleUpdateFeedTrimsTrailingCommaFromOptions(): void
-    {
-        $_REQUEST = [
-            'update_feed' => '1',
-            'NfID' => '1',
-            'NfLgID' => '1',
-            'NfName' => 'Test',
-            'NfSourceURI' => 'http://test.com',
-            'NfArticleSectionTags' => '',
-            'NfFilterTags' => '',
-            'NfOptions' => 'opt1:val1,opt2:val2,',
-        ];
-
-        $this->feedFacade->expects($this->once())
-            ->method('updateFeed')
-            ->with(
-                $this->anything(),
-                $this->callback(function (array $data) {
-                    return $data['NfOptions'] === 'opt1:val1,opt2:val2';
-                })
-            );
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleUpdateFeed');
-        $method->invoke($this->controller);
-    }
-
-    // =========================================================================
-    // handleSaveFeed tests
-    // =========================================================================
-
-    #[Test]
-    public function handleSaveFeedDoesNothingWithoutParam(): void
-    {
-        $_REQUEST = [];
-
-        $this->feedFacade->expects($this->never())
-            ->method('createFeed');
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleSaveFeed');
-        $method->invoke($this->controller);
-    }
-
-    #[Test]
-    public function handleSaveFeedCallsFacadeWithFormData(): void
-    {
-        $_REQUEST = [
-            'save_feed' => '1',
-            'NfLgID' => '2',
-            'NfName' => 'New Feed',
-            'NfSourceURI' => 'http://example.com/rss',
-            'NfArticleSectionTags' => '',
-            'NfFilterTags' => '',
-            'NfOptions' => '',
-        ];
-
-        $this->feedFacade->expects($this->once())
-            ->method('createFeed')
-            ->with($this->callback(function (array $data) {
-                return $data['NfName'] === 'New Feed'
-                    && $data['NfLgID'] === '2';
-            }));
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'handleSaveFeed');
-        $method->invoke($this->controller);
     }
 
     // =========================================================================
@@ -613,48 +368,6 @@ class FeedEditControllerTest extends TestCase
     // showMultiLoadForm tests
     // =========================================================================
 
-    #[Test]
-    public function showMultiLoadFormCallsFacadeForFeeds(): void
-    {
-        $this->feedFacade->expects($this->once())
-            ->method('getFeeds')
-            ->with(5)
-            ->willReturn([]);
-
-        $this->languageFacade->expects($this->once())
-            ->method('getLanguagesForSelect')
-            ->willReturn([]);
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'showMultiLoadForm');
-
-        ob_start();
-        try {
-            $method->invoke($this->controller, 5);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
-    }
-
-    #[Test]
-    public function showMultiLoadFormPassesNullForZeroLang(): void
-    {
-        $this->feedFacade->expects($this->once())
-            ->method('getFeeds')
-            ->with(null);
-
-        $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
-
-        $method = new \ReflectionMethod(FeedEditController::class, 'showMultiLoadForm');
-
-        ob_start();
-        try {
-            $method->invoke($this->controller, 0);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
-    }
 
     // =========================================================================
     // deleteFeed tests
@@ -752,76 +465,11 @@ class FeedEditControllerTest extends TestCase
     // edit method routing tests
     // =========================================================================
 
-    #[Test]
-    public function editMethodClearsWizardSessionIfExists(): void
-    {
-        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_REQUEST = ['filterlang' => '1', 'sort' => '1'];
-
-        $this->wizardSession->expects($this->once())
-            ->method('exists')
-            ->willReturn(true);
-        $this->wizardSession->expects($this->once())
-            ->method('clear');
-
-        $this->languageFacade->method('getLanguageName')->willReturn('Test');
-        $this->flashService->method('getAndClear')->willReturn([]);
-        $this->feedFacade->method('countFeeds')->willReturn(0);
-        $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
-
-        ob_start();
-        try {
-            $this->controller->edit([]);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
-    }
-
-    #[Test]
-    public function editMethodDoesNotClearWizardIfNotExists(): void
-    {
-        if (!defined('LWT_TEST_DB_AVAILABLE') || !LWT_TEST_DB_AVAILABLE) {
-            $this->markTestSkipped('Database connection required');
-        }
-
-        $_REQUEST = ['filterlang' => '1'];
-
-        $this->wizardSession->expects($this->once())
-            ->method('exists')
-            ->willReturn(false);
-        $this->wizardSession->expects($this->never())
-            ->method('clear');
-
-        $this->languageFacade->method('getLanguageName')->willReturn('Test');
-        $this->flashService->method('getAndClear')->willReturn([]);
-        $this->feedFacade->method('countFeeds')->willReturn(0);
-        $this->languageFacade->method('getLanguagesForSelect')->willReturn([]);
-
-        ob_start();
-        try {
-            $this->controller->edit([]);
-        } catch (\Throwable $e) {
-            // View include may fail
-        }
-        ob_end_clean();
-    }
 
     // =========================================================================
     // Method signature tests
     // =========================================================================
 
-    #[Test]
-    public function editMethodAcceptsArrayParam(): void
-    {
-        $method = new \ReflectionMethod(FeedEditController::class, 'edit');
-        $params = $method->getParameters();
-        $this->assertCount(1, $params);
-        $this->assertSame('params', $params[0]->getName());
-    }
 
     #[Test]
     public function spaMethodAcceptsArrayParam(): void
@@ -857,14 +505,5 @@ class FeedEditControllerTest extends TestCase
         $params = $method->getParameters();
         $this->assertCount(1, $params);
         $this->assertSame('id', $params[0]->getName());
-    }
-
-    #[Test]
-    public function editMethodReturnsVoid(): void
-    {
-        $method = new \ReflectionMethod(FeedEditController::class, 'edit');
-        $returnType = $method->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertSame('void', $returnType->getName());
     }
 }

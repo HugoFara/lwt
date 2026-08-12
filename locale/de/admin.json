@@ -177,5 +177,12 @@
     "users.flash.deleted": "Benutzer erfolgreich gelöscht",
     "users.flash.not_found": "Fehler: Benutzer nicht gefunden",
     "users.flash.error_prefix": "Fehler: {message}",
-    "users.flash.unknown_error": "Unbekannter Fehler"
+    "users.flash.unknown_error": "Unbekannter Fehler",
+    "users_loading": "Benutzer werden geladen ...",
+    "users_previous": "Zurück",
+    "users_next": "Weiter",
+    "users.errors.load_failed": "Benutzer konnten nicht geladen werden",
+    "users.errors.action_failed": "Die Aktion ist fehlgeschlagen",
+    "users.confirm_delete": "Benutzer „{username}“ löschen? Das lässt sich nicht rückgängig machen.",
+    "users.confirm_role": "{username} zu {role} ändern?"
 }

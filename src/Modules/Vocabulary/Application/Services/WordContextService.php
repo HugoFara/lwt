@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Application\Services
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -31,7 +31,6 @@ use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
  * - Language configuration (romanization, dictionaries)
  * - Text-to-language mapping
  * - Sentence retrieval and formatting
- * - Term data export
  *
  * @since 3.0.0
  */
@@ -217,41 +216,5 @@ class WordContextService
     public function textToClassName(string $text): string
     {
         return StringUtils::toClassName(Escaping::prepareTextdata($text));
-    }
-
-    /**
-     * Export term data as JSON for JavaScript.
-     *
-     * @param int    $wordId      Word ID
-     * @param string $text        Term text
-     * @param string $roman       Romanization
-     * @param string $translation Translation with tags
-     * @param int    $status      Word status
-     *
-     * @return string JSON encoded data
-     */
-    public function exportTermAsJson(
-        int $wordId,
-        string $text,
-        string $roman,
-        string $translation,
-        int $status
-    ): string {
-        $data = [
-            "woid" => $wordId,
-            "text" => $text,
-            "romanization" => $roman,
-            "translation" => $translation,
-            "status" => $status
-        ];
-
-        $json = json_encode($data);
-        if ($json === false) {
-            $json = json_encode(["error" => "Unable to return data."]);
-            if ($json === false) {
-                throw new \RuntimeException("Unable to return data");
-            }
-        }
-        return $json;
     }
 }

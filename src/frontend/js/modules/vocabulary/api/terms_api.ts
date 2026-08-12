@@ -163,6 +163,8 @@ export interface TermCreateFullRequest {
  * Request body for updating a term with full data.
  */
 export interface TermUpdateFullRequest {
+  /** Term text. Only a change of capitalization is accepted by the server. */
+  text?: string;
   translation: string;
   romanization?: string;
   sentence?: string;
@@ -246,6 +248,26 @@ export interface TermForEditResponse {
 /**
  * Terms API methods.
  */
+/** Fields the standalone new-term endpoint accepts. */
+export interface TermCreateForLanguageRequest {
+  language_id: number;
+  text: string;
+  lemma?: string;
+  translation?: string;
+  romanization?: string;
+  sentence?: string;
+  notes?: string;
+  status?: number;
+  tags?: string[];
+}
+
+/** Envelope returned by `POST /terms/for-language`. */
+export interface TermCreateForLanguageResponse {
+  success: boolean;
+  id?: number;
+  error?: string;
+}
+
 export const TermsApi = {
   /**
    * Get term by ID.
@@ -496,6 +518,7 @@ export const TermsApi = {
     position: number,
     wordId?: number
   ): Promise<ApiResponse<TermForEditResponse>> {
+    // An existing term carries its own language, so textId/position may be 0.
     const params: Record<string, string> = {
       term_id: String(textId),
       ord: String(position)
@@ -516,6 +539,24 @@ export const TermsApi = {
     data: TermCreateFullRequest
   ): Promise<ApiResponse<TermFullResponse>> {
     return apiPost<TermFullResponse>('/terms/full', data as unknown as Record<string, unknown>);
+  },
+
+  /**
+   * Create a term for a language, outside any text.
+   *
+   * The language is validated against the caller's own server-side, which is
+   * the reason this endpoint exists rather than the form posting directly.
+   *
+   * @param data Term fields
+   * @returns Promise with the new term's ID
+   */
+  async createForLanguage(
+    data: TermCreateForLanguageRequest
+  ): Promise<ApiResponse<TermCreateForLanguageResponse>> {
+    return apiPost<TermCreateForLanguageResponse>(
+      '/terms/for-language',
+      data as unknown as Record<string, unknown>
+    );
   },
 
   /**

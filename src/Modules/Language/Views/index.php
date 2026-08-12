@@ -12,7 +12,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Language\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -165,8 +165,7 @@ $base = UrlUtilities::getBasePath();
                     </div>
                     <div class="level-item has-text-centered">
                         <a
-                            :href="'/feeds?query=&selected_feed=&check_autoupdate=1&filterlang='
-                                + store.currentLanguage.id"
+                            :href="'/feeds/autoupdate?filterlang=' + store.currentLanguage.id"
                             class="has-text-centered"
                         >
                             <p class="heading"><?php echo __('language.list.col_feeds'); ?></p>
@@ -252,7 +251,7 @@ $base = UrlUtilities::getBasePath();
                                        x-text="lang.wordCount"></a>
                                 </td>
                                 <td class="has-text-centered">
-                                    <a :href="'/feeds?query=&selected_feed=&check_autoupdate=1&filterlang=' + lang.id">
+                                    <a :href="'/feeds/autoupdate?filterlang=' + lang.id">
                                         <span x-text="lang.feedCount"></span>
                                         (<span x-text="lang.articleCount"></span>)
                                     </a>

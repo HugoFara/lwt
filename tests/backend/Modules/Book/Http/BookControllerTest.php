@@ -106,24 +106,6 @@ class BookControllerTest extends TestCase
         $this->assertTrue($method->isPublic());
     }
 
-    #[Test]
-    public function classHasPrivateProcessImportMethod(): void
-    {
-        $reflection = new \ReflectionClass(BookController::class);
-        $method = $reflection->getMethod('processImport');
-
-        $this->assertTrue($method->isPrivate());
-    }
-
-    #[Test]
-    public function classHasPrivateShowImportResultMethod(): void
-    {
-        $reflection = new \ReflectionClass(BookController::class);
-        $method = $reflection->getMethod('showImportResult');
-
-        $this->assertTrue($method->isPrivate());
-    }
-
     // =========================================================================
     // Method signature tests
     // =========================================================================
@@ -254,38 +236,6 @@ class BookControllerTest extends TestCase
     }
 
     // =========================================================================
-    // processImport() validation tests via reflection
-    // =========================================================================
-
-    #[Test]
-    public function processImportIsPrivate(): void
-    {
-        $method = new \ReflectionMethod(BookController::class, 'processImport');
-        $this->assertTrue($method->isPrivate());
-    }
-
-    #[Test]
-    public function showImportResultAcceptsThreeParameters(): void
-    {
-        $method = new \ReflectionMethod(BookController::class, 'showImportResult');
-        $params = $method->getParameters();
-
-        $this->assertCount(3, $params);
-        $this->assertSame('message', $params[0]->getName());
-        $this->assertSame('messageType', $params[1]->getName());
-        $this->assertSame('bookId', $params[2]->getName());
-    }
-
-    #[Test]
-    public function showImportResultBookIdIsNullable(): void
-    {
-        $method = new \ReflectionMethod(BookController::class, 'showImportResult');
-        $params = $method->getParameters();
-
-        $this->assertTrue($params[2]->getType()->allowsNull());
-    }
-
-    // =========================================================================
     // Property type tests
     // =========================================================================
 
@@ -353,32 +303,15 @@ class BookControllerTest extends TestCase
     }
 
     #[Test]
-    public function importChecksForImportOperation(): void
+    public function importOnlyServesTheForm(): void
     {
-        // Verify the import method checks for 'Import' op string
+        // The upload now goes to POST /api/v1/books, so the controller has no
+        // submission branch left to dispatch on.
         $source = file_get_contents(
             (new \ReflectionClass(BookController::class))->getFileName()
         );
-        $this->assertStringContainsString("'Import'", $source);
-    }
-
-    #[Test]
-    public function processImportValidatesLanguageId(): void
-    {
-        // Verify language ID validation triggers the localized "select language" flash.
-        $source = file_get_contents(
-            (new \ReflectionClass(BookController::class))->getFileName()
-        );
-        $this->assertStringContainsString('book.flash.select_language', $source);
-    }
-
-    #[Test]
-    public function processImportValidatesUploadedFile(): void
-    {
-        $source = file_get_contents(
-            (new \ReflectionClass(BookController::class))->getFileName()
-        );
-        $this->assertStringContainsString('book.flash.select_epub', $source);
+        $this->assertStringNotContainsString("'Import'", $source);
+        $this->assertStringContainsString('import_epub_form.php', $source);
     }
 
     #[Test]
@@ -406,48 +339,5 @@ class BookControllerTest extends TestCase
             (new \ReflectionClass(BookController::class))->getFileName()
         );
         $this->assertStringContainsString("Location: /books", $source);
-    }
-
-    #[Test]
-    public function processImportParsesTagIds(): void
-    {
-        // Verify tag parsing logic: array_map('intval', explode(',', ...))
-        $source = file_get_contents(
-            (new \ReflectionClass(BookController::class))->getFileName()
-        );
-        $this->assertStringContainsString("array_map('intval'", $source);
-    }
-
-    #[Test]
-    public function importChecksBulmaNotificationClasses(): void
-    {
-        $source = file_get_contents(
-            (new \ReflectionClass(BookController::class))->getFileName()
-        );
-        $this->assertStringContainsString('is-danger', $source);
-        $this->assertStringContainsString('is-success', $source);
-    }
-
-    #[Test]
-    public function processImportAcceptsTxLgIdAliasFromTextsNew(): void
-    {
-        // The /texts/new form posts the language under TxLgID, not LgID. The
-        // controller has to fall back to that name so the inline EPUB flow
-        // works without renaming any client-side fields.
-        $source = file_get_contents(
-            (new \ReflectionClass(BookController::class))->getFileName()
-        );
-        $this->assertStringContainsString("InputValidator::getInt('TxLgID')", $source);
-    }
-
-    #[Test]
-    public function processImportAcceptsImportFileAliasFromTextsNew(): void
-    {
-        // /texts/new uses 'importFile' for the file input; /book/import uses
-        // 'thefile'. Controller reads either.
-        $source = file_get_contents(
-            (new \ReflectionClass(BookController::class))->getFileName()
-        );
-        $this->assertStringContainsString("InputValidator::getUploadedFile('importFile')", $source);
     }
 }

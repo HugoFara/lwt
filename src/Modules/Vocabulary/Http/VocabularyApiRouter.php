@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -86,6 +86,16 @@ class VocabularyApiRouter implements ApiRoutableInterface
                 (int) ($params["page"] ?? 0),
                 (int) ($params["count"] ?? 0)
             ));
+        } elseif ($frag1 === 'unknown-for-translate') {
+            $textId = (int) ($params['text_id'] ?? 0);
+            if ($textId <= 0) {
+                return Response::error('text_id is required', 400);
+            }
+            return Response::success($this->termHandler->getUnknownWordsForTranslate(
+                $textId,
+                (int) ($params['offset'] ?? 0),
+                (int) ($params['limit'] ?? 100)
+            ));
         } elseif ($frag1 === 'for-edit') {
             return Response::success($this->termHandler->formatGetTermForEdit(
                 (int) ($params['term_id'] ?? 0),
@@ -160,13 +170,20 @@ class VocabularyApiRouter implements ApiRoutableInterface
                 (int) ($params['position'] ?? 0),
                 (int) ($params['status'] ?? 0)
             ));
+        } elseif ($frag1 === 'for-language') {
+            return Response::success($this->termHandler->createTermForLanguage($params));
         } elseif ($frag1 === 'full') {
             return Response::success($this->termHandler->formatCreateTermFull($params));
+        } elseif ($frag1 === 'bulk') {
+            return Response::success($this->termHandler->createTermsBulk($params));
         } elseif ($frag1 === 'multi') {
             return Response::success($this->multiWordHandler->createMultiWordTerm($params));
         }
 
-        return Response::error('Term ID (Integer), "new", "quick", or "multi" Expected', 404);
+        return Response::error(
+            'Term ID (Integer), "new", "quick", "full", "for-language", "bulk", or "multi" Expected',
+            404
+        );
     }
 
     public function routePut(array $fragments, array $params): JsonResponse

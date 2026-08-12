@@ -28,6 +28,8 @@ const mockLoadFeed = vi.fn();
 const mockGetArticles = vi.fn();
 const mockDeleteArticles = vi.fn();
 const mockImportArticles = vi.fn();
+const mockExtractArticles = vi.fn();
+const mockCreateTextsFromEdited = vi.fn();
 const mockResetErrorArticles = vi.fn();
 
 vi.mock('../../../../src/frontend/js/modules/feed/api/feeds_api', () => ({
@@ -40,6 +42,8 @@ vi.mock('../../../../src/frontend/js/modules/feed/api/feeds_api', () => ({
   getArticles: (...args: unknown[]) => mockGetArticles(...args),
   deleteArticles: (...args: unknown[]) => mockDeleteArticles(...args),
   importArticles: (...args: unknown[]) => mockImportArticles(...args),
+  extractArticles: (...args: unknown[]) => mockExtractArticles(...args),
+  createTextsFromEdited: (...args: unknown[]) => mockCreateTextsFromEdited(...args),
   resetErrorArticles: (...args: unknown[]) => mockResetErrorArticles(...args)
 }));
 
@@ -629,6 +633,181 @@ describe('feeds/stores/feed_manager_store.ts', () => {
       await store.importSelectedArticles();
 
       expect(store.selectedArticleIds).toEqual([]);
+    });
+  });
+
+  // ===========================================================================
+  // Edit-before-import Tests
+  //
+  // Feeds carrying the edit_text option must never write straight through:
+  // importSelectedArticles has to divert into the review screen instead.
+  // ===========================================================================
+
+  describe('edit-before-import', () => {
+    const editFeed: Feed = { ...mockFeed, options: { edit_text: '1' } };
+
+    const extracted = {
+      success: true,
+      texts: [
+        {
+          TxTitle: 'Article 1',
+          TxText: 'Body 1',
+          TxAudioURI: '',
+          TxSourceURI: 'https://example.com/1'
+        }
+      ],
+      language_id: 3,
+      errors: []
+    };
+
+    it('diverts to extract instead of importing when the feed wants editing', async () => {
+      store.currentFeed = editFeed;
+      store.selectedArticleIds = [1];
+      mockExtractArticles.mockResolvedValue({ data: extracted });
+
+      await store.importSelectedArticles();
+
+      expect(mockImportArticles).not.toHaveBeenCalled();
+      expect(mockExtractArticles).toHaveBeenCalledWith([1]);
+      expect(store.viewMode).toBe('edit-texts');
+      expect(store.pendingTexts).toHaveLength(1);
+      expect(store.pendingTexts[0].title).toBe('Article 1');
+      expect(store.pendingTexts[0].language_id).toBe(3);
+      expect(store.pendingTexts[0].selected).toBe(true);
+    });
+
+    it('imports directly when the feed does not want editing', async () => {
+      store.currentFeed = mockFeed;
+      store.selectedArticleIds = [1];
+      mockImportArticles.mockResolvedValue({
+        data: { success: true, imported: 1, errors: [] }
+      });
+      mockGetArticles.mockResolvedValue({
+        data: {
+          articles: [],
+          pagination: { page: 1, per_page: 50, total: 0, total_pages: 0 },
+          feed: { id: 1, name: 'Test', langId: 1 }
+        }
+      });
+
+      await store.importSelectedArticles();
+
+      expect(mockExtractArticles).not.toHaveBeenCalled();
+      expect(mockImportArticles).toHaveBeenCalledWith([1]);
+    });
+
+    it('stays put when nothing could be extracted', async () => {
+      store.currentFeed = editFeed;
+      store.selectedArticleIds = [1];
+      mockExtractArticles.mockResolvedValue({
+        data: { success: true, texts: [], language_id: 3, errors: ['boom'] }
+      });
+
+      const result = await store.importSelectedArticles();
+
+      expect(result).toBe(false);
+      expect(store.viewMode).not.toBe('edit-texts');
+    });
+
+    it('sends only the selected rows, without the selected flag', async () => {
+      store.currentFeed = editFeed;
+      store.pendingFeedId = 7;
+      store.pendingTexts = [
+        {
+          title: 'Keep', text: 'Body', source_uri: 's', audio_uri: 'a',
+          language_id: 3, selected: true
+        },
+        {
+          title: 'Drop', text: 'Body', source_uri: '', audio_uri: '',
+          language_id: 3, selected: false
+        }
+      ];
+      mockCreateTextsFromEdited.mockResolvedValue({
+        data: { success: true, created: 1, archived: 0, errors: [] }
+      });
+      mockGetArticles.mockResolvedValue({
+        data: {
+          articles: [],
+          pagination: { page: 1, per_page: 50, total: 0, total_pages: 0 },
+          feed: { id: 1, name: 'Test', langId: 1 }
+        }
+      });
+
+      await store.savePendingTexts();
+
+      expect(mockCreateTextsFromEdited).toHaveBeenCalledWith(7, [
+        {
+          title: 'Keep',
+          text: 'Body',
+          source_uri: 's',
+          audio_uri: 'a',
+          language_id: 3
+        }
+      ]);
+      expect(store.viewMode).toBe('articles');
+      expect(store.pendingTexts).toEqual([]);
+    });
+
+    it('refuses to save a selected row with a blank title or body', async () => {
+      store.pendingFeedId = 7;
+      store.pendingTexts = [
+        {
+          title: '   ', text: 'Body', source_uri: '', audio_uri: '',
+          language_id: 3, selected: true
+        }
+      ];
+
+      const result = await store.savePendingTexts();
+
+      expect(result).toBe(false);
+      expect(mockCreateTextsFromEdited).not.toHaveBeenCalled();
+    });
+
+    it('refuses to save when every row is deselected', async () => {
+      store.pendingFeedId = 7;
+      store.pendingTexts = [
+        {
+          title: 'T', text: 'Body', source_uri: '', audio_uri: '',
+          language_id: 3, selected: false
+        }
+      ];
+
+      const result = await store.savePendingTexts();
+
+      expect(result).toBe(false);
+      expect(mockCreateTextsFromEdited).not.toHaveBeenCalled();
+    });
+
+    it('drops the pending rows on cancel', () => {
+      store.pendingTexts = [
+        {
+          title: 'T', text: 'Body', source_uri: '', audio_uri: '',
+          language_id: 3, selected: true
+        }
+      ];
+      store.viewMode = 'edit-texts';
+
+      store.cancelPendingTexts();
+
+      expect(store.pendingTexts).toEqual([]);
+      expect(store.viewMode).toBe('articles');
+    });
+
+    it('toggles a row and counts the selected ones', () => {
+      store.pendingTexts = [
+        {
+          title: 'A', text: 'B', source_uri: '', audio_uri: '',
+          language_id: 1, selected: true
+        },
+        {
+          title: 'C', text: 'D', source_uri: '', audio_uri: '',
+          language_id: 1, selected: true
+        }
+      ];
+
+      expect(store.selectedPendingCount()).toBe(2);
+      store.togglePendingText(0);
+      expect(store.selectedPendingCount()).toBe(1);
     });
   });
 

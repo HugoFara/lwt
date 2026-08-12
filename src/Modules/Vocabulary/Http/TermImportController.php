@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -17,9 +17,7 @@ declare(strict_types=1);
 
 namespace Lwt\Modules\Vocabulary\Http;
 
-use Lwt\Shared\Infrastructure\Utilities\StringUtils;
 use Lwt\Shared\Infrastructure\Http\InputValidator;
-use Lwt\Shared\Infrastructure\Database\Escaping;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\Services\WordUploadService;
 use Lwt\Modules\Vocabulary\Application\Services\FrequencyLanguageMap;
@@ -82,24 +80,10 @@ class TermImportController extends VocabularyBaseController
         $tid = InputValidator::getInt('tid', 0) ?? 0;
         $pos = InputValidator::getInt('offset');
 
-        // Handle form submission (save terms)
-        $termsArray = InputValidator::getArray('term');
-        if (!empty($termsArray)) {
-            /** @var array<int, array{lg: int, text: string, status: int, trans?: string}> $terms */
-            $terms = $termsArray;
-            $cnt = count($terms);
+        // Saving goes to POST /api/v1/terms/bulk and the next batch is a plain
+        // GET, so this only ever renders a batch of terms.
+        PageLayoutHelper::renderPageStartNobody('Translate New Words');
 
-            if ($pos !== null) {
-                $pos -= $cnt;
-            }
-
-            PageLayoutHelper::renderPageStart($cnt . ' New Word' . ($cnt == 1 ? '' : 's') . ' Saved', false);
-            $this->handleBulkSave($terms, $tid, $pos === null);
-        } else {
-            PageLayoutHelper::renderPageStartNobody('Translate New Words');
-        }
-
-        // Show next page of terms if there are more
         if ($pos !== null) {
             $sl = InputValidator::getString('sl');
             $tl = InputValidator::getString('tl');
@@ -107,46 +91,6 @@ class TermImportController extends VocabularyBaseController
         }
 
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Handle saving bulk translated terms.
-     *
-     * @param array<int, array{lg: int, text: string, status: int, trans?: string}> $terms Array of term data
-     * @param int  $tid     Text ID
-     * @param bool $cleanUp Whether to clean up right frames after save
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedParam $tid and $cleanUp are used in included view file
-     * @psalm-suppress UnresolvableInclude Path computed from viewPath property
-     */
-    private function handleBulkSave(array $terms, int $tid, bool $cleanUp): void
-    {
-        $bulkService = $this->getBulkService();
-        $maxWoId = $bulkService->bulkSaveTerms($terms);
-
-        $tooltipMode = Settings::getWithDefault('set-tooltip-mode');
-        $res = $bulkService->getNewWordsAfter($maxWoId);
-
-        // Link new words to text items
-        $linkingService = new \Lwt\Modules\Vocabulary\Application\Services\WordLinkingService();
-        $linkingService->linkNewWordsToTextItems($maxWoId);
-
-        // Prepare data for view
-        /** @var list<array<string, mixed>> $newWords */
-        $newWords = [];
-        foreach ($res as $record) {
-            $record['hex'] = StringUtils::toClassName(
-                Escaping::prepareTextdata((string)$record['WoTextLC'])
-            );
-            $record['translation'] = (string)$record['WoTranslation'];
-            $newWords[] = $record;
-        }
-
-        $todoContent = $this->getTextStatisticsService()->getTodoWordsContent($tid);
-
-        include $this->viewPath . 'bulk_save_result.php';
     }
 
     /**
@@ -158,33 +102,20 @@ class TermImportController extends VocabularyBaseController
      * @param int         $pos Offset position
      *
      * @psalm-suppress UnresolvableInclude Path computed from viewPath property
+     * @psalm-suppress UnusedParam $sl, $tl and $pos are read by the included
+     *                 view, which Psalm cannot follow.
      *
      * @return void
      */
     private function displayBulkTranslateForm(int $tid, ?string $sl, ?string $tl, int $pos): void
     {
         $contextService = $this->getContextService();
-        $discoveryService = $this->getDiscoveryService();
-        $limit = (int) Settings::getWithDefault('set-ggl-translation-per-page') + 1;
         $dictionaries = $contextService->getLanguageDictionaries($tid);
 
-        $res = $discoveryService->getUnknownWordsForBulkTranslate($tid, $pos, $limit);
-
-        // Collect terms and check if there are more
-        $terms = [];
-        $hasMore = false;
-        $cnt = 0;
-        foreach ($res as $record) {
-            $cnt++;
-            if ($cnt < $limit) {
-                $terms[] = $record;
-            } else {
-                $hasMore = true;
-            }
-        }
-
-        // Calculate next offset if there are more terms
-        $nextOffset = $hasMore ? $pos + $limit - 1 : null;
+        // The rows come from GET /api/v1/terms/unknown-for-translate; only the
+        // page size travels with the page. The setting counts the extra
+        // look-ahead row the old server-side loop used, so drop it again.
+        $limit = max(1, (int) Settings::getWithDefault('set-ggl-translation-per-page'));
 
         include $this->viewPath . 'bulk_translate_form.php';
     }

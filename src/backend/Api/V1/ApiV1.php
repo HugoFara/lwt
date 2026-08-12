@@ -8,7 +8,7 @@
  *
  * @category Lwt
  * @package  Lwt\Api\V1
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -26,11 +26,13 @@ use Lwt\Shared\Infrastructure\Http\JsonResponse;
 use Lwt\Shared\UI\Helpers\PageLayoutHelper;
 use Lwt\Shared\Infrastructure\Http\Cors;
 use Lwt\Shared\Http\ApiRoutableInterface;
+use Lwt\Modules\User\Http\ProfileApiHandler;
 use Lwt\Modules\User\Http\UserApiHandler;
 use Lwt\Modules\Language\Http\LanguageApiHandler;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 use Lwt\Modules\Tags\Http\TagApiHandler;
 use Lwt\Modules\Admin\Http\AdminApiHandler;
+use Lwt\Modules\Admin\Http\UserManagementApiHandler;
 use Lwt\Modules\Vocabulary\Http\VocabularyApiRouter;
 use Lwt\Modules\Vocabulary\Http\WordFamilyApiHandler;
 use Lwt\Modules\Text\Http\TextApiHandler;
@@ -101,6 +103,8 @@ class ApiV1
         'tts'                => NlpServiceHandler::class,
         'whisper'            => WhisperApiHandler::class,
         'activity'           => ActivityApiHandler::class,
+        'admin'              => UserManagementApiHandler::class,
+        'profile'            => ProfileApiHandler::class,
     ];
 
     private Container $container;

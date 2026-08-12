@@ -1603,7 +1603,8 @@ Version 3 adds unified text import with EPUB file support and automatic splittin
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `EpubParserService` | `src/Modules/Book/Application/Services/` | EPUB extraction using `kiwilan/php-ebook` |
+| `EpubParserService` | `src/Modules/Book/Application/Services/` | EPUB extraction and HTML-to-text cleanup |
+| `EpubReader` | `src/Modules/Book/Infrastructure/Epub/` | In-tree EPUB parser (OCF container, OPF, NCX / EPUB 3 nav) |
 | `TextSplitterService` | `src/Modules/Book/Application/Services/` | Split large texts at paragraph boundaries |
 | `Book` entity | `src/Modules/Book/Domain/Book.php` | Book domain model with progress tracking |
 | `ImportEpub` use case | `src/Modules/Book/Application/UseCases/` | Orchestrates EPUB import workflow |

@@ -2,7 +2,7 @@
  * Review Header - Header initialization and navigation for vocabulary reviews.
  *
  * @license Unlicense
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @since   3.0.0 Extracted from PHP inline scripts
  */
 

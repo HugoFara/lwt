@@ -2,7 +2,7 @@
  * Elapsed Timer - A simple count-up timer for test sessions.
  *
  * @license Unlicense
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @since   3.0.0
  */
 

@@ -76,6 +76,35 @@ class FeedLoadController
     }
 
     /**
+     * Refresh every feed whose auto-update interval has elapsed.
+     *
+     * Route: GET /feeds/autoupdate
+     *
+     * This used to hang off `/feeds?check_autoupdate=1`, which meant the
+     * retired browse page had to stay routable just to carry the flag. The
+     * language page links straight here instead.
+     *
+     * @return void
+     */
+    public function autoupdateRoute(): void
+    {
+        $currentLang = Validation::language(
+            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
+        );
+
+        $langName = $this->languageFacade->getLanguageName($currentLang);
+        PageLayoutHelper::renderPageStart('Updating Feeds - ' . $langName, true);
+
+        $this->feedFacade->renderFeedLoadInterfaceModern(
+            InputValidator::getIntParam('selected_feed', 0, 0),
+            true,
+            '/feeds/manage'
+        );
+
+        PageLayoutHelper::renderPageEnd();
+    }
+
+    /**
      * Load/refresh a single feed.
      *
      * Route: GET /feeds/{id}/load
@@ -100,47 +129,5 @@ class FeedLoadController
         );
 
         PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Multi-load feeds interface.
-     *
-     * Route: GET /feeds/multi-load
-     *
-     * @param array<string, string> $params Route parameters
-     *
-     * @return void
-     */
-    public function multiLoad(array $params): void
-    {
-        $currentLang = Validation::language(
-            InputValidator::getStringWithDb("filterlang", 'currentlanguage')
-        );
-
-        $langName = $this->languageFacade->getLanguageName($currentLang);
-        PageLayoutHelper::renderPageStart('Multi-Load Feeds - ' . $langName, true);
-
-        $this->showMultiLoadForm((int)$currentLang);
-
-        PageLayoutHelper::renderPageEnd();
-    }
-
-    /**
-     * Show the multi-load feed form.
-     *
-     * @param int $currentLang Current language filter
-     *
-     * @return void
-     */
-    private function showMultiLoadForm(int $currentLang): void
-    {
-        $feeds = $this->feedFacade->getFeeds($currentLang ?: null);
-
-        // Pass service to view for utility methods
-        $feedService = $this->feedFacade;
-        $languages = $this->languageFacade->getLanguagesForSelect();
-
-        /** @psalm-suppress UnresolvableInclude View path is constructed at runtime */
-        include $this->viewPath . 'multi_load.php';
     }
 }

@@ -45,6 +45,9 @@
     "server_data_db_name": "Database name",
     "server_data_db_size": "Database Size",
     "server_data_mysql_version": "MySQL Version",
+    "server_data_failed_migrations": "Failed migrations",
+    "server_data_failed_migrations_warning": "Some database migrations did not run through. The schema is incomplete, so features relying on the missing tables or columns will fail. Please report this with the details below.",
+    "server_data_failed_migrations_attempts": "attempts",
     "server_data_section_client_api": "Client API",
     "server_data_loading_api": "Loading API information...",
     "server_data_error_loading": "Error loading API information",
@@ -177,5 +180,12 @@
     "users.flash.deleted": "User deleted successfully",
     "users.flash.not_found": "Error: User not found",
     "users.flash.error_prefix": "Error: {message}",
-    "users.flash.unknown_error": "Unknown error"
+    "users.flash.unknown_error": "Unknown error",
+    "users_loading": "Loading users...",
+    "users_previous": "Previous",
+    "users_next": "Next",
+    "users.errors.load_failed": "Could not load users",
+    "users.errors.action_failed": "The action failed",
+    "users.confirm_delete": "Delete the user \"{username}\"? This cannot be undone.",
+    "users.confirm_role": "Change {username} to {role}?"
 }

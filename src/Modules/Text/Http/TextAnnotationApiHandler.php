@@ -10,7 +10,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Text\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -84,7 +84,8 @@ class TextAnnotationApiHandler
     /**
      * Format annotation save error into human-readable message.
      *
-     * @param array{success: bool, error?: string, requested?: int, available?: int, position?: int, found?: int} $result
+     * @param array{success: bool, error?: string, requested?: int, available?: int,
+     *              position?: int, found?: int} $result
      *
      * @return string Formatted error message
      */

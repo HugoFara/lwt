@@ -5,7 +5,7 @@
  * replacing inline onclick/onchange handlers with data attributes.
  * Works for both term tags (/tags) and text tags (/tags/text).
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

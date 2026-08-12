@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+
 /**
  * PHP Built-in Server Router
  *
@@ -9,13 +10,15 @@
  *
  * @category Server
  * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmailhotmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
  *
  * Usage: php -S localhost:8000 router.php
  */
+
+declare(strict_types=1);
 
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($uri, PHP_URL_PATH);

@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Vocabulary\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -25,6 +25,7 @@ use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\UserScopedQuery;
 use Lwt\Modules\Vocabulary\Application\UseCases\FindSimilarTerms;
 use Lwt\Modules\Vocabulary\Application\Services\TermStatusService;
+use Lwt\Modules\Vocabulary\Application\Services\WordLinkingService;
 use Lwt\Shared\Infrastructure\Dictionary\DictionaryAdapter;
 use Lwt\Modules\Tags\Application\TagsFacade;
 
@@ -43,19 +44,23 @@ class TermTranslationApiHandler
 {
     private FindSimilarTerms $findSimilarTerms;
     private DictionaryAdapter $dictionaryAdapter;
+    private WordLinkingService $linkingService;
 
     /**
      * Constructor.
      *
-     * @param FindSimilarTerms|null  $findSimilarTerms  Find similar terms use case
-     * @param DictionaryAdapter|null $dictionaryAdapter Dictionary adapter
+     * @param FindSimilarTerms|null   $findSimilarTerms  Find similar terms use case
+     * @param DictionaryAdapter|null  $dictionaryAdapter Dictionary adapter
+     * @param WordLinkingService|null $linkingService    Occurrence linking service
      */
     public function __construct(
         ?FindSimilarTerms $findSimilarTerms = null,
-        ?DictionaryAdapter $dictionaryAdapter = null
+        ?DictionaryAdapter $dictionaryAdapter = null,
+        ?WordLinkingService $linkingService = null
     ) {
         $this->findSimilarTerms = $findSimilarTerms ?? new FindSimilarTerms();
         $this->dictionaryAdapter = $dictionaryAdapter ?? new DictionaryAdapter();
+        $this->linkingService = $linkingService ?? new WordLinkingService();
     }
 
     // =========================================================================
@@ -220,14 +225,12 @@ class TermTranslationApiHandler
 
         $wid = $stmt->insertId();
 
-        // Update text items using prepared statement
-        // word_occurrences inherits user context via Ti2TxID -> texts FK
-        Connection::preparedExecute(
-            "UPDATE word_occurrences
-            SET Ti2WoID = ?
-            WHERE Ti2LgID = ? AND LOWER(Ti2Text) = ?",
-            [$wid, $lang, $textlc]
-        );
+        // Delegate rather than repeat the UPDATE: $lang arrives straight from
+        // the request (POST /terms/new), and word_occurrences has no owner
+        // column, so an unguarded statement here re-points another user's
+        // occurrences at this word. linkToTextItems() holds the ownership
+        // check; this used to be a copy of it without one.
+        $this->linkingService->linkToTextItems((int) $wid, $lang, $textlc);
 
         return ['success' => true, 'wordId' => (int) $wid, 'textLc' => $textlc];
     }

@@ -788,26 +788,6 @@ describe('review/stores/review_store.ts', () => {
   });
 
   // ===========================================================================
-  // getEditUrl Tests
-  // ===========================================================================
-
-  describe('getEditUrl', () => {
-    it('returns # without current word', () => {
-      const store = getReviewStore();
-      store.currentWord = null;
-
-      expect(store.getEditUrl()).toBe('#');
-    });
-
-    it('returns correct edit URL', () => {
-      const store = getReviewStore();
-      store.currentWord = { wordId: 123 } as never;
-
-      expect(store.getEditUrl()).toBe('/word/edit-term?wid=123');
-    });
-  });
-
-  // ===========================================================================
   // Modal Tests
   // ===========================================================================
 
@@ -841,6 +821,7 @@ describe('review/stores/review_store.ts', () => {
       const store = getReviewStore();
       const mockAudio = {
         currentTime: 10,
+        pause: vi.fn(),
         play: vi.fn().mockResolvedValue(undefined)
       };
       vi.spyOn(document, 'getElementById').mockImplementation((id) => {
@@ -858,6 +839,7 @@ describe('review/stores/review_store.ts', () => {
       const store = getReviewStore();
       const mockAudio = {
         currentTime: 10,
+        pause: vi.fn(),
         play: vi.fn().mockResolvedValue(undefined)
       };
       vi.spyOn(document, 'getElementById').mockImplementation((id) => {
@@ -883,6 +865,7 @@ describe('review/stores/review_store.ts', () => {
       const store = getReviewStore();
       const mockAudio = {
         currentTime: 0,
+        pause: vi.fn(),
         play: vi.fn().mockRejectedValue(new Error('Autoplay blocked'))
       };
       vi.spyOn(document, 'getElementById').mockReturnValue(

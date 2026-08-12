@@ -103,6 +103,7 @@
     "edit_text_form_deselected": "Text deselected - check the box to include",
     "edit_text_footer_save": "Save",
     "edit_text_footer_cancel": "Cancel",
+    "edit_texts_title": "Review texts before importing",
     "multi_load_mark_all": "Mark All",
     "multi_load_mark_none": "Mark None",
     "multi_load_col_mark": "Mark",

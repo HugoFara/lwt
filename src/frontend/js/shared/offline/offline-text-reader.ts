@@ -4,7 +4,7 @@
  * Provides offline-first text reading by checking IndexedDB before
  * making network requests.
  *
- * @author  HugoFara <Hugo.Farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

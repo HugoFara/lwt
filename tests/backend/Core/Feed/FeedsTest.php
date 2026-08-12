@@ -117,15 +117,6 @@ class FeedsTest extends TestCase
     }
 
     /**
-     * Test saveTextsFromFeed method exists
-     */
-    public function testSaveTextsFromFeedExists(): void
-    {
-        // Verify method exists
-        $this->assertTrue(method_exists($this->feedService, 'saveTextsFromFeed'));
-    }
-
-    /**
      * Test formatLastUpdate method
      */
     public function testFormatLastUpdate(): void

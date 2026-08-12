@@ -7,7 +7,7 @@
  *
  * @category Lwt
  * @package  Lwt\Shared\Infrastructure\Routing\Middleware
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -32,7 +32,7 @@ use Lwt\Shared\Infrastructure\Container\Container;
  *
  * @category Lwt
  * @package  Lwt\Shared\Infrastructure\Routing\Middleware
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0

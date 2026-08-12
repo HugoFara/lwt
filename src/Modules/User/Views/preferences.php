@@ -15,7 +15,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\User\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -44,8 +44,15 @@ use Lwt\Shared\UI\Helpers\FormHelper;
  */
 
 ?>
-<form class="validate" action="/profile/preferences" method="post" data-lwt-settings-form>
-    <?php echo FormHelper::csrfField(); ?>
+<form class="validate" data-lwt-settings-form
+      x-data="preferencesApp" @submit.prevent="save()">
+
+    <div class="notification is-danger" x-show="error" x-cloak>
+        <span x-text="error"></span>
+    </div>
+    <div class="notification is-success" x-show="success" x-cloak data-auto-hide="true">
+        <span x-text="success"></span>
+    </div>
 
     <!-- Appearance Section -->
     <div class="card settings-section mb-4" x-data="{ open: false }">
@@ -154,7 +161,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                 ->getAvailableLocales();
                         }
                         ?>
-                        <select name="app_language" id="app_language">
+                        <select name="app_language"
+                                :value="settingValue('app_language')"
+                                @change="onFieldInput('app_language', $event)" id="app_language">
                             <?php
                             echo SelectOptionsBuilder::forAppLanguages(
                                 $availableLocales,
@@ -195,6 +204,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="set-words-to-do-buttons"
+                                :value="settingValue('set-words-to-do-buttons')"
+                                @change="onFieldInput('set-words-to-do-buttons', $event)"
                                     id="set-words-to-do-buttons"
                                     class="notempty"
                                     required>
@@ -223,7 +234,10 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
-                            <select name="set-tooltip-mode" id="set-tooltip-mode" class="notempty" required>
+                            <select name="set-tooltip-mode"
+                                :value="settingValue('set-tooltip-mode')"
+                                @change="onFieldInput('set-tooltip-mode', $event)"
+                                id="set-tooltip-mode" class="notempty" required>
                                 <?php echo SelectOptionsBuilder::forTooltipType($settings['set-tooltip-mode']); ?>
                             </select>
                         </div>
@@ -252,13 +266,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                id="set-ggl-translation-per-page"
                                name="set-ggl-translation-per-page"
                                data_info="New Term Translations per Page"
-                               value="<?php
-                                   echo htmlspecialchars(
-                                       $settings['set-ggl-translation-per-page'] ?? '',
-                                       ENT_QUOTES,
-                                       'UTF-8'
-                                   );
-                                    ?>"
+                               :value="settingValue('set-ggl-translation-per-page')"
+                               @input="onFieldInput('set-ggl-translation-per-page', $event)"
                                maxlength="4"
                                style="width: 100px;"
                                required />
@@ -307,13 +316,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                id="set-test-main-frame-waiting-time"
                                name="set-test-main-frame-waiting-time"
                                data_info="Waiting time after assessment to display next review"
-                               value="<?php
-                                   echo htmlspecialchars(
-                                       $settings['set-test-main-frame-waiting-time'] ?? '',
-                                       ENT_QUOTES,
-                                       'UTF-8'
-                                   );
-                                    ?>"
+                               :value="settingValue('set-test-main-frame-waiting-time')"
+                               @input="onFieldInput('set-test-main-frame-waiting-time', $event)"
                                maxlength="4"
                                style="width: 120px;"
                                required />
@@ -345,13 +349,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                id="set-test-edit-frame-waiting-time"
                                name="set-test-edit-frame-waiting-time"
                                data_info="Waiting Time to clear the message/edit frame"
-                               value="<?php
-                                   echo htmlspecialchars(
-                                       $settings['set-test-edit-frame-waiting-time'] ?? '',
-                                       ENT_QUOTES,
-                                       'UTF-8'
-                                   );
-                                    ?>"
+                               :value="settingValue('set-test-edit-frame-waiting-time')"
+                               @input="onFieldInput('set-test-edit-frame-waiting-time', $event)"
                                maxlength="8"
                                style="width: 120px;"
                                required />
@@ -397,7 +396,10 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                 </label>
                 <div class="control">
                     <div class="select is-fullwidth">
-                        <select name="set-text-visit-statuses-via-key" id="set-text-visit-statuses-via-key">
+                        <select name="set-text-visit-statuses-via-key"
+                                :value="settingValue('set-text-visit-statuses-via-key')"
+                                @change="onFieldInput('set-text-visit-statuses-via-key', $event)"
+                                id="set-text-visit-statuses-via-key">
                             <?php
                             echo SelectOptionsBuilder::forWordStatus(
                                 $settings['set-text-visit-statuses-via-key'],
@@ -419,6 +421,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                 <div class="control">
                     <div class="select is-fullwidth">
                         <select name="set-display-text-frame-term-translation"
+                                :value="settingValue('set-display-text-frame-term-translation')"
+                                @change="onFieldInput('set-display-text-frame-term-translation', $event)"
                                 id="set-display-text-frame-term-translation">
                             <?php
                             echo SelectOptionsBuilder::forWordStatus(
@@ -442,6 +446,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="set-text-frame-annotation-position"
+                                :value="settingValue('set-text-frame-annotation-position')"
+                                @change="onFieldInput('set-text-frame-annotation-position', $event)"
                                     id="set-text-frame-annotation-position"
                                     class="notempty"
                                     required>
@@ -492,6 +498,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="set-test-sentence-count"
+                                :value="settingValue('set-test-sentence-count')"
+                                @change="onFieldInput('set-test-sentence-count', $event)"
                                     id="set-test-sentence-count"
                                     class="notempty"
                                     required>
@@ -523,6 +531,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
                             <select name="set-term-sentence-count"
+                                :value="settingValue('set-term-sentence-count')"
+                                @change="onFieldInput('set-term-sentence-count', $event)"
                                     id="set-term-sentence-count"
                                     class="notempty"
                                     required>
@@ -559,13 +569,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                id="set-similar-terms-count"
                                name="set-similar-terms-count"
                                data_info="Similar terms to be displayed while adding/editing a term"
-                               value="<?php
-                                   echo htmlspecialchars(
-                                       $settings['set-similar-terms-count'] ?? '',
-                                       ENT_QUOTES,
-                                       'UTF-8'
-                                   );
-                                    ?>"
+                               :value="settingValue('set-similar-terms-count')"
+                               @input="onFieldInput('set-similar-terms-count', $event)"
                                maxlength="1"
                                style="width: 80px;"
                                required />
@@ -592,13 +597,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                type="text"
                                id="set-term-translation-delimiters"
                                name="set-term-translation-delimiters"
-                               value="<?php
-                                   echo htmlspecialchars(
-                                       $settings['set-term-translation-delimiters'] ?? '',
-                                       ENT_QUOTES,
-                                       'UTF-8'
-                                   );
-                                    ?>"
+                               :value="settingValue('set-term-translation-delimiters')"
+                               @input="onFieldInput('set-term-translation-delimiters', $event)"
                                maxlength="8"
                                style="width: 120px;"
                                required />
@@ -641,8 +641,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                     <label class="checkbox">
                         <input type="checkbox"
                                name="set-tts"
-                               value="1"
-                               <?php echo ((int)$settings['set-tts'] ? "checked" : ""); ?> />
+                               :checked="isOn('set-tts')"
+                               @change="toggle('set-tts', $event)"
+                               value="1" />
                         <?= __('preferences.save_audio_checkbox_label') ?>
                     </label>
                 </div>
@@ -653,7 +654,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                 <div class="field has-addons">
                     <div class="control is-expanded">
                         <div class="select is-fullwidth">
-                            <select name="set-hts" id="set-hts" class="notempty" required>
+                            <select name="set-hts"
+                                :value="settingValue('set-hts')"
+                                @change="onFieldInput('set-hts', $event)" id="set-hts" class="notempty" required>
                                 <?php echo SelectOptionsBuilder::forHoverTranslation($settings['set-hts']); ?>
                             </select>
                         </div>
@@ -839,13 +842,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        id="set-texts-per-page"
                                        name="set-texts-per-page"
                                        data_info="Texts per Page"
-                                       value="<?php
-                                           echo htmlspecialchars(
-                                               $settings['set-texts-per-page'] ?? '',
-                                               ENT_QUOTES,
-                                               'UTF-8'
-                                           );
-                                            ?>"
+                                       :value="settingValue('set-texts-per-page')"
+                               @input="onFieldInput('set-texts-per-page', $event)"
                                        maxlength="4"
                                        required />
                             </div>
@@ -875,13 +873,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        id="set-archived_texts-per-page"
                                        name="set-archived_texts-per-page"
                                        data_info="Archived Texts per Page"
-                                       value="<?php
-                                           echo htmlspecialchars(
-                                               $settings['set-archived_texts-per-page'] ?? '',
-                                               ENT_QUOTES,
-                                               'UTF-8'
-                                           );
-                                            ?>"
+                                       :value="settingValue('set-archived_texts-per-page')"
+                                       @input="onFieldInput('set-archived_texts-per-page', $event)"
                                        maxlength="4"
                                        required />
                             </div>
@@ -913,13 +906,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        id="set-terms-per-page"
                                        name="set-terms-per-page"
                                        data_info="Terms per Page"
-                                       value="<?php
-                                           echo htmlspecialchars(
-                                               $settings['set-terms-per-page'] ?? '',
-                                               ENT_QUOTES,
-                                               'UTF-8'
-                                           );
-                                            ?>"
+                                       :value="settingValue('set-terms-per-page')"
+                               @input="onFieldInput('set-terms-per-page', $event)"
                                        maxlength="4"
                                        required />
                             </div>
@@ -949,13 +937,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        id="set-tags-per-page"
                                        name="set-tags-per-page"
                                        data_info="Tags per Page"
-                                       value="<?php
-                                           echo htmlspecialchars(
-                                               $settings['set-tags-per-page'] ?? '',
-                                               ENT_QUOTES,
-                                               'UTF-8'
-                                           );
-                                            ?>"
+                                       :value="settingValue('set-tags-per-page')"
+                               @input="onFieldInput('set-tags-per-page', $event)"
                                        maxlength="4"
                                        required />
                             </div>
@@ -987,13 +970,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        id="set-articles-per-page"
                                        name="set-articles-per-page"
                                        data_info="Feed Articles per Page"
-                                       value="<?php
-                                           echo htmlspecialchars(
-                                               $settings['set-articles-per-page'] ?? '',
-                                               ENT_QUOTES,
-                                               'UTF-8'
-                                           );
-                                            ?>"
+                                       :value="settingValue('set-articles-per-page')"
+                               @input="onFieldInput('set-articles-per-page', $event)"
                                        maxlength="4"
                                        required />
                             </div>
@@ -1023,13 +1001,8 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                                        id="set-feeds-per-page"
                                        name="set-feeds-per-page"
                                        data_info="Feeds per Page"
-                                       value="<?php
-                                           echo htmlspecialchars(
-                                               $settings['set-feeds-per-page'] ?? '',
-                                               ENT_QUOTES,
-                                               'UTF-8'
-                                           );
-                                            ?>"
+                                       :value="settingValue('set-feeds-per-page')"
+                               @input="onFieldInput('set-feeds-per-page', $event)"
                                        maxlength="4"
                                        required />
                             </div>
@@ -1051,7 +1024,9 @@ use Lwt\Shared\UI\Helpers\FormHelper;
                 <label class="label" for="set-regex-mode"><?= __('preferences.query_mode_label') ?></label>
                 <div class="control">
                     <div class="select is-fullwidth">
-                        <select name="set-regex-mode" id="set-regex-mode">
+                        <select name="set-regex-mode"
+                                :value="settingValue('set-regex-mode')"
+                                @change="onFieldInput('set-regex-mode', $event)" id="set-regex-mode">
                             <?php echo SelectOptionsBuilder::forRegexMode($settings['set-regex-mode']); ?>
                         </select>
                     </div>
@@ -1072,7 +1047,7 @@ use Lwt\Shared\UI\Helpers\FormHelper;
             </a>
         </div>
         <div class="control">
-            <button type="submit" name="op" value="Save" class="button is-primary">
+            <button type="submit" class="button is-primary" :disabled="isSaving">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => 'Save']); ?>
                 </span>

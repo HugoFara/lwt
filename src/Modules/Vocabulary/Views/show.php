@@ -13,7 +13,7 @@
  *
  * @category Lwt
  * @package  Lwt\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -89,4 +89,3 @@ assert(is_string($ann));
 </tr>
 </table>
 
-<div data-lwt-cleanup-frames="true" hidden></div>

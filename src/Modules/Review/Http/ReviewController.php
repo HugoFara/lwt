@@ -9,7 +9,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\Review\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -22,7 +22,6 @@ namespace Lwt\Modules\Review\Http;
 use Lwt\Shared\Http\BaseController;
 use Lwt\Shared\Infrastructure\Exception\ValidationException;
 use Lwt\Modules\Review\Application\ReviewFacade;
-use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Modules\Language\Application\LanguageFacade;
 use Lwt\Shared\Infrastructure\Language\LanguagePresets;
@@ -39,7 +38,7 @@ use Lwt\Shared\UI\Helpers\PageLayoutHelper;
  *
  * @category Lwt
  * @package  Lwt\Modules\Review\Http
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -75,7 +74,8 @@ class ReviewController extends BaseController
      *
      * @param array $params Route parameters
      *
-     * @return \Lwt\Shared\Infrastructure\Http\RedirectResponse|null Redirect when no review context, null when the page rendered
+     * @return \Lwt\Shared\Infrastructure\Http\RedirectResponse|null Redirect when no review
+     *                                                              context, null when rendered
      */
     public function index(array $params): ?\Lwt\Shared\Infrastructure\Http\RedirectResponse
     {
@@ -158,93 +158,6 @@ class ReviewController extends BaseController
         $totalCount = (int) ($testData['counts']['total'] ?? 0);
 
         include __DIR__ . '/../Views/header_content.php';
-    }
-
-    /**
-     * Render table review.
-     *
-     * @param array $params Route parameters
-     *
-     * @return void
-     *
-     * @psalm-suppress UnusedVariable Variables are used in included view files
-     */
-    public function tableReview(array $params): void
-    {
-        $langId = $this->param('lang') !== '' ? (int) $this->param('lang') : null;
-        $textId = $this->param('text') !== '' ? (int) $this->param('text') : null;
-        $selection = $this->param('selection') !== '' ? (int) $this->param('selection') : null;
-
-        // Get selection data from session criteria
-        $sessReviewSql = null;
-        if ($selection !== null && $this->sessionManager->hasCriteria()) {
-            $sessReviewSql = $this->sessionManager->getSelectionString();
-        }
-
-        // Get review SQL
-        $identifier = $this->reviewFacade->getReviewIdentifier(
-            $selection,
-            $sessReviewSql,
-            $langId,
-            $textId
-        );
-
-        if ($identifier[0] === '') {
-            throw ValidationException::forField(
-                'parameters',
-                'Review table requires valid lang, text, or selection parameter'
-            )->setHttpStatusCode(400);
-        }
-
-        /** @psalm-suppress InvalidScalarArgument */
-        $reviewResult = $this->reviewFacade->getReviewSql($identifier[0], $identifier[1]);
-
-        if ($reviewResult === null) {
-            echo '<p>Sorry - Unable to generate review SQL</p>';
-            return;
-        }
-
-        $reviewsql = $reviewResult['sql'];
-        $reviewParams = $reviewResult['params'];
-
-        // Validate single language
-        $validation = $this->reviewFacade->validateReviewSelection($reviewsql, $reviewParams);
-        if (!$validation['valid']) {
-            echo '<p>Sorry - ' . ($validation['error'] ?? 'Unknown error') . '</p>';
-            return;
-        }
-
-        // Get language settings
-        $langIdFromSql = $this->reviewFacade->getLanguageIdFromReviewSql($reviewsql, $reviewParams);
-        if ($langIdFromSql === null) {
-            include __DIR__ . '/../Views/no_terms.php';
-            PageLayoutHelper::renderPageEnd();
-            return;
-        }
-
-        $langSettings = $this->reviewFacade->getLanguageSettings($langIdFromSql);
-        $textSizeRaw = isset($langSettings['textSize']) ? (int) $langSettings['textSize'] : 100;
-        $textSize = (int) round(($textSizeRaw - 100) / 2, 0) + 100;
-
-        // Render table settings
-        $settings = $this->reviewFacade->getTableReviewSettings();
-        include __DIR__ . '/../Views/table_review_settings.php';
-
-        echo '<table class="sortable tab2 table-test" cellspacing="0" cellpadding="5">';
-        include __DIR__ . '/../Views/table_review_header.php';
-
-        // Render table rows
-        $wordsArray = $this->reviewFacade->getTableReviewWords($reviewsql, $reviewParams);
-        /** @var mixed $regexWordRaw */
-        $regexWordRaw = $langSettings['regexWord'] ?? '';
-        $regexWord = is_string($regexWordRaw) ? $regexWordRaw : '';
-        $rtl = (bool) ($langSettings['rtl'] ?? false);
-
-        foreach ($wordsArray as $word) {
-            include __DIR__ . '/../Views/table_review_row.php';
-        }
-
-        echo '</table>';
     }
 
     /**

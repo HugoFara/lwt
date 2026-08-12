@@ -1036,6 +1036,162 @@ class FeedArticleApiHandlerTest extends TestCase
         ], $overrides);
     }
 
+    // =========================================================================
+    // createTextsFromEdited
+    //
+    // The write half of the edit-before-import flow. The ownership gate and
+    // the server-side tag/limit derivation are the parts worth pinning down:
+    // the retired form trusted the payload for both.
+    // =========================================================================
+
+    public function testCreateTextsFromEditedMissingFeedIdReturnsError(): void
+    {
+        $this->feedFacade->expects($this->never())->method('createTextFromFeed');
+
+        $result = $this->handler->createTextsFromEdited([
+            'texts' => [['title' => 'T', 'text' => 'Body']],
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame(0, $result['created']);
+    }
+
+    public function testCreateTextsFromEditedEmptyTextsReturnsError(): void
+    {
+        $this->feedFacade->expects($this->never())->method('createTextFromFeed');
+
+        $result = $this->handler->createTextsFromEdited(['feed_id' => 3, 'texts' => []]);
+
+        $this->assertFalse($result['success']);
+    }
+
+    public function testCreateTextsFromEditedForeignFeedWritesNothing(): void
+    {
+        // getFeedById is user-scoped, so somebody else's feed comes back null.
+        $this->feedFacade->method('getFeedById')->willReturn(null);
+        $this->feedFacade->expects($this->never())->method('createTextFromFeed');
+        $this->feedFacade->expects($this->never())->method('archiveOldTexts');
+
+        $result = $this->handler->createTextsFromEdited([
+            'feed_id' => 999,
+            'texts' => [['title' => 'T', 'text' => 'Body']],
+        ]);
+
+        $this->assertFalse($result['success']);
+        $this->assertSame('Feed not found', $result['error']);
+    }
+
+    public function testCreateTextsFromEditedUsesFeedTagNotPayload(): void
+    {
+        $this->stubOwnedFeed(['tag' => 'from-options', 'max_texts' => '7']);
+
+        $this->feedFacade->expects($this->once())
+            ->method('createTextFromFeed')
+            ->with($this->anything(), 'from-options');
+        $this->feedFacade->expects($this->once())
+            ->method('archiveOldTexts')
+            ->with('from-options', 7)
+            ->willReturn(['archived' => 2, 'sentences' => 0, 'textitems' => 0]);
+
+        $result = $this->handler->createTextsFromEdited([
+            'feed_id' => 3,
+            // A caller trying to pick its own tag and disable archiving.
+            'tag' => 'attacker-tag',
+            'Nf_Max_Texts' => 9999,
+            'texts' => [['title' => 'T', 'text' => 'Body', 'language_id' => 1]],
+        ]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(1, $result['created']);
+        $this->assertSame(2, $result['archived']);
+    }
+
+    public function testCreateTextsFromEditedSkipsBlankRowsButKeepsOthers(): void
+    {
+        $this->stubOwnedFeed(['tag' => 'news', 'max_texts' => '5']);
+
+        $this->feedFacade->expects($this->once())->method('createTextFromFeed');
+        $this->feedFacade->method('archiveOldTexts')
+            ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
+
+        $result = $this->handler->createTextsFromEdited([
+            'feed_id' => 3,
+            'texts' => [
+                ['title' => '   ', 'text' => 'Body'],
+                ['title' => 'Good', 'text' => 'Body', 'language_id' => 1],
+                ['title' => 'No body', 'text' => '  '],
+            ],
+        ]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(1, $result['created']);
+        $this->assertCount(2, $result['errors']);
+    }
+
+    public function testCreateTextsFromEditedFallsBackToFeedLanguage(): void
+    {
+        $this->stubOwnedFeed(['tag' => 'news', 'max_texts' => '5'], 4);
+
+        // 77 is not one of the caller's languages, so the feed's wins.
+        $this->feedFacade->expects($this->once())
+            ->method('createTextFromFeed')
+            ->with(
+                $this->callback(fn(array $data): bool => $data['TxLgID'] === 4),
+                'news'
+            );
+        $this->feedFacade->method('archiveOldTexts')
+            ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
+
+        $this->handler->createTextsFromEdited([
+            'feed_id' => 3,
+            'texts' => [['title' => 'T', 'text' => 'Body', 'language_id' => 77]],
+        ]);
+    }
+
+    public function testCreateTextsFromEditedHonoursAnOwnedLanguage(): void
+    {
+        $this->stubOwnedFeed(['tag' => 'news', 'max_texts' => '5'], 4);
+
+        $this->feedFacade->expects($this->once())
+            ->method('createTextFromFeed')
+            ->with(
+                $this->callback(fn(array $data): bool => $data['TxLgID'] === 2),
+                'news'
+            );
+        $this->feedFacade->method('archiveOldTexts')
+            ->willReturn(['archived' => 0, 'sentences' => 0, 'textitems' => 0]);
+
+        $this->handler->createTextsFromEdited([
+            'feed_id' => 3,
+            'texts' => [['title' => 'T', 'text' => 'Body', 'language_id' => 2]],
+        ]);
+    }
+
+    /**
+     * Stub a feed the caller owns, with the given parsed options.
+     *
+     * @param array<string, string> $options   Feed options by name
+     * @param int                   $feedLangId Feed language
+     */
+    private function stubOwnedFeed(array $options, int $feedLangId = 1): void
+    {
+        $this->feedFacade->method('getFeedById')->willReturn([
+            'NfID' => 3,
+            'NfName' => 'TestFeed',
+            'NfLgID' => $feedLangId,
+            'NfOptions' => 'tag=' . ($options['tag'] ?? ''),
+        ]);
+        $this->feedFacade->method('getFeedOption')
+            ->willReturnCallback(
+                static fn(string $_optionsStr, string $name): ?string => $options[$name] ?? null
+            );
+        $this->feedFacade->method('getLanguages')->willReturn([
+            ['LgID' => 1, 'LgName' => 'English'],
+            ['LgID' => 2, 'LgName' => 'French'],
+            ['LgID' => 4, 'LgName' => 'German'],
+        ]);
+    }
+
     /**
      * Create a feed link row as returned by getMarkedFeedLinks.
      *

@@ -65,7 +65,7 @@ export interface FeedLoaderData {
  * @param config - Initial configuration from PHP
  * @returns Alpine component data object
  */
-export function feedLoaderData(config: FeedLoaderConfig = { feeds: [], redirectUrl: '/feeds' }): FeedLoaderData {
+export function feedLoaderData(config: FeedLoaderConfig = { feeds: [], redirectUrl: '/feeds/manage' }): FeedLoaderData {
   return {
     feeds: config.feeds,
     redirectUrl: config.redirectUrl,

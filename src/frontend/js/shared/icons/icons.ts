@@ -4,7 +4,7 @@
  * Provides functions to render Lucide SVG icons in JavaScript.
  * Maps legacy PNG icon names to their Lucide equivalents.
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

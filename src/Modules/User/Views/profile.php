@@ -12,7 +12,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\User\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0
@@ -28,13 +28,10 @@ assert(isset($user) && $user instanceof \Lwt\Modules\User\Domain\User);
 assert(isset($error) && (is_string($error) || $error === null));
 assert(isset($success) && (is_string($success) || $success === null));
 
-$escapedUsername = htmlspecialchars($user->username(), ENT_QUOTES, 'UTF-8');
-$escapedEmail = htmlspecialchars($user->email() ?? '', ENT_QUOTES, 'UTF-8');
-
 $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_QUOTES, 'UTF-8');
 ?>
 
-<section class="section">
+<section class="section" x-data="profileApp">
     <div class="container">
         <div class="columns is-centered">
             <div class="column is-6-tablet is-5-desktop">
@@ -62,18 +59,25 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                         </span>
                     </h2>
 
-                    <?php if ($user->isEmailVerified()) : ?>
-                        <div class="notification is-success is-light is-size-7 py-2 px-3 mb-4">
-                            <?php echo $t('profile.email_verified'); ?>
-                        </div>
-                    <?php else : ?>
-                        <div class="notification is-warning is-light is-size-7 py-2 px-3 mb-4">
-                            <?php echo $t('profile.email_not_verified'); ?>
-                        </div>
-                    <?php endif; ?>
+                    <div class="notification is-success is-light is-size-7 py-2 px-3 mb-4"
+                         x-show="emailVerified" x-cloak>
+                        <?php echo $t('profile.email_verified'); ?>
+                    </div>
+                    <div class="notification is-warning is-light is-size-7 py-2 px-3 mb-4"
+                         x-show="!emailVerified" x-cloak>
+                        <?php echo $t('profile.email_not_verified'); ?>
+                    </div>
 
-                    <form method="post" action="/profile">
-                        <?= FormHelper::csrfField() ?>
+                    <div class="notification is-danger is-light is-size-7 py-2 px-3 mb-4"
+                         x-show="profileError" x-cloak>
+                        <span x-text="profileError"></span>
+                    </div>
+                    <div class="notification is-success is-light is-size-7 py-2 px-3 mb-4"
+                         x-show="profileSuccess" x-cloak>
+                        <span x-text="profileSuccess"></span>
+                    </div>
+
+                    <form @submit.prevent="saveProfile()">
 
                         <div class="field">
                             <label class="label" for="profile-username">
@@ -81,7 +85,7 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                             </label>
                             <div class="control has-icons-left">
                                 <input class="input" type="text" id="profile-username"
-                                       name="username" value="<?= $escapedUsername ?>"
+                                       x-model="username"
                                        required minlength="3" maxlength="100"
                                        pattern="[a-zA-Z0-9_-]+">
                                 <span class="icon is-small is-left">
@@ -96,7 +100,7 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                             </label>
                             <div class="control has-icons-left">
                                 <input class="input" type="email" id="profile-email"
-                                       name="email" value="<?= $escapedEmail ?>"
+                                       x-model="email"
                                        required maxlength="255">
                                 <span class="icon is-small is-left">
                                     <i data-lucide="mail"></i>
@@ -107,7 +111,8 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
 
                         <div class="field">
                             <div class="control">
-                                <button type="submit" class="button is-primary">
+                                <button type="submit" class="button is-primary"
+                                        :disabled="isSavingProfile">
                                     <?php echo $t('profile.update_button'); ?>
                                 </button>
                             </div>
@@ -125,8 +130,16 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                         </span>
                     </h2>
 
-                    <form method="post" action="/profile/password">
-                        <?= FormHelper::csrfField() ?>
+                    <div class="notification is-danger is-light is-size-7 py-2 px-3 mb-4"
+                         x-show="passwordError" x-cloak>
+                        <span x-text="passwordError"></span>
+                    </div>
+                    <div class="notification is-success is-light is-size-7 py-2 px-3 mb-4"
+                         x-show="passwordSuccess" x-cloak>
+                        <span x-text="passwordSuccess"></span>
+                    </div>
+
+                    <form @submit.prevent="savePassword()">
 
                         <div class="field">
                             <label class="label" for="current-password">
@@ -134,7 +147,7 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                             </label>
                             <div class="control has-icons-left">
                                 <input class="input" type="password" id="current-password"
-                                       name="current_password" required>
+                                       x-model="currentPassword" required>
                                 <span class="icon is-small is-left">
                                     <i data-lucide="key"></i>
                                 </span>
@@ -147,7 +160,7 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                             </label>
                             <div class="control has-icons-left">
                                 <input class="input" type="password" id="new-password"
-                                       name="new_password" required minlength="8">
+                                       x-model="newPassword" required minlength="8">
                                 <span class="icon is-small is-left">
                                     <i data-lucide="lock"></i>
                                 </span>
@@ -160,7 +173,7 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
                             </label>
                             <div class="control has-icons-left">
                                 <input class="input" type="password" id="confirm-password"
-                                       name="new_password_confirm" required minlength="8">
+                                       x-model="confirmPassword" required minlength="8">
                                 <span class="icon is-small is-left">
                                     <i data-lucide="lock"></i>
                                 </span>
@@ -169,7 +182,8 @@ $t = static fn(string $key): string => htmlspecialchars(__('user.' . $key), ENT_
 
                         <div class="field">
                             <div class="control">
-                                <button type="submit" class="button is-warning">
+                                <button type="submit" class="button is-warning"
+                                        :disabled="isSavingPassword">
                                     <?php echo $t('profile.change_password_button'); ?>
                                 </button>
                             </div>

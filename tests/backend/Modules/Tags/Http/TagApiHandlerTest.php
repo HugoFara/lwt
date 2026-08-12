@@ -165,33 +165,48 @@ class TagApiHandlerTest extends TestCase
     // =========================================================================
 
     #[Test]
-    public function routePostReturns405(): void
+    public function routePostWithoutATagTypeIs404(): void
     {
         $response = $this->handler->routePost([], []);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertSame(405, $response->getStatusCode());
-        $this->assertSame(['error' => 'Method Not Allowed'], $response->getData());
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     #[Test]
-    public function routePutReturns405(): void
+    public function routePutWithoutATagTypeIs404(): void
     {
         $response = $this->handler->routePut([], []);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertSame(405, $response->getStatusCode());
-        $this->assertSame(['error' => 'Method Not Allowed'], $response->getData());
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     #[Test]
-    public function routeDeleteReturns405(): void
+    public function routeDeleteWithoutATagTypeIs404(): void
     {
         $response = $this->handler->routeDelete([], []);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertSame(405, $response->getStatusCode());
-        $this->assertSame(['error' => 'Method Not Allowed'], $response->getData());
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
+    #[Test]
+    public function routePutWithoutAnIdIs404(): void
+    {
+        $response = $this->handler->routePut(['tags', 'term'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
+    #[Test]
+    public function routeDeleteRejectsAnUnknownTagType(): void
+    {
+        $response = $this->handler->routeDelete(['tags', 'nonsense', '3'], []);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     // =========================================================================

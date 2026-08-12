@@ -17,7 +17,7 @@
  *
  * @category Lwt
  * @package  Lwt\Modules\User\Views
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @since    3.1.1
  */

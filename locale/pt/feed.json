@@ -103,6 +103,7 @@
     "edit_text_form_deselected": "Texto desmarcado - marque a caixa para incluir",
     "edit_text_footer_save": "Salvar",
     "edit_text_footer_cancel": "Cancelar",
+    "edit_texts_title": "Revisar os textos antes de importar",
     "multi_load_mark_all": "Marcar Todos",
     "multi_load_mark_none": "Desmarcar Todos",
     "multi_load_col_mark": "Marcar",

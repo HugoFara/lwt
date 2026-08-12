@@ -18,7 +18,7 @@ declare(strict_types=1);
  *
  * @category Views
  * @package  Lwt
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0

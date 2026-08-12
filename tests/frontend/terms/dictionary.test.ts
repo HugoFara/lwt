@@ -16,10 +16,6 @@ import {
 } from '../../../src/frontend/js/modules/vocabulary/services/dictionary';
 
 // Mock dependencies
-vi.mock('../../../src/frontend/js/modules/text/pages/reading/frame_management', () => ({
-  showRightFramesPanel: vi.fn(),
-}));
-
 describe('dictionary.ts', () => {
   beforeEach(() => {
     vi.clearAllMocks();

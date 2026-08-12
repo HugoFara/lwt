@@ -1320,14 +1320,6 @@ class FeedFacadeTest extends TestCase
         );
     }
 
-    public function testSaveTextsFromFeedMethodExists(): void
-    {
-        $this->assertTrue(
-            method_exists($this->facade, 'saveTextsFromFeed'),
-            'saveTextsFromFeed method should exist'
-        );
-    }
-
     public function testRenderFeedLoadInterfaceModernMethodExists(): void
     {
         $this->assertTrue(

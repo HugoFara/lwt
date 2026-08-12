@@ -3,7 +3,7 @@
  *
  * Alpine.js component for downloading texts for offline reading.
  *
- * @author  HugoFara <Hugo.Farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */

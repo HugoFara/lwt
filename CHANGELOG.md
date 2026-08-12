@@ -7,6 +7,242 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.4.0-fork] - 2026-08-12
+
+### Fixed
+
+* **A migration that failed was recorded as applied, so the schema silently
+  stayed broken** (#247, #271). `Migrations::update()` logged each failing
+  statement and wrote the migration down as applied anyway, so it was never
+  retried and the gap only surfaced much later as a 500 in whatever feature
+  needed the missing table.
+
+  That is how installs ended up without `books` and `local_dictionaries`. Both
+  declare a foreign key on `languages(LgID)` typed `INT(11) UNSIGNED`, and where
+  `languages.LgID` was still `tinyint(3)` — the widening in
+  `20251221_120000_add_inter_table_foreign_keys.sql` having never taken effect —
+  InnoDB refused the whole `CREATE TABLE` with errno 150, even under
+  `FOREIGN_KEY_CHECKS = 0`. EPUB import, Edit Language and dictionary import
+  then crashed with *Table 'books' doesn't exist*.
+
+  The runner now records the real outcome (`status`, `attempts` and `error` on
+  `_migrations`) and retries a failure when a later upgrade may have fixed its
+  prerequisite, capped so ordinary requests never re-run broken SQL. Reference
+  columns are realigned with the key they point at, on the widest member of each
+  family, so a column is only ever widened and no value can be truncated; that
+  runs again after the migrations, which widen keys as they go. Errors that mean
+  "nothing to do" (a legacy table a fresh install never had, a column baseline
+  already creates) are not counted as failures. A repair migration recreates the
+  tables and columns the failed migrations never created, so an affected
+  database mends itself on first boot with no manual SQL. Anything still failing
+  is listed on the admin **Server Data** page instead of only in `error_log`.
+
+* **Upgrading dropped every foreign key and only put some back** (#272).
+  `update()` clears the constraints before running migrations, because
+  `ALTER TABLE MODIFY` is refused on a column one points at, but only *pending*
+  migrations recreate theirs — and the migrations that created the rest were
+  applied long ago. A 3.3.0 database upgraded to this release went from 14
+  constraints to none. Nothing looked broken, which is why it went unnoticed,
+  but cascade deletes and orphan protection were gone.
+
+  The set is now captured before the drop and whatever the run did not recreate
+  is restored after it, under the same `FOREIGN_KEY_CHECKS = 0` the migrations
+  create their keys under. Keys whose table or column has since been renamed are
+  skipped, since the migration that renamed them owns the new shape. Restoring a
+  backup does the same around its own migration run.
+
+* **`DELETE /api/v1/books/{id}` and `PUT /api/v1/books/{id}/progress` returned
+  405 despite being fully implemented.** `Endpoints::ROUTES` is keyed by path,
+  and a URL carrying an ID matches no key exactly, so `getMethodsForEndpoint()`
+  falls back to the *first path segment*. The `books/chapters` and
+  `books/progress` keys therefore never matched anything — they read as
+  authorisation but were decorative — and the bare `books` entry allowed only
+  `GET` and `POST`. Both requests were rejected before dispatch, so
+  `BookApiHandler::routeDelete()` and `updateProgress()` were unreachable code.
+  No caller had ever exercised them, so nothing regressed; the routes simply
+  did not exist. `books` now allows all four methods.
+
+  `EndpointMethodReachabilityTest` guards the class: it asserts real request
+  shapes (with IDs) resolve through `Endpoints::resolve()`, and fails with an
+  explanation pointing at the first-segment rule. It fails against the previous
+  registry on exactly those two routes.
+
+### Added
+
+* **Books are shell-free.** `/books` and `/book/{id}` render entirely from
+  `/api/v1` through the new `bookList` and `bookDetail` Alpine components. The
+  views became scaffolds carrying a config blob — the query-string filter and
+  page for the list, the book ID for the detail — and `BookController` no
+  longer calls `BookFacade` to render either page. The detail page issues one
+  request, not two, because `GET /books/{id}` already nests the chapters.
+
+  The list keeps its behaviour: the language filter and pagination now update
+  the address bar via `history.replaceState`, so a bookmarked `?lg_id=&page=`
+  still opens where the reader left off, and deleting the last row of a page
+  steps back rather than stranding the reader on an empty one.
+
+  Psalm's `MixedArrayAccess` / `MixedAssignment` / `MixedOperand` suppressions
+  for `src/Modules/Book/Views` were removed — with no row data left to walk,
+  Psalm reported them as unnecessary.
+
+### Removed
+
+* **Seven orphaned view templates**, taking `src/**/Views` from 78 files to 71.
+  None had a caller — checked against literal `include`s, `render('stem')`, and
+  the `$this->viewPath . 'file.php'` concatenation the controllers use. No view
+  is included under a computed name, so that enumeration is exhaustive.
+
+  Five belonged to the **legacy AJAX review page, which no longer exists**:
+  `ajax_review_config.php`, `review_interaction_globals.php`,
+  `review_term_area.php`, `status_change_config.php` and `review_finished.php`
+  — half the Review module's views. `/review` is the module's only route, and
+  it renders `review_desktop.php`. `review_ajax.ts` and its 431-line test go
+  with them: a "test" → "review" rename had moved the TypeScript onto
+  `#term-review`/`#review-finished-area`/`#reviews-done-today` while the views
+  still emitted `#term-test`/`#test-finished-area`/`#tests-done-today`, so the
+  two halves had been mutually unreachable, not merely unrouted. Nothing
+  imported the module's named exports; `modules/review/index.ts` pulled it in
+  for side effects alone. No controller plumbing survived either — no PHP
+  outside the deleted files builds `$reviewData`, `$statusChange`,
+  `$testStatus`, `$waitTime`, `$dict1Uri`, `$langSettings` or `$tomorrowTests`.
+
+  The other two were superseded and left behind: `Feed/Views/new.php` (the flat
+  add-feed form; `/feeds/new` has gone through `wizard_step1.php` since the
+  wizard landed) and `Vocabulary/Views/list_filter.php` (`list_alpine.php`
+  carries the filter markup now). `word_list_filter.test.ts` matches the latter
+  by name only — it covers the Alpine store `word_list_filter.ts`, so no
+  coverage is lost.
+
+* **The last of the frame-era result plumbing** (#266, #262): four result views
+  still emitted a `<script type="application/json">` blob that
+  `word_result_init.ts` applied to `window.parent.document` — the reading
+  *frame*. No frameset has existed for some time (`frames-r` and `frame-l` are
+  emitted nowhere), so for a same-tab navigation `window.parent` was the result
+  page itself and every update found nothing. `#learnstatus`, which
+  `updateLearnStatus` wrote into, is likewise emitted nowhere in the app.
+
+  The confirmation pages stay; only the dead payload goes, along with the
+  server-side work that existed solely to build it — two `QueryBuilder` queries
+  and the sentence masking behind `edit_term_result`, and a
+  `getTodoWordsContent()` call on each of four paths. `save_result.php` is gone
+  entirely: its only remaining output was the message the controller already
+  echoed a few lines above, so single-word saves had been printing it twice.
+
+  Also removed: `word_result_init.ts`, the orphaned `updateLearnStatus`,
+  `updateNewWordInDOM`, `updateBulkWordInDOM`, `updateTestWordInDOM` and
+  `completeWordOperation` helpers, and the `data-lwt-cleanup-frames` marker in
+  `show.php`. `updateExistingWordInDOM`, `updateWordStatusInDOM` and the
+  `markWord*InDOM` pair stay — the reading view's keyboard shortcuts and popup
+  actions call them after an API write.
+
+  `upload_result.php` survives, because its config blob feeds a real Alpine
+  component that fetches `/api/v1/terms/imported` rather than frame plumbing.
+  (An earlier revision of this entry called it CSP-clean; it wasn't. Its
+  `x-data` was an inline object literal taking arguments and its page picker
+  called `parseInt`, both of which `@alpinejs/csp` rejects. Fixed by emitting
+  the config as a JSON blob and moving the parse into a component method.)
+
+* **Two more superseded legacy term routes** (#266, #262): `/vocabulary/term-hover`
+  and `/word/set-all-status` each rendered a server-built page whose only real
+  payload was a JSON blob applied to a reading *frame* that no longer exists.
+  Both were superseded by the API — `POST /api/v1/terms/quick` for hover-create
+  (used by `word_popover`, `word_modal` and `text_keyboard`) and
+  `TextPositionApiHandler` for mark-all-known/ignored, which calls the very same
+  `markAllWordsWithStatus` service. Neither route had a single inbound link.
+  Removing them drops `hover_save_result.php`, `all_wellknown_result.php`, the
+  `TermDisplayController::hoverCreate` and `TermStatusController::markAllWords`
+  handlers, the orphaned `CreateTermFromHover` use case, and their
+  `word_result_init.ts` initialisers.
+
+* **The legacy multi-word edit page** (#266, #262): `/word/edit-multi` rendered
+  a server-built HTML form that posted back to itself and answered with
+  `edit_multi_update_result.php` — a view whose entire output was a JSON blob in
+  a `<script type="application/json">` tag, which the reader then applied to the
+  opener's DOM. The modern reader stopped using any of it when the frame reader
+  was retired: selecting several words now opens the Alpine multi-word modal,
+  which talks to `POST /api/v1/terms/multi` and `PUT /api/v1/terms/multi/{id}`.
+  Nothing linked to the route any more, so the whole loop was unreachable.
+  Removing it drops `MultiWordController`, its three views, the route, the
+  `word_result_init.ts` handler, and the now-orphaned `updateMultiWordInDOM`
+  and `WordContextService::exportTermAsJson`. No behaviour change — none of it
+  could run.
+
+### Security — phase 8 (XSS hardening: kill the "build markup by concatenation" pattern)
+
+* **DOM XSS: Google Translate output was interpolated into `value="…"`**
+  (`bulk_translate.ts`). The bulk-translate page turns each machine
+  translation into an editable input; a quote in the translation closed the
+  value attribute and everything after it became attributes on the input
+  (`" onfocus="…" autofocus x="` is enough). Built through
+  `document.createElement` now.
+* **DOM XSS: multi-word markers were assembled as a markup string.**
+  `expression_interactable.ts` serialised a term's attributes into
+  `' k="v"'` pairs and `user_interactions.ts` parsed that back through
+  `innerHTML` — the same broken "produce a quoted literal by concatenation"
+  shape phase 7 removed from PHP. A term whose translation or romanization
+  contains `"` escaped its attribute and could add an event handler; both
+  fields are plantable through CSV or ePub import, so this was stored, not
+  reflected. `newExpressionInteractable` now takes the attribute map it was
+  always being handed and applies it with `setAttribute`, which is both safer
+  and less code. The marker label is set as `textContent`, so
+  `ExpressionService` sends a literal non-breaking space rather than the
+  `&nbsp;` entity (fixing, incidentally, a missing `;` that had been there
+  since the marker was written).
+* **DOM XSS: language names reached both a text node and a data attribute
+  unescaped** (`language_list.ts`). Setting a new default language rebuilds
+  the other cards' buttons from names read out of the DOM. Names are
+  user-supplied, so a language called `" onmouseover="…` injected a handler.
+  The button is built with `setAttribute`/`dataset` and the title text is
+  escaped.
+* **DOM XSS: LibreTranslate connection errors were rendered as markup**
+  (`language_form.ts`). The message can quote the `lwt_translator` parameter
+  read back off the user-configured translator URL, so it is escaped now.
+* **Hardening: `json_encode` into `<script type="application/json">` without
+  `JSON_HEX_TAG`, in five more places** — the Glosbe and Google-Translate
+  config blocks in `TranslationController` (which carry raw query
+  parameters), `ExpressionService`'s two multi-word config blocks (which
+  carry `WoTranslation` / `WoRomanization`), and `MediaService`'s
+  audio-player config.
+
+  **These were not exploitable.** PHP's `json_encode` escapes `/` as `\/`
+  unless `JSON_UNESCAPED_SLASHES` is passed, so a payload emerges as
+  `<\/script>`, which the HTML tokenizer does not accept as a closing tag.
+  (An earlier entry in this changelog states that `json_encode` "does not
+  escape `<`, `>`, or `/` by default" — the claim about `/` is wrong, and so
+  is any conclusion drawn from it about a live breakout.) What the flag buys
+  is independence from that default: `Home/Views/helpers.php` already passes
+  `JSON_UNESCAPED_SLASHES` on a page config block, so the one thing standing
+  between this pattern and a real breakout is a flag people do sometimes add.
+* **Regression is now held by an invariant, not by vigilance.** This is the
+  third sweep of this class, so
+  `tests/backend/Core/JsonScriptBlockEscapingTest.php` walks every
+  `json_encode` call in `src/`, brace-matches its arguments, and fails if a
+  call whose output lands inside a `<script>` element omits `JSON_HEX_TAG`.
+  API responses and outbound HTTP bodies are correctly ignored. It found the
+  `MediaService` site, which reading had missed.
+* **Regression tests**: hostile-input cases for the multi-word marker
+  (attribute breakout and a markup label), the bulk-translate input value,
+  and a language named `<img src=x onerror=…>` / `" onmouseover="…`. Each was
+  checked against the pre-fix code to confirm it actually fails there.
+
+### Changed
+
+* **EPUB import no longer depends on an external Composer package** (#263):
+  LWT now ships its own EPUB reader
+  (`src/Modules/Book/Infrastructure/Epub/`), replacing `kiwilan/php-ebook`.
+  It reads the OCF container, the OPF package document, and both flavours of
+  table of contents — the EPUB 2 NCX and the EPUB 3 navigation document — which
+  is everything the importer consumed. Dropping it also removed four transitive
+  dependencies (`kiwilan/php-archive`, `kiwilan/php-xml-reader`,
+  `smalot/pdfparser`, `spatie/temporary-directory`), taking `composer.lock` from
+  20 packages to 15. Parsing relies only on `ext-zip` and `ext-dom`, both
+  already required. XML is parsed with entity substitution off and network
+  access disabled, so a hostile EPUB cannot mount an XXE attack.
+
+  Note that this does not by itself remove the need to run `composer install`
+  from a source checkout — `phpmailer/phpmailer`, `league/oauth2-google` and
+  `thenetworg/oauth2-azure` are still required.
+
 ## [3.3.0-fork] - 2026-08-06
 
 ### Added

@@ -8,3 +8,5 @@
  */
 
 export * from './pages/dictionary_import';
+export * from './pages/dictionary_list';
+export * from './api/local_dictionaries_api';

@@ -11,7 +11,7 @@
  *
  * @category Lwt
  * @package  Lwt\Database
- * @author   HugoFara <hugo.farajallah@protonmail.com>
+ * @author   HugoFara <git@hugofara.net>
  * @license  Unlicense <http://unlicense.org/>
  * @link     https://hugofara.github.io/lwt/developer/api
  * @since    3.0.0 Split from database_operations.php
@@ -342,7 +342,9 @@ class Restore
             // Drop all FK constraints before running migrations.
             // SET FOREIGN_KEY_CHECKS = 0 only affects INSERT/UPDATE/DELETE and DROP TABLE,
             // not ALTER TABLE MODIFY on columns referenced by FKs.
-            // The migrations will recreate FKs as needed.
+            // Only the migrations that are pending recreate theirs, so the set
+            // is captured first and restored once the run is over.
+            $foreignKeys = Migrations::captureForeignKeys();
             Migrations::dropAllForeignKeys();
 
             // Disable FK checks during migrations to handle legacy backup data
@@ -351,6 +353,7 @@ class Restore
             try {
                 Migrations::checkAndUpdate();
             } finally {
+                Migrations::restoreForeignKeys($foreignKeys);
                 Connection::execute("SET FOREIGN_KEY_CHECKS = 1");
             }
             Migrations::reparseAllTexts();

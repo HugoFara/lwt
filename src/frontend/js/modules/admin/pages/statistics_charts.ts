@@ -4,7 +4,7 @@
  * Uses dynamic imports to only load Chart.js (~200KB) when the statistics page
  * is actually visited.
  *
- * @author  HugoFara <hugo.farajallah@protonmail.com>
+ * @author  HugoFara <git@hugofara.net>
  * @license Unlicense <http://unlicense.org/>
  * @since   3.0.0
  */
