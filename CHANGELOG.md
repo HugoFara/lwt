@@ -7,7 +7,27 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Added
+
+* **Reviews are graded Again / Hard / Good / Easy** (#238, phase 2b). The review
+  card's Wrong/Correct pair becomes the four grades FSRS needs, each showing
+  when it would bring the term back — "3d", "2mo" — before you commit to it.
+  Keys 1-4 grade, as in Anki; the arrow keys still work, and setting a status
+  outright moved to Shift and the number keys. Hard, Good and Easy all raise
+  the term's status by one exactly as Correct did, so reading colours are
+  unchanged; what differs is what the scheduler learns.
+
 ### Changed
+
+* **The review queue follows the FSRS schedule** (#238, phase 2b). Since 3.4.0
+  LWT has recorded FSRS memory state on every review while the queue still
+  ordered by the old Leitner score. It now picks and orders by each term's due
+  date. A term you have not graded yet keeps the schedule it already had — it
+  falls due exactly where its status put it — so nothing floods or empties on
+  upgrade, and it moves onto real scheduling the first time you grade it. Two
+  statuses shift by a day in the process: the old formula rounded before
+  comparing, putting status 2 at day 3 for an interval of 2, and status 5 at
+  day 72 for 71.
 
 * **Similar terms suggest the parts of a compound, not its siblings**
   ([#137](https://github.com/HugoFara/lwt/issues/137)). The term editor's
