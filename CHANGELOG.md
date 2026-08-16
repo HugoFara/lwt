@@ -7,6 +7,8 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+## [3.4.2-fork] - 2026-08-16
+
 ### Fixed
 
 * **Finishing the RSS feed wizard saved nothing** (#262). The wizard's last
