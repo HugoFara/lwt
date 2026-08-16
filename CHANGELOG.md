@@ -7,6 +7,32 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Changed
+
+* **Similar terms suggest the parts of a compound, not its siblings**
+  ([#137](https://github.com/HugoFara/lwt/issues/137)). The term editor's
+  "Similar Terms" box ranked every candidate against the whole term on its own,
+  so for a compound like *Geschwindigkeitsbegrenzung* each word built on
+  *Geschwindigkeit* scored on that shared half and the term explaining the
+  other half — *Begrenzung* — was pushed off the list by its own siblings.
+  Suggestions are now picked one at a time, and after each pick the term
+  shrinks to the part still unexplained, so a candidate that only repeats an
+  earlier suggestion scores near nothing and a short term covering fresh ground
+  wins on merit. The first suggestion is unchanged, and terms you already know
+  are still preferred.
+
+* **Similar terms follow word families, not just spelling**
+  ([#136](https://github.com/HugoFara/lwt/issues/136)). Suggestions were ranked
+  purely on shared letter pairs, which cannot reach an irregular form: *bought*
+  and *buy* have no letters in common to match on, so neither found the other.
+  Terms sharing the searched term's lemma are now suggested first, whatever
+  they score on spelling. Terms already in your vocabulary use the lemma their
+  language's lemmatizer gave them when you saved them, so this follows
+  whichever lemmatizer you configured; a term you have not saved yet is looked
+  up in the local lemma dictionary only, never the NLP service, so the
+  suggestion box never waits on the network. Languages with the lemmatizer set
+  to *none* are unaffected.
+
 ## [3.4.2-fork] - 2026-08-16
 
 ### Fixed

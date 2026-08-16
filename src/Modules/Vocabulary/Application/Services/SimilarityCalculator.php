@@ -200,14 +200,74 @@ class SimilarityCalculator
      */
     public function getSimilarityRanking(string $str1, string $str2): float
     {
-        $pairs1 = $this->wordLetterPairs($str1);
-        $pairs2 = $this->wordLetterPairs($str2);
+        return $this->dice(
+            $this->wordLetterPairs($str1),
+            $this->wordLetterPairs($str2)
+        );
+    }
+
+    /**
+     * Sørensen–Dice coefficient of two sets of letter pairs.
+     *
+     * @param string[] $pairs1 First set of letter pairs
+     * @param string[] $pairs2 Second set of letter pairs
+     *
+     * @return float Similarity ranking (0-1)
+     */
+    private function dice(array $pairs1, array $pairs2): float
+    {
         $union = count($pairs1) + count($pairs2);
         if ($union == 0) {
             return 0;
         }
         $intersection = count(array_intersect($pairs1, $pairs2));
         return 2 * $intersection / $union;
+    }
+
+    /**
+     * Build the letter-pair profile of a term.
+     *
+     * Profiling a term once and comparing the profile is equivalent to calling
+     * getCombinedSimilarityRanking(), but does not redo the phonetic
+     * normalization on every comparison.
+     *
+     * @param string $str Input string (should be lowercase)
+     *
+     * @return LetterPairProfile
+     */
+    public function profile(string $str): LetterPairProfile
+    {
+        return new LetterPairProfile(
+            array_values($this->wordLetterPairs($str)),
+            array_values($this->wordLetterPairs($this->phoneticNormalize($str)))
+        );
+    }
+
+    /**
+     * Similarity of a candidate against the part of a term left to explain.
+     *
+     * Same coefficient as getCombinedSimilarityRanking(), but the term side is
+     * whatever is left of it — so a candidate that only repeats what an earlier
+     * suggestion already covered scores near zero, however long the overlap
+     * with the whole term was. Passing the full term profile as $remaining
+     * reproduces getCombinedSimilarityRanking() exactly.
+     *
+     * @param LetterPairProfile $candidate      Candidate term profile
+     * @param LetterPairProfile $remaining      Not-yet-explained part of the term
+     * @param float             $phoneticWeight Weight for phonetic similarity (0-1)
+     *
+     * @return float Combined similarity ranking (0-1)
+     */
+    public function getResidualCombinedRanking(
+        LetterPairProfile $candidate,
+        LetterPairProfile $remaining,
+        float $phoneticWeight = 0.3
+    ): float {
+        $charSimilarity = $this->dice($candidate->chars(), $remaining->chars());
+        $phoneticSimilarity = $this->dice($candidate->phonetics(), $remaining->phonetics());
+
+        return (1 - $phoneticWeight) * $charSimilarity
+            + $phoneticWeight * $phoneticSimilarity;
     }
 
     /**

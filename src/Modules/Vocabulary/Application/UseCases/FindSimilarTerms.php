@@ -20,6 +20,8 @@ namespace Lwt\Modules\Vocabulary\Application\UseCases;
 use Lwt\Shared\Infrastructure\Database\QueryBuilder;
 use Lwt\Shared\Infrastructure\Database\Settings;
 use Lwt\Modules\Vocabulary\Application\Services\SimilarityCalculator;
+use Lwt\Modules\Vocabulary\Domain\LemmatizerInterface;
+use Lwt\Modules\Vocabulary\Infrastructure\Lemmatizers\DictionaryLemmatizer;
 use Lwt\Shared\UI\Helpers\IconHelper;
 
 /**
@@ -32,14 +34,41 @@ class FindSimilarTerms
     private SimilarityCalculator $calculator;
 
     /**
+     * Lemmatizer used to place an unsaved term in a word family.
+     */
+    private ?LemmatizerInterface $lemmatizer;
+
+    /**
      * Constructor.
      *
      * @param SimilarityCalculator|null $calculator Similarity calculator
+     * @param LemmatizerInterface|null  $lemmatizer Lemmatizer for the searched term
      */
     public function __construct(
-        ?SimilarityCalculator $calculator = null
+        ?SimilarityCalculator $calculator = null,
+        ?LemmatizerInterface $lemmatizer = null
     ) {
         $this->calculator = $calculator ?? new SimilarityCalculator();
+        $this->lemmatizer = $lemmatizer;
+    }
+
+    /**
+     * The lemmatizer, built on first use.
+     *
+     * Deliberately the dictionary one: this runs on every lookup, and the NLP
+     * lemmatizer would put a network round-trip in that path. Terms already in
+     * the vocabulary carry the lemma their configured lemmatizer produced when
+     * they were saved, so an install on spaCy still gets word families here —
+     * only a term that has never been saved falls back to this.
+     *
+     * @return LemmatizerInterface
+     */
+    private function getLemmatizer(): LemmatizerInterface
+    {
+        if ($this->lemmatizer === null) {
+            $this->lemmatizer = new DictionaryLemmatizer();
+        }
+        return $this->lemmatizer;
     }
 
     /**
@@ -51,7 +80,7 @@ class FindSimilarTerms
      * @param float  $minRanking     Minimum similarity ranking (0-1)
      * @param float  $phoneticWeight Weight for phonetic similarity (0-1)
      *
-     * @return int[] Word IDs sorted by weighted similarity, descending
+     * @return list<int> Word IDs, most useful first
      */
     public function execute(
         int $languageId,
@@ -64,45 +93,231 @@ class FindSimilarTerms
 
         // Fetch words with their status for weighting
         $rows = QueryBuilder::table('words')
-            ->select(['WoID', 'WoTextLC', 'WoStatus'])
+            ->select(['WoID', 'WoTextLC', 'WoStatus', 'WoLemmaLC'])
             ->where('WoLgID', '=', $languageId)
             ->where('WoTextLC', '<>', $comparedTermLc)
             ->getPrepared();
 
-        $termlsd = [];
+        $candidates = [];
         foreach ($rows as $record) {
-            // Calculate combined similarity (character pairs + phonetic)
-            $baseSimilarity = $this->calculator->getCombinedSimilarityRanking(
-                $comparedTermLc,
-                (string)$record["WoTextLC"],
+            $candidates[] = [
+                'id' => (int) $record["WoID"],
+                'textLc' => (string) $record["WoTextLC"],
+                'status' => (int) $record["WoStatus"],
+                'lemmaLc' => (string) ($record["WoLemmaLC"] ?? ''),
+            ];
+        }
+
+        return $this->rankByCoverage(
+            $candidates,
+            $comparedTermLc,
+            $maxCount,
+            $minRanking,
+            $phoneticWeight,
+            $this->resolveLemma($languageId, $comparedTermLc)
+        );
+    }
+
+    /**
+     * Work out which word family the searched term belongs to.
+     *
+     * Prefers the lemma already stored on the term, so whatever lemmatizer the
+     * language is configured with is the one that decides. Only a term that is
+     * not in the vocabulary yet — the common case when adding a word while
+     * reading — is looked up in the dictionary. A word the dictionary does not
+     * know is its own lemma, which is what makes searching a base form pull up
+     * its inflections.
+     *
+     * @param int    $languageId     Language ID
+     * @param string $comparedTermLc Lowercased term
+     *
+     * @return string Lowercased lemma, or an empty string when unavailable
+     */
+    private function resolveLemma(int $languageId, string $comparedTermLc): string
+    {
+        if ($comparedTermLc === '') {
+            return '';
+        }
+
+        $language = QueryBuilder::table('languages')
+            ->select(['LgSourceLang', 'LgLemmatizerType'])
+            ->where('LgID', '=', $languageId)
+            ->firstPrepared();
+        if ($language === null) {
+            return '';
+        }
+
+        // The language opted out of lemmatization entirely
+        $lemmatizerType = strtolower(trim((string) ($language['LgLemmatizerType'] ?? '')));
+        if ($lemmatizerType === 'none') {
+            return '';
+        }
+
+        $stored = QueryBuilder::table('words')
+            ->select(['WoLemmaLC'])
+            ->where('WoLgID', '=', $languageId)
+            ->where('WoTextLC', '=', $comparedTermLc)
+            ->firstPrepared();
+        $storedLemma = trim((string) ($stored['WoLemmaLC'] ?? ''));
+        if ($storedLemma !== '') {
+            return mb_strtolower($storedLemma, 'UTF-8');
+        }
+
+        $languageCode = trim((string) ($language['LgSourceLang'] ?? ''));
+        if ($languageCode !== '') {
+            $lemma = $this->getLemmatizer()->lemmatize($comparedTermLc, $languageCode);
+            if ($lemma !== null && trim($lemma) !== '') {
+                return mb_strtolower(trim($lemma), 'UTF-8');
+            }
+        }
+
+        return $comparedTermLc;
+    }
+
+    /**
+     * Pick the terms that between them explain the most of the compared term.
+     *
+     * Ranking each candidate against the whole term independently — what this
+     * used to do — makes a compound's siblings crowd out its parts: every word
+     * sharing "geschwindigkeit" scores on that shared half, so the term that
+     * would explain the *other* half never makes the list. So the picks are
+     * made one at a time, and after each one the term shrinks to the part still
+     * unexplained. A candidate that only repeats an earlier pick then scores
+     * near zero, and a short term covering fresh ground wins on merit.
+     *
+     * The first pick is unchanged: with nothing covered yet, the score is the
+     * plain pairwise similarity. Admission to the pool uses that same pairwise
+     * score against the minimum ranking, so this changes which candidates are
+     * chosen and in what order, never which ones were eligible.
+     *
+     * Terms of the same word family are the exception, and come first. Letter
+     * pairs cannot reach an irregular form — "bought" and "buy" share none at
+     * all, and no amount of tuning would have found them — so a shared lemma
+     * admits a candidate whatever it scores, and ranks it above the terms that
+     * merely look alike.
+     *
+     * @param list<array{id: int, textLc: string, status: int, lemmaLc?: string}> $candidates     Candidates
+     * @param string                                                              $comparedTermLc Lowercased term
+     * @param int                                                                 $maxCount       Maximum to return
+     * @param float                                                               $minRanking     Minimum (0-1)
+     * @param float                                                               $phoneticWeight Phonetic (0-1)
+     * @param string                                                              $lemmaLc        Term's lemma
+     *
+     * @return list<int> Word IDs, most useful first
+     */
+    public function rankByCoverage(
+        array $candidates,
+        string $comparedTermLc,
+        int $maxCount,
+        float $minRanking,
+        float $phoneticWeight = 0.3,
+        string $lemmaLc = ''
+    ): array {
+        if ($maxCount <= 0) {
+            return [];
+        }
+
+        $term = $this->calculator->profile($comparedTermLc);
+
+        $pool = [];
+        foreach ($candidates as $candidate) {
+            $profile = $this->calculator->profile($candidate['textLc']);
+            $baseSimilarity = $this->calculator->getResidualCombinedRanking(
+                $profile,
+                $term,
                 $phoneticWeight
             );
+            $isFamily = $this->sharesWordFamily($candidate, $lemmaLc);
 
-            // Apply status weight to boost learned words
-            $status = (int) $record["WoStatus"];
-            $statusWeight = $this->calculator->getStatusWeight($status);
-            $weightedSimilarity = $baseSimilarity * $statusWeight;
-
-            // Only include if base similarity meets minimum threshold
-            if ($baseSimilarity >= $minRanking) {
-                $termlsd[(int) $record["WoID"]] = $weightedSimilarity;
+            // The threshold reads the unweighted score, as it always has
+            if (!$isFamily && $baseSimilarity < $minRanking) {
+                continue;
             }
+
+            $statusWeight = $this->calculator->getStatusWeight($candidate['status']);
+            $pool[] = [
+                'id' => $candidate['id'],
+                'profile' => $profile,
+                'family' => $isFamily,
+                'weight' => $statusWeight,
+                'weighted' => $baseSimilarity * $statusWeight,
+            ];
         }
 
-        // Sort by weighted similarity descending
-        arsort($termlsd, SORT_NUMERIC);
+        $remaining = $term;
+        $picked = [];
+        $wanted = min($maxCount, count($pool));
 
-        // Return top N results
-        $r = [];
-        $i = 0;
-        foreach ($termlsd as $key => $_val) {
-            if ($i >= $maxCount) {
+        for ($i = 0; $i < $wanted; $i++) {
+            $bestIndex = null;
+            $bestFamily = false;
+            $bestGain = -1.0;
+            $bestWeighted = -1.0;
+            $bestStatus = -1.0;
+
+            foreach ($pool as $index => $entry) {
+                $gain = $this->calculator->getResidualCombinedRanking(
+                    $entry['profile'],
+                    $remaining,
+                    $phoneticWeight
+                ) * $entry['weight'];
+
+                // Family first; then whichever explains the most of what is
+                // left. Once the term is fully explained every gain is zero, so
+                // the pairwise score and then the status decide the remainder.
+                if ($bestIndex === null) {
+                    $isBetter = true;
+                } elseif ($entry['family'] !== $bestFamily) {
+                    $isBetter = $entry['family'];
+                } elseif (abs($gain - $bestGain) > 1e-9) {
+                    $isBetter = $gain > $bestGain;
+                } elseif (abs($entry['weighted'] - $bestWeighted) > 1e-9) {
+                    $isBetter = $entry['weighted'] > $bestWeighted;
+                } else {
+                    $isBetter = $entry['weight'] > $bestStatus;
+                }
+
+                if ($isBetter) {
+                    $bestIndex = $index;
+                    $bestFamily = $entry['family'];
+                    $bestGain = $gain;
+                    $bestWeighted = $entry['weighted'];
+                    $bestStatus = $entry['weight'];
+                }
+            }
+
+            if ($bestIndex === null) {
                 break;
             }
-            $i++;
-            $r[$i] = $key;
+
+            $picked[] = $pool[$bestIndex]['id'];
+            $remaining = $remaining->minus($pool[$bestIndex]['profile']);
+            unset($pool[$bestIndex]);
         }
-        return $r;
+
+        return $picked;
+    }
+
+    /**
+     * Whether a candidate belongs to the searched term's word family.
+     *
+     * Matches on the candidate's own lemma, and on the candidate *being* the
+     * lemma — a base form usually carries no lemma of its own.
+     *
+     * @param array{id: int, textLc: string, status: int, lemmaLc?: string} $candidate Candidate
+     * @param string                                                        $lemmaLc   Term's lemma
+     *
+     * @return bool
+     */
+    private function sharesWordFamily(array $candidate, string $lemmaLc): bool
+    {
+        if ($lemmaLc === '') {
+            return false;
+        }
+
+        $candidateLemma = mb_strtolower(trim($candidate['lemmaLc'] ?? ''), 'UTF-8');
+
+        return $candidateLemma === $lemmaLc || $candidate['textLc'] === $lemmaLc;
     }
 
     /**
