@@ -30,7 +30,7 @@ class CorsTest extends TestCase
     protected function setUp(): void
     {
         // Snapshot any ambient CORS_ALLOWED_ORIGINS (a developer's .env may set
-        // it for local Model B testing) and clear it through EnvLoader so each
+        // it to test a cross-origin client) and clear it through EnvLoader so each
         // test sees a deterministic baseline regardless of .env/$_ENV/getenv —
         // EnvLoader::get consults the loaded store first, which a bare
         // unset($_ENV[...]) would not clear.

@@ -127,9 +127,11 @@ Phase 1's. The *data* half is met (config blobs carry boot parameters —
 | i18n injection | `PageLayoutHelper::buildI18nScript()` | every page |
 | Icons | `IconHelper::render()` → server-rendered `<i data-lucide>` | throughout |
 
-The bundled client works around all four with a build-time transpiler
-(`build/php-view-prerender.mjs`) rather than removing them — see Phase 2. #266
-stays open against that markup half; it is not a Phase 1 deliverable.
+A bundled client used to work around all four with a build-time transpiler
+rather than removing them; that client and its transpiler are gone (see
+Phase 2), so nothing routes around this today. #266 stays open against that
+markup half; it is not a Phase 1 deliverable, and with the mobile client now
+independent it needs a fresh justification before it is worth paying for.
 
 - [x] **(Phase 0 gate) Injectable API base URL.** Done in Phase 0 — same seam.
       `@shared/api/client` resolves an injectable **absolute** server root and
@@ -272,36 +274,36 @@ Keep the service worker (`sw.ts`) + manifest as the offline cache layer; expand
 coverage as each surface goes shell-free. Track progress as "% of mobile-critical
 flows that run without a server-rendered page."
 
-## Phase 2 — Capacitor client + own F-Droid repo
+## Phase 2 — the mobile client (now independent)
 
-**The client now exists: `Lukaisu` (`../lukaisu/`, separate repo).** v0.1 is a
-working shell; the data/i18n de-coupling above makes a bundled (Model B) client
-the next achievable target. See `lukaisu/ROADMAP.md` for the build-side detail.
+**Closed out of this repo, 2026-08.** The client exists and shipped: `Lukaisu`
+(`../lukaisu/`) is a Capacitor 8 app on the system WebView, signed, fully FOSS,
+and **live in its own F-Droid repo at `https://fdroid.lukaisu.org/repo`**. Only
+the main-catalog submission is still ahead of it. See `lukaisu/ROADMAP.md`.
 
-- [x] Thin **Capacitor** shell using the **system WebView** (no Chrome
-      dependency) — Capacitor 8, Android platform committed.
-- [x] **Server-URL config screen** — native `GET /api/v1/version` probe, choice
-      persisted in native Preferences, then navigates the WebView to the server.
-- [~] **Bundled-client (Model B) build mode.** `npm run build:app`
-      (`vite.app.config.ts` → `dist-app/`) emits standalone connect/library/
-      reader/review pages that boot `main.ts` against a remote `/api/v1` with no
-      PHP in the loop. Each page body is **prerendered from the real PHP view**
-      at build time (`build/php-view-prerender.mjs`) so the Alpine scaffolds,
-      icons and labels stay a single source of truth. `../lukaisu` consumes
-      `dist-app/` as
-      its Capacitor `webDir` (`npm run sync:model-b` there). **CORS is now
-      required** — the bundle origin (`https://localhost`) is cross-origin to
-      every server, so servers must set `CORS_ALLOWED_ORIGINS=https://localhost`.
-      All four surfaces are bundled: connect → library → reader → **review**
-      (`f1f062c24`), and the navbar they share is client-rendered too.
-      **Remaining: on-device QA only** — everything else in this bullet ships.
-- [ ] Reuse existing PWA assets; close the small gaps: real adaptive/maskable
-      launcher icons (replace placeholders) and a manifest **`id`** (Lukaisu v0.2).
-- [ ] Ship through **our own F-Droid repo first** (low bar, full control,
-      derisks the toolchain) before applying to the main catalog (Lukaisu v0.3:
-      release signing + reproducible-build hygiene + fastlane metadata).
-- [ ] Expect a "needs a server" note — acceptable for a self-hostable-service
-      client.
+**It no longer builds on anything here.** Lukaisu owns its reading frontend
+outright under `webapp/` (moved from `lukaisu-server/src/frontend/` in its
+Phase M, 2026-07) and has gone local-first: an on-device Dexie database and
+TypeScript parsers run the read/save/review loop with **no server at all**,
+connecting one being optional. So the bundled-client ("Model B") build this
+phase used to describe — `npm run build:app`, `vite.app.config.ts`,
+`build/php-view-prerender.mjs`, the four standalone pages under
+`src/frontend/app/` — had no consumer left, and has been **deleted**. It was
+never in CI or the Docker image; recover it from git history if a bundled build
+is ever wanted here again.
+
+What that work bought this repo is kept and still earns its place, because it
+serves any remote or third-party client, not just a bundled one: the injectable
+API base URL, opt-in CORS, bearer-token auth, `GET /connect`, and the client
+i18n bundle — all listed under Phase 0, all independently useful.
+
+**Consequence for the north star:** phone reach is no longer LWT's to deliver;
+Lukaisu delivers it, from its own code. The keystone-constraint argument above
+was written when a bundled client depended on shrinking the server-rendered
+surface — it now has to stand on what self-hosters reading in a browser get out
+of it, which is a weaker case and a smaller budget. Re-argue
+[#266](https://github.com/HugoFara/lwt/issues/266) on those terms before
+spending on it.
 
 ## Phase 3 — Toward "5 minutes to reading" (mass-market prerequisites)
 
