@@ -983,8 +983,8 @@ if (!$isNew) {
                             value="Save and Open"
                             :value="submitOp()"
                             class="button is-primary is-medium is-fullwidth"
-                            :disabled="autoImporting"
-                            :class="{ 'is-loading': autoImporting }">
+                            :disabled="isBusy()"
+                            :class="{ 'is-loading': isBusy() }">
                         <span class="icon" x-show="!isEpub()">
                             <?php echo IconHelper::render(
                                 'book-open',

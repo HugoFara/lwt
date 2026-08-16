@@ -772,10 +772,12 @@ interface TextNewFormData {
   source: string;
   showAdvanced: boolean;
   autoImporting: boolean;
+  saving: boolean;
   fileTab: 'computer' | 'server';
   fileType: '' | 'epub' | 'subtitle' | 'audio' | 'other';
 
   init(): void;
+  isBusy(): boolean;
   selectSource(source: string): void;
   goBack(): void;
   goToReview(): void;
@@ -798,6 +800,7 @@ export function textNewFormData(): TextNewFormData {
     source: '',
     showAdvanced: false,
     autoImporting: false,
+    saving: false,
     fileTab: 'computer',
     fileType: '',
     saveError: '',
@@ -881,6 +884,20 @@ export function textNewFormData(): TextNewFormData {
     },
 
     /**
+     * Whether a save or an auto-import is in flight.
+     *
+     * The two are tracked apart because `autoImporting` also drives the
+     * "fetching the page" banner, which belongs to the URL/Gutenberg import
+     * alone — a plain save reusing that flag announced a Gutenberg fetch that
+     * was never happening.
+     *
+     * @returns True while the submit button should stay disabled
+     */
+    isBusy(): boolean {
+      return this.autoImporting || this.saving;
+    },
+
+    /**
      * Save through the API rather than posting the form to the page origin.
      *
      * An EPUB goes to the books API, everything else to POST /api/v1/texts,
@@ -892,10 +909,10 @@ export function textNewFormData(): TextNewFormData {
     handleSubmit(event: Event) {
       event.preventDefault();
       const form = event.target as HTMLFormElement | null;
-      if (!form || this.autoImporting) return;
+      if (!form || this.isBusy()) return;
 
       this.saveError = '';
-      this.autoImporting = true;
+      this.saving = true;
 
       const save = this.isEpub()
         ? importEpubForm(form).then((result) => ({
@@ -915,7 +932,7 @@ export function textNewFormData(): TextNewFormData {
           return;
         }
         this.saveError = result.error;
-        this.autoImporting = false;
+        this.saving = false;
       });
     },
 
