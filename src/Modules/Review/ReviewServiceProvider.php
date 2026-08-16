@@ -41,7 +41,6 @@ use Lwt\Modules\Review\Application\ReviewFacade;
 use Lwt\Modules\Review\Http\ReviewController;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
 // Application Services
-use Lwt\Modules\Review\Application\Services\ReviewService;
 
 /**
  * Service provider for the Review module.
@@ -114,11 +113,6 @@ class ReviewServiceProvider implements ServiceProviderInterface
             return new ReviewApiHandler(
                 $c->getTyped(ReviewFacade::class)
             );
-        });
-
-        // Register ReviewService
-        $container->singleton(ReviewService::class, function (Container $_c) {
-            return new ReviewService();
         });
     }
 
