@@ -179,6 +179,29 @@ class FindSimilarTermsTest extends TestCase
         return $candidates;
     }
 
+    /**
+     * Build candidates from a term => [status, lemma] map, numbering from 1.
+     *
+     * @param array<string, array{int, string}> $terms Terms with status and lemma
+     *
+     * @return list<array{id: int, textLc: string, status: int, lemmaLc: string}>
+     */
+    private static function candidatesWithLemmas(array $terms): array
+    {
+        $candidates = [];
+        $id = 1;
+        foreach ($terms as $textLc => [$status, $lemmaLc]) {
+            $candidates[] = [
+                'id' => $id,
+                'textLc' => (string) $textLc,
+                'status' => $status,
+                'lemmaLc' => $lemmaLc,
+            ];
+            $id++;
+        }
+        return $candidates;
+    }
+
     public function testCoveringTermBeatsASiblingSharingTheSameHalf(): void
     {
         // The reported case: every word built on "geschwindigkeit" scores on
@@ -346,5 +369,118 @@ class FindSimilarTermsTest extends TestCase
         $this->assertSame([1, 2], array_slice($result, 0, 2));
         $this->assertContains(3, $result);
         $this->assertContains(4, $result);
+    }
+
+    // =========================================================================
+    // Word families (#136)
+    // =========================================================================
+
+    public function testAnIrregularFormIsFoundThroughItsLemma(): void
+    {
+        // "bought" and "buy" share no letter pair at all, so string similarity
+        // scores them 0.0 and the old threshold dropped both. 1 = buy (the
+        // lemma itself, carrying no lemma of its own), 2 = buying.
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidatesWithLemmas([
+                'buy' => [1, ''],
+                'buying' => [1, 'buy'],
+                'boughs' => [1, ''],
+            ]),
+            'bought',
+            3,
+            0.33,
+            0.3,
+            'buy'
+        );
+
+        $this->assertSame([1, 2], array_slice($result, 0, 2));
+    }
+
+    public function testFamilyOutranksATermThatMerelyLooksAlike(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        // "boughs" scores well against "bought" on letter pairs and is
+        // unrelated; "buy" scores nothing and is the lemma.
+        $result = $useCase->rankByCoverage(
+            self::candidatesWithLemmas(['boughs' => [1, ''], 'buy' => [1, '']]),
+            'bought',
+            1,
+            0.33,
+            0.3,
+            'buy'
+        );
+
+        $this->assertSame([2], $result);
+    }
+
+    public function testKnownTermsComeFirstWithinAFamily(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidatesWithLemmas(['buying' => [1, 'buy'], 'buys' => [5, 'buy']]),
+            'bought',
+            2,
+            0.33,
+            0.3,
+            'buy'
+        );
+
+        $this->assertSame([2, 1], $result);
+    }
+
+    public function testFamilyMembersStillRespectMaxCount(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidatesWithLemmas([
+                'buy' => [1, ''],
+                'buying' => [1, 'buy'],
+                'buys' => [1, 'buy'],
+            ]),
+            'bought',
+            2,
+            0.33,
+            0.3,
+            'buy'
+        );
+
+        $this->assertCount(2, $result);
+    }
+
+    public function testAnUnknownLemmaLeavesRankingUntouched(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $terms = ['great' => [1, ''], 'idea' => [1, ''], 'greatriver' => [1, '']];
+        $withoutLemma = $useCase->rankByCoverage(
+            self::candidatesWithLemmas($terms),
+            'greatidea',
+            3,
+            0.33
+        );
+
+        $this->assertSame([1, 2, 3], $withoutLemma);
+    }
+
+    public function testAnUnrelatedLemmaAdmitsNobody(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        // A lemma nothing in the vocabulary shares must not widen the pool
+        $result = $useCase->rankByCoverage(
+            self::candidatesWithLemmas(['xylophone' => [1, 'xylophone']]),
+            'bought',
+            3,
+            0.33,
+            0.3,
+            'buy'
+        );
+
+        $this->assertSame([], $result);
     }
 }
