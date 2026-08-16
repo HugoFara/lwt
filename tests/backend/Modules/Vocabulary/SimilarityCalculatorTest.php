@@ -767,4 +767,89 @@ class SimilarityCalculatorTest extends TestCase
         $result = $this->calculator->getSimilarityRanking('abc', 'xyz');
         $this->assertSame(0.0, $result);
     }
+
+    // =========================================================================
+    // Profiles and Residual Ranking
+    // =========================================================================
+
+    public function testProfileCarriesBothSpellings(): void
+    {
+        $profile = $this->calculator->profile('phone');
+
+        $this->assertSame(
+            $this->calculator->wordLetterPairs('phone'),
+            $profile->chars()
+        );
+        $this->assertSame(
+            $this->calculator->wordLetterPairs(
+                $this->calculator->phoneticNormalize('phone')
+            ),
+            $profile->phonetics()
+        );
+    }
+
+    public function testProfileOfEmptyStringIsEmpty(): void
+    {
+        $this->assertTrue($this->calculator->profile('')->isEmpty());
+    }
+
+    public function testResidualRankingAgainstWholeTermMatchesCombinedRanking(): void
+    {
+        // Nothing covered yet, so the two must agree — this is what keeps the
+        // first suggestion identical to the old pairwise behaviour.
+        $term = $this->calculator->profile('geschwindigkeitsbegrenzung');
+        $candidate = $this->calculator->profile('geschwindigkeit');
+
+        $this->assertSame(
+            $this->calculator->getCombinedSimilarityRanking(
+                'geschwindigkeitsbegrenzung',
+                'geschwindigkeit',
+                0.3
+            ),
+            $this->calculator->getResidualCombinedRanking($candidate, $term, 0.3)
+        );
+    }
+
+    public function testResidualRankingCollapsesForAnAlreadyCoveredCandidate(): void
+    {
+        $term = $this->calculator->profile('greatidea');
+        $great = $this->calculator->profile('great');
+        $sibling = $this->calculator->profile('greatriver');
+
+        $before = $this->calculator->getResidualCombinedRanking($sibling, $term);
+        $after = $this->calculator->getResidualCombinedRanking(
+            $sibling,
+            $term->minus($great)
+        );
+
+        $this->assertGreaterThan(0.0, $before);
+        $this->assertSame(0.0, $after);
+    }
+
+    public function testResidualRankingHoldsUpForACandidateCoveringTheRest(): void
+    {
+        $term = $this->calculator->profile('greatidea');
+        $great = $this->calculator->profile('great');
+        $idea = $this->calculator->profile('idea');
+
+        $this->assertGreaterThan(
+            $this->calculator->getResidualCombinedRanking($idea, $term),
+            $this->calculator->getResidualCombinedRanking($idea, $term->minus($great))
+        );
+    }
+
+    public function testMinusRemovesTheCoveredPairs(): void
+    {
+        $term = $this->calculator->profile('greatidea');
+        $remaining = $term->minus($this->calculator->profile('great'));
+
+        $this->assertSame(['ti', 'id', 'de'], $remaining->chars());
+    }
+
+    public function testMinusOfItselfLeavesNothing(): void
+    {
+        $term = $this->calculator->profile('greatidea');
+
+        $this->assertTrue($term->minus($term)->isEmpty());
+    }
 }

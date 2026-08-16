@@ -156,4 +156,195 @@ class FindSimilarTermsTest extends TestCase
             'max phonetic' => [1.0],
         ];
     }
+
+    // =========================================================================
+    // Coverage-based ranking (#137)
+    // =========================================================================
+
+    /**
+     * Build candidates from a term => status map, numbering them from 1.
+     *
+     * @param array<string, int> $terms Terms and their status
+     *
+     * @return list<array{id: int, textLc: string, status: int}>
+     */
+    private static function candidates(array $terms): array
+    {
+        $candidates = [];
+        $id = 1;
+        foreach ($terms as $textLc => $status) {
+            $candidates[] = ['id' => $id, 'textLc' => (string) $textLc, 'status' => $status];
+            $id++;
+        }
+        return $candidates;
+    }
+
+    public function testCoveringTermBeatsASiblingSharingTheSameHalf(): void
+    {
+        // The reported case: every word built on "geschwindigkeit" scores on
+        // that shared half, so the term explaining the *other* half used to be
+        // pushed out. 1 = geschwindigkeit, 2 = begrenzung, 3 = …messer.
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidates([
+                'geschwindigkeit' => 1,
+                'begrenzung' => 1,
+                'geschwindigkeitsmesser' => 1,
+            ]),
+            'geschwindigkeitsbegrenzung',
+            3,
+            0.33
+        );
+
+        $this->assertSame([1, 2, 3], $result);
+    }
+
+    public function testASiblingDoesNotCrowdOutTheOtherHalf(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidates([
+                'great' => 1,
+                'idea' => 1,
+                'greatriver' => 1,
+                'greatbuilding' => 1,
+            ]),
+            'greatidea',
+            2,
+            0.33
+        );
+
+        // "great" explains the head, "idea" the tail — the two siblings that
+        // only repeat the head are left out of a two-slot list entirely.
+        $this->assertSame([1, 2], $result);
+    }
+
+    public function testFirstPickIsStillThePlainPairwiseBest(): void
+    {
+        $useCase = new FindSimilarTerms();
+        $calculator = new SimilarityCalculator();
+
+        $terms = ['begrenzung' => 1, 'geschwindigkeit' => 1, 'geschwindigkeitsmesser' => 1];
+        $result = $useCase->rankByCoverage(
+            self::candidates($terms),
+            'geschwindigkeitsbegrenzung',
+            3,
+            0.33
+        );
+
+        $best = '';
+        $bestScore = -1.0;
+        foreach (array_keys($terms) as $term) {
+            $score = $calculator->getCombinedSimilarityRanking(
+                'geschwindigkeitsbegrenzung',
+                (string) $term,
+                0.3
+            );
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = (string) $term;
+            }
+        }
+
+        $this->assertSame(
+            array_search($best, array_keys($terms), true) + 1,
+            $result[0]
+        );
+    }
+
+    public function testStatusWeightStillPromotesKnownTerms(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $unweighted = $useCase->rankByCoverage(
+            self::candidates(['great' => 1, 'greatman' => 1]),
+            'greatidea',
+            1,
+            0.33
+        );
+        $weighted = $useCase->rankByCoverage(
+            self::candidates(['great' => 1, 'greatman' => 5]),
+            'greatidea',
+            1,
+            0.33
+        );
+
+        $this->assertSame([1], $unweighted);
+        $this->assertSame([2], $weighted);
+    }
+
+    public function testRespectsMaxCount(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidates(['great' => 1, 'idea' => 1, 'greatriver' => 1]),
+            'greatidea',
+            2,
+            0.33
+        );
+
+        $this->assertCount(2, $result);
+    }
+
+    public function testMaxCountOfZeroReturnsNothing(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidates(['great' => 1]),
+            'greatidea',
+            0,
+            0.33
+        );
+
+        $this->assertSame([], $result);
+    }
+
+    public function testDropsCandidatesBelowTheMinimumRanking(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $result = $useCase->rankByCoverage(
+            self::candidates(['great' => 1, 'xylophone' => 1]),
+            'greatidea',
+            5,
+            0.33
+        );
+
+        $this->assertSame([1], $result);
+    }
+
+    public function testReturnsNothingWithoutCandidates(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        $this->assertSame([], $useCase->rankByCoverage([], 'greatidea', 5, 0.33));
+    }
+
+    public function testFillsTheListOnceTheTermIsFullyExplained(): void
+    {
+        $useCase = new FindSimilarTerms();
+
+        // "great" + "idea" leave nothing uncovered; the siblings still have to
+        // fill the remaining slots rather than be dropped.
+        $result = $useCase->rankByCoverage(
+            self::candidates([
+                'great' => 1,
+                'idea' => 1,
+                'greatriver' => 1,
+                'greatbuilding' => 1,
+            ]),
+            'greatidea',
+            4,
+            0.33
+        );
+
+        $this->assertCount(4, $result);
+        $this->assertSame([1, 2], array_slice($result, 0, 2));
+        $this->assertContains(3, $result);
+        $this->assertContains(4, $result);
+    }
 }

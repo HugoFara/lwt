@@ -7,6 +7,20 @@ ones are marked like "v1.0.0-fork".
 
 ## [Unreleased]
 
+### Changed
+
+* **Similar terms suggest the parts of a compound, not its siblings**
+  ([#137](https://github.com/HugoFara/lwt/issues/137)). The term editor's
+  "Similar Terms" box ranked every candidate against the whole term on its own,
+  so for a compound like *Geschwindigkeitsbegrenzung* each word built on
+  *Geschwindigkeit* scored on that shared half and the term explaining the
+  other half — *Begrenzung* — was pushed off the list by its own siblings.
+  Suggestions are now picked one at a time, and after each pick the term
+  shrinks to the part still unexplained, so a candidate that only repeats an
+  earlier suggestion scores near nothing and a short term covering fresh ground
+  wins on merit. The first suggestion is unchanged, and terms you already know
+  are still preferred.
+
 ## [3.4.2-fork] - 2026-08-16
 
 ### Fixed

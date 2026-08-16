@@ -51,7 +51,7 @@ class FindSimilarTerms
      * @param float  $minRanking     Minimum similarity ranking (0-1)
      * @param float  $phoneticWeight Weight for phonetic similarity (0-1)
      *
-     * @return int[] Word IDs sorted by weighted similarity, descending
+     * @return list<int> Word IDs, most useful first
      */
     public function execute(
         int $languageId,
@@ -69,40 +69,121 @@ class FindSimilarTerms
             ->where('WoTextLC', '<>', $comparedTermLc)
             ->getPrepared();
 
-        $termlsd = [];
+        $candidates = [];
         foreach ($rows as $record) {
-            // Calculate combined similarity (character pairs + phonetic)
-            $baseSimilarity = $this->calculator->getCombinedSimilarityRanking(
-                $comparedTermLc,
-                (string)$record["WoTextLC"],
+            $candidates[] = [
+                'id' => (int) $record["WoID"],
+                'textLc' => (string) $record["WoTextLC"],
+                'status' => (int) $record["WoStatus"],
+            ];
+        }
+
+        return $this->rankByCoverage(
+            $candidates,
+            $comparedTermLc,
+            $maxCount,
+            $minRanking,
+            $phoneticWeight
+        );
+    }
+
+    /**
+     * Pick the terms that between them explain the most of the compared term.
+     *
+     * Ranking each candidate against the whole term independently — what this
+     * used to do — makes a compound's siblings crowd out its parts: every word
+     * sharing "geschwindigkeit" scores on that shared half, so the term that
+     * would explain the *other* half never makes the list. So the picks are
+     * made one at a time, and after each one the term shrinks to the part still
+     * unexplained. A candidate that only repeats an earlier pick then scores
+     * near zero, and a short term covering fresh ground wins on merit.
+     *
+     * The first pick is unchanged: with nothing covered yet, the score is the
+     * plain pairwise similarity. Admission to the pool uses that same pairwise
+     * score against the minimum ranking, so this changes which candidates are
+     * chosen and in what order, never which ones were eligible.
+     *
+     * @param list<array{id: int, textLc: string, status: int}> $candidates     Candidate terms
+     * @param string                                            $comparedTermLc Lowercased term
+     * @param int                                               $maxCount       Maximum to return
+     * @param float                                             $minRanking     Minimum ranking (0-1)
+     * @param float                                             $phoneticWeight Phonetic weight (0-1)
+     *
+     * @return list<int> Word IDs, most useful first
+     */
+    public function rankByCoverage(
+        array $candidates,
+        string $comparedTermLc,
+        int $maxCount,
+        float $minRanking,
+        float $phoneticWeight = 0.3
+    ): array {
+        if ($maxCount <= 0) {
+            return [];
+        }
+
+        $term = $this->calculator->profile($comparedTermLc);
+
+        $pool = [];
+        foreach ($candidates as $candidate) {
+            $profile = $this->calculator->profile($candidate['textLc']);
+            $baseSimilarity = $this->calculator->getResidualCombinedRanking(
+                $profile,
+                $term,
                 $phoneticWeight
             );
 
-            // Apply status weight to boost learned words
-            $status = (int) $record["WoStatus"];
-            $statusWeight = $this->calculator->getStatusWeight($status);
-            $weightedSimilarity = $baseSimilarity * $statusWeight;
-
-            // Only include if base similarity meets minimum threshold
-            if ($baseSimilarity >= $minRanking) {
-                $termlsd[(int) $record["WoID"]] = $weightedSimilarity;
+            // The threshold reads the unweighted score, as it always has
+            if ($baseSimilarity < $minRanking) {
+                continue;
             }
+
+            $statusWeight = $this->calculator->getStatusWeight($candidate['status']);
+            $pool[] = [
+                'id' => $candidate['id'],
+                'profile' => $profile,
+                'weight' => $statusWeight,
+                'weighted' => $baseSimilarity * $statusWeight,
+            ];
         }
 
-        // Sort by weighted similarity descending
-        arsort($termlsd, SORT_NUMERIC);
+        $remaining = $term;
+        $picked = [];
+        $wanted = min($maxCount, count($pool));
 
-        // Return top N results
-        $r = [];
-        $i = 0;
-        foreach ($termlsd as $key => $_val) {
-            if ($i >= $maxCount) {
+        for ($i = 0; $i < $wanted; $i++) {
+            $bestIndex = null;
+            $bestGain = -1.0;
+            $bestWeighted = -1.0;
+
+            foreach ($pool as $index => $entry) {
+                $gain = $this->calculator->getResidualCombinedRanking(
+                    $entry['profile'],
+                    $remaining,
+                    $phoneticWeight
+                ) * $entry['weight'];
+
+                // Once the term is fully explained every gain is zero, so the
+                // pairwise score decides the rest of the list
+                $isBetter = $gain > $bestGain + 1e-9
+                    || (abs($gain - $bestGain) <= 1e-9 && $entry['weighted'] > $bestWeighted);
+                if ($isBetter) {
+                    $bestGain = $gain;
+                    $bestWeighted = $entry['weighted'];
+                    $bestIndex = $index;
+                }
+            }
+
+            if ($bestIndex === null) {
                 break;
             }
-            $i++;
-            $r[$i] = $key;
+
+            $picked[] = $pool[$bestIndex]['id'];
+            $remaining = $remaining->minus($pool[$bestIndex]['profile']);
+            unset($pool[$bestIndex]);
         }
-        return $r;
+
+        return $picked;
     }
 
     /**
