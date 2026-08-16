@@ -40,7 +40,6 @@ use Lwt\Modules\Review\Application\ReviewFacade;
 // Http
 use Lwt\Modules\Review\Http\ReviewController;
 use Lwt\Modules\Review\Http\ReviewApiHandler;
-// Application Services
 
 /**
  * Service provider for the Review module.
