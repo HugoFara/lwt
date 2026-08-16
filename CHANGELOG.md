@@ -15,6 +15,14 @@ ones are marked like "v1.0.0-fork".
   feeds list was retired. A redirect discards the body, so the wizard ran to
   completion and produced no feed. Affects 3.4.0 and 3.4.1. The manual "add a
   feed" tab and the curated-source browser were unaffected.
+* **The feed wizard showed no article to pick from.** Steps 2 and 3 render the
+  fetched article so you can click the part to import, but the controller
+  handed the view the extractor's whole result array instead of the article's
+  HTML. The picker showed the word "Array", and the "Array to string
+  conversion" notice behind it is fatal wherever PHP warnings are — so on those
+  installs the wizard could not get past step 2 at all. Affects 3.4.0 and
+  3.4.1. The article is also cached in the session again, as it was meant to
+  be, so stepping back and forth no longer refetches it every time.
 
 ### Changed
 

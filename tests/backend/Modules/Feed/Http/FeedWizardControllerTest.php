@@ -1050,15 +1050,57 @@ class FeedWizardControllerTest extends TestCase
         $this->wizardSession->method('getRedirect')->willReturn('');
 
         $this->feedFacade->method('getFeedOption')->willReturn(null);
+        // The extractor answers with one entry per feed item, not with an
+        // html string — the view echoes what comes back, so the item's
+        // TxText is what has to come out.
         $this->feedFacade->method('extractTextFromArticle')
-            ->willReturn(['html' => '<div>extracted html</div>']);
+            ->willReturn([
+                0 => [
+                    'TxTitle' => '',
+                    'TxText' => '<div>extracted html</div>',
+                    'TxSourceURI' => '',
+                    'TxAudioURI' => '',
+                ],
+            ]);
 
         $this->wizardSession->expects($this->once())
             ->method('setFeedItemHtml')
-            ->with(0, ['html' => '<div>extracted html</div>']);
+            ->with(0, '<div>extracted html</div>');
 
         $result = $this->invokePrivate('getStep2FeedHtml');
-        $this->assertIsArray($result);
+        $this->assertSame('<div>extracted html</div>', $result);
+    }
+
+    #[Test]
+    public function getStep2FeedHtmlReportsAnExtractionError(): void
+    {
+        $feedItem = [
+            'link' => 'http://example.com/article1',
+            'title' => 'Article Title',
+        ];
+
+        $this->wizardSession->method('getSelectedFeed')->willReturn(0);
+        $this->wizardSession->method('getFeedItemHtml')->willReturn(null);
+        $this->wizardSession->method('getFeedItem')->willReturn($feedItem);
+        $this->wizardSession->method('getOptions')->willReturn('');
+        $this->wizardSession->method('getRedirect')->willReturn('');
+
+        $this->feedFacade->method('getFeedOption')->willReturn(null);
+        $this->feedFacade->method('extractTextFromArticle')
+            ->willReturn([
+                'error' => [
+                    'message' => 'Could not read <b>the article</b>',
+                    'link' => ['http://example.com/article1'],
+                ],
+            ]);
+
+        $result = $this->invokePrivate('getStep2FeedHtml');
+
+        $this->assertIsString($result);
+        $this->assertStringContainsString('notification is-danger', $result);
+        // The message names a URL the wizard fetched, so it is escaped rather
+        // than echoed into the page as markup.
+        $this->assertStringContainsString('&lt;b&gt;the article&lt;/b&gt;', $result);
     }
 
     #[Test]
@@ -1171,14 +1213,21 @@ class FeedWizardControllerTest extends TestCase
 
         $this->feedFacade->method('getFeedOption')->willReturn(null);
         $this->feedFacade->method('extractTextFromArticle')
-            ->willReturn(['html' => '<div>step3 html</div>']);
+            ->willReturn([
+                0 => [
+                    'TxTitle' => '',
+                    'TxText' => '<div>step3 html</div>',
+                    'TxSourceURI' => '',
+                    'TxAudioURI' => '',
+                ],
+            ]);
 
         $this->wizardSession->expects($this->once())
             ->method('setFeedItemHtml')
-            ->with(0, ['html' => '<div>step3 html</div>']);
+            ->with(0, '<div>step3 html</div>');
 
         $result = $this->invokePrivate('getStep3FeedHtml');
-        $this->assertIsArray($result);
+        $this->assertSame('<div>step3 html</div>', $result);
     }
 
     #[Test]
@@ -1200,7 +1249,7 @@ class FeedWizardControllerTest extends TestCase
             ->willReturn([]);
 
         $result = $this->invokePrivate('getStep3FeedHtml');
-        $this->assertIsArray($result);
+        $this->assertSame('', $result);
     }
 
     // =========================================================================

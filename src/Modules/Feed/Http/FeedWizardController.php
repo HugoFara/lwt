@@ -621,11 +621,48 @@ class FeedWizardController
     }
 
     /**
+     * Reduce an extraction result to the article HTML the preview shows.
+     *
+     * extractTextFromArticle() answers with one entry per feed item —
+     * `[0 => ['TxText' => <html>, ...]]` — or an `error` entry when the fetch
+     * failed. The preview asks about a single item and the wizard views echo a
+     * string, so hand them that item's HTML rather than the whole structure:
+     * echoing the array printed "Array" where the element picker belongs, and
+     * raised "Array to string conversion", which is fatal wherever warnings
+     * are. Storing the array in the session was equally lossy — getFeedItemHtml()
+     * only returns strings, so every render re-fetched the article.
+     *
+     * @param array<array-key, mixed> $extraction Extraction result
+     *
+     * @return string Article HTML, an error notice, or '' when neither is there
+     */
+    private function articleHtmlFromExtraction(array $extraction): string
+    {
+        /** @var mixed $error */
+        $error = $extraction['error']['message'] ?? null;
+        if (is_string($error) && $error !== '') {
+            return '<p class="notification is-danger">'
+                . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>';
+        }
+
+        /** @var mixed $first */
+        $first = $extraction[0] ?? null;
+        if (!is_array($first)) {
+            return '';
+        }
+
+        /** @var mixed $html */
+        $html = $first['TxText'] ?? '';
+
+        return is_string($html) ? $html : '';
+    }
+
+    /**
      * Get HTML content for step 2 feed preview.
      *
-     * @return string|array HTML content
+     * @return string HTML content
      */
-    private function getStep2FeedHtml(): string|array
+    private function getStep2FeedHtml(): string
     {
         $i = $this->wizardSession->getSelectedFeed();
         $existingHtml = $this->wizardSession->getFeedItemHtml($i);
@@ -656,8 +693,9 @@ class FeedWizardController
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
                 $charset
             );
-            $this->wizardSession->setFeedItemHtml($i, $html);
-            return is_string($html) ? $html : (is_array($html) ? $html : '');
+            $articleHtml = $this->articleHtmlFromExtraction($html);
+            $this->wizardSession->setFeedItemHtml($i, $articleHtml);
+            return $articleHtml;
         }
 
         return $existingHtml;
@@ -666,9 +704,9 @@ class FeedWizardController
     /**
      * Get HTML content for step 3 feed preview.
      *
-     * @return string|array HTML content
+     * @return string HTML content
      */
-    private function getStep3FeedHtml(): string|array
+    private function getStep3FeedHtml(): string
     {
         $i = $this->wizardSession->getSelectedFeed();
         $existingHtml = $this->wizardSession->getFeedItemHtml($i);
@@ -699,8 +737,9 @@ class FeedWizardController
                 'iframe!?!script!?!noscript!?!head!?!meta!?!link!?!style',
                 $charset
             );
-            $this->wizardSession->setFeedItemHtml($i, $html);
-            return is_string($html) ? $html : (is_array($html) ? $html : '');
+            $articleHtml = $this->articleHtmlFromExtraction($html);
+            $this->wizardSession->setFeedItemHtml($i, $articleHtml);
+            return $articleHtml;
         }
 
         return $existingHtml;
