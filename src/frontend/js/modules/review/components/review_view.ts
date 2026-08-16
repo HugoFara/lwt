@@ -994,7 +994,18 @@ onDomReady(() => {
   // Only init if Alpine is available and we're on the review page
   const container = document.getElementById('review-app');
   const configEl = document.getElementById('review-config');
-  if (container && configEl && window.Alpine) {
+  if (!container || !configEl) return;
+
+  // Alpine is only put on window after main.ts has awaited bootI18n(), so
+  // whether it is there yet when the DOM becomes ready is a race — and one the
+  // review page lost as soon as this chunk grew enough to shift the timing.
+  // Testing the flag once left the page on its spinner for good. Wait for
+  // Alpine to announce itself instead, and take the flag as the shortcut for
+  // when it has already started.
+  if (window.Alpine) {
     initReviewApp();
+    return;
   }
+
+  document.addEventListener('alpine:initialized', () => initReviewApp(), { once: true });
 });
