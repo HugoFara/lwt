@@ -13,6 +13,7 @@
 import Alpine from 'alpinejs';
 import type { FeedWizardStoreState } from '../types/feed_wizard_types';
 import { getFeedWizardStore } from '../stores/feed_wizard_store';
+import { saveFeed } from '../api/save_feed';
 
 /**
  * A curated feed source entry.
@@ -50,18 +51,6 @@ export interface Step1Config {
 }
 
 /**
- * Hidden form data for curated feed submission.
- */
-interface CuratedFormData {
-  NfLgID: string;
-  NfName: string;
-  NfSourceURI: string;
-  NfArticleSectionTags: string;
-  NfFilterTags: string;
-  NfOptions: string;
-}
-
-/**
  * Step 1 component data interface.
  */
 export interface FeedWizardStep1Data {
@@ -83,13 +72,17 @@ export interface FeedWizardStep1Data {
   languages: Array<{ id: number; name: string }>;
   curatedFeeds: CuratedFeedGroup[];
   readonly filteredCuratedFeeds: CuratedFeedGroup[];
-  curatedFormData: CuratedFormData;
+
+  // Save state
+  saving: boolean;
+  saveError: string;
 
   // Lifecycle
   init(): void;
 
   // Actions
   cancel(): void;
+  hasSaveError(): boolean;
   addSelectedFeeds(): void;
   addCuratedFeed(source: CuratedSource): void;
 
@@ -195,14 +188,8 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
       return groups;
     },
 
-    curatedFormData: {
-      NfLgID: '',
-      NfName: '',
-      NfSourceURI: '',
-      NfArticleSectionTags: '',
-      NfFilterTags: '',
-      NfOptions: ''
-    },
+    saving: false,
+    saveError: '',
 
     init(): void {
       // Configure store for step 1
@@ -235,24 +222,38 @@ export function feedWizardStep1Data(): FeedWizardStep1Data {
       }
     },
 
-    addCuratedFeed(source: CuratedSource): void {
-      // Populate hidden form and submit using current language from navbar
-      this.curatedFormData = {
-        NfLgID: String(this.currentLanguageId),
-        NfName: source.name,
-        NfSourceURI: source.url,
-        NfArticleSectionTags: source.articleSectionTags,
-        NfFilterTags: source.filterTags,
-        NfOptions: source.options
-      };
+    hasSaveError(): boolean {
+      return this.saveError !== '';
+    },
 
-      // Need to wait one tick for Alpine to update the hidden inputs
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this as any).$nextTick(() => {
-        const form = document.getElementById('curated-feed-form') as HTMLFormElement | null;
-        if (form) {
-          form.submit();
+    /**
+     * Add a curated source as a feed.
+     *
+     * This used to fill a hidden form and submit it to /feeds/new, which meant
+     * waiting a tick for Alpine to write the inputs before posting. Calling the
+     * API directly removes both the hidden form and that timing dependency
+     * (#262). The language is the navbar's current selection, as before.
+     */
+    addCuratedFeed(source: CuratedSource): void {
+      if (this.saving) return;
+
+      this.saveError = '';
+      this.saving = true;
+
+      void saveFeed({
+        langId: this.currentLanguageId,
+        name: source.name,
+        sourceUri: source.url,
+        articleSectionTags: source.articleSectionTags,
+        filterTags: source.filterTags,
+        options: source.options
+      }, null).then((result) => {
+        if (result.feedId === null) {
+          this.saveError = result.error;
+          this.saving = false;
+          return;
         }
+        window.location.href = `/feeds/${result.feedId}/edit`;
       });
     }
   } as FeedWizardStep1Data;

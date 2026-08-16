@@ -10,6 +10,13 @@ vi.mock('alpinejs', () => ({
   }
 }));
 
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
+  apiGet: vi.fn(),
+  apiPost: vi.fn(),
+  apiPut: vi.fn(),
+  apiDelete: vi.fn()
+}));
+
 // Create shared mock store
 const mockStore = {
   configure: vi.fn()
@@ -22,6 +29,7 @@ vi.mock('../../../src/frontend/js/modules/feed/stores/feed_wizard_store', () => 
 
 import Alpine from 'alpinejs';
 import { feedWizardStep1Data, initFeedWizardStep1Alpine, type Step1Config } from '../../../src/frontend/js/modules/feed/components/feed_wizard_step1';
+import { apiPost } from '../../../src/frontend/js/shared/api/client';
 
 describe('feed_wizard_step1.ts', () => {
   beforeEach(() => {
@@ -168,6 +176,87 @@ describe('feed_wizard_step1.ts', () => {
         rssUrl: 'https://test.com/feed',
         editFeedId: 10
       });
+    });
+  });
+
+  // ===========================================================================
+  // addCuratedFeed() Tests
+  // ===========================================================================
+
+  describe('addCuratedFeed()', () => {
+    const source = {
+      name: 'Tagesschau',
+      url: 'https://example.com/rss',
+      articleSectionTags: '//div',
+      filterTags: '//aside',
+      options: 'edit_text=1'
+    };
+
+    /**
+     * Put a step 1 config carrying a current language on the page.
+     */
+    function withCurrentLanguage(id: number): void {
+      const config: Partial<Step1Config> = {
+        rssUrl: '',
+        hasError: false,
+        editFeedId: null,
+        languages: [],
+        curatedFeeds: [],
+        currentLanguageId: id,
+        currentLanguageName: 'Deutsch'
+      };
+      document.body.innerHTML = `
+        <script id="wizard-step1-config" type="application/json">
+          ${JSON.stringify(config)}
+        </script>
+      `;
+    }
+
+    /**
+     * This used to fill a hidden form and submit it to /feeds/new after a
+     * $nextTick; it calls the API directly now, so there is no hidden form and
+     * no timing dependency left to get wrong.
+     */
+    it('creates the feed through the API', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { success: true, feed: { id: 4 } } });
+      withCurrentLanguage(3);
+
+      const component = feedWizardStep1Data();
+      component.addCuratedFeed(source);
+      await vi.waitFor(() => expect(apiPost).toHaveBeenCalled());
+
+      expect(apiPost).toHaveBeenCalledWith('/feeds', expect.objectContaining({
+        langId: 3,
+        name: 'Tagesschau',
+        sourceUri: 'https://example.com/rss',
+        articleSectionTags: '//div',
+        filterTags: '//aside',
+        options: 'edit_text=1'
+      }));
+    });
+
+    it('shows the API error instead of navigating', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ error: 'Language not found or access denied' });
+      withCurrentLanguage(3);
+
+      const component = feedWizardStep1Data();
+      component.addCuratedFeed(source);
+      await vi.waitFor(() => expect(component.hasSaveError()).toBe(true));
+
+      expect(component.saveError).toBe('Language not found or access denied');
+      expect(component.saving).toBe(false);
+    });
+
+    it('does nothing while a save is already in flight', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { success: true, feed: { id: 4 } } });
+      withCurrentLanguage(3);
+
+      const component = feedWizardStep1Data();
+      component.addCuratedFeed(source);
+      component.addCuratedFeed(source);
+      await vi.waitFor(() => expect(apiPost).toHaveBeenCalled());
+
+      expect(apiPost).toHaveBeenCalledTimes(1);
     });
   });
 

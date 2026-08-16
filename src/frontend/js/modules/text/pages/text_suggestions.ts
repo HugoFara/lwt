@@ -12,6 +12,7 @@ import Alpine from 'alpinejs';
 import { initIcons } from '@shared/icons/lucide_icons';
 import { getCsrfToken } from '@shared/api/client';
 import { importEpubForm } from '@modules/book/api/books_api';
+import { saveTextForm } from './text_form_save';
 
 // ── Gutenberg browser ───────────────────────────────────────────────
 
@@ -771,10 +772,12 @@ interface TextNewFormData {
   source: string;
   showAdvanced: boolean;
   autoImporting: boolean;
+  saving: boolean;
   fileTab: 'computer' | 'server';
   fileType: '' | 'epub' | 'subtitle' | 'audio' | 'other';
 
   init(): void;
+  isBusy(): boolean;
   selectSource(source: string): void;
   goBack(): void;
   goToReview(): void;
@@ -785,10 +788,9 @@ interface TextNewFormData {
   selectFileTab(tab: 'computer' | 'server'): void;
   fileTabActive(tab: string): string;
   isEpub(): boolean;
-  formAction(): string;
   submitOp(): string;
-  epubError: string;
-  hasEpubError(): boolean;
+  saveError: string;
+  hasSaveError(): boolean;
   handleSubmit(event: Event): void;
 }
 
@@ -798,9 +800,10 @@ export function textNewFormData(): TextNewFormData {
     source: '',
     showAdvanced: false,
     autoImporting: false,
+    saving: false,
     fileTab: 'computer',
     fileType: '',
-    epubError: '',
+    saveError: '',
 
     init() {
       // When arriving via import_url (Gutenberg/Feed) or import_epub_url
@@ -871,43 +874,65 @@ export function textNewFormData(): TextNewFormData {
       return this.fileType === 'epub';
     },
 
-    formAction(): string {
-      return this.isEpub() ? '/api/v1/books' : '/texts/new';
-    },
-
     /**
-     * Whether the last EPUB import reported a failure.
+     * Whether the last save or import reported a failure.
      *
      * @returns True when an error message is pending
      */
-    hasEpubError(): boolean {
-      return this.epubError !== '';
+    hasSaveError(): boolean {
+      return this.saveError !== '';
     },
 
     /**
-     * Send an EPUB to the books API instead of letting the form post.
+     * Whether a save or an auto-import is in flight.
      *
-     * Every other source keeps its native POST to /texts/new.
+     * The two are tracked apart because `autoImporting` also drives the
+     * "fetching the page" banner, which belongs to the URL/Gutenberg import
+     * alone — a plain save reusing that flag announced a Gutenberg fetch that
+     * was never happening.
+     *
+     * @returns True while the submit button should stay disabled
+     */
+    isBusy(): boolean {
+      return this.autoImporting || this.saving;
+    },
+
+    /**
+     * Save through the API rather than posting the form to the page origin.
+     *
+     * An EPUB goes to the books API, everything else to POST /api/v1/texts,
+     * which answers with a bookId of its own when the text was long enough to
+     * be split into chapters.
      *
      * @param event Submit event
      */
     handleSubmit(event: Event) {
-      if (!this.isEpub()) return;
-
       event.preventDefault();
       const form = event.target as HTMLFormElement | null;
-      if (!form || this.autoImporting) return;
+      if (!form || this.isBusy()) return;
 
-      this.epubError = '';
-      this.autoImporting = true;
+      this.saveError = '';
+      this.saving = true;
 
-      void importEpubForm(form).then((result) => {
+      const save = this.isEpub()
+        ? importEpubForm(form).then((result) => ({
+            textId: null,
+            bookId: result.bookId,
+            error: result.error,
+          }))
+        : saveTextForm(form, 0);
+
+      void save.then((result) => {
         if (result.bookId !== null) {
           window.location.href = `/book/${result.bookId}`;
           return;
         }
-        this.epubError = result.error;
-        this.autoImporting = false;
+        if (result.textId !== null) {
+          window.location.href = `/text/${result.textId}/read`;
+          return;
+        }
+        this.saveError = result.error;
+        this.saving = false;
       });
     },
 
@@ -917,9 +942,79 @@ export function textNewFormData(): TextNewFormData {
   };
 }
 
+// ── Text Edit Form (existing text) ───────────────────────────────────
+
+interface TextEditFormData {
+  textId: number;
+  saving: boolean;
+  saveError: string;
+
+  init(): void;
+  hasSaveError(): boolean;
+  handleSubmit(event: Event): void;
+}
+
+export function textEditFormData(): TextEditFormData {
+  return {
+    textId: 0,
+    saving: false,
+    saveError: '',
+
+    init() {
+      const configEl = document.getElementById('text-edit-config');
+      if (!configEl?.textContent) return;
+      try {
+        const config = JSON.parse(configEl.textContent) as { textId?: number };
+        this.textId = config.textId ?? 0;
+      } catch {
+        this.textId = 0;
+      }
+    },
+
+    hasSaveError(): boolean {
+      return this.saveError !== '';
+    },
+
+    /**
+     * Save through PUT /api/v1/texts/{id} instead of posting the form.
+     *
+     * "Check" is left alone: it asks the server to render a parsing report of
+     * the text in the box rather than to save anything, and that report is
+     * still a server-rendered page.
+     *
+     * @param event Submit event
+     */
+    handleSubmit(event: Event) {
+      const submitter = (event as SubmitEvent).submitter as HTMLButtonElement | null;
+      const op = submitter?.value ?? 'Change';
+      if (op === 'Check') return;
+
+      event.preventDefault();
+      const form = event.target as HTMLFormElement | null;
+      if (!form || this.saving) return;
+
+      this.saveError = '';
+      this.saving = true;
+      const openAfter = op === 'Change and Open';
+
+      void saveTextForm(form, this.textId).then((result) => {
+        if (result.textId === null) {
+          this.saveError = result.error;
+          this.saving = false;
+          return;
+        }
+        window.location.href = openAfter
+          ? `/text/${result.textId}/read`
+          : `/texts#rec${result.textId}`;
+      });
+    },
+  };
+}
+
 // ── Registration ────────────────────────────────────────────────────
 
 Alpine.data('textNewForm', textNewFormData);
+Alpine.data('textEditForm', textEditFormData);
 Alpine.data('gutenbergBrowser', gutenbergBrowserData);
 Alpine.data('gdlBrowser', gdlBrowserData);
 Alpine.data('feedBrowser', feedBrowserData);

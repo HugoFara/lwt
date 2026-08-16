@@ -10,11 +10,14 @@
  */
 
 import Alpine from 'alpinejs';
+import { readFeedForm, saveFeed } from '../api/save_feed';
 
 /**
  * Configuration for the feed form component, passed from PHP.
  */
 export interface FeedFormConfig {
+  /** Feed being edited, or null/absent on the create form. */
+  feedId?: number | null;
   editText?: boolean;
   autoUpdate?: boolean;
   autoUpdateValue?: string;
@@ -35,6 +38,11 @@ export interface FeedFormConfig {
  * Feed form Alpine component data interface.
  */
 export interface FeedFormData {
+  // Save state
+  feedId: number | null;
+  saving: boolean;
+  saveError: string;
+
   // Option toggles
   editText: boolean;
   autoUpdate: boolean;
@@ -56,6 +64,7 @@ export interface FeedFormData {
   // Methods
   init(): void;
   serializeOptions(): string;
+  hasSaveError(): boolean;
   handleSubmit(event: Event): void;
 }
 
@@ -67,6 +76,10 @@ export interface FeedFormData {
  */
 export function feedFormData(config: FeedFormConfig = {}): FeedFormData {
   return {
+    feedId: config.feedId ?? null,
+    saving: false,
+    saveError: '',
+
     // Option toggles - default to false except editText
     editText: config.editText ?? true,
     autoUpdate: config.autoUpdate ?? false,
@@ -96,6 +109,7 @@ export function feedFormData(config: FeedFormConfig = {}): FeedFormData {
         try {
           const jsonConfig = JSON.parse(configEl.textContent || '{}') as FeedFormConfig;
           // Merge JSON config with defaults
+          this.feedId = jsonConfig.feedId ?? this.feedId;
           this.editText = jsonConfig.editText ?? this.editText;
           this.autoUpdate = jsonConfig.autoUpdate ?? this.autoUpdate;
           this.maxLinks = jsonConfig.maxLinks ?? this.maxLinks;
@@ -164,17 +178,42 @@ export function feedFormData(config: FeedFormConfig = {}): FeedFormData {
       return parts.join(',') + (parts.length > 0 ? ',' : '');
     },
 
+    hasSaveError(): boolean {
+      return this.saveError !== '';
+    },
+
     /**
-     * Handle form submission - serialize options to hidden field.
+     * Save the feed through the API rather than posting the form.
+     *
+     * Both forms this component backs (the manual "add a feed" form and the
+     * edit form) posted to /feeds/new or /feeds/{id}/edit, where
+     * FeedEditController passed the submitted NfLgID straight to the facade.
+     * The API path checks that language belongs to the caller (#262).
      *
      * @param event - Submit event
      */
     handleSubmit(event: Event): void {
-      const form = event.target as HTMLFormElement;
-      const hiddenField = form.querySelector<HTMLInputElement>('input[name="NfOptions"]');
-      if (hiddenField) {
-        hiddenField.value = this.serializeOptions();
-      }
+      event.preventDefault();
+      if (this.saving) return;
+
+      const form = event.target as HTMLFormElement | null;
+      if (!form) return;
+
+      this.saveError = '';
+      this.saving = true;
+
+      const data = readFeedForm(form, this.serializeOptions());
+
+      void saveFeed(data, this.feedId).then((result) => {
+        if (result.feedId === null) {
+          this.saveError = result.error;
+          this.saving = false;
+          return;
+        }
+        window.location.href = this.feedId === null
+          ? `/feeds/${result.feedId}/edit`
+          : '/feeds/manage';
+      });
     }
   };
 }

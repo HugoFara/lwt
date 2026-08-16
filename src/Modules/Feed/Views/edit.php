@@ -60,6 +60,7 @@ $helpLabel = __('feed.edit_help');
 
 <script type="application/json" id="feed-form-config">
 <?php echo json_encode([
+    'feedId' => (int)$feed['NfID'],
     'editText' => isset($options['edit_text']),
     'autoUpdate' => $autoUpdateInterval !== null,
     'autoUpdateValue' => $autoUpdateInterval ?? '',
@@ -76,13 +77,14 @@ $helpLabel = __('feed.edit_help');
     'articleSourceValue' => $options['article_source'] ?? '',
 ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>
 </script>
-<form class="validate" action="/feeds/<?php echo (int)$feed['NfID']; ?>/edit" method="post"
+<!-- Saves through PUT /api/v1/feeds/{id} (#262), so the form carries no action. -->
+<form class="validate"
       x-data="feedForm()"
       @submit="handleSubmit($event)">
-    <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
-    <input type="hidden" name="NfID" value="<?php echo $feed['NfID'] ?? ''; ?>" />
-    <input type="hidden" name="NfOptions" value="" />
-    <input type="hidden" name="update_feed" value="1" />
+
+    <div x-show="hasSaveError()" class="notification is-danger" x-cloak>
+        <span x-text="saveError"></span>
+    </div>
 
     <div class="box">
         <!-- Language -->
@@ -327,7 +329,8 @@ $helpLabel = __('feed.edit_help');
             </button>
         </div>
         <div class="control">
-            <button type="submit" class="button is-primary">
+            <button type="submit" class="button is-primary"
+                    :disabled="saving" :class="{ 'is-loading': saving }">
                 <span class="icon is-small">
                     <?php echo IconHelper::render('save', ['alt' => __('feed.edit_save')]); ?>
                 </span>

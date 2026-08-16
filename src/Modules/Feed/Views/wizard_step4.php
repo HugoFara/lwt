@@ -125,8 +125,8 @@ $configJson = json_encode([
         </div>
     </div>
 
-    <form class="validate" action="/feeds/edit" method="post" @submit="handleSubmit">
-        <?php echo \Lwt\Shared\UI\Helpers\FormHelper::csrfField(); ?>
+    <!-- Saves through /api/v1/feeds (#262), so the form carries no action. -->
+    <form class="validate" @submit="handleSubmit($event)">
         <div class="box">
             <!-- Language -->
             <div class="field is-horizontal">
@@ -355,13 +355,10 @@ $configJson = json_encode([
             </div>
         </div>
 
-        <!-- Hidden inputs -->
-        <template x-if="isEditMode">
-            <input type="hidden" name="NfID" :value="config.editFeedId" />
-        </template>
-        <input type="hidden" name="NfOptions" value="" />
-        <input type="hidden" name="article_source" :value="config.feedText" />
-        <input type="hidden" :name="isEditMode ? 'update_feed' : 'save_feed'" value="1" />
+        <!-- Save failure, reported by the API -->
+        <div x-show="hasSaveError()" class="notification is-danger" x-cloak>
+            <span x-text="saveError"></span>
+        </div>
 
         <!-- Form Actions -->
         <div class="field is-grouped is-grouped-right mt-5">
@@ -379,7 +376,8 @@ $configJson = json_encode([
                 </button>
             </div>
             <div class="control">
-                <button type="submit" class="button is-primary">
+                <button type="submit" class="button is-primary"
+                        :disabled="saving" :class="{ 'is-loading': saving }">
                     <span x-text="submitLabel"><?php echo __e('feed.wizard.step4.save'); ?></span>
                 </button>
             </div>

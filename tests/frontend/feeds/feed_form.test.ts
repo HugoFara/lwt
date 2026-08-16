@@ -2,7 +2,15 @@
  * Tests for feed_form_component.ts - Feed form Alpine component
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+vi.mock('../../../src/frontend/js/shared/api/client', () => ({
+  apiGet: vi.fn(),
+  apiPost: vi.fn(),
+  apiPut: vi.fn(),
+  apiDelete: vi.fn()
+}));
 import { feedFormData, FeedFormConfig } from '../../../src/frontend/js/modules/feed/components/feed_form_component';
+import { apiPost, apiPut } from '../../../src/frontend/js/shared/api/client';
 
 describe('feed_form_component.ts', () => {
   beforeEach(() => {
@@ -334,63 +342,103 @@ describe('feed_form_component.ts', () => {
   // ===========================================================================
 
   describe('handleSubmit()', () => {
-    it('populates NfOptions hidden field on submit', () => {
-      document.body.innerHTML = `
-        <form>
-          <input type="hidden" name="NfOptions" value="" />
-        </form>
-      `;
+    /**
+     * Build a feed form carrying the fields the component reads.
+     */
+    function buildForm(fields: Record<string, string> = {}): HTMLFormElement {
+      const values = {
+        NfLgID: '2',
+        NfName: 'Tagesschau',
+        NfSourceURI: 'https://example.com/rss',
+        NfArticleSectionTags: '//div',
+        NfFilterTags: '',
+        ...fields
+      };
+      document.body.innerHTML =
+        '<form>' +
+        Object.entries(values)
+          .map(([name, value]) => `<input name="${name}" value="${value}">`)
+          .join('') +
+        '</form>';
+      return document.querySelector('form')!;
+    }
+
+    it('creates through POST when the component has no feed id', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { success: true, feed: { id: 5 } } });
+
+      const component = feedFormData({ editText: true, maxLinks: true, maxLinksValue: '75' });
+      component.handleSubmit({ target: buildForm(), preventDefault: () => {} } as unknown as Event);
+      await vi.waitFor(() => expect(apiPost).toHaveBeenCalled());
+
+      expect(apiPost).toHaveBeenCalledWith('/feeds', expect.objectContaining({
+        langId: 2,
+        name: 'Tagesschau',
+        sourceUri: 'https://example.com/rss'
+      }));
+      expect(apiPut).not.toHaveBeenCalled();
+    });
+
+    it('updates through PUT when the component carries a feed id', async () => {
+      vi.mocked(apiPut).mockResolvedValue({ data: { success: true, feed: { id: 9 } } });
+
+      const component = feedFormData({ feedId: 9 });
+      component.handleSubmit({ target: buildForm(), preventDefault: () => {} } as unknown as Event);
+      await vi.waitFor(() => expect(apiPut).toHaveBeenCalled());
+
+      expect(apiPut).toHaveBeenCalledWith('/feeds/9', expect.any(Object));
+      expect(apiPost).not.toHaveBeenCalled();
+    });
+
+    it('sends the serialized options string', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { success: true, feed: { id: 5 } } });
 
       const component = feedFormData({
         editText: true,
-        maxLinks: true,
-        maxLinksValue: '75'
+        autoUpdate: true,
+        autoUpdateValue: '24',
+        autoUpdateUnit: 'h'
       });
+      component.handleSubmit({ target: buildForm(), preventDefault: () => {} } as unknown as Event);
+      await vi.waitFor(() => expect(apiPost).toHaveBeenCalled());
 
-      const form = document.querySelector('form')!;
-      const event = { target: form } as unknown as Event;
-      component.handleSubmit(event);
-
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('edit_text=1');
-      expect(nfOptions.value).toContain('max_links=75');
+      const payload = vi.mocked(apiPost).mock.calls[0][1] as { options: string };
+      expect(payload.options).toContain('edit_text=1');
+      expect(payload.options).toContain('autoupdate=24h');
     });
 
-    it('handles missing NfOptions field gracefully', () => {
-      document.body.innerHTML = `
-        <form></form>
-      `;
+    it('refuses to send a form with no name', async () => {
+      const component = feedFormData({});
+      component.handleSubmit({
+        target: buildForm({ NfName: '' }),
+        preventDefault: () => {}
+      } as unknown as Event);
+      await vi.waitFor(() => expect(component.hasSaveError()).toBe(true));
 
-      const component = feedFormData({ editText: true });
-      const form = document.querySelector('form')!;
-      const event = { target: form } as unknown as Event;
-
-      expect(() => component.handleSubmit(event)).not.toThrow();
+      expect(apiPost).not.toHaveBeenCalled();
+      expect(component.saveError).toContain('name');
     });
 
-    it('clears previous NfOptions value', () => {
-      document.body.innerHTML = `
-        <form>
-          <input type="hidden" name="NfOptions" value="old_value" />
-        </form>
-      `;
+    it('shows the API error and stays on the page', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ error: 'Language not found or access denied' });
 
-      const component = feedFormData({
-        editText: false,
-        autoUpdate: false,
-        maxLinks: false,
-        charset: false,
-        maxTexts: false,
-        tag: false,
-        articleSource: false
-      });
+      const component = feedFormData({});
+      component.handleSubmit({ target: buildForm(), preventDefault: () => {} } as unknown as Event);
+      await vi.waitFor(() => expect(component.hasSaveError()).toBe(true));
 
-      const form = document.querySelector('form')!;
-      const event = { target: form } as unknown as Event;
-      component.handleSubmit(event);
+      expect(component.saveError).toBe('Language not found or access denied');
+      expect(component.saving).toBe(false);
+    });
 
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toBe('');
+    it('ignores a second submit while one is in flight', async () => {
+      vi.mocked(apiPost).mockResolvedValue({ data: { success: true, feed: { id: 5 } } });
+
+      const component = feedFormData({});
+      const form = buildForm();
+      component.handleSubmit({ target: form, preventDefault: () => {} } as unknown as Event);
+      component.handleSubmit({ target: form, preventDefault: () => {} } as unknown as Event);
+      await vi.waitFor(() => expect(apiPost).toHaveBeenCalled());
+
+      expect(apiPost).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -404,30 +452,32 @@ describe('feed_form_component.ts', () => {
         <script type="application/json" id="feed-form-config">
           {"editText": true, "autoUpdate": true, "autoUpdateValue": "24", "autoUpdateUnit": "h"}
         </script>
-        <form>
-          <input type="hidden" name="NfOptions" value="" />
-        </form>
       `;
 
       const component = feedFormData();
       component.init();
 
-      // Verify initial state from config
       expect(component.editText).toBe(true);
       expect(component.autoUpdate).toBe(true);
 
-      // Simulate user modifying values
       component.maxLinks = true;
       component.maxLinksValue = '200';
 
-      // Submit
-      const form = document.querySelector('form')!;
-      component.handleSubmit({ target: form } as unknown as Event);
+      const options = component.serializeOptions();
+      expect(options).toContain('edit_text=1');
+      expect(options).toContain('autoupdate=24h');
+      expect(options).toContain('max_links=200');
+    });
 
-      const nfOptions = document.querySelector<HTMLInputElement>('[name="NfOptions"]')!;
-      expect(nfOptions.value).toContain('edit_text=1');
-      expect(nfOptions.value).toContain('autoupdate=24h');
-      expect(nfOptions.value).toContain('max_links=200');
+    it('reads the feed id out of the config blob', () => {
+      document.body.innerHTML = `
+        <script type="application/json" id="feed-form-config">{"feedId": 42}</script>
+      `;
+
+      const component = feedFormData();
+      component.init();
+
+      expect(component.feedId).toBe(42);
     });
   });
 });

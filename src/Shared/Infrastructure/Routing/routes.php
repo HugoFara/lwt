@@ -426,13 +426,13 @@ function registerRoutes(Router $router): void
     // Feeds SPA (new Alpine.js single page application)
     $router->registerWithMiddleware('/feeds/manage', 'Lwt\\Modules\\Feed\\Http\\FeedController@spa', AUTH_MIDDLEWARE);
 
-    // New feed form (RESTful route)
+    // New feed form (RESTful route). GET only: the form saves through
+    // POST /api/v1/feeds (#262).
     $router->get('/feeds/new', 'Lwt\\Modules\\Feed\\Http\\FeedController@newFeed', AUTH_MIDDLEWARE);
-    $router->post('/feeds/new', 'Lwt\\Modules\\Feed\\Http\\FeedController@newFeed', AUTH_MIDDLEWARE);
 
-    // Edit feed form (RESTful route): /feeds/123/edit
+    // Edit feed form (RESTful route): /feeds/123/edit. GET only, as above —
+    // the form saves through PUT /api/v1/feeds/{id}.
     $router->get('/feeds/{id:int}/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@editFeed', AUTH_MIDDLEWARE);
-    $router->post('/feeds/{id:int}/edit', 'Lwt\\Modules\\Feed\\Http\\FeedController@editFeed', AUTH_MIDDLEWARE);
 
     // Delete feed (RESTful route): DELETE /feeds/123
     $router->delete('/feeds/{id:int}', 'Lwt\\Modules\\Feed\\Http\\FeedController@deleteFeed', AUTH_MIDDLEWARE);

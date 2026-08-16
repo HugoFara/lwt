@@ -168,10 +168,16 @@ export interface TextCreateRequest {
 }
 
 /**
- * Text creation response.
+ * Text save response.
+ *
+ * A text long enough to need splitting is created as a book of chapters
+ * instead, so a create can come back with a `bookId` — `textId` is then the
+ * first chapter. An update never splits and always answers with `bookId: null`.
  */
-export interface TextCreateResponse {
-  id?: number;
+export interface TextSaveResponse {
+  textId: number | null;
+  bookId: number | null;
+  message: string;
   error?: string;
 }
 
@@ -298,8 +304,33 @@ export const TextsApi = {
    * @param data Text creation data
    * @returns Promise with new text ID or error
    */
-  async create(data: TextCreateRequest): Promise<ApiResponse<TextCreateResponse>> {
-    return apiPost<TextCreateResponse>('/texts', {
+  async create(data: TextCreateRequest): Promise<ApiResponse<TextSaveResponse>> {
+    return apiPost<TextSaveResponse>('/texts', {
+      title: data.title,
+      language_id: data.langId,
+      text: data.text,
+      source_uri: data.sourceUri,
+      audio_uri: data.audioUri,
+      tags: data.tags
+    });
+  },
+
+  /**
+   * Update an existing text and reparse it.
+   *
+   * Same payload as create. Reparsing discards the text's sentences and word
+   * occurrences and builds them again, so reading progress in the text is lost
+   * — which is what the form POST did too.
+   *
+   * @param textId Text ID to update
+   * @param data   Text fields
+   * @returns Promise with the saved text ID or error
+   */
+  async update(
+    textId: number,
+    data: TextCreateRequest
+  ): Promise<ApiResponse<TextSaveResponse>> {
+    return apiPut<TextSaveResponse>(`/texts/${textId}`, {
       title: data.title,
       language_id: data.langId,
       text: data.text,

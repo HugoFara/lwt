@@ -170,17 +170,10 @@ $configJson = json_encode([
             </div>
         </div>
 
-        <!-- Hidden form for curated feed submission -->
-        <form id="curated-feed-form" action="/feeds/new" method="post" style="display: none;">
-            <?php echo FormHelper::csrfField(); ?>
-            <input type="hidden" name="save_feed" value="1" />
-            <input type="hidden" name="NfLgID" x-bind:value="curatedFormData.NfLgID" />
-            <input type="hidden" name="NfName" x-model="curatedFormData.NfName" />
-            <input type="hidden" name="NfSourceURI" x-model="curatedFormData.NfSourceURI" />
-            <input type="hidden" name="NfArticleSectionTags" x-model="curatedFormData.NfArticleSectionTags" />
-            <input type="hidden" name="NfFilterTags" x-model="curatedFormData.NfFilterTags" />
-            <input type="hidden" name="NfOptions" x-model="curatedFormData.NfOptions" />
-        </form>
+        <!-- Add failure, reported by the API -->
+        <div x-show="hasSaveError()" class="notification is-danger" x-cloak>
+            <span x-text="saveError"></span>
+        </div>
     </div>
 
     <!-- ===================== TAB 2: Wizard (Enter Feed URL) ===================== -->
@@ -258,12 +251,14 @@ $configJson = json_encode([
             'articleSourceValue' => '',
         ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>
         </script>
-        <form class="validate" action="/feeds/new" method="post"
+        <!-- Saves through POST /api/v1/feeds (#262), so no action of its own. -->
+        <form class="validate"
               x-data="feedForm"
               @submit="handleSubmit($event)">
-            <?php echo FormHelper::csrfField(); ?>
-            <input type="hidden" name="NfOptions" value="" />
-            <input type="hidden" name="save_feed" value="1" />
+
+            <div x-show="hasSaveError()" class="notification is-danger" x-cloak>
+                <span x-text="saveError"></span>
+            </div>
 
             <div class="box">
                 <input type="hidden" name="NfLgID" x-bind:value="currentLanguageId" />
@@ -491,7 +486,8 @@ $configJson = json_encode([
                     </button>
                 </div>
                 <div class="control">
-                    <button type="submit" class="button is-primary">
+                    <button type="submit" class="button is-primary"
+                            :disabled="saving" :class="{ 'is-loading': saving }">
                         <span class="icon is-small">
                             <?php echo IconHelper::render('save', ['alt' => __('feed.wizard.step1.save')]); ?>
                         </span>

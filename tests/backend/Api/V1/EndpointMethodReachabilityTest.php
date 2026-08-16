@@ -74,6 +74,10 @@ class EndpointMethodReachabilityTest extends TestCase
             // Standalone term creation, replacing POST /word/new (#262).
             'create a term for a language' => ['POST', '/api/v1/terms/for-language'],
 
+            // The text editor's save, replacing its op=Save/op=Change form
+            // POST (#262). 'update a text' below covers PUT /texts/{id}.
+            'create a text'         => ['POST', '/api/v1/texts'],
+
             // The signed-in user's own profile (#262).
             'read own profile'      => ['GET', '/api/v1/profile'],
             'update own profile'    => ['PUT', '/api/v1/profile'],
