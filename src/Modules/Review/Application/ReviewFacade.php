@@ -31,6 +31,7 @@ use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 use Lwt\Modules\Review\Domain\ReviewSession;
 use Lwt\Modules\Review\Domain\ReviewConfiguration;
 use Lwt\Modules\Review\Infrastructure\MySqlReviewRepository;
+use Lwt\Modules\Review\Infrastructure\ScheduleSql;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 use Lwt\Shared\Infrastructure\Database\Connection;
 use Lwt\Modules\Vocabulary\Application\Services\ExportService;
@@ -282,7 +283,7 @@ class ReviewFacade
      * @param int $wordId    Word ID
      * @param int $newStatus New status
      *
-     * @return array{oldStatus: int, newStatus: int, oldScore: int, newScore: int}
+     * @return array{oldStatus: int, newStatus: int}
      */
     public function updateWordStatus(int $wordId, int $newStatus): array
     {
@@ -398,10 +399,11 @@ class ReviewFacade
     public function getTableReviewWords(string $reviewsql, array $params = []): array
     {
         $sql = "SELECT DISTINCT WoID, WoText, WoTranslation, WoRomanization,
-            WoSentence, WoStatus, WoTodayScore AS Score
+            WoSentence, WoStatus,
+            DATEDIFF(" . ScheduleSql::effectiveDue() . ", NOW()) AS Score
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'
-            ORDER BY WoTodayScore, WoRandom * RAND()";
+            ORDER BY " . ScheduleSql::effectiveDue() . ", RAND()";
 
         return Connection::preparedFetchAll($sql, $params);
     }

@@ -257,10 +257,17 @@ endpoint was always fine.
   ease factor is Anki's default 2500, since LWT has never computed an SM-2
   ease and 0 would collapse the interval for anyone with FSRS off.
 
-**Still to do:** drop `SCORE_FORMULA_*` / `WoTodayScore` / `WoTomorrowScore` /
-`WoRandom` and their 16 call sites. Also unverified: the export has been read
-back with SQLite and matches what Anki documents, but nobody has yet opened one
-of these decks in a real Anki install.
+- **The legacy scoring is retired.** `SCORE_FORMULA_*`,
+  `makeScoreRandomInsertUpdate()` and the three columns are gone, along with
+  the daily UPDATE across the whole `words` table that kept them fresh. The
+  scope was larger than this document claimed: sixteen files reference the
+  columns directly, but the SQL-fragment builder had **37** call sites across
+  fifteen more. `ReviewService` — 847 lines duplicating the queue with no
+  caller — was deleted rather than migrated.
+
+**Still unverified:** the .apkg export has been read back with SQLite and
+matches what Anki documents, but nobody has yet opened one of these decks in a
+real Anki install.
 
 ## Trade-offs & open questions
 

@@ -26,6 +26,19 @@ ones are marked like "v1.0.0-fork".
   unsuspending resumes rather than restarts. Nothing flows the other way —
   re-importing a deck still updates only fields and suspension.
 
+### Removed
+
+* **The legacy Leitner scoring is gone** (#238, phase 2b). `WoTodayScore`,
+  `WoTomorrowScore` and `WoRandom` were a stored copy of a formula over a
+  term's status and the date it last changed. Everything reads the term's due
+  date now, so a migration drops all three columns — nothing is lost, because
+  the values were derived rather than entered, and every term keeps the
+  schedule it had. Two things go with them: the daily sweep that recomputed
+  the scores across your whole vocabulary on the first page load after
+  midnight, and the vocabulary list's **Score** column, which showed a
+  percentage of that formula and is now **Due**, counting the days until the
+  term comes back.
+
 ### Changed
 
 * **The review queue follows the FSRS schedule** (#238, phase 2b). Since 3.4.0

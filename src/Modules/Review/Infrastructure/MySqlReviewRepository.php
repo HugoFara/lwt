@@ -72,7 +72,8 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             WoRomanization, WoSentence, WoLgID,
             (IFNULL(WoSentence, '') NOT LIKE CONCAT('%{', WoText, '}%')) AS notvalid,
             WoStatus,
-            DATEDIFF(NOW(), WoStatusChanged) AS Days, WoTodayScore AS Score
+            DATEDIFF(NOW(), WoStatusChanged) AS Days,
+            DATEDIFF(" . ScheduleSql::effectiveDue() . ", NOW()) AS Score
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*' AND " . ScheduleSql::isDue() . "
             ORDER BY $due, RAND()
@@ -179,7 +180,8 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
         $reviewsql = $config->toSqlProjectionPrepared($params);
 
         $sql = "SELECT DISTINCT WoID, WoText, WoTextLC, WoTranslation, WoRomanization,
-            WoSentence, WoLgID, WoStatus, WoTodayScore AS Score,
+            WoSentence, WoLgID, WoStatus,
+            DATEDIFF(" . ScheduleSql::effectiveDue() . ", NOW()) AS Score,
             DATEDIFF(NOW(), WoStatusChanged) AS Days
             FROM $reviewsql AND WoStatus BETWEEN 1 AND 5
             AND WoTranslation != '' AND WoTranslation != '*'
@@ -204,32 +206,20 @@ class MySqlReviewRepository implements ReviewRepositoryInterface
             ->where('WoID', '=', $wordId)
             ->valuePrepared('WoStatus');
 
-        $oldScore = (int) QueryBuilder::table('words')
-            ->where('WoID', '=', $wordId)
-            ->valuePrepared('GREATEST(0, ROUND(WoTodayScore, 0))');
-
-        // Update with score recalculation
         $bindings = [$newStatus, $wordId];
         $userScope = UserScopedQuery::forTablePrepared('words', $bindings);
         Connection::preparedExecute(
             "UPDATE words
-            SET WoStatus = ?, WoStatusChanged = NOW(), " .
-            TermStatusService::makeScoreRandomInsertUpdate('u') . "
+            SET WoStatus = ?, WoStatusChanged = NOW()
             WHERE WoID = ?" . $userScope,
             $bindings
         );
 
         $this->activityRepository->incrementTermsReviewed();
 
-        $newScore = (int) QueryBuilder::table('words')
-            ->where('WoID', '=', $wordId)
-            ->valuePrepared('GREATEST(0, ROUND(WoTodayScore, 0))');
-
         return [
             'oldStatus' => $oldStatus,
             'newStatus' => $newStatus,
-            'oldScore' => $oldScore,
-            'newScore' => $newScore
         ];
     }
 

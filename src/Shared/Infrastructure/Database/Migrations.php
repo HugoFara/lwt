@@ -1152,16 +1152,16 @@ class Migrations
         }
 
 
-        // Do Scoring once per day, clean Word/Texttags, and optimize db
+        // Clean Word/Texttags and optimize db, once per day.
+        //
+        // This used to recompute every term's review score here as well, since
+        // the legacy score was a stored number that went stale the moment the
+        // day rolled over. A term's due date does not go stale, so the whole
+        // sweep -- an UPDATE across the entire words table, on the first
+        // request after midnight -- is simply gone.
         $lastscorecalc = Settings::get('lastscorecalc');
         $today = date('Y-m-d');
         if ($lastscorecalc != $today) {
-            // Update word scores - complex SQL expression, use raw query
-            Connection::execute(
-                "UPDATE words
-                SET " . TermStatusService::makeScoreRandomInsertUpdate('u') . "
-                WHERE WoTodayScore>=-100 AND WoStatus<98"
-            );
             // Clean up orphaned word_tag_map (tags deleted)
             Connection::execute(
                 "DELETE word_tag_map

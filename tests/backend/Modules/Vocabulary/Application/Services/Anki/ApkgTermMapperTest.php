@@ -161,9 +161,6 @@ final class ApkgTermMapperTest extends TestCase
             wordCount: 1,
             createdAt: $now,
             statusChangedAt: $now,
-            todayScore: 0.0,
-            tomorrowScore: 0.0,
-            random: 0.5,
         );
     }
 
