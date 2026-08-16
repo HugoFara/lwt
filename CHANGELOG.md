@@ -17,6 +17,15 @@ ones are marked like "v1.0.0-fork".
   the term's status by one exactly as Correct did, so reading colours are
   unchanged; what differs is what the scheduler learns.
 
+* **Anki decks arrive already scheduled** (#228, #238). A term LWT has
+  scheduled now exports as a review card rather than a new one: it is due in
+  Anki when it is due in LWT, and carries its interval, review count, lapse
+  count, FSRS memory state and full review history. Anki's own FSRS reads that
+  state, so it continues from LWT's estimate instead of starting the term from
+  scratch. Suspended terms keep their schedule behind the suspension, so
+  unsuspending resumes rather than restarts. Nothing flows the other way —
+  re-importing a deck still updates only fields and suspension.
+
 ### Changed
 
 * **The review queue follows the FSRS schedule** (#238, phase 2b). Since 3.4.0

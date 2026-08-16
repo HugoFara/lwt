@@ -247,9 +247,20 @@ write. So `term_schedule` stayed empty on installs that only ever used the main
 review screen. The graded path fixes this for the SPA; the binary `change`
 endpoint was always fine.
 
+- **Scheduling reaches Anki.** The `.apkg` exporter writes a scheduled term as
+  a review card — `type`/`queue` 2, due in days from the collection creation
+  day, interval, reps and lapses — with the FSRS memory state in `cards.data`
+  as `{"s":…,"d":…,"dr":…}` and its history as `revlog` rows. Grades pass
+  through unchanged, both apps numbering Again..Easy 1–4. Suspension still wins
+  the queue but no longer discards the state. Relearning is flattened to review
+  (Anki keys learning-queue due dates by timestamp, not day number) and the
+  ease factor is Anki's default 2500, since LWT has never computed an SM-2
+  ease and 0 would collapse the interval for anyone with FSRS off.
+
 **Still to do:** drop `SCORE_FORMULA_*` / `WoTodayScore` / `WoTomorrowScore` /
-`WoRandom` and their 16 call sites, and populate `cards.data` + `revlog` in the
-`.apkg` exporter so scheduling round-trips to Anki (#228).
+`WoRandom` and their 16 call sites. Also unverified: the export has been read
+back with SQLite and matches what Anki documents, but nobody has yet opened one
+of these decks in a real Anki install.
 
 ## Trade-offs & open questions
 

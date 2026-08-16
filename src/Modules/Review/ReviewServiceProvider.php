@@ -24,7 +24,9 @@ use Lwt\Shared\Infrastructure\Container\ServiceProviderInterface;
 // Domain
 use Lwt\Modules\Review\Domain\ReviewRepositoryInterface;
 // Infrastructure
+use Lwt\Modules\Review\Domain\TermScheduleRepositoryInterface;
 use Lwt\Modules\Review\Infrastructure\MySqlReviewRepository;
+use Lwt\Modules\Review\Infrastructure\MySqlTermScheduleRepository;
 use Lwt\Modules\Review\Infrastructure\SessionStateManager;
 // Use Cases
 use Lwt\Modules\Review\Application\UseCases\GetNextTerm;
@@ -59,6 +61,13 @@ class ReviewServiceProvider implements ServiceProviderInterface
         // Register Repository Interface binding
         $container->singleton(ReviewRepositoryInterface::class, function (Container $_c) {
             return new MySqlReviewRepository();
+        });
+
+        // Scheduling state. Bound here rather than only constructed by hand,
+        // because the .apkg exporter is auto-wired through the container and
+        // asks for the interface.
+        $container->singleton(TermScheduleRepositoryInterface::class, function (Container $_c) {
+            return new MySqlTermScheduleRepository();
         });
 
         // Register MySqlReviewRepository as concrete implementation

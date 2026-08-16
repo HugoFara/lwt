@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Lwt\Modules\Review\Domain\Scheduling\LegacyStatusSeed;
 use Lwt\Modules\Review\Domain\Scheduling\MemoryState;
 use Lwt\Modules\Review\Domain\Scheduling\Rating;
+use Lwt\Modules\Review\Domain\Scheduling\ReviewLogEntry;
 use Lwt\Modules\Review\Domain\Scheduling\SchedulingResult;
 use Lwt\Modules\Review\Domain\Scheduling\SchedulingState;
 use Lwt\Modules\Review\Domain\TermScheduleRepositoryInterface;
@@ -167,6 +168,86 @@ final class MySqlTermScheduleRepository implements TermScheduleRepositoryInterfa
         );
 
         return $hit !== null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findMany(array $wordIds): array
+    {
+        if ($wordIds === []) {
+            return [];
+        }
+
+        $params = [];
+        $inClause = Connection::buildPreparedInClause($wordIds, $params);
+        $scope = $this->appendUserScope($params);
+
+        $rows = Connection::preparedFetchAll(
+            'SELECT TsWoID, TsStability, TsDifficulty, TsDue, TsLastReview, TsReps, TsLapses, TsState
+             FROM term_schedule
+             JOIN words ON WoID = TsWoID
+             WHERE TsWoID IN ' . $inClause . $scope,
+            $params
+        );
+
+        $states = [];
+        foreach ($rows as $row) {
+            $states[(int) $row['TsWoID']] = new MemoryState(
+                stability: (float) $row['TsStability'],
+                difficulty: (float) $row['TsDifficulty'],
+                due: new DateTimeImmutable((string) $row['TsDue']),
+                lastReview: $row['TsLastReview'] !== null
+                    ? new DateTimeImmutable((string) $row['TsLastReview'])
+                    : null,
+                reps: (int) $row['TsReps'],
+                lapses: (int) $row['TsLapses'],
+                state: SchedulingState::from((int) $row['TsState']),
+            );
+        }
+
+        return $states;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function historyFor(array $wordIds): array
+    {
+        if ($wordIds === []) {
+            return [];
+        }
+
+        $params = [];
+        $inClause = Connection::buildPreparedInClause($wordIds, $params);
+        $scope = $this->appendUserScope($params);
+
+        $rows = Connection::preparedFetchAll(
+            'SELECT RlWoID, RlGrade, RlState, RlStability, RlDifficulty,
+                    RlElapsedDays, RlScheduledDays, RlReviewedAt
+             FROM review_log
+             JOIN words ON WoID = RlWoID
+             WHERE RlWoID IN ' . $inClause . $scope . '
+             ORDER BY RlWoID, RlReviewedAt, RlID',
+            $params
+        );
+
+        $history = [];
+        foreach ($rows as $row) {
+            $wordId = (int) $row['RlWoID'];
+            $history[$wordId][] = new ReviewLogEntry(
+                wordId: $wordId,
+                grade: Rating::from((int) $row['RlGrade']),
+                stateBefore: SchedulingState::from((int) $row['RlState']),
+                stability: (float) $row['RlStability'],
+                difficulty: (float) $row['RlDifficulty'],
+                elapsedDays: (int) $row['RlElapsedDays'],
+                scheduledDays: (int) $row['RlScheduledDays'],
+                reviewedAt: new DateTimeImmutable((string) $row['RlReviewedAt']),
+            );
+        }
+
+        return $history;
     }
 
     /**
